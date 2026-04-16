@@ -3,29 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>サムネイル制作 | Portfolio</title>
+  <title>My Portfolio</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <nav>
-    <ul>
-      <li><a href="index.html">← トップに戻る</a></li>
-    </ul>
-  </nav>
+<nav>
+  <ul>
+    <li><a href="#works">作品</a></li>
+    <li><a href="#about">自己紹介</a></li>
+    <li><a href="#contact">連絡先</a></li>
+  </ul>
+</nav>
+</nav>
+ <header>
+  <p class="header-sub">PORTFOLIO</p>
+  <h1>府内葵</h1>
+  <p class="header-desc">Webデザイナー / フロントエンド</p>
+</header>
 
-  <header>
-    <p class="header-sub">WORKS</p>
-    <h1>サムネイル制作</h1>
-    <p class="header-desc">Photoshop / Canva</p>
-  </header>
+<main>
+  <section class="works" id="works">
+    <h2>作品一覧</h2>
+    <div class="card-grid">
+      <div class="card" onclick="location.href='cafe.html'">
+        <h3>架空カフェサイト</h3>
+        <p>HTML / CSSで制作したカフェのWebサイトです。</p>
+      </div>
+      <div class="card" onclick="location.href='ryokan.html'">
+        <h3>架空旅館サイト</h3>
+        <p>和をテーマにした旅館のWebサイトです。</p>
+      </div>
+      <div class="card" onclick="location.href='thumbnail.html'">
+        <h3>サムネイル制作</h3>
+        <p>YouTube・SNS向けサムネイルのデザインです。</p>
+      </div>
+      <div class="card" onclick="location.href='webdesign.html'">
+        <h3>Webデザイン</h3>
+        <p>各種Webデザインの制作実績です。</p>
+      </div>
+    </div>
+  </section>
 
-  <main>
-    <section class="work-detail">
-      <h2>制作概要</h2>
-      <p>YouTube・SNS向けのサムネイルデザインです。クリック率を意識したデザインを心がけています。</p>
-    </section>
-  </main>
+  <section class="about" id="about">
+    <h2>自己紹介</h2>
+    <div class="about-content">
+      <p>はじめまして。WebデザイナーのYour Nameです。</p>
+      <p>HTML / CSS / Figmaを使ったWebサイト制作が得意です。</p>
+      <ul class="skills">
+        <li>HTML / CSS</li>
+        <li>Figma</li>
+        <li>レスポンシブデザイン</li>
+      </ul>
+    </div>
+  </section>
 
+  <section class="contact" id="contact">
+    <h2>連絡先</h2>
+    <p>お仕事のご依頼はこちらからどうぞ。</p>
+    <a href="https://coconala.com" class="contact-btn">ココナラを見る</a>
+  </section>
+</main>
+</body>
 </body>
 </html>
