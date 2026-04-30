@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オセロ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 20px;
+      color: #c8a96e;
+    }
+
+    /* 設定画面 */
+    #setup {
+      text-align: center;
+    }
+
+    .setup-group {
+      margin-bottom: 24px;
+    }
+
+    .setup-group h3 {
+      font-size: 0.9rem;
+      color: #aaa;
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .btn-select {
+      padding: 10px 24px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #f4f1ea;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn-select.active {
+      border-color: #c8a96e;
+      color: #c8a96e;
+    }
+
+    .btn-start {
+      margin-top: 12px;
+      padding: 14px 48px;
+      background: #c8a96e;
+      color: #111;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .btn-start:hover { transform: translateY(-2px); }
+
+    /* ゲーム画面 */
+    #game { display: none; text-align: center; }
+
+    .scoreboard {
+      display: flex;
+      gap: 40px;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .score-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .score-disc {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+    }
+
+    .score-disc.black { background: #222; border: 2px solid #888; }
+    .score-disc.white { background: #fff; border: 2px solid #888; }
+
+    .score-num {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .score-label {
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+
+    #status {
+      font-size: 0.9rem;
+      color: #c8a96e;
+      margin-bottom: 16px;
+      letter-spacing: 0.1em;
+      min-height: 24px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      background: #1b5e20;
+      border: 3px solid #c8a96e;
+      border-radius: 8px;
+      padding: 6px;
+      width: min(90vw, 480px);
+      height: min(90vw, 480px);
+      margin: 0 auto;
+    }
+
+    .cell {
+      background: #2e7d32;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .cell:hover { background: #388e3c; }
+
+    .cell.hint { background: #33691e; }
+
+    .disc {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .disc.black { background: radial-gradient(circle at 35% 35%, #555, #111); }
+    .disc.white { background: radial-gradient(circle at 35% 35%, #fff, #ccc); }
+
+    .hint-dot {
+      width: 25%;
+      height: 25%;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+    }
+
+    .btn-reset {
+      margin-top: 16px;
+      padding: 10px 32px;
+      border: 1px solid #c8a96e;
+      color: #c8a96e;
+      background: transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+      background: #c8a96e;
+      color: #111;
+    }
+
+    #result-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    #result-overlay.show { display: flex; }
+
+    .result-box {
+      background: #1c1f2b;
+      border: 1px solid #c8a96e;
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+
+    .result-box h2 {
+      font-size: 2rem;
+      color: #c8a96e;
+      margin-bottom: 16px;
+    }
+
+    .result-box p {
+      color: #aaa;
+      margin-bottom: 32px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>オセロ</h1>
+
+  <!-- 設定画面 -->
+  <div id="setup">
+    <div class="setup-group">
+      <h3>あなたの色</h3>
+      <div class="btn-group">
+        <button class="btn-select active" onclick="selectColor('black')">⚫ 黒（先手）</button>
+        <button class="btn-select" onclick="selectColor('white')">⚪ 白（後手）</button>
+      </div>
+    </div>
+    <div class="setup-group">
+      <h3>AIの強さ</h3>
+      <div class="btn-group">
+        <button class="btn-select active" onclick="selectLevel(1)">弱</button>
+        <button class="btn-select" onclick="selectLevel(3)">中</button>
+        <button class="btn-select" onclick="selectLevel(5)">強</button>
+        <button class="btn-select" onclick="selectLevel(7)">激強</button>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startGame()">ゲームスタート</button>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="game">
+    <div class="scoreboard">
+      <div class="score-item">
+        <div class="score-disc black"></div>
+        <div class="score-num" id="black-score">2</div>
+        <div class="score-label" id="black-label">あなた</div>
+      </div>
+      <div class="score-item">
+        <div class="score-disc white"></div>
+        <div class="score-num" id="white-score">2</div>
+        <div class="score-label" id="white-label">AI</div>
+      </div>
+    </div>
+    <div id="status">あなたのターン</div>
+    <div id="board"></div>
+    <button class="btn-reset" onclick="backToSetup()">← 設定に戻る</button>
+  </div>
+
+  <!-- 結果オーバーレイ -->
+  <div id="result-overlay">
+    <div class="result-box">
+      <h2 id="result-title"></h2>
+      <p id="result-detail"></p>
+      <button class="btn-start" onclick="restartGame()">もう一度</button>
+      <br><br>
+      <button class="btn-reset" onclick="backToSetup()">設定に戻る</button>
+    </div>
+  </div>
+
+  <script>
+    let board = [];
+    let currentTurn = 'black';
+    let playerColor = 'black';
+    let aiColor = 'white';
+    let aiLevel = 1;
+    let isAIThinking = false;
+
+    const DIRECTIONS = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+
+    function selectColor(color) {
+      playerColor = color;
+      document.querySelectorAll('.setup-group:first-child .btn-select').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function selectLevel(level) {
+      aiLevel = level;
+      document.querySelectorAll('.setup-group:nth-child(2) .btn-select').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function initBoard() {
+      board = Array(8).fill(null).map(() => Array(8).fill(null));
+      board[3][3] = 'white';
+      board[3][4] = 'black';
+      board[4][3] = 'black';
+      board[4][4] = 'white';
+    }
+
+    function startGame() {
+      aiColor = playerColor === 'black' ? 'white' : 'black';
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      document.getElementById('black-label').textContent = playerColor === 'black' ? 'あなた' : 'AI';
+      document.getElementById('white-label').textContent = playerColor === 'white' ? 'あなた' : 'AI';
+      initBoard();
+      currentTurn = 'black';
+      renderBoard();
+      updateStatus();
+      if (playerColor === 'white') {
+        setTimeout(aiMove, 800);
+      }
+    }
+
+    function renderBoard() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+      const moves = getValidMoves(currentTurn);
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          const isHint = moves.some(m => m[0] === r && m[1] === c);
+          if (isHint && currentTurn === playerColor) cell.classList.add('hint');
+
+          if (board[r][c]) {
+            const disc = document.createElement('div');
+            disc.className = `disc ${board[r][c]}`;
+            cell.appendChild(disc);
+          } else if (isHint && currentTurn === playerColor) {
+            const dot = document.createElement('div');
+            dot.className = 'hint-dot';
+            cell.appendChild(dot);
+          }
+
+          cell.onclick = () => handleClick(r, c);
+          boardEl.appendChild(cell);
+        }
+      }
+
+      // スコア更新
+      let black = 0, white = 0;
+      board.flat().forEach(c => { if (c === 'black') black++; if (c === 'white') white++; });
+      document.getElementById('black-score').textContent = black;
+      document.getElementById('white-score').textContent = white;
+    }
+
+    function getValidMoves(color) {
+      const moves = [];
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          if (isValidMove(r, c, color)) moves.push([r, c]);
+        }
+      }
+      return moves;
+    }
+
+    function isValidMove(r, c, color) {
+      if (board[r][c]) return false;
+      const opp = color === 'black' ? 'white' : 'black';
+      for (const [dr, dc] of DIRECTIONS) {
+        let nr = r + dr, nc = c + dc, found = false;
+        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === opp) {
+          nr += dr; nc += dc; found = true;
+        }
+        if (found && nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === color) return true;
+      }
+      return false;
+    }
+
+    function placeDisc(r, c, color) {
+      board[r][c] = color;
+      const opp = color === 'black' ? 'white' : 'black';
+      for (const [dr, dc] of DIRECTIONS) {
+        const toFlip = [];
+        let nr = r + dr, nc = c + dc;
+        while (nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === opp) {
+          toFlip.push([nr, nc]);
+          nr += dr; nc += dc;
+        }
+        if (toFlip.length && nr >= 0 && nr < 8 && nc >= 0 && nc < 8 && board[nr][nc] === color) {
+          toFlip.forEach(([fr, fc]) => board[fr][fc] = color);
+        }
+      }
+    }
+
+    function handleClick(r, c) {
+      if (isAIThinking || currentTurn !== playerColor) return;
+      if (!isValidMove(r, c, playerColor)) return;
+      placeDisc(r, c, playerColor);
+      currentTurn = aiColor;
+      renderBoard();
+      updateStatus();
+      checkGameOver();
+      setTimeout(aiMove, 600);
+    }
+
+    function aiMove() {
+      if (currentTurn !== aiColor) return;
+      const moves = getValidMoves(aiColor);
+      if (moves.length === 0) {
+        currentTurn = playerColor;
+        updateStatus();
+        if (getValidMoves(playerColor).length === 0) showResult();
+        return;
+      }
+      isAIThinking = true;
+      let best;
+      if (aiLevel === 1) {
+        best = moves[Math.floor(Math.random() * moves.length)];
+      } else {
+        best = getBestMove(aiLevel);
+      }
+      placeDisc(best[0], best[1], aiColor);
+      currentTurn = playerColor;
+      isAIThinking = false;
+      renderBoard();
+      updateStatus();
+      if (getValidMoves(playerColor).length === 0) {
+        currentTurn = aiColor;
+        updateStatus();
+        document.getElementById('status').textContent = 'パスします...';
+        setTimeout(aiMove, 800);
+      }
+      checkGameOver();
+    }
+
+    function getBestMove(depth) {
+      const moves = getValidMoves(aiColor);
+      let bestScore = -Infinity, bestMove = moves[0];
+      for (const [r, c] of moves) {
+        const saved = JSON.parse(JSON.stringify(board));
+        placeDisc(r, c, aiColor);
+        const score = minimax(depth - 1, false, -Infinity, Infinity);
+        board = saved;
+        if (score > bestScore) { bestScore = score; bestMove = [r, c]; }
+      }
+      return bestMove;
+    }
+
+    function minimax(depth, isMax, alpha, beta) {
+      const color = isMax ? aiColor : playerColor;
+      const moves = getValidMoves(color);
+      if (depth === 0 || moves.length === 0) return evaluate();
+      let best = isMax ? -Infinity : Infinity;
+      for (const [r, c] of moves) {
+        const saved = JSON.parse(JSON.stringify(board));
+        placeDisc(r, c, color);
+        const score = minimax(depth - 1, !isMax, alpha, beta);
+        board = saved;
+        if (isMax) { best = Math.max(best, score); alpha = Math.max(alpha, score); }
+        else { best = Math.min(best, score); beta = Math.min(beta, score); }
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+
+    function evaluate() {
+      const weights = [
+        [100,-20,10,5,5,10,-20,100],
+        [-20,-50,-2,-2,-2,-2,-50,-20],
+        [10,-2,5,1,1,5,-2,10],
+        [5,-2,1,0,0,1,-2,5],
+        [5,-2,1,0,0,1,-2,5],
+        [10,-2,5,1,1,5,-2,10],
+        [-20,-50,-2,-2,-2,-2,-50,-20],
+        [100,-20,10,5,5,10,-20,100]
+      ];
+      let score = 0;
+      for (let r = 0; r < 8; r++)
+        for (let c = 0; c < 8; c++)
+          if (board[r][c] === aiColor) score += weights[r][c];
+          else if (board[r][c] === playerColor) score -= weights[r][c];
+      return score;
+    }
+
+    function updateStatus() {
+      const el = document.getElementById('status');
+      if (currentTurn === playerColor) el.textContent = 'あなたのターン';
+      else el.textContent = 'AIが考えています...';
+    }
+
+    function checkGameOver() {
+      const playerMoves = getValidMoves(playerColor);
+      const aiMoves = getValidMoves(aiColor);
+      if (playerMoves.length === 0 && aiMoves.length === 0) showResult();
+    }
+
+    function showResult() {
+      let black = 0, white = 0;
+      board.flat().forEach(c => { if (c === 'black') black++; if (c === 'white') white++; });
+      const playerCount = playerColor === 'black' ? black : white;
+      const aiCount = playerColor === 'black' ? white : black;
+      const title = playerCount > aiCount ? '🎉 あなたの勝ち！' : playerCount < aiCount ? '😞 AIの勝ち' : '引き分け';
+      document.getElementById('result-title').textContent = title;
+      document.getElementById('result-detail').textContent = `あなた ${playerCount} - AI ${aiCount}`;
+      document.getElementById('result-overlay').classList.add('show');
+    }
+
+    function restartGame() {
+      document.getElementById('result-overlay').classList.remove('show');
+      initBoard();
+      currentTurn = 'black';
+      renderBoard();
+      updateStatus();
+      if (playerColor === 'white') setTimeout(aiMove, 800);
+    }
+
+    function backToSetup() {
+      document.getElementById('result-overlay').classList.remove('show');
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('setup').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
