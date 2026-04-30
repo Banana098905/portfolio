@@ -3,139 +3,158 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 body {
+  background-color: #111;
+  color: #f4f1ea;
   font-family: "Noto Sans JP", sans-serif;
-  background-color: #f8f8f8;
-  color: #333;
 }
 
-h1 {
-  font-size: 2rem;
-  color: #ffffff;
-}
-header {
-  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-  color: white;
-  padding: 80px 40px;
-  text-align: center;
-}
-
-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-}
-
-header p {
-  margin-top: 12px;
-  color: #88aacc;
-  font-size: 1rem;
-  letter-spacing: 0.2em;
-}
-.works {
-  padding: 60px 40px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.works h2 {
-  font-size: 1.5rem;
-  margin-bottom: 30px;
-  text-align: center;
-}
-
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 28px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
-  cursor: pointer;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 10px;
-  color: #0f3460;
-  border-left: 3px solid #0f3460;
-  padding-left: 10px;
-}
-
-.card p {
-  font-size: 0.9rem;
-  color: #666;
-}
-.header-sub {
-  font-size: 0.8rem;
-  letter-spacing: 0.4em;
-  color: #88aacc;
-  margin-bottom: 16px;
-}
-
-.header-desc {
-  margin-top: 12px;
-  color: #88aacc;
-  font-size: 1rem;
-  letter-spacing: 0.2em;
-}
+/* ナビ */
 nav {
-  background-color: #1a1a2e;
-  padding: 5px 40px;
-  position: sticky;
+  position: fixed;
   top: 0;
+  width: 100%;
+  background: rgba(17,17,17,0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 40px;
   z-index: 100;
+  backdrop-filter: blur(8px);
+}
+
+.logo {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.1rem;
+  color: #c8a96e;
+  letter-spacing: 0.2em;
 }
 
 nav ul {
   list-style: none;
   display: flex;
   gap: 32px;
-  justify-content: flex-end;
 }
 
 nav a {
-  color: #88aacc;
+  color: #f4f1ea;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   letter-spacing: 0.1em;
   transition: color 0.2s;
 }
 
 nav a:hover {
-  color: white;
-}
-.about {
-  background: white;
-  padding: 60px 40px;
+  color: #c8a96e;
 }
 
-.about h2 {
-  font-size: 1.5rem;
+/* Hero */
+.hero {
+  height: 100vh;
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+              linear-gradient(135deg, #1c1f2b, #111);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  margin-bottom: 40px;
-  color: #0f3460;
+}
+
+.hero-content {
+  animation: fadeIn 1.2s ease;
+}
+
+.hero-sub {
+  font-size: 0.85rem;
+  color: #c8a96e;
+  letter-spacing: 0.4em;
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 2.8rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  letter-spacing: 0.1em;
+}
+
+.hero p {
+  color: #aaa;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 0;
+}
+
+/* Works */
+.works {
+  padding: 120px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+h2 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.6rem;
+  color: #c8a96e;
+  letter-spacing: 0.3em;
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.card {
+  background: #1c1f2b;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 40px;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: #c8a96e;
+}
+
+.card h3 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.2rem;
+  color: #f4f1ea;
+  margin-bottom: 12px;
+  border-left: 2px solid #c8a96e;
+  padding-left: 16px;
+}
+
+.card p {
+  font-size: 0.88rem;
+  color: #888;
+  line-height: 1.9;
+  padding-left: 16px;
+}
+
+/* About */
+.about {
+  background: #1c1f2b;
+  padding: 120px 80px;
 }
 
 .about-content {
-  max-width: 600px;
+  max-width: 700px;
   margin: 0 auto;
-  line-height: 1.9;
+  text-align: center;
 }
 
 .about-content p {
-  margin-bottom: 16px;
-  color: #555;
+  color: #aaa;
+  line-height: 2.2;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
 }
 
 .skills {
@@ -143,66 +162,70 @@ nav a:hover {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 24px;
+  justify-content: center;
+  margin-top: 32px;
 }
 
 .skills li {
-  background: #0f3460;
-  color: white;
-  padding: 6px 16px;
+  border: 1px solid #c8a96e;
+  color: #c8a96e;
+  padding: 6px 20px;
   border-radius: 999px;
   font-size: 0.85rem;
+  letter-spacing: 0.1em;
 }
+
+/* Contact */
 .contact {
-  background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
-  color: white;
-  padding: 80px 40px;
+  padding: 120px 80px;
   text-align: center;
 }
 
 .contact h2 {
-  font-size: 1.5rem;
-  margin-bottom: 16px;
+  color: #c8a96e;
 }
 
 .contact p {
-  color: #88aacc;
-  margin-bottom: 32px;
+  color: #aaa;
+  margin-bottom: 40px;
   letter-spacing: 0.1em;
+  font-size: 0.9rem;
 }
 
 .contact-btn {
   display: inline-block;
-  background: white;
-  color: #0f3460;
-  padding: 14px 40px;
+  border: 1px solid #c8a96e;
+  color: #c8a96e;
+  padding: 16px 48px;
   border-radius: 999px;
   text-decoration: none;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  transition: transform 0.2s, box-shadow 0.2s;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+  transition: background 0.2s, color 0.2s;
 }
 
 .contact-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-}
-.work-detail {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 60px 40px;
+  background: #c8a96e;
+  color: #111;
 }
 
-.work-detail h2 {
-  font-size: 1.3rem;
-  color: #0f3460;
-  border-left: 3px solid #0f3460;
-  padding-left: 10px;
-  margin-bottom: 20px;
-}
-
-.work-detail p {
+/* Footer */
+footer {
+  background: #0a0a0a;
+  padding: 40px;
+  text-align: center;
   color: #555;
-  line-height: 1.9;
-  margin-bottom: 16px;
+  font-size: 0.85rem;
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
