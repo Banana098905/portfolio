@@ -3,29 +3,164 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>旅館サイト | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>宵待ちの宿</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="ryokan.css">
 </head>
 <body>
+
+  <!-- ナビ -->
   <nav>
+    <div class="logo">宵待ちの宿</div>
     <ul>
-      <li><a href="index.html">← トップに戻る</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#rooms">Rooms</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#access">Access</a></li>
+      <li><a href="#reservation">予約</a></li>
     </ul>
   </nav>
 
-  <header>
-    <p class="header-sub">WORKS</p>
-    <h1>架空旅館サイト</h1>
-    <p class="header-desc">HTML / CSS</p>
-  </header>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-sub">静けさに浸る、一夜の滞在体験。</p>
+      <h1>夜を、泊まる。</h1>
+      <div class="hero-btns">
+        <a href="#rooms" class="btn-primary">宿泊プランを見る</a>
+        <a href="#reservation" class="btn-secondary">空室を確認</a>
+      </div>
+    </div>
+  </section>
 
-  <main>
-    <section class="work-detail">
-      <h2>制作概要</h2>
-      <p>架空の旅館「山乃湯」のWebサイトです。和の雰囲気を大切にしてデザインしました。</p>
-    </section>
-  </main>
+  <!-- About -->
+  <section class="about" id="about">
+    <h2>About</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>昼の喧騒を離れ、夜という時間に身を委ねるための場所として生まれました。</p>
+        <p>この宿では"夜"が主役。夕暮れから深夜にかけて、時間の流れがゆっくりになるように設計されています。</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="time">18:00</span>
+          <span class="event">チェックイン・お茶のおもてなし</span>
+        </div>
+        <div class="timeline-item">
+          <span class="time">20:00</span>
+          <span class="event">夜食・バーラウンジ</span>
+        </div>
+        <div class="timeline-item">
+          <span class="time">22:00</span>
+          <span class="event">夜の読書室・お香体験</span>
+        </div>
+        <div class="timeline-item">
+          <span class="time">24:00</span>
+          <span class="event">深夜のお茶サービス</span>
+        </div>
+        <div class="timeline-item">
+          <span class="time">07:00</span>
+          <span class="event">静かな和の朝食</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ <!-- Rooms -->
+<section class="rooms" id="rooms">
+  <h2>Rooms</h2>
+  <div class="rooms-grid">
+    <div class="room-card">
+      <div class="room-img" style="background-image: url('room1.jpg')"></div>
+      <div class="room-info">
+        <h3>和室</h3>
+        <p>畳の香りと静寂に包まれた、ベーシックな和の空間。</p>
+        <span>定員2名 ／ ¥18,000〜</span>
+      </div>
+    </div>
+    <div class="room-card">
+      <div class="room-img" style="background-image: url('room2.jpg')"></div>
+      <div class="room-info">
+        <h3>半露天風呂付き客室</h3>
+        <p>夜風を感じながら、プライベートな湯を楽しむ。</p>
+        <span>定員2名 ／ ¥32,000〜</span>
+      </div>
+    </div>
+    <div class="room-card">
+      <div class="room-img" style="background-image: url('room3.jpg')"></div>
+      <div class="room-info">
+        <h3>ミニマル客室</h3>
+        <p>余白と静けさだけを残した、研ぎ澄まされた空間。</p>
+        <span>定員1名 ／ ¥24,000〜</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+  <!-- Experience -->
+  <section class="experience" id="experience">
+    <h2>Experience</h2>
+    <div class="experience-grid">
+      <div class="exp-card">
+        <h3>夜の読書室</h3>
+        <p>間接照明に照らされた古書の空間。静かにページをめくる夜。</p>
+      </div>
+      <div class="exp-card">
+        <h3>バーラウンジ</h3>
+        <p>小さなジャズが流れる、夜だけのバー。一杯の時間を味わう。</p>
+      </div>
+      <div class="exp-card">
+        <h3>お香体験</h3>
+        <p>香りで整える、眠る前のひととき。</p>
+      </div>
+      <div class="exp-card">
+        <h3>深夜のお茶</h3>
+        <p>深夜0時、部屋に届く一服のほうじ茶。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cuisine -->
+  <section class="cuisine" id="cuisine">
+    <h2>Cuisine</h2>
+    <div class="cuisine-content">
+      <p>季節のおばんざい、炊き立てのご飯、ほうじ茶。</p>
+      <p>夜食は軽く、朝食は静かに。余白のある食事を。</p>
+    </div>
+  </section>
+
+  <!-- Access -->
+  <section class="access" id="access">
+    <h2>Access</h2>
+    <div class="access-info">
+      <p>〒000-0000　京都府京都市◯◯区 1-2-3</p>
+      <p>最寄駅：◯◯駅より徒歩10分</p>
+      <p>チェックイン：18:00　チェックアウト：10:00</p>
+    </div>
+  </section>
+
+  <!-- Reservation -->
+  <section class="reservation" id="reservation">
+    <h2>Reservation</h2>
+    <div class="form-wrap">
+      <input type="date" placeholder="宿泊日">
+      <input type="number" placeholder="人数" min="1" max="4">
+      <select>
+        <option value="">プランを選択</option>
+        <option>和室プラン</option>
+        <option>半露天風呂付きプラン</option>
+        <option>ミニマルプラン</option>
+      </select>
+      <textarea placeholder="ご要望・メッセージ"></textarea>
+      <button>静かな夜を予約する</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 宵待ちの宿</p>
+    <p><a href="index.html">← ポートフォリオに戻る</a></p>
+  </footer>
 
 </body>
 </html>

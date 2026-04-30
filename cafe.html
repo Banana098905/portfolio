@@ -3,29 +3,134 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>カフェサイト | Portfolio</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>月読珈琲</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cafe.css">
 </head>
 <body>
+
+  <!-- ナビ -->
   <nav>
+    <div class="logo">月読珈琲</div>
     <ul>
-      <li><a href="index.html">← トップに戻る</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#access">Access</a></li>
+      <li><a href="#contact">予約</a></li>
     </ul>
   </nav>
 
-  <header>
-    <p class="header-sub">WORKS</p>
-    <h1>架空カフェサイト</h1>
-    <p class="header-desc">HTML / CSS</p>
-  </header>
+  <!-- Hero -->
+ <section class="hero">
+  <div class="hero-content">
+    <p class="hero-sub">深夜0時、街の喧騒が消えた頃にだけ灯る。</p>
+    <h1>夜だけ開く、<br>物語のための場所。</h1>
+    <div class="hero-btns">
+      <a href="#menu" class="btn-primary">メニューを見る</a>
+      <a href="#contact" class="btn-secondary">今夜の席を予約</a>
+    </div>
+  </div>
+</section>
 
-  <main>
-    <section class="work-detail">
-      <h2>制作概要</h2>
-      <p>架空のカフェ「Cafe Noir」のWebサイトです。落ち着いた雰囲気を意識してデザインしました。</p>
-    </section>
-  </main>
+  <!-- About -->
+  <section class="about" id="about">
+    <h2>About</h2>
+    <div class="about-grid">
+      <div class="about-text">
+        <p>月読珈琲は、「夜にしか訪れられない静けさ」を大切にした喫茶店です。昼には見えない感情や思考に、そっと寄り添う場所を目指しています。</p>
+        <p>かつて本に救われた店主が、同じように誰かの夜を支えられる場所を作りたいと考え、この店を始めました。</p>
+      </div>
+      <ul class="about-features">
+        <li>間接照明のみ</li>
+        <li>木のカウンター</li>
+        <li>古書が並ぶ壁</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Menu -->
+  <section class="menu" id="menu">
+    <h2>Menu</h2>
+    <div class="menu-grid">
+      <div class="menu-card">
+        <h3>夜想ブレンド</h3>
+        <p>深煎りの重厚な一杯</p>
+        <span>¥600</span>
+      </div>
+      <div class="menu-card">
+        <h3>月光ラテ</h3>
+        <p>やわらかいミルクの甘さ</p>
+        <span>¥700</span>
+      </div>
+      <div class="menu-card">
+        <h3>深煎りエスプレッソ</h3>
+        <p>凝縮された夜の味</p>
+        <span>¥500</span>
+      </div>
+      <div class="menu-card">
+        <h3>ガトーショコラ</h3>
+        <p>濃厚なチョコレートケーキ</p>
+        <span>¥650</span>
+      </div>
+      <div class="menu-card">
+        <h3>チーズケーキ</h3>
+        <p>なめらかな口溶け</p>
+        <span>¥600</span>
+      </div>
+      <div class="menu-card">
+        <h3>夜更けのトースト</h3>
+        <p>バターと蜂蜜の香り</p>
+        <span>¥500</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Commitment -->
+  <section class="commitment">
+    <h2>Commitment</h2>
+    <div class="commitment-grid">
+      <div class="commitment-item">
+        <h3>豆</h3>
+        <p>エチオピア産を中心に、夜に合う深煎りを厳選。</p>
+      </div>
+      <div class="commitment-item">
+        <h3>抽出</h3>
+        <p>一杯ずつハンドドリップ。待つ時間も体験にする。</p>
+      </div>
+      <div class="commitment-item">
+        <h3>空間</h3>
+        <p>音楽なし、または小さなジャズのみ。静けさをデザイン。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Access -->
+  <section class="access" id="access">
+    <h2>Access</h2>
+    <div class="access-info">
+      <p>東京都世田谷区◯◯ 1-2-3</p>
+      <p>営業時間：00:00 – 04:00</p>
+      <p>定休日：満月の日</p>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="contact" id="contact">
+    <h2>Reservation</h2>
+    <div class="form-wrap">
+      <input type="text" placeholder="お名前">
+      <input type="email" placeholder="メールアドレス">
+      <input type="text" placeholder="来店希望日時">
+      <textarea placeholder="メッセージ"></textarea>
+      <button>夜を予約する</button>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 月読珈琲</p>
+    <p><a href="index.html">← ポートフォリオに戻る</a></p>
+  </footer>
 
 </body>
 </html>
