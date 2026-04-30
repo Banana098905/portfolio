@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onitama</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      margin-bottom: 8px;
+      color: #c8a96e;
+    }
+
+    .subtitle {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 20px;
+      letter-spacing: 0.2em;
+    }
+
+    /* 設定画面 */
+    #setup { text-align: center; }
+    .setup-group { margin-bottom: 24px; }
+    .setup-group h3 {
+      font-size: 0.9rem;
+      color: #aaa;
+      letter-spacing: 0.2em;
+      margin-bottom: 12px;
+    }
+    .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-select {
+      padding: 10px 24px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #f4f1ea;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-select.active { border-color: #c8a96e; color: #c8a96e; }
+    .btn-start {
+      margin-top: 12px;
+      padding: 14px 48px;
+      background: #c8a96e;
+      color: #111;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn-start:hover { transform: translateY(-2px); }
+
+    /* ゲーム画面 */
+    #game { display: none; text-align: center; }
+
+    #status {
+      font-size: 0.9rem;
+      color: #c8a96e;
+      margin-bottom: 12px;
+      letter-spacing: 0.1em;
+      min-height: 24px;
+    }
+
+    /* カード */
+    .cards-area {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .card {
+      background: #1c1f2b;
+      border: 2px solid #333;
+      border-radius: 8px;
+      padding: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 80px;
+    }
+
+    .card.selected { border-color: #c8a96e; background: #2a2d3e; }
+    .card.ai-card { cursor: default; opacity: 0.7; }
+
+    .card-name {
+      font-size: 0.7rem;
+      color: #c8a96e;
+      margin-bottom: 4px;
+      letter-spacing: 0.1em;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 12px);
+      grid-template-rows: repeat(5, 12px);
+      gap: 1px;
+      margin: 0 auto;
+      width: fit-content;
+    }
+
+    .card-cell {
+      width: 12px;
+      height: 12px;
+      background: #2e3250;
+      border-radius: 2px;
+    }
+
+    .card-cell.move { background: #c8a96e; }
+    .card-cell.center { background: #4a4e6e; }
+
+    /* 待機カード */
+    .waiting-card {
+      background: #1c1f2b;
+      border: 2px solid #555;
+      border-radius: 8px;
+      padding: 8px;
+      width: 80px;
+      margin: 0 auto 8px;
+    }
+
+    /* 盤面 */
+    #board {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 3px;
+      background: #2a1f0e;
+      border: 3px solid #c8a96e;
+      border-radius: 8px;
+      padding: 6px;
+      width: min(80vw, 320px);
+      height: min(80vw, 320px);
+      margin: 8px auto;
+    }
+
+    .cell {
+      background: #8B7355;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s;
+      position: relative;
+    }
+
+    .cell:hover { background: #9B8365; }
+    .cell.selected { background: #FFD700; }
+    .cell.hint { background: #90EE90; }
+    .cell.temple { background: #7B5B3A; border: 1px solid #c8a96e; }
+
+    .piece {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(10px, 3vw, 16px);
+      font-weight: 700;
+      border: 2px solid rgba(0,0,0,0.3);
+    }
+
+    .piece.player { background: #e8d5a3; color: #111; }
+    .piece.player.master { background: #c8a96e; color: #111; border-color: #fff; }
+    .piece.ai { background: #c0392b; color: #fff; }
+    .piece.ai.master { background: #8b0000; color: #fff; border-color: #ff6666; }
+
+    .btn-reset {
+      margin-top: 12px;
+      padding: 10px 32px;
+      border: 1px solid #c8a96e;
+      color: #c8a96e;
+      background: transparent;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover { background: #c8a96e; color: #111; }
+
+    /* 結果 */
+    #result-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    #result-overlay.show { display: flex; }
+    .result-box {
+      background: #1c1f2b;
+      border: 1px solid #c8a96e;
+      border-radius: 16px;
+      padding: 48px;
+      text-align: center;
+    }
+    .result-box h2 { font-size: 2rem; color: #c8a96e; margin-bottom: 16px; }
+    .result-box p { color: #aaa; margin-bottom: 32px; }
+
+    a.back-link {
+      color: #c8a96e;
+      font-size: 0.85rem;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>鬼玉</h1>
+  <p class="subtitle">ONITAMA</p>
+  <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+
+  <!-- 設定画面 -->
+  <div id="setup">
+    <div class="setup-group">
+      <h3>AIの強さ</h3>
+      <div class="btn-group">
+        <button class="btn-select active" onclick="selectLevel(1)">弱</button>
+        <button class="btn-select" onclick="selectLevel(3)">中</button>
+        <button class="btn-select" onclick="selectLevel(5)">強</button>
+        <button class="btn-select" onclick="selectLevel(7)">激強</button>
+      </div>
+    </div>
+    <button class="btn-start" onclick="startGame()">ゲームスタート</button>
+  </div>
+
+  <!-- ゲーム画面 -->
+  <div id="game">
+    <div id="status"></div>
+
+    <!-- AIのカード -->
+    <div class="cards-area" id="ai-cards"></div>
+
+    <!-- 待機カード -->
+    <div class="waiting-card" id="waiting-card">
+      <div class="card-name" style="text-align:center">待機</div>
+      <div class="card-grid" id="waiting-grid"></div>
+    </div>
+
+    <!-- 盤面 -->
+    <div id="board"></div>
+
+    <!-- プレイヤーのカード -->
+    <div class="cards-area" id="player-cards"></div>
+
+    <button class="btn-reset" onclick="backToSetup()">← 設定に戻る</button>
+  </div>
+
+  <!-- 結果 -->
+  <div id="result-overlay">
+    <div class="result-box">
+      <h2 id="result-title"></h2>
+      <p id="result-detail"></p>
+      <button class="btn-start" onclick="restartGame()">もう一度</button>
+      <br><br>
+      <button class="btn-reset" onclick="backToSetup()">設定に戻る</button>
+    </div>
+  </div>
+
+  <script>
+    // Onitamaのカード定義（移動パターン：[dr, dc] 先手視点）
+    const CARD_DATA = [
+      { name: '虎',    moves: [[-2,0],[1,0]] },
+      { name: '蟹',    moves: [[-1,0],[1,-2],[1,2]] },
+      { name: '鶴',    moves: [[-1,-1],[-1,1],[1,0]] },
+      { name: '蛙',    moves: [[-1,1],[0,-2],[1,-1]] },
+      { name: '兎',    moves: [[-1,-1],[0,2],[1,1]] },
+      { name: '龍',    moves: [[-1,-2],[-1,2],[1,-1],[1,1]] },
+      { name: '象',    moves: [[-1,-1],[-1,1],[1,-1],[1,1]] },
+      { name: '猿',    moves: [[-1,-1],[-1,1],[1,-1],[1,1],[0,0]] },
+      { name: '鳳凰',  moves: [[-1,-2],[-1,2],[1,-1],[1,0],[1,1]] },
+      { name: '牛',    moves: [[-1,0],[0,1],[1,0]] },
+      { name: '馬',    moves: [[-1,0],[0,-1],[1,0]] },
+      { name: '蛇',    moves: [[-1,1],[0,-1],[1,-1]] },
+      { name: '鷹',    moves: [[-1,-1],[0,1],[1,1]] },
+      { name: '猪',    moves: [[-1,0],[0,-1],[0,1]] },
+      { name: '雄牛',  moves: [[-1,0],[0,1],[1,0],[0,-1]] },
+      { name: '鰻',    moves: [[-1,-1],[0,1],[1,-1]] },
+    ];
+
+    let board = [];
+    let playerCards = [];
+    let aiCards = [];
+    let waitingCard = null;
+    let selectedCard = null;
+    let selectedCell = null;
+    let currentTurn = 'player';
+    let aiLevel = 1;
+    let isAIThinking = false;
+
+    function selectLevel(level) {
+      aiLevel = level;
+      document.querySelectorAll('.setup-group .btn-select').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function initGame() {
+      // 盤面初期化
+      board = Array(5).fill(null).map(() => Array(5).fill(null));
+      // プレイヤー（下・青）
+      for (let c = 0; c < 5; c++) board[4][c] = { side: 'player', master: c === 2 };
+      // AI（上・赤）
+      for (let c = 0; c < 5; c++) board[0][c] = { side: 'ai', master: c === 2 };
+
+      // カードをシャッフルして配布
+      const deck = shuffle([...CARD_DATA]).slice(0, 5);
+      playerCards = [deck[0], deck[1]];
+      aiCards = [deck[2], deck[3]];
+      waitingCard = deck[4];
+
+      selectedCard = null;
+      selectedCell = null;
+      currentTurn = 'player';
+    }
+
+    function startGame() {
+      document.getElementById('setup').style.display = 'none';
+      document.getElementById('game').style.display = 'block';
+      initGame();
+      render();
+      updateStatus();
+    }
+
+    function render() {
+      renderBoard();
+      renderCards();
+      renderWaiting();
+    }
+
+    function renderBoard() {
+      const boardEl = document.getElementById('board');
+      boardEl.innerHTML = '';
+
+      const hints = getHintCells();
+
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+
+          // 神殿マス
+          if ((r === 0 && c === 2) || (r === 4 && c === 2)) cell.classList.add('temple');
+          if (selectedCell && selectedCell[0] === r && selectedCell[1] === c) cell.classList.add('selected');
+          if (hints.some(h => h[0] === r && h[1] === c)) cell.classList.add('hint');
+
+          if (board[r][c]) {
+            const p = board[r][c];
+            const piece = document.createElement('div');
+            piece.className = `piece ${p.side}${p.master ? ' master' : ''}`;
+            piece.textContent = p.master ? '王' : '兵';
+            cell.appendChild(piece);
+          }
+
+          cell.onclick = () => handleClick(r, c);
+          boardEl.appendChild(cell);
+        }
+      }
+    }
+
+    function renderCards() {
+      // プレイヤーカード
+      const pcEl = document.getElementById('player-cards');
+      pcEl.innerHTML = '';
+      playerCards.forEach((card, i) => {
+        const el = createCardEl(card, false, selectedCard === i);
+        el.onclick = () => {
+          if (currentTurn !== 'player' || isAIThinking) return;
+          selectedCard = selectedCard === i ? null : i;
+          selectedCell = null;
+          render();
+        };
+        pcEl.appendChild(el);
+      });
+
+      // AIカード
+      const acEl = document.getElementById('ai-cards');
+      acEl.innerHTML = '';
+      aiCards.forEach(card => {
+        const el = createCardEl(card, true, false);
+        acEl.appendChild(el);
+      });
+    }
+
+    function renderWaiting() {
+      const wg = document.getElementById('waiting-grid');
+      wg.innerHTML = '';
+      document.querySelector('#waiting-card .card-name').textContent = waitingCard.name;
+      renderMiniGrid(wg, waitingCard.moves, false);
+    }
+
+    function createCardEl(card, isAI, isSelected) {
+      const el = document.createElement('div');
+      el.className = `card${isAI ? ' ai-card' : ''}${isSelected ? ' selected' : ''}`;
+
+      const name = document.createElement('div');
+      name.className = 'card-name';
+      name.textContent = card.name;
+      el.appendChild(name);
+
+      const grid = document.createElement('div');
+      grid.className = 'card-grid';
+      renderMiniGrid(grid, card.moves, isAI);
+      el.appendChild(grid);
+
+      return el;
+    }
+
+    function renderMiniGrid(container, moves, flip) {
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'card-cell';
+          if (r === 2 && c === 2) { cell.classList.add('center'); }
+          else {
+            const dr = flip ? -(r - 2) : r - 2;
+            const dc = c - 2;
+            if (moves.some(m => m[0] === dr && m[1] === dc)) cell.classList.add('move');
+          }
+          container.appendChild(cell);
+        }
+      }
+    }
+
+    function getHintCells() {
+      if (currentTurn !== 'player' || selectedCard === null || !selectedCell) return [];
+      const [sr, sc] = selectedCell;
+      if (!board[sr][sc] || board[sr][sc].side !== 'player') return [];
+      return getMovesForCard(sr, sc, playerCards[selectedCard], 'player');
+    }
+
+    function getMovesForCard(r, c, card, side) {
+      const moves = [];
+      const dir = side === 'player' ? -1 : 1;
+      for (const [dr, dc] of card.moves) {
+        const nr = r + dr * dir;
+        const nc = c + dc;
+        if (nr >= 0 && nr < 5 && nc >= 0 && nc < 5) {
+          if (!board[nr][nc] || board[nr][nc].side !== side) {
+            moves.push([nr, nc]);
+          }
+        }
+      }
+      return moves;
+    }
+
+    function handleClick(r, c) {
+      if (currentTurn !== 'player' || isAIThinking) return;
+
+      // ヒントマスをクリック → 移動
+      if (selectedCard !== null && selectedCell) {
+        const hints = getHintCells();
+        if (hints.some(h => h[0] === r && h[1] === c)) {
+          executeMove('player', selectedCell[0], selectedCell[1], r, c, selectedCard);
+          return;
+        }
+      }
+
+      // 自分の駒をクリック
+      if (board[r][c] && board[r][c].side === 'player') {
+        selectedCell = [r, c];
+        render();
+        return;
+      }
+
+      selectedCell = null;
+      render();
+    }
+
+    function executeMove(side, fr, fc, tr, tc, cardIdx) {
+      const cards = side === 'player' ? playerCards : aiCards;
+      const usedCard = cards[cardIdx];
+      const target = board[tr][tc];
+
+      // 勝利判定
+      let win = false;
+      if (target && target.master) win = true; // 王を取る
+      if (board[fr][fc].master) {
+        // 神殿到達
+        if (side === 'player' && tr === 0 && tc === 2) win = true;
+        if (side === 'ai' && tr === 4 && tc === 2) win = true;
+      }
+
+      board[tr][tc] = board[fr][fc];
+      board[fr][fc] = null;
+
+      // カード交換
+      cards[cardIdx] = waitingCard;
+      waitingCard = usedCard;
+
+      if (side === 'player') {
+        selectedCard = null;
+        selectedCell = null;
+        currentTurn = 'ai';
+        render();
+        updateStatus();
+        if (win) { showResult('🎉 あなたの勝ち！', ''); return; }
+        setTimeout(aiMove, 700);
+      } else {
+        currentTurn = 'player';
+        render();
+        updateStatus();
+        if (win) { showResult('😞 AIの勝ち', ''); return; }
+      }
+    }
+
+    function aiMove() {
+      if (currentTurn !== 'ai') return;
+      isAIThinking = true;
+
+      const best = getBestMove(aiLevel);
+      isAIThinking = false;
+
+      if (best) {
+        executeMove('ai', best.fr, best.fc, best.tr, best.tc, best.cardIdx);
+      } else {
+        // パス（通常起きない）
+        currentTurn = 'player';
+        render();
+        updateStatus();
+      }
+    }
+
+    function getBestMove(depth) {
+      const moves = getAllMoves('ai');
+      if (moves.length === 0) return null;
+      let best = null, bestScore = -Infinity;
+
+      for (const move of moves) {
+        const state = saveState();
+        applyMove('ai', move);
+        const score = minimax(depth - 1, false, -Infinity, Infinity);
+        restoreState(state);
+        if (score > bestScore) { bestScore = score; best = move; }
+      }
+      return best;
+    }
+
+    function minimax(depth, isMax, alpha, beta) {
+      const side = isMax ? 'ai' : 'player';
+      if (depth === 0) return evaluate();
+
+      const moves = getAllMoves(side);
+      if (moves.length === 0) return isMax ? -9999 : 9999;
+
+      let best = isMax ? -Infinity : Infinity;
+      for (const move of moves) {
+        const state = saveState();
+        const result = applyMove(side, move);
+        if (result === 'win') {
+          restoreState(state);
+          return isMax ? 9999 : -9999;
+        }
+        const score = minimax(depth - 1, !isMax, alpha, beta);
+        restoreState(state);
+        if (isMax) { best = Math.max(best, score); alpha = Math.max(alpha, score); }
+        else { best = Math.min(best, score); beta = Math.min(beta, score); }
+        if (beta <= alpha) break;
+      }
+      return best;
+    }
+
+    function applyMove(side, move) {
+      const cards = side === 'player' ? playerCards : aiCards;
+      const target = board[move.tr][move.tc];
+      let win = false;
+
+      if (target && target.master) win = true;
+      if (board[move.fr][move.fc].master) {
+        if (side === 'player' && move.tr === 0 && move.tc === 2) win = true;
+        if (side === 'ai' && move.tr === 4 && move.tc === 2) win = true;
+      }
+
+      board[move.tr][move.tc] = board[move.fr][move.fc];
+      board[move.fr][move.fc] = null;
+      const used = cards[move.cardIdx];
+      cards[move.cardIdx] = waitingCard;
+      waitingCard = used;
+
+      return win ? 'win' : null;
+    }
+
+    function getAllMoves(side) {
+      const cards = side === 'player' ? playerCards : aiCards;
+      const moves = [];
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          if (board[r][c] && board[r][c].side === side) {
+            cards.forEach((card, cardIdx) => {
+              getMovesForCard(r, c, card, side).forEach(([tr, tc]) => {
+                moves.push({ fr: r, fc: c, tr, tc, cardIdx });
+              });
+            });
+          }
+        }
+      }
+      return moves;
+    }
+
+    function evaluate() {
+      let score = 0;
+      for (let r = 0; r < 5; r++) {
+        for (let c = 0; c < 5; c++) {
+          if (!board[r][c]) continue;
+          const p = board[r][c];
+          const val = p.master ? 100 : 10;
+          // 神殿への近さ
+          const templeDist = p.side === 'ai'
+            ? Math.abs(r - 4) + Math.abs(c - 2)
+            : Math.abs(r - 0) + Math.abs(c - 2);
+          const posBonus = p.master ? (5 - templeDist) * 3 : 0;
+          score += p.side === 'ai' ? val + posBonus : -(val + posBonus);
+        }
+      }
+      return score;
+    }
+
+    function saveState() {
+      return {
+        board: JSON.parse(JSON.stringify(board)),
+        pc: JSON.parse(JSON.stringify(playerCards)),
+        ac: JSON.parse(JSON.stringify(aiCards)),
+        wc: JSON.parse(JSON.stringify(waitingCard)),
+      };
+    }
+
+    function restoreState(state) {
+      board = JSON.parse(JSON.stringify(state.board));
+      playerCards = JSON.parse(JSON.stringify(state.pc));
+      aiCards = JSON.parse(JSON.stringify(state.ac));
+      waitingCard = JSON.parse(JSON.stringify(state.wc));
+    }
+
+    function updateStatus() {
+      document.getElementById('status').textContent =
+        currentTurn === 'player' ? 'あなたのターン　カードを選んで駒をクリック' : 'AIが考えています...';
+    }
+
+    function showResult(title, detail) {
+      document.getElementById('result-title').textContent = title;
+      document.getElementById('result-detail').textContent = detail;
+      document.getElementById('result-overlay').classList.add('show');
+    }
+
+    function restartGame() {
+      document.getElementById('result-overlay').classList.remove('show');
+      initGame();
+      render();
+      updateStatus();
+    }
+
+    function backToSetup() {
+      document.getElementById('result-overlay').classList.remove('show');
+      document.getElementById('game').style.display = 'none';
+      document.getElementById('setup').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
