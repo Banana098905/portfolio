@@ -229,3 +229,23 @@ footer {
     transform: translateY(0);
   }
 }
+.notice {
+  background: #1c1f2b;
+  border-top: 1px solid #333;
+  padding: 40px 80px;
+  text-align: center;
+}
+
+.notice h2 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.2rem;
+  color: #c8a96e;
+  margin-bottom: 20px;
+  letter-spacing: 0.2em;
+}
+
+.notice-content p {
+  color: #aaa;
+  font-size: 0.85rem;
+  line-height: 2.2;
+}

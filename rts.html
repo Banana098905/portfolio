@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>王国戦争</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0e1a;
+      color: #c8d8e8;
+      font-family: monospace;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    #header {
+      background: #0d1526;
+      border-bottom: 1px solid #1e3a5f;
+      padding: 4px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      height: 36px;
+    }
+
+    #header h1 { font-size: 0.85rem; color: #4a9eff; letter-spacing: 0.3em; }
+
+    .resources { display: flex; gap: 16px; font-size: 0.75rem; }
+    .res { color: #88bbdd; }
+    .res span { color: #fff; font-weight: bold; }
+
+    #main { display: flex; flex: 1; overflow: hidden; }
+
+    #left-panel {
+      width: 160px;
+      background: #0d1526;
+      border-right: 1px solid #1e3a5f;
+      padding: 8px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      font-size: 0.72rem;
+    }
+
+    #map-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: #080c18;
+      cursor: crosshair;
+    }
+
+    #game-canvas { display: block; }
+
+    #right-panel {
+      width: 150px;
+      background: #0d1526;
+      border-left: 1px solid #1e3a5f;
+      padding: 8px;
+      flex-shrink: 0;
+      overflow-y: auto;
+      font-size: 0.72rem;
+    }
+
+    #bottom-panel {
+      height: 72px;
+      background: #0d1526;
+      border-top: 1px solid #1e3a5f;
+      display: flex;
+      flex-shrink: 0;
+    }
+
+    #timeline {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 10px;
+      font-size: 0.68rem;
+    }
+
+    .log-item { padding: 1px 0; color: #88bbdd; }
+    .log-item .log-time { color: #4a9eff; margin-right: 6px; }
+    .log-item.important { color: #ffaa4a; }
+    .log-item.victory { color: #4aff88; }
+    .log-item.danger { color: #ff4a4a; }
+
+    .panel-title {
+      font-size: 0.65rem;
+      color: #4a9eff;
+      letter-spacing: 0.15em;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #1e3a5f;
+      padding-bottom: 3px;
+      margin-top: 8px;
+    }
+
+    .panel-title:first-child { margin-top: 0; }
+
+    .cmd-btn {
+      display: block;
+      width: 100%;
+      background: #111d33;
+      border: 1px solid #1e3a5f;
+      color: #88bbdd;
+      padding: 4px 6px;
+      font-size: 0.68rem;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      font-family: monospace;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .cmd-btn:hover { background: #1e3a5f; color: #fff; }
+    .cmd-btn.active { background: #1e4a8f; border-color: #4a9eff; color: #4a9eff; }
+    .cmd-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .build-btn {
+      display: block;
+      width: 100%;
+      background: #111d33;
+      border: 1px solid #1e3a5f;
+      color: #88bbdd;
+      padding: 4px 6px;
+      font-size: 0.65rem;
+      cursor: pointer;
+      border-radius: 3px;
+      margin-bottom: 3px;
+      font-family: monospace;
+      text-align: left;
+    }
+
+    .build-btn:hover { background: #1e3a5f; color: #fff; }
+    .build-btn .cost { color: #ffaa4a; float: right; }
+
+    .status-item { margin-bottom: 8px; }
+    .status-label { color: #4a9eff; font-size: 0.65rem; }
+    .status-val { color: #fff; font-size: 0.9rem; font-weight: bold; }
+
+    .front-row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+    .front-name { color: #88bbdd; }
+    .front-state { font-weight: bold; }
+    .front-state.win { color: #4aff88; }
+    .front-state.lose { color: #ff4a4a; }
+    .front-state.even { color: #ffaa4a; }
+
+    #minimap { border: 1px solid #1e3a5f; display: block; margin-top: 4px; }
+
+    .unit-card {
+      background: #111d33;
+      border: 1px solid #1e3a5f;
+      border-radius: 3px;
+      padding: 6px;
+      margin-bottom: 4px;
+    }
+
+    .unit-card .uc-name { color: #4a9eff; margin-bottom: 3px; }
+    .unit-card .uc-stat { color: #88bbdd; }
+    .morale-bar { height: 3px; background: #1e3a5f; border-radius: 2px; margin-top: 3px; }
+    .morale-fill { height: 100%; background: #4a9eff; border-radius: 2px; }
+
+    .prod-item {
+      background: #111d33;
+      border: 1px solid #1e3a5f;
+      border-radius: 3px;
+      padding: 4px 6px;
+      margin-bottom: 3px;
+      font-size: 0.65rem;
+    }
+
+    .prod-bar { height: 3px; background: #1e3a5f; border-radius: 2px; margin-top: 3px; }
+    .prod-fill { height: 100%; background: #4aff88; border-radius: 2px; transition: width 0.5s; }
+
+    #overlay {
+      display: flex;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .overlay-box {
+      background: #0d1526;
+      border: 1px solid #4a9eff;
+      border-radius: 8px;
+      padding: 32px;
+      text-align: center;
+      max-width: 380px;
+    }
+
+    .overlay-box h2 { color: #4a9eff; font-size: 1.3rem; margin-bottom: 12px; letter-spacing: 0.2em; }
+    .overlay-box p { color: #88bbdd; margin-bottom: 16px; font-size: 0.8rem; line-height: 1.8; }
+
+    .diff-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+
+    .diff-btn {
+      padding: 6px 16px;
+      border: 1px solid #1e3a5f;
+      background: transparent;
+      color: #88bbdd;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: monospace;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .diff-btn.active { border-color: #4a9eff; color: #4a9eff; }
+
+    .start-btn {
+      background: #4a9eff;
+      color: #000;
+      border: none;
+      padding: 10px 36px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: monospace;
+      transition: transform 0.2s;
+    }
+
+    .start-btn:hover { transform: translateY(-2px); }
+
+    .key-hint { color: #556; font-size: 0.6rem; margin-top: 4px; }
+
+    #result-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #result-overlay.show { display: flex; }
+  </style>
+</head>
+<body>
+
+  <!-- スタート画面 -->
+  <div id="overlay">
+    <div class="overlay-box">
+      <h2>王国戦争</h2>
+      <p>30×30の戦場で敵王国を殲滅せよ。<br>施設を建て、兵士を生産し、領土を広げろ。</p>
+      <p style="font-size:0.7rem; color:#556;">
+        左クリック：選択/移動　右クリック：選択解除<br>
+        A:攻撃 D:防衛 G:集結 B:建設モード
+      </p>
+      <div class="diff-btns">
+        <button class="diff-btn active" onclick="setDiff(1,this)">易しい</button>
+        <button class="diff-btn" onclick="setDiff(2,this)">普通</button>
+        <button class="diff-btn" onclick="setDiff(3,this)">難しい</button>
+        <button class="diff-btn" onclick="setDiff(4,this)">鬼畜</button>
+      </div>
+      <button class="start-btn" onclick="startGame()">出陣</button>
+      <br><br>
+      <a href="index.html" style="color:#4a9eff;font-size:0.8rem;text-decoration:none;">← ポートフォリオに戻る</a>
+    </div>
+  </div>
+
+  <!-- 結果画面 -->
+  <div id="result-overlay">
+    <div class="overlay-box">
+      <h2 id="result-title"></h2>
+      <p id="result-detail"></p>
+      <button class="start-btn" onclick="location.reload()">もう一度</button>
+      <br><br>
+      <a href="index.html" style="color:#4a9eff;font-size:0.8rem;text-decoration:none;display:block;margin-top:12px;">← ポートフォリオに戻る</a>
+    </div>
+  </div>
+
+  <!-- ヘッダー -->
+  <div id="header">
+    <h1>王国戦争</h1>
+    <div class="resources">
+      <div class="res">兵力 <span id="res-troops">0</span></div>
+      <div class="res">食料 <span id="res-food">200</span></div>
+      <div class="res">金 <span id="res-gold">100</span></div>
+      <div class="res">木 <span id="res-wood">100</span></div>
+      <div class="res">石 <span id="res-stone">50</span></div>
+      <div class="res">時間 <span id="res-time">00:00</span></div>
+    </div>
+  </div>
+
+  <div id="main">
+    <!-- 左パネル -->
+    <div id="left-panel">
+      <div class="panel-title">■ 選択中</div>
+      <div id="unit-display"><div style="color:#556;">未選択</div></div>
+
+      <div class="panel-title">■ 命令 [キー]</div>
+      <button class="cmd-btn" id="cmd-move" onclick="setCmd('move')">移動 [M]</button>
+      <button class="cmd-btn" id="cmd-attack" onclick="setCmd('attack')">攻撃 [A]</button>
+      <button class="cmd-btn" id="cmd-defend" onclick="setCmd('defend')">防衛 [D]</button>
+      <button class="cmd-btn" id="cmd-gather" onclick="setCmd('gather')">集結 [G]</button>
+
+      <div class="panel-title">■ 建設 [B]</div>
+      <button class="build-btn" onclick="setBuild('castle')">城 <span class="cost">G:200 W:100</span></button>
+      <button class="build-btn" onclick="setBuild('barracks')">兵舎 <span class="cost">G:80 W:60</span></button>
+      <button class="build-btn" onclick="setBuild('fortress')">要塞 <span class="cost">G:120 S:80</span></button>
+      <button class="build-btn" onclick="setBuild('farm')">農場 <span class="cost">G:50 W:40</span></button>
+      <button class="build-btn" onclick="setBuild('mine')">鉱山 <span class="cost">G:60 S:40</span></button>
+      <button class="build-btn" onclick="setBuild('lumbermill')">木材所 <span class="cost">G:50 W:30</span></button>
+
+      <div class="panel-title">■ 生産</div>
+      <div id="prod-list"><div style="color:#556;">兵舎を選択</div></div>
+
+      <div class="panel-title">■ 生産中</div>
+      <div id="queue-list"></div>
+    </div>
+
+    <!-- マップ -->
+    <div id="map-area">
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- 右パネル -->
+    <div id="right-panel">
+      <div class="panel-title">■ 戦況</div>
+      <div class="status-item">
+        <div class="status-label">自軍</div>
+        <div class="status-val" id="stat-player">0</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">敵軍</div>
+        <div class="status-val" id="stat-enemy">0</div>
+      </div>
+      <div class="status-item">
+        <div class="status-label">自拠点</div>
+        <div class="status-val" id="stat-bases">1</div>
+      </div>
+
+      <div class="panel-title">■ 戦線</div>
+      <div class="front-row"><span class="front-name">北</span><span class="front-state even" id="front-north">均衡</span></div>
+      <div class="front-row"><span class="front-name">中央</span><span class="front-state even" id="front-center">均衡</span></div>
+      <div class="front-row"><span class="front-name">南</span><span class="front-state even" id="front-south">均衡</span></div>
+
+      <div class="panel-title">■ ミニマップ</div>
+      <canvas id="minimap" width="134" height="134"></canvas>
+    </div>
+  </div>
+
+  <!-- 下パネル -->
+  <div id="bottom-panel">
+    <div id="timeline"></div>
+  </div>
+
+  <script>
+    const GRID = 30;
+    const CELL = 28;
+
+    const UNIT_DEF = {
+      vanguard: { name:'前衛', sym:'●', hp:150, atk:18, spd:1.2, range:1.2, col:'#4a9eff', cost:{food:20,gold:30}, time:8 },
+      archer:   { name:'射手', sym:'▲', hp:80,  atk:25, spd:1.0, range:3.5, col:'#4aff88', cost:{food:15,gold:35}, time:10 },
+      engineer: { name:'工兵', sym:'■', hp:90,  atk:10, spd:0.9, range:1.2, col:'#ffaa4a', cost:{food:10,gold:40,wood:20}, time:12 },
+      officer:  { name:'指揮', sym:'◆', hp:100, atk:14, spd:1.1, range:1.2, col:'#ff88ff', cost:{food:25,gold:60}, time:15 },
+      siege:    { name:'攻城', sym:'★', hp:120, atk:40, spd:0.6, range:2.5, col:'#ff4a4a', cost:{food:20,gold:80,stone:30}, time:20 },
+    };
+
+    const BUILD_DEF = {
+      castle:     { name:'城',    col:'#4a9eff', hp:800, cost:{gold:200,wood:100},        produces:null },
+      barracks:   { name:'兵舎',  col:'#4aff88', hp:300, cost:{gold:80, wood:60},         produces:['vanguard','archer','officer','siege'] },
+      fortress:   { name:'要塞',  col:'#ffaa4a', hp:600, cost:{gold:120,stone:80},        produces:null, defBonus:50 },
+      farm:       { name:'農場',  col:'#88ff88', hp:200, cost:{gold:50, wood:40},         foodRate:3 },
+      mine:       { name:'鉱山',  col:'#ffcc88', hp:200, cost:{gold:60, stone:40},        goldRate:2 },
+      lumbermill: { name:'木材所',col:'#aa8855', hp:200, cost:{gold:50, wood:30},         woodRate:2 },
+      engineer_b: { name:'工兵所',col:'#ffaa4a', hp:250, cost:{gold:100,wood:80,stone:40},produces:['engineer'] },
+    };
+
+    let canvas, ctx, miniCtx;
+    let camX = 0, camY = 0;
+    let isDragging = false, dragStart = null;
+    let units = [], buildings = [], productionQueue = [];
+    let selectedUnits = [], selectedBuilding = null;
+    let currentCmd = null, buildMode = null;
+    let food = 200, gold = 100, wood = 100, stone = 50;
+    let gameTime = 0, gameRunning = false, difficulty = 1;
+    let logs = [];
+    let animFrame, tickInterval;
+    let terrain = [];
+
+    // テレイン生成
+    function genTerrain() {
+      terrain = [];
+      for (let r = 0; r < GRID; r++) {
+        terrain[r] = [];
+        for (let c = 0; c < GRID; c++) {
+          const n = Math.random();
+          if (n < 0.06) terrain[r][c] = 'mountain';
+          else if (n < 0.14) terrain[r][c] = 'forest';
+          else if (n < 0.18) terrain[r][c] = 'water';
+          else terrain[r][c] = 'plain';
+        }
+      }
+      // 中央は平地
+      for (let r = 12; r < 18; r++)
+        for (let c = 12; c < 18; c++)
+          terrain[r][c] = 'plain';
+    }
+
+    function setDiff(d, btn) {
+      difficulty = d;
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function startGame() {
+      document.getElementById('overlay').style.display = 'none';
+      genTerrain();
+      initCanvas();
+      initGame();
+      gameRunning = true;
+      addLog('出陣！施設を建て、軍を育てよ。', 'important');
+      gameLoop();
+      tickInterval = setInterval(gameTick, 1000);
+    }
+
+    function initCanvas() {
+      canvas = document.getElementById('game-canvas');
+      const area = document.getElementById('map-area');
+      canvas.width = area.clientWidth;
+      canvas.height = area.clientHeight;
+      ctx = canvas.getContext('2d');
+      miniCtx = document.getElementById('minimap').getContext('2d');
+
+      canvas.addEventListener('click', handleClick);
+      canvas.addEventListener('contextmenu', e => { e.preventDefault(); clearSel(); });
+      canvas.addEventListener('wheel', handleWheel);
+      canvas.addEventListener('mousedown', e => { if (e.button===1){ isDragging=true; dragStart={x:e.clientX+camX,y:e.clientY+camY}; } });
+      canvas.addEventListener('mousemove', e => { if(isDragging){ camX=dragStart.x-e.clientX; camY=dragStart.y-e.clientY; clampCam(); } });
+      canvas.addEventListener('mouseup', () => isDragging=false);
+
+      document.addEventListener('keydown', handleKey);
+
+      // カメラを自城に合わせる
+      camX = 14 * CELL - canvas.width/2;
+      camY = 26 * CELL - canvas.height/2;
+      clampCam();
+    }
+
+    function handleWheel(e) {
+      e.preventDefault();
+    }
+
+    function clampCam() {
+      const maxX = GRID * CELL - canvas.width;
+      const maxY = GRID * CELL - canvas.height;
+      camX = Math.max(0, Math.min(maxX, camX));
+      camY = Math.max(0, Math.min(maxY, camY));
+    }
+
+    function initGame() {
+      units = [];
+      buildings = [];
+      productionQueue = [];
+
+      // プレイヤー初期建物
+      buildings.push(mkBuilding('castle', 'player', 14, 27));
+      buildings.push(mkBuilding('barracks', 'player', 12, 26));
+      buildings.push(mkBuilding('barracks', 'player', 16, 26));
+      buildings.push(mkBuilding('farm', 'player', 14, 28));
+
+      // 初期兵士
+      for (let i = 0; i < 8; i++) {
+        spawnUnit('vanguard', 'player', 13 + (i%4), 25 + Math.floor(i/4));
+      }
+      for (let i = 0; i < 6; i++) {
+        spawnUnit('archer', 'player', 12 + i, 24);
+      }
+
+      // 敵初期建物
+      buildings.push(mkBuilding('castle', 'enemy', 14, 2));
+      buildings.push(mkBuilding('barracks', 'enemy', 12, 3));
+      buildings.push(mkBuilding('barracks', 'enemy', 16, 3));
+      buildings.push(mkBuilding('farm', 'enemy', 14, 1));
+      buildings.push(mkBuilding('fortress', 'enemy', 10, 4));
+      buildings.push(mkBuilding('fortress', 'enemy', 18, 4));
+
+     // 敵初期兵士なし（施設から生産のみ）
+
+      // 中立資源建物
+      for (let i = 0; i < 8; i++) {
+        const r = 8 + Math.floor(Math.random()*14);
+        const c = 3 + Math.floor(Math.random()*24);
+        if (terrain[r][c] !== 'water' && terrain[r][c] !== 'mountain') {
+          buildings.push(mkBuilding(Math.random()<0.5?'mine':'lumbermill', 'neutral', c, r));
+        }
+      }
+    }
+
+    function mkBuilding(type, side, x, y) {
+      return {
+        type, side,
+        x, y,
+        hp: BUILD_DEF[type]?.hp || 300,
+        maxHp: BUILD_DEF[type]?.hp || 300,
+        id: Math.random(),
+      };
+    }
+
+    let unitId = 0;
+    function spawnUnit(type, side, x, y) {
+      units.push({
+        id: unitId++,
+        type, side,
+        x: x + (Math.random()-0.5)*0.4,
+        y: y + (Math.random()-0.5)*0.4,
+        tx: x, ty: y,
+        hp: UNIT_DEF[type].hp * (side==='enemy' ? 0.8+difficulty*0.1 : 1),
+        maxHp: UNIT_DEF[type].hp * (side==='enemy' ? 0.8+difficulty*0.1 : 1),
+        morale: 100,
+        state: 'idle',
+        attackCd: 0,
+      });
+    }
+
+    // ========== ゲームループ ==========
+    function gameLoop() {
+      if (!gameRunning) return;
+      update();
+      draw();
+      animFrame = requestAnimationFrame(gameLoop);
+    }
+
+    function update() {
+      units.forEach(u => { if (u.hp > 0) updateUnit(u); });
+      units = units.filter(u => u.hp > 0);
+      checkVictory();
+    }
+
+    function updateUnit(u) {
+      if (u.attackCd > 0) u.attackCd -= 0.016;
+
+      if (u.side === 'enemy') aiControl(u);
+
+      // 移動
+      const dx = u.tx - u.x, dy = u.ty - u.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+      const spd = UNIT_DEF[u.type].spd * 0.05;
+      if (dist > 0.15) {
+        const t = terrain[Math.round(u.y)]?.[Math.round(u.x)];
+        const slow = t === 'forest' ? 0.6 : t === 'mountain' ? 0.3 : 1;
+        u.x += (dx/dist) * spd * slow;
+        u.y += (dy/dist) * spd * slow;
+        u.x = Math.max(0, Math.min(GRID-1, u.x));
+        u.y = Math.max(0, Math.min(GRID-1, u.y));
+      }
+
+      // 自動戦闘
+      const range = UNIT_DEF[u.type].range;
+      const enemies = units.filter(e => e.side !== u.side && e.hp > 0);
+      const nearby = enemies.filter(e => {
+        const ex=e.x-u.x, ey=e.y-u.y;
+        return Math.sqrt(ex*ex+ey*ey) <= range;
+      });
+
+      if (nearby.length > 0 && u.attackCd <= 0) {
+        const tgt = nearby.sort((a,b)=>a.hp-b.hp)[0];
+        const dmg = UNIT_DEF[u.type].atk * (0.8+Math.random()*0.4) * (u.morale/100);
+        tgt.hp -= dmg;
+        u.attackCd = 1.2;
+        u.state = 'attack';
+        if (tgt.hp <= 0) {
+          if (u.side === 'player') addLog(`${UNIT_DEF[u.type].name}が敵を撃破`, 'victory');
+          else addLog(`自軍${UNIT_DEF[tgt.type].name}が撃破された`, 'danger');
+        }
+      } else if (nearby.length === 0 && u.state === 'attack' && dist < 0.2) {
+        u.state = 'idle';
+      }
+
+      // 士気
+      const allies = units.filter(e=>e.side===u.side&&e.hp>0).length;
+      const foes = units.filter(e=>e.side!==u.side&&e.hp>0).length;
+      u.morale = allies < foes*0.4
+        ? Math.max(20, u.morale-0.15)
+        : Math.min(100, u.morale+0.08);
+
+      // 指揮官バフ
+      if (u.type !== 'officer') {
+        const officers = units.filter(e=>e.side===u.side&&e.type==='officer'&&e.hp>0);
+        officers.forEach(o=>{
+          const od=Math.sqrt((o.x-u.x)**2+(o.y-u.y)**2);
+          if(od<3) u.morale=Math.min(100,u.morale+0.05);
+        });
+      }
+    }
+
+    function aiControl(u) {
+      if (Math.random() > 0.005 * difficulty) return;
+      const playerUnits = units.filter(e=>e.side==='player'&&e.hp>0);
+      const playerBuildings = buildings.filter(b=>b.side==='player'&&b.hp>0);
+
+      if (Math.random() < 0.3 && playerBuildings.length > 0) {
+        // 建物を狙う
+        const tgt = playerBuildings[Math.floor(Math.random()*playerBuildings.length)];
+        u.tx = tgt.x + (Math.random()-0.5);
+        u.ty = tgt.y + (Math.random()-0.5);
+        u.state = 'attack';
+      } else if (playerUnits.length > 0) {
+        const tgt = playerUnits[Math.floor(Math.random()*playerUnits.length)];
+        u.tx = tgt.x + (Math.random()-0.5);
+        u.ty = tgt.y + (Math.random()-0.5);
+        u.state = 'attack';
+      } else {
+        u.tx = Math.random()*GRID;
+        u.ty = Math.random()*(GRID*0.6);
+        u.state = 'move';
+      }
+    }
+
+    // ========== 描画 ==========
+    const TERRAIN_COLORS = {
+      plain:    '#0d1a0d',
+      forest:   '#0a2010',
+      mountain: '#1a1a1a',
+      water:    '#0a1520',
+    };
+
+    function draw() {
+      ctx.fillStyle = '#080c18';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.save();
+      ctx.translate(-camX, -camY);
+
+      // テレイン
+      for (let r=0; r<GRID; r++) {
+        for (let c=0; c<GRID; c++) {
+          const t = terrain[r][c];
+          ctx.fillStyle = TERRAIN_COLORS[t] || '#0d1a0d';
+          ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
+          if (t==='forest') {
+            ctx.fillStyle = '#1a3a1a';
+            ctx.font = `${CELL*0.5}px monospace`;
+            ctx.textAlign='center';
+            ctx.fillText('♣', c*CELL+CELL/2, r*CELL+CELL*0.65);
+          } else if (t==='mountain') {
+            ctx.fillStyle = '#333';
+            ctx.font = `${CELL*0.45}px monospace`;
+            ctx.textAlign='center';
+            ctx.fillText('▲', c*CELL+CELL/2, r*CELL+CELL*0.65);
+          } else if (t==='water') {
+            ctx.fillStyle = '#0a2a4a';
+            ctx.fillRect(c*CELL, r*CELL, CELL, CELL);
+          }
+        }
+      }
+
+      // グリッド線
+      ctx.strokeStyle = '#0d1a2e';
+      ctx.lineWidth = 0.5;
+      for (let i=0; i<=GRID; i++) {
+        ctx.beginPath(); ctx.moveTo(i*CELL,0); ctx.lineTo(i*CELL,GRID*CELL); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,i*CELL); ctx.lineTo(GRID*CELL,i*CELL); ctx.stroke();
+      }
+
+      // 建物
+      buildings.forEach(b => {
+        if (b.hp <= 0) return;
+        const bx = b.x*CELL+CELL/2, by = b.y*CELL+CELL/2;
+        const def = BUILD_DEF[b.type];
+        const col = b.side==='player' ? def.col : b.side==='enemy' ? '#ff4444' : '#888888';
+        const size = CELL*0.42;
+
+        ctx.fillStyle = b.side==='player' ? '#1e3a5f' : b.side==='enemy' ? '#3a1e1e' : '#2a2a2a';
+        ctx.strokeStyle = col;
+        ctx.lineWidth = selectedBuilding?.id===b.id ? 2.5 : 1.5;
+        ctx.beginPath();
+        ctx.rect(bx-size, by-size, size*2, size*2);
+        ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = col;
+        ctx.font = `bold ${CELL*0.35}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText(def.name[0], bx, by+CELL*0.12);
+
+        // HPバー
+        const bw = CELL*0.8;
+        const hr = b.hp/b.maxHp;
+        ctx.fillStyle='#333';
+        ctx.fillRect(bx-bw/2, by+size+1, bw, 3);
+        ctx.fillStyle = hr>0.5?'#4aff88':hr>0.25?'#ffaa4a':'#ff4a4a';
+        ctx.fillRect(bx-bw/2, by+size+1, bw*hr, 3);
+      });
+
+      // ユニット
+      units.forEach(u => {
+        if (u.hp<=0) return;
+        const ux=u.x*CELL+CELL/2, uy=u.y*CELL+CELL/2;
+        const r2 = CELL*0.28;
+        const def = UNIT_DEF[u.type];
+        const isSel = selectedUnits.includes(u.id);
+
+        if (isSel) {
+          ctx.beginPath();
+          ctx.arc(ux,uy,r2+3,0,Math.PI*2);
+          ctx.strokeStyle='#fff';
+          ctx.lineWidth=1.5;
+          ctx.stroke();
+        }
+
+        ctx.beginPath();
+        ctx.arc(ux,uy,r2,0,Math.PI*2);
+        ctx.fillStyle = u.side==='player' ? def.col : '#ff3333';
+        ctx.globalAlpha = 0.4 + (u.morale/100)*0.6;
+        ctx.fill();
+        ctx.globalAlpha=1;
+
+        if (u.state==='attack') {
+          ctx.beginPath();
+          ctx.arc(ux,uy,r2+4+Math.random()*3,0,Math.PI*2);
+          ctx.strokeStyle = u.side==='player' ? '#4a9eff44':'#ff4a4a44';
+          ctx.lineWidth=2;
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = u.side==='player' ? '#fff' : '#faa';
+        ctx.font = `${CELL*0.28}px monospace`;
+        ctx.textAlign='center';
+        ctx.fillText(def.sym, ux, uy+CELL*0.09);
+
+        // HPバー
+        const bw=CELL*0.55;
+        const hr=u.hp/u.maxHp;
+        ctx.fillStyle='#333';
+        ctx.fillRect(ux-bw/2, uy+r2+1, bw, 2);
+        ctx.fillStyle = hr>0.5?'#4aff88':hr>0.25?'#ffaa4a':'#ff4a4a';
+        ctx.fillRect(ux-bw/2, uy+r2+1, bw*hr, 2);
+      });
+
+      // 建設プレビュー
+      if (buildMode) {
+        ctx.fillStyle='rgba(74,158,255,0.15)';
+        ctx.strokeStyle='#4a9eff';
+        ctx.lineWidth=1;
+        ctx.setLineDash([4,4]);
+        ctx.strokeRect(0, 0, GRID*CELL, GRID*CELL/2);
+        ctx.setLineDash([]);
+        ctx.fillStyle='#4a9eff';
+        ctx.font='0.7rem monospace';
+        ctx.textAlign='left';
+        ctx.fillText(`建設中：${BUILD_DEF[buildMode]?.name} [ESC でキャンセル]`, 6, GRID*CELL-10);
+      }
+
+      ctx.restore();
+      drawMinimap();
+      updatePanels();
+    }
+
+    function drawMinimap() {
+      const mc=miniCtx, mw=134, mh=134;
+      mc.fillStyle='#080c18';
+      mc.fillRect(0,0,mw,mh);
+      const cs=mw/GRID;
+
+      // テレイン
+      for(let r=0;r<GRID;r++){
+        for(let c=0;c<GRID;c++){
+          const t=terrain[r][c];
+          mc.fillStyle = t==='forest'?'#0a2010':t==='mountain'?'#1a1a1a':t==='water'?'#0a1520':'#0d1a0d';
+          mc.fillRect(c*cs,r*cs,cs,cs);
+        }
+      }
+
+      buildings.forEach(b=>{
+        if(b.hp<=0)return;
+        mc.fillStyle = b.side==='player'?'#4a9eff':b.side==='enemy'?'#ff4a4a':'#888';
+        mc.fillRect(b.x*cs-1,b.y*cs-1,3,3);
+      });
+
+      units.forEach(u=>{
+        if(u.hp<=0)return;
+        mc.fillStyle=u.side==='player'?'#4a9eff':'#ff4a4a';
+        mc.fillRect(u.x*cs-0.5,u.y*cs-0.5,1.5,1.5);
+      });
+
+      // カメラ範囲
+      mc.strokeStyle='#ffffff44';
+      mc.lineWidth=1;
+      mc.strokeRect(
+        camX/CELL*cs, camY/CELL*cs,
+        (canvas.width/CELL)*cs, (canvas.height/CELL)*cs
+      );
+    }
+
+    function updatePanels() {
+      const pu=units.filter(u=>u.side==='player'&&u.hp>0);
+      const eu=units.filter(u=>u.side==='enemy'&&u.hp>0);
+      document.getElementById('stat-player').textContent=pu.length;
+      document.getElementById('stat-enemy').textContent=eu.length;
+      document.getElementById('res-troops').textContent=pu.length;
+      document.getElementById('stat-bases').textContent=buildings.filter(b=>b.side==='player'&&b.hp>0).length;
+
+      setFront('front-north',  pu.filter(u=>u.y<10).length, eu.filter(u=>u.y<10).length);
+      setFront('front-center', pu.filter(u=>u.y>=10&&u.y<20).length, eu.filter(u=>u.y>=10&&u.y<20).length);
+      setFront('front-south',  pu.filter(u=>u.y>=20).length, eu.filter(u=>u.y>=20).length);
+
+      // 選択ユニット表示
+      const sel=units.filter(u=>selectedUnits.includes(u.id)&&u.hp>0);
+      if(sel.length>0){
+        const avgHp=sel.reduce((s,u)=>s+u.hp/u.maxHp,0)/sel.length;
+        const avgM=sel.reduce((s,u)=>s+u.morale,0)/sel.length;
+        const types=[...new Set(sel.map(u=>UNIT_DEF[u.type].name))];
+        document.getElementById('unit-display').innerHTML=`
+          <div class="unit-card">
+            <div class="uc-name">${types.join('・')} ×${sel.length}</div>
+            <div class="uc-stat">HP: ${Math.round(avgHp*100)}%</div>
+            <div class="uc-stat">士気: ${Math.round(avgM)}%</div>
+            <div class="morale-bar"><div class="morale-fill" style="width:${avgM}%"></div></div>
+          </div>
+        `;
+      } else if(selectedBuilding) {
+        const b=selectedBuilding;
+        const def=BUILD_DEF[b.type];
+        document.getElementById('unit-display').innerHTML=`
+          <div class="unit-card">
+            <div class="uc-name">${def.name}</div>
+            <div class="uc-stat">HP: ${Math.round(b.hp)}/${b.maxHp}</div>
+          </div>
+        `;
+        // 生産メニュー
+        if(def.produces){
+          document.getElementById('prod-list').innerHTML=def.produces.map(t=>`
+            <button class="cmd-btn" onclick="queueUnit('${t}')">
+              ${UNIT_DEF[t].name} G:${UNIT_DEF[t].cost.gold} F:${UNIT_DEF[t].cost.food}
+            </button>
+          `).join('');
+        } else {
+          document.getElementById('prod-list').innerHTML='<div style="color:#556;">生産不可</div>';
+        }
+      } else {
+        document.getElementById('unit-display').innerHTML='<div style="color:#556;">未選択</div>';
+        document.getElementById('prod-list').innerHTML='<div style="color:#556;">兵舎を選択</div>';
+      }
+
+      // 生産キュー表示
+      document.getElementById('queue-list').innerHTML=productionQueue.map(q=>`
+        <div class="prod-item">
+          ${UNIT_DEF[q.type].name}
+          <div class="prod-bar"><div class="prod-fill" style="width:${(1-q.remaining/UNIT_DEF[q.type].time)*100}%"></div></div>
+        </div>
+      `).join('') || '<div style="color:#556;">なし</div>';
+    }
+
+    function setFront(id,p,e){
+      const el=document.getElementById(id);
+      if(p>e*1.4){el.textContent='優勢';el.className='front-state win';}
+      else if(e>p*1.4){el.textContent='劣勢';el.className='front-state lose';}
+      else{el.textContent='均衡';el.className='front-state even';}
+    }
+
+    // ========== 入力処理 ==========
+    function handleClick(e) {
+      const rect=canvas.getBoundingClientRect();
+      const wx=(e.clientX-rect.left+camX)/CELL;
+      const wy=(e.clientY-rect.top+camY)/CELL;
+
+      // 建設モード
+      if(buildMode){
+        const cost=BUILD_DEF[buildMode].cost;
+        if((cost.gold||0)>gold||(cost.wood||0)>wood||(cost.stone||0)>stone){
+          addLog('資源が足りません','danger'); return;
+        }
+        const gx=Math.round(wx), gy=Math.round(wy);
+        if(gx>=0&&gx<GRID&&gy>=0&&gy<GRID&&terrain[gy][gx]!=='water'&&terrain[gy][gx]!=='mountain'){
+          gold-=(cost.gold||0); wood-=(cost.wood||0); stone-=(cost.stone||0);
+          buildings.push(mkBuilding(buildMode,'player',gx,gy));
+          addLog(`${BUILD_DEF[buildMode].name}を建設しました`,'important');
+          updateRes();
+        }
+        buildMode=null; return;
+      }
+
+      // 命令モード
+      if(currentCmd&&selectedUnits.length>0){
+        selectedUnits.forEach((id,i)=>{
+          const u=units.find(u=>u.id===id);
+          if(!u)return;
+          u.tx=wx+(i%4-1.5)*0.7;
+          u.ty=wy+Math.floor(i/4)*0.7;
+          u.state=currentCmd;
+        });
+        addLog(`${selectedUnits.length}体に${getCmd(currentCmd)}命令`,'important');
+        return;
+      }
+
+      // 建物クリック
+      const clickedB=buildings.find(b=>{
+        if(b.hp<=0||b.side!=='player')return false;
+        return Math.abs(b.x-wx)<0.7&&Math.abs(b.y-wy)<0.7;
+      });
+      if(clickedB){ selectedBuilding=clickedB; selectedUnits=[]; return; }
+
+      // ユニットクリック
+      const clicked=units.filter(u=>{
+        if(u.side!=='player'||u.hp<=0)return false;
+        return Math.sqrt((u.x-wx)**2+(u.y-wy)**2)<0.65;
+      });
+      if(clicked.length>0){
+        if(e.shiftKey) clicked.forEach(u=>{ if(!selectedUnits.includes(u.id)) selectedUnits.push(u.id); });
+        else { selectedUnits=clicked.map(u=>u.id); selectedBuilding=null; }
+        return;
+      }
+
+      // 空きクリック＝移動
+      if(selectedUnits.length>0){
+        selectedUnits.forEach((id,i)=>{
+          const u=units.find(u=>u.id===id);
+          if(!u)return;
+          u.tx=wx+(i%4-1.5)*0.7;
+          u.ty=wy+Math.floor(i/4)*0.7;
+          u.state='move';
+        });
+      } else {
+        selectedBuilding=null;
+      }
+    }
+
+    function handleKey(e){
+      if(!gameRunning)return;
+      switch(e.key.toLowerCase()){
+        case 'm': setCmd('move'); break;
+        case 'a': setCmd('attack'); break;
+        case 'd': setCmd('defend'); break;
+        case 'g': setCmd('gather'); break;
+        case 'b': buildMode=buildMode?null:'barracks'; break;
+        case 'escape': buildMode=null; clearSel(); break;
+        // カメラ移動
+        case 'arrowleft': camX=Math.max(0,camX-CELL*2); break;
+        case 'arrowright': camX=Math.min(GRID*CELL-canvas.width,camX+CELL*2); break;
+        case 'arrowup': camY=Math.max(0,camY-CELL*2); break;
+        case 'arrowdown': camY=Math.min(GRID*CELL-canvas.height,camY+CELL*2); break;
+      }
+    }
+
+    function setCmd(cmd){
+      currentCmd=currentCmd===cmd?null:cmd;
+      document.querySelectorAll('.cmd-btn').forEach(b=>b.classList.remove('active'));
+      if(currentCmd) document.getElementById(`cmd-${currentCmd}`)?.classList.add('active');
+    }
+
+    function setBuild(type){ buildMode=type; currentCmd=null; }
+    function getCmd(c){ return {move:'移動',attack:'攻撃',defend:'防衛',gather:'集結'}[c]||c; }
+
+    function clearSel(){
+      selectedUnits=[]; selectedBuilding=null; buildMode=null; currentCmd=null;
+      document.querySelectorAll('.cmd-btn').forEach(b=>b.classList.remove('active'));
+    }
+
+    // ========== 生産 ==========
+    function queueUnit(type){
+      if(!selectedBuilding)return;
+      const cost=UNIT_DEF[type].cost;
+      if((cost.gold||0)>gold||(cost.food||0)>food){
+        addLog('資源が足りません','danger'); return;
+      }
+      gold-=(cost.gold||0); food-=(cost.food||0);
+      productionQueue.push({ type, remaining:UNIT_DEF[type].time, building:selectedBuilding });
+      addLog(`${UNIT_DEF[type].name}を生産キューに追加`);
+      updateRes();
+    }
+
+    // ========== 毎秒処理 ==========
+    function gameTick(){
+      if(!gameRunning)return;
+      gameTime++;
+
+      // 資源生産
+      food = Math.max(0, food-1);
+      buildings.forEach(b=>{
+        if(b.side!=='player'||b.hp<=0)return;
+        if(BUILD_DEF[b.type]?.foodRate) food+=BUILD_DEF[b.type].foodRate;
+        if(BUILD_DEF[b.type]?.goldRate) gold+=BUILD_DEF[b.type].goldRate;
+        if(BUILD_DEF[b.type]?.woodRate) wood+=BUILD_DEF[b.type].woodRate;
+      });
+
+      // 生産処理
+      productionQueue.forEach(q=>{ q.remaining-=1; });
+      const done=productionQueue.filter(q=>q.remaining<=0);
+      done.forEach(q=>{
+        const b=q.building;
+        if(b&&b.hp>0){
+          spawnUnit(q.type,'player',b.x+(Math.random()-0.5),b.y+1);
+          addLog(`${UNIT_DEF[q.type].name}が完成しました`,'victory');
+        }
+      });
+      productionQueue=productionQueue.filter(q=>q.remaining>0);
+
+      // AI生産
+     const aiInterval = Math.max(8, 30 - difficulty * 5);
+if(gameTime%aiInterval===0 && gameTime > 30){
+        const aiBarracks=buildings.filter(b=>b.side==='enemy'&&b.type==='barracks'&&b.hp>0);
+        aiBarracks.forEach(b=>{
+          const types=['vanguard','vanguard','archer','officer'];
+          spawnUnit(types[Math.floor(Math.random()*types.length)],'enemy',b.x+(Math.random()-0.5),b.y+1);
+        });
+        if(gameTime%(60-difficulty*10)===0){
+          addLog('敵が増援を送ってきた','danger');
+        }
+      }
+
+      // 建物への攻撃チェック
+      buildings.forEach(b=>{
+        if(b.hp<=0)return;
+        const attackers=units.filter(u=>u.side!==b.side&&u.hp>0&&Math.sqrt((u.x-b.x)**2+(u.y-b.y)**2)<1.2);
+        attackers.forEach(u=>{
+          if(u.attackCd<=0){
+            b.hp-=UNIT_DEF[u.type].atk*0.5;
+            u.attackCd=1.5;
+            u.state='attack';
+          }
+        });
+        if(b.hp<=0){
+          addLog(`${BUILD_DEF[b.type]?.name||'建物'}が破壊された`, b.side==='player'?'danger':'victory');
+        }
+      });
+
+      // 時間表示
+      const m=Math.floor(gameTime/60),s=gameTime%60;
+      document.getElementById('res-time').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      updateRes();
+    }
+
+    function updateRes(){
+      document.getElementById('res-food').textContent=Math.round(food);
+      document.getElementById('res-gold').textContent=Math.round(gold);
+      document.getElementById('res-wood').textContent=Math.round(wood);
+      document.getElementById('res-stone').textContent=Math.round(stone);
+    }
+
+    function addLog(msg,type=''){
+      const m=Math.floor(gameTime/60),s=gameTime%60;
+      const time=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      logs.unshift({time,msg,type});
+      if(logs.length>60)logs.pop();
+      document.getElementById('timeline').innerHTML=
+        logs.slice(0,25).map(l=>`<div class="log-item ${l.type}"><span class="log-time">[${l.time}]</span>${l.msg}</div>`).join('');
+    }
+
+  function checkVictory(){
+  const playerCastle=buildings.find(b=>b.type==='castle'&&b.side==='player'&&b.hp>0);
+  const enemyCastle=buildings.find(b=>b.type==='castle'&&b.side==='enemy'&&b.hp>0);
+
+  if(!enemyCastle){
+    const playerAlive=units.filter(u=>u.side==='player'&&u.hp>0).length;
+    end('🎉 勝利！',`敵の城を落とした！残兵力：${playerAlive}体`);
+  } else if(!playerCastle){
+    end('😞 敗北','城が落ちた...');
+  }
+}
+    function end(title,detail){
+      gameRunning=false;
+      cancelAnimationFrame(animFrame);
+      clearInterval(tickInterval);
+      document.getElementById('result-title').textContent=title;
+      document.getElementById('result-detail').textContent=detail;
+      document.getElementById('result-overlay').classList.add('show');
+    }
+  </script>
+</body>
+</html>
