@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>陣取りシューティング | Portfolio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; touch-action: none; }
+    body {
+      background: #0a0a1a;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .game-container {
+      background: #111122;
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid #2a2a4a;
+      text-align: center;
+      max-width: 100%;
+    }
+    h1 { font-size: clamp(1.2rem, 5vw, 1.6rem); letter-spacing: 0.2em; color: #c8a96e; margin-bottom: 4px; }
+    .sub { font-size: 0.7rem; color: #6a6a8a; margin-bottom: 16px; }
+    canvas { display: block; margin: 0 auto; border-radius: 12px; box-shadow: 0 0 0 2px #2a2a4a; cursor: crosshair; width: 100%; height: auto; max-width: 700px; aspect-ratio: 700/500; }
+    .info { display: flex; justify-content: space-between; align-items: center; margin: 12px 20px 8px; padding: 6px 16px; background: #0d0d1a; border-radius: 60px; flex-wrap: wrap; justify-content: center; gap: 16px; }
+    .score-box { background: #1a1a2e; padding: 4px 16px; border-radius: 40px; color: #c8a96e; }
+    .score-box span { color: white; font-weight: bold; margin-right: 6px; }
+    .restart-btn { background: #1a1a2e; border: 1px solid #c8a96e; color: #c8a96e; padding: 6px 20px; border-radius: 999px; cursor: pointer; margin-top: 8px; }
+    .restart-btn:hover { background: #c8a96e; color: #111; }
+    .back-link { color: #c8a96e; font-size: 0.75rem; text-decoration: none; display: inline-block; margin-top: 12px; opacity: 0.7; }
+    .back-link:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <h1>陣取りシューティング</h1>
+  <div class="sub">— TERRITORY CAPTURE —</div>
+  <canvas id="gameCanvas" width="700" height="500" style="aspect-ratio:700/500"></canvas>
+  <div class="info">
+    <div class="score-box"><span>🏰</span> <span id="captureRate">0</span>%</div>
+    <div class="score-box"><span>💥</span> <span id="killCount">0</span></div>
+  </div>
+  <button class="restart-btn" onclick="location.reload()">再起動</button>
+  <div><a href="index.html" class="back-link">← ポートフォリオに戻る</a></div>
+</div>
+
+<script>
+  (function(){
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 700;
+    canvas.height = 500;
+
+    const GRID_W = 5, GRID_H = 5;
+    const CELL_W = canvas.width / GRID_W;
+    const CELL_H = 80;
+    const SHIP_Y = canvas.height - 40;
+    
+    let grid = Array(GRID_H).fill().map(() => Array(GRID_W).fill(false));
+    for(let i=0;i<GRID_W;i++) grid[GRID_H-1][i] = (i===1 || i===2 || i===3);
+    
+    let enemies = [];
+    let bullets = [];
+    let playerX = canvas.width/2;
+    let score = 0;
+    let frame = 0;
+    let spawnCounter = 0;
+    let gameRunning = true;
+    
+    class Enemy { constructor(x, y, hp=1) { this.x = x; this.y = y; this.w = 30; this.h = 30; this.hp = hp; this.maxHp = hp; } }
+    class Bullet { constructor(x, y) { this.x = x; this.y = y; this.w = 5; this.h = 10; this.speed = 5; } }
+    
+    function updateCaptureRate(){
+      let total = GRID_W * GRID_H;
+      let owned = 0;
+      for(let r=0;r<GRID_H;r++) for(let c=0;c<GRID_W;c++) if(grid[r][c]) owned++;
+      let percent = Math.floor(owned / total * 100);
+      document.getElementById('captureRate').innerText = percent;
+      document.getElementById('killCount').innerText = score;
+      if(percent >= 60 && gameRunning){
+        gameRunning = false;
+        setTimeout(() => alert("✨ 勝利！ 領土60%を制圧しました ✨\n「再起動」でもう一度遊べます"), 30);
+      }
+      return percent;
+    }
+    
+    function captureCell(col, row){
+      if(row >=0 && row < GRID_H && col >=0 && col < GRID_W && !grid[row][col]){
+        grid[row][col] = true;
+        updateCaptureRate();
+      }
+    }
+    
+    function spawnEnemy(){
+      let col = Math.floor(Math.random() * GRID_W);
+      let x = col * CELL_W + CELL_W/2 - 15;
+      let y = 10;
+      let hp = (score > 15 && Math.random()<0.3) ? 2 : 1;
+      enemies.push(new Enemy(x, y, hp));
+    }
+    
+    function shoot(){
+      if(!gameRunning) return;
+      bullets.push(new Bullet(playerX-2, SHIP_Y-15));
+    }
+    
+    function update(){
+      if(!gameRunning) return;
+      frame++;
+      
+      if(spawnCounter <= 0){
+        spawnEnemy();
+        spawnCounter = Math.max(15, 40 - Math.floor(score/8));
+      } else { spawnCounter--; }
+      
+      for(let i=0;i<bullets.length;i++){
+        bullets[i].y -= bullets[i].speed;
+        if(bullets[i].y + bullets[i].h < 0 || bullets[i].y > canvas.height){
+          bullets.splice(i,1); i--; continue;
+        }
+        let hit = false;
+        for(let j=0;j<enemies.length;j++){
+          let e = enemies[j];
+          if(bullets[i].x < e.x+e.w && bullets[i].x+bullets[i].w > e.x &&
+             bullets[i].y < e.y+e.h && bullets[i].y+bullets[i].h > e.y){
+            e.hp--;
+            if(e.hp <= 0){
+              let col = Math.floor(e.x / CELL_W);
+              let row = Math.floor(e.y / CELL_H);
+              captureCell(col, row);
+              enemies.splice(j,1);
+              score++;
+              updateCaptureRate();
+            }
+            bullets.splice(i,1);
+            hit = true;
+            break;
+          }
+        }
+        if(hit) { i--; }
+      }
+      
+      for(let i=0;i<enemies.length;i++){
+        enemies[i].y += 1.2;
+        if(enemies[i].y + enemies[i].h > SHIP_Y){
+          gameRunning = false;
+          alert("💀 陣地突破！ 敗北 💀\n再起動で挑戦");
+          return;
+        }
+      }
+      
+      let owned = 0;
+      for(let r=0;r<GRID_H;r++) for(let c=0;c<GRID_W;c++) if(grid[r][c]) owned++;
+      if(Math.random() < owned / 80 && bullets.length < 12){
+        bullets.push(new Bullet(playerX-2 + (Math.random()-0.5)*20, SHIP_Y-12));
+      }
+    }
+    
+    function draw(){
+      ctx.fillStyle = '#0a0a1a';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      
+      for(let r=0;r<GRID_H;r++){
+        for(let c=0;c<GRID_W;c++){
+          let x = c*CELL_W, y = r*CELL_H;
+          if(grid[r][c]){
+            ctx.fillStyle = '#2a4a6a';
+            ctx.fillRect(x+2, y+2, CELL_W-4, CELL_H-4);
+            ctx.strokeStyle = '#4a9eff';
+          } else {
+            ctx.fillStyle = '#1a1a2a';
+            ctx.fillRect(x+2, y+2, CELL_W-4, CELL_H-4);
+            ctx.strokeStyle = '#2a2a4a';
+          }
+          ctx.strokeRect(x+2, y+2, CELL_W-4, CELL_H-4);
+        }
+      }
+      
+      for(let e of enemies){
+        ctx.fillStyle = '#ff5555';
+        ctx.fillRect(e.x, e.y, e.w, e.h);
+        ctx.fillStyle = 'white';
+        ctx.font = "bold 14px monospace";
+        ctx.fillText("⚔", e.x+8, e.y+22);
+        if(e.hp > 1){
+          ctx.fillStyle = '#ffaa66';
+          ctx.fillRect(e.x, e.y-6, e.w * (e.hp/e.maxHp), 4);
+        }
+      }
+      
+      for(let b of bullets){
+        ctx.fillStyle = '#ffcc44';
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+      }
+      
+      ctx.fillStyle = '#88aaff';
+      ctx.beginPath();
+      ctx.moveTo(playerX, SHIP_Y-20);
+      ctx.lineTo(playerX-18, SHIP_Y-4);
+      ctx.lineTo(playerX-8, SHIP_Y-4);
+      ctx.lineTo(playerX-8, SHIP_Y);
+      ctx.lineTo(playerX+8, SHIP_Y);
+      ctx.lineTo(playerX+8, SHIP_Y-4);
+      ctx.lineTo(playerX+18, SHIP_Y-4);
+      ctx.fill();
+      ctx.fillStyle = '#ccddff';
+      ctx.beginPath();
+      ctx.arc(playerX, SHIP_Y-14, 8, 0, Math.PI*2);
+      ctx.fill();
+    }
+    
+    // タッチ＆マウス対応
+    function handleMove(clientX){
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      let mx = (clientX - rect.left) * scaleX;
+      playerX = Math.min(canvas.width-20, Math.max(20, mx));
+    }
+    
+    function onMove(e){
+      e.preventDefault();
+      const point = e.touches ? e.touches[0] : e;
+      handleMove(point.clientX);
+    }
+    
+    function onShoot(e){
+      e.preventDefault();
+      shoot();
+    }
+    
+    canvas.addEventListener('mousemove', onMove);
+    canvas.addEventListener('touchmove', onMove, { passive: false });
+    canvas.addEventListener('click', onShoot);
+    canvas.addEventListener('touchstart', onShoot, { passive: false });
+    
+    function gameLoop(){
+      update();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    gameLoop();
+    setInterval(() => { if(gameRunning) updateCaptureRate(); }, 200);
+  })();
+</script>
+</body>
+</html>

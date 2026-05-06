@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>防衛戦略 | Portfolio</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; touch-action: manipulation; }
+    body {
+      background: #0a0a1a;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .game-container {
+      background: #111122;
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid #c8a96e;
+      text-align: center;
+      max-width: 100%;
+    }
+    canvas { border-radius: 12px; box-shadow: 0 0 0 2px #2a2a4a; cursor: crosshair; width: 100%; height: auto; max-width: 800px; aspect-ratio:800/450; }
+    .info-bar {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+    .stat {
+      background: #0d0d1a;
+      padding: 6px 18px;
+      border-radius: 40px;
+      font-size: clamp(0.7rem, 3vw, 0.9rem);
+    }
+    .stat span { color: #c8a96e; font-weight: bold; margin-right: 6px; }
+    button {
+      background: #1a1a2e;
+      border: 1px solid #c8a96e;
+      color: #c8a96e;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin: 4px;
+      cursor: pointer;
+      font-size: clamp(0.7rem, 3vw, 0.8rem);
+    }
+    button:hover { background: #c8a96e; color: #111; }
+    .back-link { color: #c8a96e; font-size: 0.7rem; display: inline-block; margin-top: 12px; text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <h1 style="font-size: clamp(1.2rem, 5vw, 1.6rem);">防衛戦略</h1>
+  <div style="font-size:0.7rem; margin-bottom: 8px;">— 玉座を守れ —</div>
+  <canvas id="gameCanvas" width="800" height="450" style="aspect-ratio:800/450"></canvas>
+  <div class="info-bar">
+    <div class="stat"><span>🛡️ 城壁</span> <span id="wallHp">100</span>%</div>
+    <div class="stat"><span>💰 黄金</span> <span id="goldAmount">150</span></div>
+    <div class="stat"><span>🌊 Wave</span> <span id="waveNum">1</span></div>
+    <div class="stat"><span>🏹 弓兵</span> <span id="archerCount">0</span>/6</div>
+  </div>
+  <div>
+    <button onclick="buyRepair()">修理 (+20) 30G</button>
+    <button onclick="buyArcher()">弓兵召喚 50G</button>
+    <button onclick="buyShield()">一時バリア 40G</button>
+  </div>
+  <div><a href="index.html" class="back-link">← ポートフォリオに戻る</a></div>
+</div>
+
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 800; canvas.height = 450;
+
+  let gold = 150;
+  let wave = 1;
+  let wallHp = 100;
+  let barrier = 0;
+  let archers = []; // 最大6体、玉座の周りに配置
+  let enemies = [];
+  let arrows = [];
+  let gameRunning = true;
+  let frame = 0;
+  let spawnCounter = 0;
+  let enemiesThisWave = 0;
+  let waveInProgress = true;
+  
+  // 玉座の座標
+  const THRONE_X = canvas.width / 2;
+  const THRONE_Y = canvas.height - 55;
+  
+  // 弓兵の配置位置（玉座を囲む扇形/半円）
+  function getArcherPosition(index, total) {
+    // 玉座の後ろ側（上側）に半円状に配置
+    const radius = 55;  // 玉座からの距離
+    const startAngle = -Math.PI / 2.5;  // 左上方向から
+    const endAngle = Math.PI / 2.5;     // 右上方向まで
+    
+    let angle;
+    if (total === 1) {
+      angle = 0; // 1体なら真上
+    } else {
+      angle = startAngle + (index / (total - 1)) * (endAngle - startAngle);
+    }
+    
+    return {
+      x: THRONE_X + Math.cos(angle) * radius,
+      y: THRONE_Y - 25 + Math.sin(angle) * radius * 0.5
+    };
+  }
+  
+  // 弓兵の配置を更新（追加/削除時に呼び出す）
+  function updateArcherPositions() {
+    for (let i = 0; i < archers.length; i++) {
+      const pos = getArcherPosition(i, archers.length);
+      archers[i].x = pos.x;
+      archers[i].y = pos.y;
+    }
+  }
+  
+  function updateUI(){
+    document.getElementById('wallHp').innerText = Math.max(0, Math.floor(wallHp));
+    document.getElementById('goldAmount').innerText = Math.floor(gold);
+    document.getElementById('waveNum').innerText = wave;
+    document.getElementById('archerCount').innerText = `${archers.length}/6`;
+  }
+  
+  function buyRepair(){
+    if(gold >= 30 && wallHp < 100){
+      gold -= 30;
+      wallHp = Math.min(100, wallHp + 20);
+      updateUI();
+    }
+  }
+  
+  function buyArcher(){
+    // 最大6体まで（玉座を囲むのに十分）
+    if(gold >= 50 && archers.length < 6){
+      gold -= 50;
+      archers.push({ cooldown: 0 });
+      updateArcherPositions();
+      updateUI();
+    }
+  }
+  
+  function buyShield(){
+    if(gold >= 40 && barrier <= 0){
+      gold -= 40;
+      barrier = 180;
+      updateUI();
+    }
+  }
+  
+  function startWave(){
+    waveInProgress = true;
+    enemiesThisWave = 5 + Math.floor(wave * 1.3);
+    spawnCounter = 10;
+  }
+  
+  function spawnEnemy(){
+    let side = Math.random() < 0.5 ? 'left' : 'right';
+    let x = side === 'left' ? -20 : canvas.width+20;
+    let y = 40 + Math.random() * (canvas.height - 150);
+    let hp = 20 + Math.floor(wave * 5);
+    enemies.push({ 
+      x: x, y: y, w: 35, h: 35,
+      hp: hp, maxHp: hp, type: 'normal' 
+    });
+  }
+  
+  function updateGame(){
+    if(!gameRunning) return;
+    frame++;
+    
+    if(waveInProgress){
+      if(spawnCounter <= 0 && enemiesThisWave > 0){
+        spawnEnemy();
+        enemiesThisWave--;
+        spawnCounter = 28 - Math.min(15, wave);
+      } else {
+        spawnCounter--;
+      }
+      if(enemiesThisWave === 0 && enemies.length === 0){
+        waveInProgress = false;
+        wave++;
+        gold += 80 + wave * 5;
+        updateUI();
+        setTimeout(() => startWave(), 1800);
+      }
+    }
+    
+    // 敵移動（玉座へ）
+    for(let i=0;i<enemies.length;i++){
+      let e = enemies[i];
+      let dx = THRONE_X - e.x, dy = THRONE_Y - e.y;
+      let len = Math.hypot(dx,dy);
+      if(len > 1){
+        e.x += (dx/len) * 1.3;
+        e.y += (dy/len) * 1.2;
+      } else {
+        let dmg = 9 + Math.floor(wave/2);
+        if(barrier > 0) dmg = 0;
+        wallHp -= dmg;
+        enemies.splice(i,1);
+        updateUI();
+        if(wallHp <= 0){
+          gameRunning = false;
+          alert('💀 玉座が崩壊した… ゲームオーバー 💀\n再読み込みで挑戦');
+          return;
+        }
+        i--; continue;
+      }
+      e.x = Math.min(canvas.width+50, Math.max(-50, e.x));
+      e.y = Math.min(canvas.height-40, Math.max(20, e.y));
+    }
+    
+    // 弓兵の射撃（玉座周りから）
+    for(let a of archers){
+      if(a.cooldown <= 0){
+        let nearest = null;
+        let minDist = 300;
+        for(let e of enemies){
+          let d = Math.hypot(a.x - e.x, a.y - e.y);
+          if(d < minDist){ minDist = d; nearest = e; }
+        }
+        if(nearest){
+          arrows.push({
+            x: a.x, y: a.y,
+            tx: nearest.x, ty: nearest.y,
+            speed: 6, damage: 15
+          });
+          a.cooldown = 28;
+        }
+      } else {
+        a.cooldown--;
+      }
+    }
+    
+    // 矢の移動
+    for(let i=0;i<arrows.length;i++){
+      let ar = arrows[i];
+      let dx = ar.tx - ar.x, dy = ar.ty - ar.y;
+      let len = Math.hypot(dx,dy);
+      if(len < 8){
+        for(let j=0;j<enemies.length;j++){
+          let e = enemies[j];
+          if(Math.hypot(ar.x - e.x, ar.y - e.y) < 35){
+            e.hp -= ar.damage;
+            if(e.hp <= 0){
+              gold += 12 + Math.floor(wave*0.8);
+              enemies.splice(j,1);
+              updateUI();
+            }
+            break;
+          }
+        }
+        arrows.splice(i,1); i--; continue;
+      }
+      ar.x += (dx/len) * ar.speed;
+      ar.y += (dy/len) * ar.speed;
+    }
+    
+    if(barrier > 0) barrier--;
+  }
+  
+  // タッチ＆マウス対応の攻撃
+  function handleAttack(clientX, clientY){
+    if(!gameRunning) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    let mx = (clientX - rect.left) * scaleX;
+    let my = (clientY - rect.top) * scaleY;
+    for(let i=0;i<enemies.length;i++){
+      let en = enemies[i];
+      if(Math.hypot(mx - en.x, my - en.y) < 40){
+        en.hp -= 28;
+        if(en.hp <= 0){
+          gold += 15;
+          enemies.splice(i,1);
+          updateUI();
+        }
+        break;
+      }
+    }
+  }
+  
+  function onAttack(e){
+    e.preventDefault();
+    const point = e.touches ? e.touches[0] : e;
+    handleAttack(point.clientX, point.clientY);
+  }
+  
+  canvas.addEventListener('mousedown', onAttack);
+  canvas.addEventListener('touchstart', onAttack, { passive: false });
+  
+  function draw(){
+    ctx.fillStyle = '#0a1020';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    
+    // 玉座の台座
+    ctx.fillStyle = '#8a6a3a';
+    ctx.fillRect(THRONE_X-55, THRONE_Y-20, 110, 45);
+    ctx.fillStyle = '#c8a96e';
+    ctx.font = "bold 18px monospace";
+    ctx.fillText("玉座", THRONE_X-22, THRONE_Y-5);
+    
+    // 城壁バー
+    ctx.fillStyle = '#3a3a5a';
+    ctx.fillRect(THRONE_X-45, THRONE_Y-30, 90, 8);
+    ctx.fillStyle = wallHp>60?'#88ff88':'#ffaa55';
+    ctx.fillRect(THRONE_X-45, THRONE_Y-30, 90 * (wallHp/100), 8);
+    
+    // バリア表示
+    if(barrier > 0){
+      ctx.fillStyle = '#88aaffaa';
+      ctx.fillRect(THRONE_X-65, THRONE_Y-43, 130, 14);
+      ctx.fillStyle = '#aaccff';
+      ctx.font = "bold 11px monospace";
+      ctx.fillText("バリア", THRONE_X-22, THRONE_Y-35);
+    }
+    
+    // 弓兵（玉座を囲んで配置）
+    for(let a of archers){
+      ctx.fillStyle = '#88cc88';
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, 11, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = "16px monospace";
+      ctx.fillText("🏹", a.x-7, a.y+6);
+      
+      // 射程範囲インジケータ（薄く）
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, 130, 0, Math.PI*2);
+      ctx.strokeStyle = '#88ff8844';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    
+    // 敵
+    for(let e of enemies){
+      let grad = ctx.createLinearGradient(e.x, e.y, e.x+10, e.y+10);
+      grad.addColorStop(0, '#aa3333');
+      grad.addColorStop(1, '#551111');
+      ctx.fillStyle = grad;
+      ctx.fillRect(e.x, e.y, e.w, e.h);
+      ctx.fillStyle = '#ffaa66';
+      ctx.fillRect(e.x, e.y-8, e.w * (e.hp/e.maxHp), 5);
+      ctx.fillStyle = '#fff';
+      ctx.font = "bold 20px monospace";
+      ctx.fillText("👺", e.x+6, e.y+26);
+    }
+    
+    // 矢
+    for(let a of arrows){
+      ctx.fillStyle = '#ffdd88';
+      ctx.fillRect(a.x-2, a.y-2, 4, 8);
+    }
+    
+    ctx.fillStyle = '#aaa';
+    ctx.font = "12px monospace";
+    ctx.fillText("タップ/クリックで敵を直接攻撃", 12, 30);
+    
+    // 弓兵の配置説明
+    ctx.fillStyle = '#6a6a8a';
+    ctx.font = "10px monospace";
+    ctx.fillText("弓兵は玉座を守るように配置されます", 12, 50);
+  }
+  
+  function loop(){
+    updateGame();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  
+  startWave();
+  updateUI();
+  loop();
+</script>
+</body>
+</html>
