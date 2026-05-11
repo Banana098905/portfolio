@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>陰陽の狭間で | Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>陰陽の狭間で | 災厄降臨</title>
   <style>
     * {
       margin: 0;
@@ -159,12 +159,22 @@
       margin-top: 12px;
       letter-spacing: 0.05em;
     }
+
+    .warning-tip {
+      background: #44000088;
+      color: #ffaa88;
+      border-radius: 40px;
+      padding: 2px 12px;
+      font-size: 0.7rem;
+      margin-top: 6px;
+      display: inline-block;
+    }
   </style>
 </head>
 <body>
 <div class="game-container">
   <h1>陰陽の狭間で</h1>
-  <div class="subtitle">— THE BORDER OF LIGHT & DARK —</div>
+  <div class="subtitle">— 災厄降臨 —</div>
 
   <canvas id="gameCanvas" width="900" height="550"></canvas>
 
@@ -175,7 +185,7 @@
     <div class="attribute">
       <div class="attr-badge">
         <div class="light-dot"></div>
-        <span class="attr-light">白属性</span>
+        <span class="attr-light" id="attrStatus">白属性</span>
       </div>
       <span style="color:#4a4a6a">⇄</span>
       <div class="attr-badge">
@@ -188,9 +198,11 @@
     </div>
   </div>
 
+  <div id="warningMsg" class="warning-tip" style="display: none;">⚠️ 境界の歪みが増している...</div>
   <button class="restart-btn" onclick="restartGame()">再起動</button>
   <div class="controls">
-    🖱️ マウス移動 | 自分の色と同じ弾は無害 | 異なる色だけ当たる
+    🖱️ マウス移動 | ⚫⚪ 同じ色の弾は無害 | 異なる色は即死<br>
+    ⚙️ 歯車(回転)・🚀 追尾ミサイル追加！端にいると追尾強化・属性反転
   </div>
   <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
 </div>
@@ -216,29 +228,30 @@
       x: width/2,
       y: height - 60,
       radius: 14,
-      attribute: 'white',   // 'white' または 'black'
-      invincible: 0
+      attribute: 'white',
+      invincible: 0,
+      forcedAttributeTimer: 0
     };
 
-    // 弾幕
-    let bullets = [];
+    // オブジェクト配列 (タイプ: 'bullet', 'gear', 'missile')
+    let enemies = [];
     let particle = [];
 
-    // 境界線の位置 (X座標 白領域 / 黒領域)
     let borderX = width/2;
-    let borderTarget = width/2;
-    
-    // フレームカウンタ
     let frame = 0;
-    
-    // 敵発生間隔
     let spawnCounter = 0;
-    let spawnDelay = 28;  // フレームごと
+    let baseSpawnDelay = 22;  // 初期難易度高め
     
-    // 難易度進行
     let intensity = 1;
     
-    // ----- ヘルパー関数 -----
+    // 端ペナルティ
+    let edgeResistTimer = 0;
+    const EDGE_THRESHOLD = 70;
+    const MAX_EDGE_TIME = 85;      // 短くなり、より危険に
+    let edgeAlertLevel = 0;
+    let homingIntensity = 0;
+
+    // ----- ヘルパー -----
     function formatTime(sec) {
       return String(Math.floor(sec)).padStart(2,'0');
     }
@@ -249,13 +262,17 @@
         let elapsed = Math.floor((Date.now() - startTime) / 1000);
         document.getElementById('timerDisplay').innerText = formatTime(elapsed);
       }
+      let attrSpan = document.getElementById('attrStatus');
+      let currentAttr = player.forcedAttributeTimer > 0 ? (player.attribute === 'white' ? '黒属性(反転)' : '白属性(反転)') : player.attribute === 'white' ? '白属性' : '黒属性';
+      attrSpan.innerText = currentAttr;
+      if(player.forcedAttributeTimer > 0) attrSpan.style.color = "#ffaa88";
+      else attrSpan.style.color = "#d4d4ff";
     }
     
-    // プレイヤーの属性を領域に応じて更新
     function updatePlayerAttribute() {
+      if(player.forcedAttributeTimer > 0) return;
       let newAttr = (player.x < borderX) ? 'white' : 'black';
       if(player.attribute !== newAttr){
-        // 属性変化時のエフェクト
         for(let i=0;i<12;i++){
           particle.push({
             x: player.x + (Math.random() - 0.5)*16,
@@ -270,99 +287,244 @@
       player.attribute = newAttr;
     }
     
-    // 敵（弾）を追加
-    function addBullet(){
-      // 敵の属性をランダムに (白/黒)
-      const attr = Math.random() < 0.5 ? 'white' : 'black';
-      // 出現位置: フィールド上部 ランダムX
-      let x = 20 + Math.random() * (width - 40);
-      let y = -16;
-      // 速度: 下向きに、少し左右に揺れる
-      let vx = (Math.random() - 0.5) * 1.2;
-      let vy = 2.8 + Math.random() * 1.8 + intensity * 0.5;
-      let radius = 8;
-      bullets.push({
-        x, y, vx, vy, radius,
-        attribute: attr,
-      });
-    }
-    
-    // 衝突判定 (プレイヤーと弾)
-    function checkCollisions(){
-      if(player.invincible > 0){
-        player.invincible--;
-        return;
+    // 端ペナルティ (より厳しく)
+    function updateEdgePenalty() {
+      const isAtEdge = (player.x < EDGE_THRESHOLD || player.x > width - EDGE_THRESHOLD);
+      if(isAtEdge && gameRunning){
+        edgeResistTimer = Math.min(MAX_EDGE_TIME, edgeResistTimer + 1.6);
+      } else {
+        edgeResistTimer = Math.max(0, edgeResistTimer - 1.2);
       }
       
-      for(let i=0; i<bullets.length; i++){
-        const b = bullets[i];
-        const dx = player.x - b.x;
-        const dy = player.y - b.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if(dist < player.radius + b.radius){
-          // 属性が異なる場合のみダメージ（同じ色はすり抜け）
-          if(b.attribute !== player.attribute){
-            // ゲームオーバー
-            gameRunning = false;
-            if(timerInterval) clearInterval(timerInterval);
-            // 結果表示
-            showGameOver();
-            return;
-          } else {
-            // 同じ色は無害だけど、かすったエフェクト
-            for(let p=0;p<3;p++){
-              particle.push({
-                x: b.x, y: b.y,
-                vx: (Math.random()-0.5)*2,
-                vy: (Math.random()-0.5)*2,
-                life: 0.3,
-                color: b.attribute === 'white' ? '#aaccff' : '#667799'
-              });
-            }
-            bullets.splice(i,1);
-            i--;
-            continue;
+      let newLevel = 0;
+      if(edgeResistTimer > MAX_EDGE_TIME * 0.35) newLevel = 1;
+      if(edgeResistTimer > MAX_EDGE_TIME * 0.65) newLevel = 2;
+      
+      if(newLevel >= 2 && edgeAlertLevel < 2 && gameRunning){
+        if(player.forcedAttributeTimer <= 0){
+          player.forcedAttributeTimer = 140;   // 約2.3秒
+          player.attribute = (player.attribute === 'white') ? 'black' : 'white';
+          for(let i=0;i<30;i++){
+            particle.push({
+              x: player.x + (Math.random()-0.5)*30,
+              y: player.y + (Math.random()-0.5)*20,
+              vx: (Math.random()-0.5)*3,
+              vy: (Math.random()-0.5)*3 - 1,
+              life: 0.7,
+              color: '#ff8866'
+            });
+          }
+          const warnDiv = document.getElementById('warningMsg');
+          warnDiv.style.display = 'inline-block';
+          warnDiv.innerText = '⚠️ 陰陽逆転！強制反転！ ⚠️';
+          setTimeout(() => { if(document.getElementById('warningMsg')) warnDiv.style.display = 'none'; }, 1800);
+        }
+      } else if(newLevel === 1 && edgeAlertLevel < 1 && gameRunning){
+        const warnDiv = document.getElementById('warningMsg');
+        warnDiv.style.display = 'inline-block';
+        warnDiv.innerText = '⚠️ 端に留まりすぎ！追尾強化＆危険度上昇';
+        setTimeout(() => { if(document.getElementById('warningMsg') && edgeAlertLevel !==2) warnDiv.style.display = 'none'; }, 1300);
+      }
+      
+      edgeAlertLevel = newLevel;
+      homingIntensity = (edgeAlertLevel === 1 ? 0.2 : (edgeAlertLevel === 2 ? 0.45 : 0));
+      
+      if(player.forcedAttributeTimer > 0){
+        player.forcedAttributeTimer--;
+        if(player.forcedAttributeTimer === 0){
+          let naturalAttr = (player.x < borderX) ? 'white' : 'black';
+          if(player.attribute !== naturalAttr){
+            player.attribute = naturalAttr;
+            for(let i=0;i<15;i++) particle.push({ x: player.x, y: player.y, vx: (Math.random()-0.5)*2, vy: -2, life:0.5, color: '#aaccff'});
           }
         }
       }
     }
     
-    // スコア加算と弾の除去（無害な弾はスコアにならない！異なる属性を避けた結果としてスコアアップ）
-    // 今回は「異なる属性の弾を避けてフィールド外」にするのは自然だが、
-    // ゲーム性を高めるため「異なる属性の弾が画面外に出たらスコア+1」と定義してみる
-    function updateBullets(){
-      for(let i=0; i<bullets.length; i++){
-        const b = bullets[i];
-        b.x += b.vx;
-        b.y += b.vy;
+    // ----- 敵生成 (通常弾, 歯車, ミサイル) -----
+    function addNormalBullet(){
+      const attr = Math.random() < 0.5 ? 'white' : 'black';
+      let x = 20 + Math.random() * (width - 40);
+      let y = -16;
+      let vx = (Math.random() - 0.5) * 1.2;
+      let vy = 2.8 + Math.random() * 1.8 + intensity * 0.5;
+      if(homingIntensity > 0 && gameRunning){
+        let dx = player.x - x;
+        let dy = player.y - y;
+        let len = Math.hypot(dx, dy);
+        if(len > 0.01){
+          let normX = dx / len;
+          let normY = dy / len;
+          vx += normX * homingIntensity * 1.2;
+          vy += normY * homingIntensity * 1.0;
+          vx = Math.min(3.5, Math.max(-3.5, vx));
+          vy = Math.min(7, Math.max(1.8, vy));
+        }
+      }
+      enemies.push({
+        type: 'bullet',
+        x, y, vx, vy, radius: 8,
+        attribute: attr,
+        rotation: 0
+      });
+    }
+    
+    // 歯車 (回転しながら落ちる)
+    function addGear(){
+      const attr = Math.random() < 0.5 ? 'white' : 'black';
+      let x = 30 + Math.random() * (width - 60);
+      let y = -20;
+      let vx = (Math.random() - 0.5) * 0.8;
+      let vy = 2.2 + Math.random() * 1.5 + intensity * 0.4;
+      // 歯車もホーミングの影響を受ける (警戒時)
+      if(homingIntensity > 0 && gameRunning){
+        let dx = player.x - x;
+        let dy = player.y - y;
+        let len = Math.hypot(dx, dy);
+        if(len > 0.01){
+          let normX = dx / len;
+          let normY = dy / len;
+          vx += normX * homingIntensity * 0.8;
+          vy += normY * homingIntensity * 0.6;
+          vx = Math.min(2.8, Math.max(-2.8, vx));
+          vy = Math.min(6, Math.max(1.5, vy));
+        }
+      }
+      enemies.push({
+        type: 'gear',
+        x, y, vx, vy, radius: 10,
+        attribute: attr,
+        angle: Math.random() * Math.PI * 2,
+        spin: 0.12
+      });
+    }
+    
+    // 追尾ミサイル (徐々にプレイヤーへ向きを変えながら落下, ただし強すぎない)
+    function addMissile(){
+      const attr = Math.random() < 0.5 ? 'white' : 'black';
+      let x = 40 + Math.random() * (width - 80);
+      let y = -25;
+      let vx = (Math.random() - 0.5) * 1.0;
+      let vy = 2.5 + Math.random() * 1.2 + intensity * 0.3;
+      enemies.push({
+        type: 'missile',
+        x, y, vx, vy, radius: 7,
+        attribute: attr,
+        targetLock: 0,
+        trail: []
+      });
+    }
+    
+    // 生成ルーチン (難易度高め)
+    function spawnEnemy(){
+      let r = Math.random();
+      // 通常弾: 50%, 歯車: 25%, ミサイル: 25%
+      if(r < 0.5) addNormalBullet();
+      else if(r < 0.75) addGear();
+      else addMissile();
+      
+      // 稀に同時生成
+      if(Math.random() < 0.25 + intensity * 0.05) {
+        if(Math.random() < 0.6) addNormalBullet();
+        else if(Math.random() < 0.7) addGear();
+        else addMissile();
+      }
+    }
+    
+    // ----- 更新処理 -----
+    function updateEnemies(){
+      for(let i=0; i<enemies.length; i++){
+        const e = enemies[i];
+        // ミサイルの追尾 (毎フレーム速度をプレイヤー方向に微調整)
+        if(e.type === 'missile' && gameRunning){
+          let dx = player.x - e.x;
+          let dy = player.y - e.y;
+          let len = Math.hypot(dx, dy);
+          if(len > 0.2){
+            let normX = dx / len;
+            let normY = dy / len;
+            let homingPower = 0.025 + (homingIntensity * 0.06);
+            e.vx += normX * homingPower;
+            e.vy += normY * homingPower * 0.6;
+            // 速度上限
+            let maxSpeed = 5.5;
+            let spd = Math.hypot(e.vx, e.vy);
+            if(spd > maxSpeed){
+              e.vx = e.vx / spd * maxSpeed;
+              e.vy = e.vy / spd * maxSpeed;
+            }
+          }
+        }
         
-        // 画面外除去 + スコア処理（異なる属性の弾が下方面外に抜けたら、プレイヤーが回避したとみなす）
-        if(b.y > height + 50 || b.x < -50 || b.x > width+50){
-          if(b.y > height + 20 && b.attribute !== player.attribute && gameRunning){
-            // 敵弾をかわした → スコア加算
+        e.x += e.vx;
+        e.y += e.vy;
+        if(e.type === 'gear') e.angle += e.spin;
+        
+        // ミサイルの軌跡パーティクル
+        if(e.type === 'missile' && frame % 3 === 0){
+          e.trail = e.trail || [];
+          e.trail.push({x: e.x, y: e.y, life: 0.5});
+          for(let t of e.trail) t.life -= 0.05;
+          e.trail = e.trail.filter(t => t.life > 0);
+        }
+        
+        // 画面外削除 + スコア (異なる属性の敵が下に抜けたら加点)
+        if(e.y > height + 60 || e.x < -60 || e.x > width + 60){
+          if(e.y > height + 30 && e.attribute !== player.attribute && gameRunning){
             score++;
             updateUI();
           }
-          bullets.splice(i,1);
+          enemies.splice(i,1);
           i--;
         }
       }
     }
     
-    // 境界線の変化（ゲーム全体のバランス）
-    function updateBorder(){
-      // スコアに応じて黒領域が広がったりする演出: プレイヤーの属性が一定以上長く続くと領域変化
-      // 簡単のためにスコアに応じて少しずつ境界が動く：白側に押されるか黒側に押される
-      let shift = Math.sin(Date.now() * 0.0008) * 8;
-      let target = width/2 + shift;
-      // スコアで領域圧迫: スコアが上がるほど黒領域が増える(難易度上昇)
-      let pressure = Math.min(90, Math.floor(score / 20)) * (Math.sin(frame*0.01)*0.5 + 0.5);
-      target += (player.attribute === 'white' ? -pressure*0.3 : pressure*0.3);
-      target = Math.min(width - 70, Math.max(70, target));
-      borderX = borderX * 0.96 + target * 0.04;
+    function checkCollisions(){
+      if(player.invincible > 0){
+        player.invincible--;
+        return;
+      }
+      for(let i=0; i<enemies.length; i++){
+        const e = enemies[i];
+        let r = (e.type === 'gear') ? 9 : (e.type === 'missile' ? 7 : 8);
+        const dx = player.x - e.x;
+        const dy = player.y - e.y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if(dist < player.radius + r){
+          if(e.attribute !== player.attribute){
+            gameRunning = false;
+            if(timerInterval) clearInterval(timerInterval);
+            showGameOver();
+            return;
+          } else {
+            // 同じ色は無害で消える
+            for(let p=0;p<5;p++){
+              particle.push({
+                x: e.x, y: e.y,
+                vx: (Math.random()-0.5)*3,
+                vy: (Math.random()-0.5)*3,
+                life: 0.4,
+                color: e.attribute === 'white' ? '#aaccff' : '#8866aa'
+              });
+            }
+            enemies.splice(i,1);
+            i--;
+          }
+        }
+      }
     }
     
-    // パーティクル更新
+    function updateDifficulty(){
+      let elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
+      intensity = 1 + Math.floor(elapsed / 9) + Math.floor(score / 70);
+      intensity = Math.min(6, intensity);
+      let newDelay = Math.max(10, 26 - intensity * 2 - Math.floor(score/35));
+      if(edgeAlertLevel >= 1) newDelay = Math.max(7, newDelay - 5);
+      if(edgeAlertLevel >= 2) newDelay = Math.max(5, newDelay - 3);
+      baseSpawnDelay = newDelay;
+    }
+    
     function updateParticles(){
       for(let i=0;i<particle.length;i++){
         particle[i].x += particle[i].vx;
@@ -375,33 +537,156 @@
       }
     }
     
-    // 難易度上昇 (時間＋スコア)
-    function updateDifficulty(){
-      let elapsed = startTime ? (Date.now() - startTime) / 1000 : 0;
-      intensity = 1 + Math.floor(elapsed / 12) + Math.floor(score / 80);
-      intensity = Math.min(5, intensity);
-      // 弾の発生間隔
-      let newDelay = Math.max(12, 32 - intensity * 2 - Math.floor(score/40));
-      spawnDelay = newDelay;
+    function updateBorder(){
+      let shift = Math.sin(Date.now() * 0.0008) * 8;
+      let target = width/2 + shift;
+      let pressure = Math.min(90, Math.floor(score / 18)) * (Math.sin(frame*0.01)*0.5 + 0.5);
+      target += (player.attribute === 'white' ? -pressure*0.3 : pressure*0.3);
+      target = Math.min(width - 70, Math.max(70, target));
+      borderX = borderX * 0.96 + target * 0.04;
     }
     
-    // マウス移動
-    function handleMouseMove(e){
-      if(!gameRunning) return;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      let mouseX = (e.clientX - rect.left) * scaleX;
-      mouseX = Math.min(width - player.radius, Math.max(player.radius, mouseX));
-      player.x = mouseX;
-      updatePlayerAttribute();
+    // ----- 描画 (歯車とミサイルを専用描画)-----
+    function draw(){
+      if(!ctx) return;
+      const grad = ctx.createLinearGradient(0,0,width,0);
+      grad.addColorStop(0, '#eef4ff');
+      grad.addColorStop(borderX/width - 0.03, '#eef4ff');
+      grad.addColorStop(borderX/width, '#1a1f33');
+      grad.addColorStop(1, '#0a0a1a');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0,0,width,height);
+      
+      ctx.beginPath();
+      ctx.moveTo(borderX, 0);
+      ctx.lineTo(borderX, height);
+      ctx.lineWidth = 3;
+      ctx.setLineDash([8, 10]);
+      ctx.strokeStyle = '#c8a96e';
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // エッジゲージ
+      if(edgeResistTimer > 0 && gameRunning){
+        let percent = edgeResistTimer / MAX_EDGE_TIME;
+        ctx.fillStyle = `rgba(255, 100, 80, ${0.4+percent*0.5})`;
+        ctx.fillRect(width-100, height-18, 90 * percent, 8);
+        ctx.strokeStyle = "#ffaa66";
+        ctx.strokeRect(width-100, height-18, 90, 8);
+        ctx.fillStyle = "#ffcc99";
+        ctx.font = "10px monospace";
+        ctx.fillText("乱れ", width-70, height-22);
+      }
+      
+      ctx.globalAlpha = 0.15;
+      for(let i=0;i<width;i+=40){
+        ctx.beginPath();
+        ctx.moveTo(i+(frame%40)*0.4, 0);
+        ctx.lineTo(i+10+(frame%40)*0.4, height);
+        ctx.strokeStyle = '#ddddee';
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      
+      // 各種敵描画
+      for(let e of enemies){
+        ctx.save();
+        if(e.type === 'bullet'){
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, e.radius-1, 0, Math.PI*2);
+          ctx.fillStyle = e.attribute === 'white' ? '#ffffff' : '#221133';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(e.x, e.y, e.radius-2, 0, Math.PI*2);
+          ctx.fillStyle = e.attribute === 'white' ? '#88aaff' : '#442266';
+          ctx.fill();
+        }
+        else if(e.type === 'gear'){
+          ctx.translate(e.x, e.y);
+          ctx.rotate(e.angle);
+          ctx.beginPath();
+          for(let i=0;i<8;i++){
+            let rad = i * Math.PI*2/8;
+            let x1 = Math.cos(rad) * (e.radius);
+            let y1 = Math.sin(rad) * (e.radius);
+            let x2 = Math.cos(rad+0.5) * (e.radius-3);
+            let y2 = Math.sin(rad+0.5) * (e.radius-3);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.lineTo(Math.cos(rad+0.9)*(e.radius-6), Math.sin(rad+0.9)*(e.radius-6));
+            ctx.fillStyle = e.attribute === 'white' ? '#bbddff' : '#663388';
+            ctx.fill();
+          }
+          ctx.beginPath();
+          ctx.arc(0, 0, e.radius-4, 0, Math.PI*2);
+          ctx.fillStyle = e.attribute === 'white' ? '#ffffff' : '#331155';
+          ctx.fill();
+          ctx.setTransform(1,0,0,1,0,0);
+        }
+        else if(e.type === 'missile'){
+          ctx.beginPath();
+          ctx.moveTo(e.x + 8, e.y);
+          ctx.lineTo(e.x - 5, e.y-4);
+          ctx.lineTo(e.x - 2, e.y);
+          ctx.lineTo(e.x - 5, e.y+4);
+          ctx.fillStyle = e.attribute === 'white' ? '#eecc99' : '#994466';
+          ctx.fill();
+          ctx.beginPath();
+          ctx.arc(e.x+2, e.y, 4, 0, Math.PI*2);
+          ctx.fillStyle = e.attribute === 'white' ? '#ffaa66' : '#882244';
+          ctx.fill();
+          // 軌跡
+          if(e.trail){
+            for(let t of e.trail){
+              ctx.beginPath();
+              ctx.arc(t.x, t.y, 2, 0, Math.PI*2);
+              ctx.fillStyle = `rgba(200,120,80,${t.life*0.6})`;
+              ctx.fill();
+            }
+          }
+        }
+        ctx.restore();
+        ctx.shadowBlur = 0;
+      }
+      
+      // プレイヤー
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
+      let mainColor = player.attribute === 'white' ? '#ccddff' : '#332255';
+      if(player.forcedAttributeTimer > 0) mainColor = '#cc8866';
+      ctx.fillStyle = mainColor;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius-3, 0, Math.PI*2);
+      ctx.fillStyle = player.attribute === 'white' ? '#fff' : '#8866aa';
+      ctx.fill();
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.arc(player.x-5, player.y-2, 2, 0, Math.PI*2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(player.x+5, player.y-2, 2, 0, Math.PI*2);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius+4, 0, Math.PI*2);
+      ctx.fillStyle = player.attribute === 'white' ? 'rgba(200,200,255,0.2)' : 'rgba(80,60,120,0.3)';
+      ctx.fill();
+      
+      for(let p of particle){
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = p.color || '#aaccff';
+        ctx.fill();
+      }
+      
+      ctx.font = "bold 12px 'Noto Sans JP'";
+      ctx.fillStyle = '#fff3dd';
+      ctx.fillText("光 領 域", 24, 44);
+      ctx.fillStyle = '#bdafff';
+      ctx.fillText("闇 領 域", width-78, 44);
     }
     
-    // マウスリーブでゲームオーバーにならないようにするだけ
-    function handleMouseLeave(){
-      // 何もしない（外に出てもそのままx固定）
-    }
-    
-    // ゲームオーバー表示
     function showGameOver(){
       gameRunning = false;
       if(timerInterval) clearInterval(timerInterval);
@@ -414,181 +699,82 @@
       resultDiv.style.alignItems = 'center';
       resultDiv.style.justifyContent = 'center';
       resultDiv.style.zIndex = '200';
-      resultDiv.style.fontFamily = "'Noto Sans JP', monospace";
       resultDiv.innerHTML = `
         <div style="background:#0d0d1a; border:1px solid #c8a96e; border-radius:24px; padding: 32px 48px; text-align:center;">
           <h2 style="color:#c8a96e; margin-bottom:12px;">散華</h2>
-          <p style="margin-bottom:8px;">あなたは闇に飲まれた…</p>
+          <p>均衡は崩れ、混沌に飲まれた…</p>
           <p style="font-size:1.4rem; margin:12px 0;">🏆 スコア: ${score}</p>
-          <p style="color:#aaa; margin-bottom:24px;">生存時間: ${document.getElementById('timerDisplay').innerText} 秒</p>
-          <button onclick="location.reload()" style="background:#c8a96e; border:none; padding:8px 28px; border-radius:999px; font-weight:bold; cursor:pointer;">再挑戦</button>
+          <p style="color:#aaa;">生存: ${document.getElementById('timerDisplay').innerText} 秒</p>
+          <button onclick="location.reload()" style="background:#c8a96e; border:none; padding:8px 28px; border-radius:999px; font-weight:bold; margin-top:20px; cursor:pointer;">再挑戦</button>
           <div style="margin-top:16px"><a href="index.html" style="color:#88aaff;">ポートフォリオに戻る</a></div>
         </div>
       `;
       document.body.appendChild(resultDiv);
     }
     
-    // リスタート (手動)
-    window.restartGame = function(){
-      if(timerInterval) clearInterval(timerInterval);
-      location.reload();
-    };
+    window.restartGame = () => location.reload();
     
-    // ゲーム初期化
+    function handleMouseMove(e){
+      if(!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      let mouseX = (e.clientX - rect.left) * scaleX;
+      mouseX = Math.min(width - player.radius, Math.max(player.radius, mouseX));
+      player.x = mouseX;
+      if(player.forcedAttributeTimer <= 0) updatePlayerAttribute();
+    }
+    
     function initGame(){
       gameRunning = true;
       score = 0;
-      bullets = [];
+      enemies = [];
       particle = [];
       player.x = width/2;
       player.y = height - 60;
       player.attribute = 'white';
-      player.invincible = 0;
+      player.forcedAttributeTimer = 0;
       borderX = width/2;
       frame = 0;
       intensity = 1;
-      spawnCounter = 6;
+      edgeResistTimer = 0;
+      edgeAlertLevel = 0;
+      homingIntensity = 0;
+      spawnCounter = 3;
       startTime = Date.now();
       updateUI();
       if(timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(()=>{
-        if(gameRunning) updateUI();
-      }, 200);
-      
-      // 最初の弾幕をいくつか
-      for(let i=0;i<6;i++) setTimeout(()=> addBullet(), i*200);
+      timerInterval = setInterval(()=>{ if(gameRunning) updateUI(); }, 200);
+      for(let i=0;i<8;i++) setTimeout(()=> spawnEnemy(), i*180);
     }
     
-    // 描画処理
-    function draw(){
-      if(!ctx) return;
-      
-      // 背景グラデーション 白領域 / 黒領域
-      const grad = ctx.createLinearGradient(0,0,width,0);
-      grad.addColorStop(0, '#eef4ff');
-      grad.addColorStop(borderX/width - 0.03, '#eef4ff');
-      grad.addColorStop(borderX/width, '#1a1f33');
-      grad.addColorStop(1, '#0a0a1a');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0,0,width,height);
-      
-      // 境界線エフェクト
-      ctx.beginPath();
-      ctx.moveTo(borderX, 0);
-      ctx.lineTo(borderX, height);
-      ctx.lineWidth = 3;
-      ctx.setLineDash([8, 10]);
-      ctx.strokeStyle = '#c8a96e';
-      ctx.stroke();
-      ctx.setLineDash([]);
-      
-      // グリッド表現（雰囲気）
-      ctx.globalAlpha = 0.2;
-      for(let i=0;i<width;i+=40){
-        ctx.beginPath();
-        ctx.moveTo(i+(frame%40)*0.4, 0);
-        ctx.lineTo(i+10+(frame%40)*0.4, height);
-        ctx.strokeStyle = '#ddddee';
-        ctx.stroke();
-      }
-      ctx.globalAlpha = 1;
-      
-      // 弾を描画
-      for(let b of bullets){
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius-1, 0, Math.PI*2);
-        ctx.fillStyle = b.attribute === 'white' ? '#ffffff' : '#221133';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(b.x, b.y, b.radius-2, 0, Math.PI*2);
-        ctx.fillStyle = b.attribute === 'white' ? '#88aaff' : '#442266';
-        ctx.fill();
-        // 輝き
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = b.attribute === 'white' ? '#88aaff' : '#663399';
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-      
-      // プレイヤー
-      ctx.shadowBlur = 0;
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius, 0, Math.PI*2);
-      ctx.fillStyle = player.attribute === 'white' ? '#ccddff' : '#332255';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius-3, 0, Math.PI*2);
-      ctx.fillStyle = player.attribute === 'white' ? '#fff' : '#664488';
-      ctx.fill();
-      // 目の表現
-      ctx.fillStyle = '#111';
-      ctx.beginPath();
-      ctx.arc(player.x-5, player.y-2, 2, 0, Math.PI*2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(player.x+5, player.y-2, 2, 0, Math.PI*2);
-      ctx.fill();
-      
-      // 属性のオーラ
-      ctx.beginPath();
-      ctx.arc(player.x, player.y, player.radius+4, 0, Math.PI*2);
-      ctx.fillStyle = player.attribute === 'white' ? 'rgba(200,200,255,0.2)' : 'rgba(80,60,120,0.3)';
-      ctx.fill();
-      
-      // パーティクル
-      for(let p of particle){
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI*2);
-        ctx.fillStyle = p.color || '#aaccff';
-        ctx.fill();
-      }
-      
-      // テキスト: 領域ラベル
-      ctx.font = "bold 12px 'Noto Sans JP'";
-      ctx.fillStyle = '#fff3dd';
-      ctx.shadowBlur = 0;
-      ctx.fillText("光 領 域", 24, 44);
-      ctx.fillStyle = '#bdafff';
-      ctx.fillText("闇 領 域", width-78, 44);
-      
-      // スコアボーナス表示
-      if(!gameRunning) return;
-    }
-    
-    // ゲームループ
-    let lastTimestamp = 0;
     function gameLoop(){
       if(!gameRunning){
         draw();
         requestAnimationFrame(gameLoop);
         return;
       }
-      
       frame++;
       updateDifficulty();
-      // 弾生成
-      if(spawnCounter <= 0 && gameRunning){
-        addBullet();
-        spawnCounter = spawnDelay;
-        if(Math.random()< 0.3 + intensity*0.05) addBullet(); // 稀に二重
+      updateEdgePenalty();
+      
+      if(spawnCounter <= 0){
+        spawnEnemy();
+        spawnCounter = baseSpawnDelay;
+        if(Math.random() < 0.35 + intensity*0.07) spawnEnemy();
       } else {
         spawnCounter--;
       }
       
-      updateBullets();
+      updateEnemies();
       updateBorder();
       updateParticles();
       checkCollisions();
-      
       draw();
-      
       requestAnimationFrame(gameLoop);
     }
     
-    // イベント設定
     canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseleave', handleMouseLeave);
-    
+    canvas.addEventListener('mouseleave', ()=>{});
     initGame();
     gameLoop();
   })();
