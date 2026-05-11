@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スライス・プラネット</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 24px;
+      left: 32px;
+      color: #c8a96e;
+      font-size: 0.85rem;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.7; }
+
+    .genre-badge {
+      font-size: 0.75rem;
+      color: #c8a96e;
+      border: 1px solid #c8a96e55;
+      padding: 4px 16px;
+      border-radius: 999px;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-family: "Noto Serif JP", serif;
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      color: #c8a96e;
+      margin-bottom: 6px;
+    }
+
+    .title-en {
+      font-size: 0.8rem;
+      color: #555;
+      letter-spacing: 0.3em;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: #1c1f2b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 40px;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-family: "Noto Serif JP", serif;
+      font-size: 0.95rem;
+      color: #c8a96e;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+      border-left: 2px solid #c8a96e;
+      padding-left: 14px;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: #888;
+      line-height: 2;
+      padding-left: 16px;
+    }
+
+    .point-list {
+      list-style: none;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .point-list li {
+      font-size: 0.88rem;
+      color: #888;
+      line-height: 1.8;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .point-label {
+      font-size: 0.72rem;
+      color: #c8a96e;
+      border: 1px solid #c8a96e44;
+      padding: 2px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    /* planet animation */
+    .planet-wrap {
+      margin: 0 auto 40px;
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+
+    .planet {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #6e8ef4, #1a1a5e);
+      box-shadow: inset -12px -12px 30px rgba(0,0,0,0.5);
+      animation: spin 8s linear infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .planet::before {
+      content: '';
+      position: absolute;
+      width: 180%;
+      height: 30px;
+      background: rgba(255,255,255,0.07);
+      top: 38px;
+      left: -20px;
+      transform: rotate(-15deg);
+      border-radius: 50%;
+    }
+
+    .planet::after {
+      content: '';
+      position: absolute;
+      width: 160%;
+      height: 18px;
+      background: rgba(255,255,255,0.05);
+      top: 58px;
+      left: -10px;
+      transform: rotate(-15deg);
+      border-radius: 50%;
+    }
+
+    .core {
+      position: absolute;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 40%, #ffdd88, #e07800);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px #e07800aa;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .slash-line {
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      width: 140px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #fff, transparent);
+      transform: rotate(-30deg);
+      opacity: 0;
+      animation: slash 3s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      from { filter: hue-rotate(0deg); }
+      to { filter: hue-rotate(30deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-50%, -50%) scale(1.15); }
+    }
+    @keyframes slash {
+      0% { opacity: 0; left: -20px; }
+      40% { opacity: 1; }
+      60% { opacity: 1; left: 10px; }
+      100% { opacity: 0; left: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+
+  <div style="text-align: center;">
+    <span class="genre-badge">切断アクション・パズル</span>
+  </div>
+
+  <div class="planet-wrap">
+    <div class="planet">
+      <div class="core"></div>
+    </div>
+    <div class="slash-line"></div>
+  </div>
+
+  <h1>スライス・プラネット</h1>
+  <p class="title-en">Slice Planet</p>
+
+  <div class="card">
+    <h2>ゲーム概要</h2>
+    <p>
+      画面中央に現れる惑星を、スワイプ（またはドラッグ）で一刀両断する切断アクションゲーム。
+      惑星の中には「核（コア）」があり、核を傷つけずに指定された面積比率（例：50:50）で
+      切断することを目指す。コンボが続くほど惑星が回転したり、核が動いたりと難化していく。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>おもしろさの核心</h2>
+    <ul class="point-list">
+      <li>
+        <span class="point-label">手触り</span>
+        綺麗な円形を真っ二つにするビジュアル的な快感。切断の瞬間のエフェクトと音が気持ちいい。
+      </li>
+      <li>
+        <span class="point-label">緊張感</span>
+        コンボが続くほど惑星が回転・核が移動。判断の速さと精度が同時に問われる。
+      </li>
+      <li>
+        <span class="point-label">時間</span>
+        1ステージ5〜10秒。連続で何個成功できるかを競う「サバイバルモード」がメイン。
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>設計のポイント</h2>
+    <ul class="point-list">
+      <li>
+        <span class="point-label">演出</span>
+        成功時に画面が光る、切断音が気持ちいいなど、フィードバックを強くする。
+      </li>
+      <li>
+        <span class="point-label">テンポ</span>
+        失敗しても即次の惑星が出現。待ち時間ゼロの超速リトライ設計。
+      </li>
+      <li>
+        <span class="point-label">操作</span>
+        スワイプ一つに絞ることで、誰でも直感的に遊べる。
+      </li>
+    </ul>
+  </div>
+
+</body>
+</html>

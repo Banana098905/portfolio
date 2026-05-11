@@ -292,3 +292,157 @@ footer {
   position: relative;
   z-index: 2;
 }
+
+/* ゲーム企画セクション */
+.proposals {
+  padding: 120px 80px;
+  background: #111;
+}
+
+.proposals > .works {
+  padding: 0;
+}
+
+.proposal-intro {
+  text-align: center;
+  color: #888;
+  font-size: 0.88rem;
+  letter-spacing: 0.15em;
+  margin-top: -40px;
+  margin-bottom: 60px;
+}
+
+.proposal-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto 80px;
+}
+
+.proposal-card {
+  background: #1c1f2b;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 40px;
+  transition: transform 0.2s, border-color 0.3s;
+}
+
+.proposal-card:hover {
+  transform: translateY(-4px);
+  border-color: #c8a96e;
+}
+
+.proposal-genre {
+  display: inline-block;
+  font-size: 0.72rem;
+  color: #c8a96e;
+  border: 1px solid #c8a96e44;
+  padding: 3px 12px;
+  border-radius: 999px;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+.proposal-card h3 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1.2rem;
+  color: #f4f1ea;
+  margin-bottom: 4px;
+  border-left: 2px solid #c8a96e;
+  padding-left: 16px;
+}
+
+.proposal-card .card-en {
+  font-size: 0.78rem;
+  color: #555;
+  padding-left: 18px;
+  margin-bottom: 20px;
+  letter-spacing: 0.15em;
+}
+
+.proposal-card .card-desc {
+  font-size: 0.88rem;
+  color: #888;
+  line-height: 1.9;
+  padding-left: 16px;
+  margin-bottom: 20px;
+  border-left: none;
+}
+
+.proposal-points {
+  border-top: 1px solid #2a2d3a;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.proposal-point {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  color: #777;
+  line-height: 1.7;
+}
+
+.proposal-point-label {
+  font-size: 0.72rem;
+  color: #c8a96e;
+  border: 1px solid #c8a96e44;
+  padding: 1px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* まとめ：設計原則 */
+.design-tips {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.design-tips h3 {
+  font-family: "Noto Serif JP", serif;
+  font-size: 1rem;
+  color: #c8a96e;
+  letter-spacing: 0.2em;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.tip-card {
+  background: #1c1f2b;
+  border: 1px solid #333;
+  border-radius: 8px;
+  padding: 32px 28px;
+}
+
+.tip-num {
+  font-family: "Noto Serif JP", serif;
+  font-size: 2rem;
+  color: #2a2d3a;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.tip-card h4 {
+  font-size: 0.9rem;
+  color: #f4f1ea;
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
+}
+
+.tip-card p {
+  font-size: 0.82rem;
+  color: #777;
+  line-height: 1.9;
+}

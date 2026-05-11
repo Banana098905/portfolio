@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ギリギリ・シャッター</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a2e;
+      color: #f4f1ea;
+      font-family: "Noto Sans JP", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 24px;
+      left: 32px;
+      color: #c8a96e;
+      font-size: 0.85rem;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.7; }
+
+    .genre-badge {
+      font-size: 0.75rem;
+      color: #c8a96e;
+      border: 1px solid #c8a96e55;
+      padding: 4px 16px;
+      border-radius: 999px;
+      letter-spacing: 0.15em;
+      margin-bottom: 20px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-family: "Noto Serif JP", serif;
+      font-size: 2rem;
+      letter-spacing: 0.3em;
+      color: #c8a96e;
+      margin-bottom: 6px;
+    }
+
+    .title-en {
+      font-size: 0.8rem;
+      color: #555;
+      letter-spacing: 0.3em;
+      margin-bottom: 48px;
+    }
+
+    .card {
+      background: #1c1f2b;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 40px;
+      width: 100%;
+      max-width: 560px;
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-family: "Noto Serif JP", serif;
+      font-size: 0.95rem;
+      color: #c8a96e;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+      border-left: 2px solid #c8a96e;
+      padding-left: 14px;
+    }
+
+    .card p {
+      font-size: 0.88rem;
+      color: #888;
+      line-height: 2;
+      padding-left: 16px;
+    }
+
+    .point-list {
+      list-style: none;
+      padding-left: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .point-list li {
+      font-size: 0.88rem;
+      color: #888;
+      line-height: 1.8;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .point-label {
+      font-size: 0.72rem;
+      color: #c8a96e;
+      border: 1px solid #c8a96e44;
+      padding: 2px 10px;
+      border-radius: 999px;
+      white-space: nowrap;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    /* camera viewfinder animation */
+    .camera-wrap {
+      margin: 0 auto 40px;
+      width: 120px;
+      height: 120px;
+      position: relative;
+    }
+
+    .viewfinder {
+      width: 120px;
+      height: 120px;
+      border: 2px solid #c8a96e66;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* corner brackets */
+    .viewfinder::before,
+    .viewfinder::after {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-color: #c8a96e;
+      border-style: solid;
+    }
+    .viewfinder::before {
+      top: 6px; left: 6px;
+      border-width: 2px 0 0 2px;
+    }
+    .viewfinder::after {
+      bottom: 6px; right: 6px;
+      border-width: 0 2px 2px 0;
+    }
+
+    .crosshair-h {
+      position: absolute;
+      top: 50%; left: 0;
+      width: 100%; height: 1px;
+      background: #c8a96e33;
+      transform: translateY(-50%);
+    }
+    .crosshair-v {
+      position: absolute;
+      left: 50%; top: 0;
+      width: 1px; height: 100%;
+      background: #c8a96e33;
+      transform: translateX(-50%);
+    }
+    .center-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #c8a96e;
+      transform: translate(-50%, -50%);
+    }
+
+    .target {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 28px;
+      animation: run-through 2.5s linear infinite;
+      white-space: nowrap;
+    }
+
+    @keyframes run-through {
+      0%   { left: 140px; }
+      100% { left: -60px; }
+    }
+
+    .shutter-flash {
+      position: absolute;
+      inset: 0;
+      background: white;
+      border-radius: 6px;
+      opacity: 0;
+      animation: flash 2.5s linear infinite;
+    }
+
+    @keyframes flash {
+      0%, 44%, 56%, 100% { opacity: 0; }
+      48%, 52% { opacity: 0.6; }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+
+  <div style="text-align: center;">
+    <span class="genre-badge">タイミング・スナップ・アクション</span>
+  </div>
+
+  <div class="camera-wrap">
+    <div class="viewfinder">
+      <div class="crosshair-h"></div>
+      <div class="crosshair-v"></div>
+      <div class="center-dot"></div>
+      <div class="target">👾</div>
+      <div class="shutter-flash"></div>
+    </div>
+  </div>
+
+  <h1>ギリギリ・シャッター</h1>
+  <p class="title-en">Giri-Giri Shutter</p>
+
+  <div class="card">
+    <h2>ゲーム概要</h2>
+    <p>
+      画面の右から左へ超高速で通り過ぎるモンスターや乗り物を、カメラのフレームのど真ん中で捉えるゲーム。
+      タイミングよくボタンを押すだけ。中心からのズレがx,y座標で数値化され、
+      0に近いほど高得点になる動体視力特化型のアクション。
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>おもしろさの核心</h2>
+    <ul class="point-list">
+      <li>
+        <span class="point-label">スコア性</span>
+        中心からのズレがx,y座標で数値化。ミリ単位の精度を競うやりこみ要素。
+      </li>
+      <li>
+        <span class="point-label">コレクション</span>
+        UFOや一瞬しか笑わないキャラなど、激レアな被写体を撮る図鑑要素でリプレイ性を確保。
+      </li>
+      <li>
+        <span class="point-label">シェア</span>
+        1プレイ1スナップ。リザルトが「写真」として保存されSNSシェアと相性抜群。
+      </li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>設計のポイント</h2>
+    <ul class="point-list">
+      <li>
+        <span class="point-label">演出</span>
+        シャッター音・フラッシュ・ファインダー枠の収縮など、カメラ感を徹底的に演出する。
+      </li>
+      <li>
+        <span class="point-label">テンポ</span>
+        1プレイ数秒で終了。リザルト確認後すぐ次へ。中毒性の高いループ設計。
+      </li>
+      <li>
+        <span class="point-label">操作</span>
+        ボタンを押すだけ。誰でも遊べる操作性と、極めるほど深くなるスコア攻略。
+      </li>
+    </ul>
+  </div>
+
+</body>
+</html>
