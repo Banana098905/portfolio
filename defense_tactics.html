@@ -3,385 +3,591 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>防衛戦略 | Portfolio</title>
+  <title>防衛戦略 - 漆黒の玉座</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; touch-action: manipulation; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
     body {
-      background: #0a0a1a;
+      background: radial-gradient(circle at 20% 30%, #0a0a1a, #020210);
       color: #f4f1ea;
-      font-family: "Noto Sans JP", sans-serif;
+      font-family: 'Segoe UI', 'Noto Sans JP', 'Cinema', monospace;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       padding: 20px;
     }
+
     .game-container {
-      background: #111122;
-      border-radius: 24px;
+      background: rgba(10, 12, 28, 0.65);
+      backdrop-filter: blur(4px);
+      border-radius: 36px;
       padding: 20px;
-      border: 1px solid #c8a96e;
+      border: 1px solid rgba(200, 169, 110, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(200, 169, 110, 0.1);
       text-align: center;
       max-width: 100%;
     }
-    canvas { border-radius: 12px; box-shadow: 0 0 0 2px #2a2a4a; cursor: crosshair; width: 100%; height: auto; max-width: 800px; aspect-ratio:800/450; }
+
+    h1 {
+      font-size: clamp(1.2rem, 6vw, 2rem);
+      letter-spacing: 0.3em;
+      text-shadow: 0 0 8px #c8a96e, 0 0 2px #ffd580;
+      background: linear-gradient(135deg, #e6d5a8, #c8a96e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 4px;
+    }
+
+    canvas {
+      border-radius: 24px;
+      box-shadow: 0 0 0 3px #2a2a4a, 0 12px 28px black;
+      cursor: crosshair;
+      width: 100%;
+      height: auto;
+      max-width: 800px;
+      aspect-ratio: 800 / 450;
+      transition: transform 0.2s;
+    }
+
+    canvas:active {
+      transform: scale(0.99);
+    }
+
     .info-bar {
       display: flex;
-      gap: 24px;
+      gap: 12px;
       justify-content: center;
-      margin: 12px 0;
+      margin: 16px 0;
       flex-wrap: wrap;
     }
+
     .stat {
-      background: #0d0d1a;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      border: 1px solid #c8a96e66;
       padding: 6px 18px;
-      border-radius: 40px;
-      font-size: clamp(0.7rem, 3vw, 0.9rem);
+      border-radius: 60px;
+      font-size: clamp(0.65rem, 3vw, 0.9rem);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05), 0 4px 8px rgba(0, 0, 0, 0.3);
     }
-    .stat span { color: #c8a96e; font-weight: bold; margin-right: 6px; }
+
+    .stat span {
+      color: #ffd966;
+      margin-right: 6px;
+      text-shadow: 0 0 3px #b8860b;
+    }
+
     button {
-      background: #1a1a2e;
+      background: #1e1a2f;
       border: 1px solid #c8a96e;
-      color: #c8a96e;
-      padding: 6px 14px;
-      border-radius: 999px;
+      color: #f0e6c5;
+      padding: 6px 16px;
+      border-radius: 60px;
       margin: 4px;
       cursor: pointer;
-      font-size: clamp(0.7rem, 3vw, 0.8rem);
+      font-size: clamp(0.65rem, 3vw, 0.8rem);
+      font-weight: bold;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
     }
-    button:hover { background: #c8a96e; color: #111; }
-    .back-link { color: #c8a96e; font-size: 0.7rem; display: inline-block; margin-top: 12px; text-decoration: none; }
+
+    button:hover {
+      background: #c8a96e;
+      color: #111;
+      border-color: #ffdfaa;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .back-link {
+      color: #c8a96e;
+      font-size: 0.7rem;
+      display: inline-block;
+      margin-top: 14px;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      transition: 0.2s;
+    }
+
+    .back-link:hover {
+      text-shadow: 0 0 6px #ffcc77;
+      color: #ffe0a3;
+    }
+
+    .enemy-count {
+      background: #2a1f2a;
+      border: 1px solid #ff8866;
+    }
   </style>
 </head>
 <body>
 <div class="game-container">
-  <h1 style="font-size: clamp(1.2rem, 5vw, 1.6rem);">防衛戦略</h1>
-  <div style="font-size:0.7rem; margin-bottom: 8px;">— 玉座を守れ —</div>
-  <canvas id="gameCanvas" width="800" height="450" style="aspect-ratio:800/450"></canvas>
+  <h1>⚔️ 玉座防衛 ⚔️</h1>
+  <div style="font-size:0.65rem; margin-bottom: 6px; letter-spacing: 0.2em; opacity: 0.8;">— 闇の侵攻を阻め —</div>
+  <canvas id="gameCanvas" width="800" height="450"></canvas>
   <div class="info-bar">
     <div class="stat"><span>🛡️ 城壁</span> <span id="wallHp">100</span>%</div>
     <div class="stat"><span>💰 黄金</span> <span id="goldAmount">150</span></div>
-    <div class="stat"><span>🌊 Wave</span> <span id="waveNum">1</span></div>
+    <div class="stat"><span>🌊 波</span> <span id="waveNum">1</span></div>
     <div class="stat"><span>🏹 弓兵</span> <span id="archerCount">0</span>/6</div>
+    <div class="stat enemy-count" id="enemyRemain">👾 残:0</div>
   </div>
   <div>
-    <button onclick="buyRepair()">修理 (+20) 30G</button>
-    <button onclick="buyArcher()">弓兵召喚 50G</button>
-    <button onclick="buyShield()">一時バリア 40G</button>
+    <button onclick="buyRepair()">🔧 修理 +20 (30G)</button>
+    <button onclick="buyArcher()">🏹 弓兵召喚 (50G)</button>
+    <button onclick="buyShield()">✨ 聖域バリア (40G)</button>
+    <button onclick="upgradeAttack()">⚡ 神撃強化 +8 (60G)</button>
   </div>
-  <div><a href="index.html" class="back-link">← ポートフォリオに戻る</a></div>
+  <div><a href="index.html" class="back-link">← 闇の彼方へ戻る</a></div>
 </div>
 
 <script>
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  canvas.width = 800; canvas.height = 450;
+  (function(){
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800; canvas.height = 450;
 
-  let gold = 150;
-  let wave = 1;
-  let wallHp = 100;
-  let barrier = 0;
-  let archers = []; // 最大6体、玉座の周りに配置
-  let enemies = [];
-  let arrows = [];
-  let gameRunning = true;
-  let frame = 0;
-  let spawnCounter = 0;
-  let enemiesThisWave = 0;
-  let waveInProgress = true;
-  
-  // 玉座の座標
-  const THRONE_X = canvas.width / 2;
-  const THRONE_Y = canvas.height - 55;
-  
-  // 弓兵の配置位置（玉座を囲む扇形/半円）
-  function getArcherPosition(index, total) {
-    // 玉座の後ろ側（上側）に半円状に配置
-    const radius = 55;  // 玉座からの距離
-    const startAngle = -Math.PI / 2.5;  // 左上方向から
-    const endAngle = Math.PI / 2.5;     // 右上方向まで
+    // ========== ゲーム変数 ==========
+    let gold = 150, wave = 1, wallHp = 100, barrier = 0;
+    let archers = [];
+    let enemies = [];
+    let arrows = [];
+    let particles = [];      // ✨ エフェクト用パーティクル
+    let gameRunning = true;
+    let waveInProgress = true;
+    let frame = 0;
+    let spawnCounter = 0;
+    let enemiesThisWave = 0;
+    let baseDamage = 28;
+    let waveTransitionTimer = 0;   // ウェーブ開始演出用
+    let waveFlash = 0;             // 画面フラッシュ
     
-    let angle;
-    if (total === 1) {
-      angle = 0; // 1体なら真上
-    } else {
-      angle = startAngle + (index / (total - 1)) * (endAngle - startAngle);
+    const THRONE_X = canvas.width/2;
+    const THRONE_Y = canvas.height-55;
+    
+    // ========== ヘルパー ==========
+    function addParticle(x, y, vx, vy, life, color, size=3) {
+      particles.push({ x, y, vx, vy, life, color, size });
     }
     
-    return {
-      x: THRONE_X + Math.cos(angle) * radius,
-      y: THRONE_Y - 25 + Math.sin(angle) * radius * 0.5
+    function burstEffect(cx, cy, count, baseColor) {
+      for(let i=0;i<count;i++) {
+        let angle = Math.random() * Math.PI * 2;
+        let speed = Math.random() * 2 + 1;
+        let vx = Math.cos(angle) * speed;
+        let vy = Math.sin(angle) * speed - 1;
+        addParticle(cx, cy, vx, vy, 0.7 + Math.random()*0.5, baseColor, Math.random()*3+2);
+      }
+    }
+    
+    // 弓兵配置
+    function getArcherPosition(index, total) {
+      const radius = 58;
+      const startAngle = -Math.PI / 2.3;
+      const endAngle = Math.PI / 2.3;
+      let angle = total === 1 ? 0 : startAngle + (index / (total - 1)) * (endAngle - startAngle);
+      return {
+        x: THRONE_X + Math.cos(angle) * radius,
+        y: THRONE_Y - 20 + Math.sin(angle) * radius * 0.55
+      };
+    }
+    
+    function updateArcherPositions() {
+      for (let i = 0; i < archers.length; i++) {
+        Object.assign(archers[i], getArcherPosition(i, archers.length));
+      }
+    }
+    
+    function updateUI() {
+      document.getElementById('wallHp').innerText = Math.max(0, Math.floor(wallHp));
+      document.getElementById('goldAmount').innerText = Math.floor(gold);
+      document.getElementById('waveNum').innerText = wave;
+      document.getElementById('archerCount').innerText = `${archers.length}/6`;
+      document.getElementById('enemyRemain').innerHTML = `👾 残:${enemies.length}`;
+    }
+    
+    // ========== ゲームアクション ==========
+    window.buyRepair = function() {
+      if (gold >= 30 && wallHp < 100) {
+        gold -= 30;
+        wallHp = Math.min(100, wallHp + 20);
+        updateUI();
+        // エフェクト
+        burstEffect(THRONE_X, THRONE_Y-20, 12, '#88ffaa');
+        for(let i=0;i<8;i++) addParticle(THRONE_X-30+Math.random()*60, THRONE_Y-25, (Math.random()-0.5)*2, -Math.random()*2, 0.5, '#aaffaa', 3);
+      }
     };
-  }
-  
-  // 弓兵の配置を更新（追加/削除時に呼び出す）
-  function updateArcherPositions() {
-    for (let i = 0; i < archers.length; i++) {
-      const pos = getArcherPosition(i, archers.length);
-      archers[i].x = pos.x;
-      archers[i].y = pos.y;
-    }
-  }
-  
-  function updateUI(){
-    document.getElementById('wallHp').innerText = Math.max(0, Math.floor(wallHp));
-    document.getElementById('goldAmount').innerText = Math.floor(gold);
-    document.getElementById('waveNum').innerText = wave;
-    document.getElementById('archerCount').innerText = `${archers.length}/6`;
-  }
-  
-  function buyRepair(){
-    if(gold >= 30 && wallHp < 100){
-      gold -= 30;
-      wallHp = Math.min(100, wallHp + 20);
-      updateUI();
-    }
-  }
-  
-  function buyArcher(){
-    // 最大6体まで（玉座を囲むのに十分）
-    if(gold >= 50 && archers.length < 6){
-      gold -= 50;
-      archers.push({ cooldown: 0 });
-      updateArcherPositions();
-      updateUI();
-    }
-  }
-  
-  function buyShield(){
-    if(gold >= 40 && barrier <= 0){
-      gold -= 40;
-      barrier = 180;
-      updateUI();
-    }
-  }
-  
-  function startWave(){
-    waveInProgress = true;
-    enemiesThisWave = 5 + Math.floor(wave * 1.3);
-    spawnCounter = 10;
-  }
-  
-  function spawnEnemy(){
-    let side = Math.random() < 0.5 ? 'left' : 'right';
-    let x = side === 'left' ? -20 : canvas.width+20;
-    let y = 40 + Math.random() * (canvas.height - 150);
-    let hp = 20 + Math.floor(wave * 5);
-    enemies.push({ 
-      x: x, y: y, w: 35, h: 35,
-      hp: hp, maxHp: hp, type: 'normal' 
-    });
-  }
-  
-  function updateGame(){
-    if(!gameRunning) return;
-    frame++;
-    
-    if(waveInProgress){
-      if(spawnCounter <= 0 && enemiesThisWave > 0){
-        spawnEnemy();
-        enemiesThisWave--;
-        spawnCounter = 28 - Math.min(15, wave);
-      } else {
-        spawnCounter--;
-      }
-      if(enemiesThisWave === 0 && enemies.length === 0){
-        waveInProgress = false;
-        wave++;
-        gold += 80 + wave * 5;
+    window.buyArcher = function() {
+      if (gold >= 50 && archers.length < 6) {
+        gold -= 50;
+        archers.push({ cooldown: 0 });
+        updateArcherPositions();
         updateUI();
-        setTimeout(() => startWave(), 1800);
+        // 召喚エフェクト
+        let pos = getArcherPosition(archers.length-1, archers.length);
+        burstEffect(pos.x, pos.y, 18, '#c8ff88');
       }
-    }
-    
-    // 敵移動（玉座へ）
-    for(let i=0;i<enemies.length;i++){
-      let e = enemies[i];
-      let dx = THRONE_X - e.x, dy = THRONE_Y - e.y;
-      let len = Math.hypot(dx,dy);
-      if(len > 1){
-        e.x += (dx/len) * 1.3;
-        e.y += (dy/len) * 1.2;
-      } else {
-        let dmg = 9 + Math.floor(wave/2);
-        if(barrier > 0) dmg = 0;
-        wallHp -= dmg;
-        enemies.splice(i,1);
+    };
+    window.buyShield = function() {
+      if (gold >= 40 && barrier <= 0) {
+        gold -= 40;
+        barrier = 220;
         updateUI();
-        if(wallHp <= 0){
-          gameRunning = false;
-          alert('💀 玉座が崩壊した… ゲームオーバー 💀\n再読み込みで挑戦');
-          return;
-        }
-        i--; continue;
+        burstEffect(THRONE_X, THRONE_Y-30, 35, '#88aaff');
+        for(let i=0;i<30;i++) addParticle(THRONE_X-40+Math.random()*80, THRONE_Y-45, (Math.random()-0.5)*3, -Math.random()*4, 0.7, '#aaf', 4);
       }
-      e.x = Math.min(canvas.width+50, Math.max(-50, e.x));
-      e.y = Math.min(canvas.height-40, Math.max(20, e.y));
-    }
+    };
+    window.upgradeAttack = function() {
+      if (gold >= 60) {
+        gold -= 60;
+        baseDamage += 8;
+        updateUI();
+        for(let i=0;i<15;i++) addParticle(THRONE_X-20+Math.random()*40, THRONE_Y-10, (Math.random()-0.5)*4, -Math.random()*3-1, 0.6, '#ffaa66', 5);
+      }
+    };
     
-    // 弓兵の射撃（玉座周りから）
-    for(let a of archers){
-      if(a.cooldown <= 0){
-        let nearest = null;
-        let minDist = 300;
-        for(let e of enemies){
-          let d = Math.hypot(a.x - e.x, a.y - e.y);
-          if(d < minDist){ minDist = d; nearest = e; }
-        }
-        if(nearest){
-          arrows.push({
-            x: a.x, y: a.y,
-            tx: nearest.x, ty: nearest.y,
-            speed: 6, damage: 15
-          });
-          a.cooldown = 28;
-        }
-      } else {
-        a.cooldown--;
+    // ウェーブ開始
+    function startWave() {
+      waveInProgress = true;
+      enemiesThisWave = 5 + Math.floor(wave * 1.6);
+      spawnCounter = 12;
+      waveTransitionTimer = 25;  // 演出用
+      waveFlash = 20;
+      // ウェーブ開始テキスト用パーティクル
+      for(let i=0;i<40;i++) {
+        addParticle(THRONE_X, THRONE_Y-80, (Math.random()-0.5)*4, -Math.random()*3-2, 0.8, '#ffccaa', 4);
       }
     }
     
-    // 矢の移動
-    for(let i=0;i<arrows.length;i++){
-      let ar = arrows[i];
-      let dx = ar.tx - ar.x, dy = ar.ty - ar.y;
-      let len = Math.hypot(dx,dy);
-      if(len < 8){
-        for(let j=0;j<enemies.length;j++){
-          let e = enemies[j];
-          if(Math.hypot(ar.x - e.x, ar.y - e.y) < 35){
-            e.hp -= ar.damage;
-            if(e.hp <= 0){
-              gold += 12 + Math.floor(wave*0.8);
-              enemies.splice(j,1);
-              updateUI();
-            }
-            break;
-          }
-        }
-        arrows.splice(i,1); i--; continue;
-      }
-      ar.x += (dx/len) * ar.speed;
-      ar.y += (dy/len) * ar.speed;
+    // 敵生成
+    function spawnEnemy() {
+      let side = Math.random() < 0.5 ? 'left' : 'right';
+      let x = side === 'left' ? -35 : canvas.width + 35;
+      let y = 40 + Math.random() * (canvas.height - 160);
+      let rnd = Math.random();
+      let hp, speed, colorType, sizeScale = 1;
+      if (rnd < 0.65) { hp = 20 + Math.floor(wave * 4.5); speed = 1.3; colorType = 0; }      // 通常
+      else if (rnd < 0.85) { hp = 45 + Math.floor(wave * 6); speed = 0.95; colorType = 1; sizeScale = 1.1; } // 重装甲
+      else { hp = 12 + Math.floor(wave * 3); speed = 2.1; colorType = 2; sizeScale = 0.9; }    // 速い
+      enemies.push({
+        x, y, w: 34 * sizeScale, h: 34 * sizeScale,
+        hp, maxHp: hp, speed, colorType,
+        type: 'normal'
+      });
+      // 出現エフェクト
+      burstEffect(x, y, 8, '#aa5555');
     }
     
-    if(barrier > 0) barrier--;
-  }
-  
-  // タッチ＆マウス対応の攻撃
-  function handleAttack(clientX, clientY){
-    if(!gameRunning) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    let mx = (clientX - rect.left) * scaleX;
-    let my = (clientY - rect.top) * scaleY;
-    for(let i=0;i<enemies.length;i++){
-      let en = enemies[i];
-      if(Math.hypot(mx - en.x, my - en.y) < 40){
-        en.hp -= 28;
-        if(en.hp <= 0){
-          gold += 15;
-          enemies.splice(i,1);
-          updateUI();
-        }
-        break;
-      }
-    }
-  }
-  
-  function onAttack(e){
-    e.preventDefault();
-    const point = e.touches ? e.touches[0] : e;
-    handleAttack(point.clientX, point.clientY);
-  }
-  
-  canvas.addEventListener('mousedown', onAttack);
-  canvas.addEventListener('touchstart', onAttack, { passive: false });
-  
-  function draw(){
-    ctx.fillStyle = '#0a1020';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    
-    // 玉座の台座
-    ctx.fillStyle = '#8a6a3a';
-    ctx.fillRect(THRONE_X-55, THRONE_Y-20, 110, 45);
-    ctx.fillStyle = '#c8a96e';
-    ctx.font = "bold 18px monospace";
-    ctx.fillText("玉座", THRONE_X-22, THRONE_Y-5);
-    
-    // 城壁バー
-    ctx.fillStyle = '#3a3a5a';
-    ctx.fillRect(THRONE_X-45, THRONE_Y-30, 90, 8);
-    ctx.fillStyle = wallHp>60?'#88ff88':'#ffaa55';
-    ctx.fillRect(THRONE_X-45, THRONE_Y-30, 90 * (wallHp/100), 8);
-    
-    // バリア表示
-    if(barrier > 0){
-      ctx.fillStyle = '#88aaffaa';
-      ctx.fillRect(THRONE_X-65, THRONE_Y-43, 130, 14);
-      ctx.fillStyle = '#aaccff';
-      ctx.font = "bold 11px monospace";
-      ctx.fillText("バリア", THRONE_X-22, THRONE_Y-35);
-    }
-    
-    // 弓兵（玉座を囲んで配置）
-    for(let a of archers){
-      ctx.fillStyle = '#88cc88';
-      ctx.beginPath();
-      ctx.arc(a.x, a.y, 11, 0, Math.PI*2);
-      ctx.fill();
-      ctx.fillStyle = '#fff';
-      ctx.font = "16px monospace";
-      ctx.fillText("🏹", a.x-7, a.y+6);
+    // ゲーム更新
+    function updateGame() {
+      if (!gameRunning) return;
+      frame++;
       
-      // 射程範囲インジケータ（薄く）
-      ctx.beginPath();
-      ctx.arc(a.x, a.y, 130, 0, Math.PI*2);
-      ctx.strokeStyle = '#88ff8844';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      // ウェーブ進行
+      if (waveInProgress) {
+        if (spawnCounter <= 0 && enemiesThisWave > 0) {
+          spawnEnemy();
+          enemiesThisWave--;
+          spawnCounter = Math.max(10, 28 - wave);
+        } else {
+          spawnCounter--;
+        }
+        if (enemiesThisWave === 0 && enemies.length === 0) {
+          waveInProgress = false;
+          wave++;
+          gold += 100 + wave * 8;
+          updateUI();
+          setTimeout(() => startWave(), 1800);
+        }
+      }
+      
+      // 敵移動＆衝突
+      for (let i = 0; i < enemies.length; i++) {
+        let e = enemies[i];
+        let dx = THRONE_X - e.x, dy = THRONE_Y - e.y;
+        let len = Math.hypot(dx, dy);
+        if (len > 1.5) {
+          e.x += (dx / len) * e.speed;
+          e.y += (dy / len) * e.speed * 0.92;
+        } else {
+          let dmg = 8 + Math.floor(wave / 2);
+          if (barrier > 0) dmg = Math.max(1, Math.floor(dmg * 0.3));
+          wallHp -= dmg;
+          // 壁ヒットエフェクト
+          burstEffect(THRONE_X, THRONE_Y-20, 14, '#ff6644');
+          enemies.splice(i, 1);
+          updateUI();
+          if (wallHp <= 0) {
+            gameRunning = false;
+            // ゲームオーバー表示
+            return;
+          }
+          i--; continue;
+        }
+        e.x = Math.min(canvas.width + 60, Math.max(-60, e.x));
+        e.y = Math.min(canvas.height - 40, Math.max(20, e.y));
+      }
+      
+      // 弓兵射撃 (強化: 追尾エフェクト)
+      for (let a of archers) {
+        if (a.cooldown <= 0) {
+          let nearest = null, minDist = 400;
+          for (let e of enemies) {
+            let d = Math.hypot(a.x - e.x, a.y - e.y);
+            if (d < minDist) { minDist = d; nearest = e; }
+          }
+          if (nearest) {
+            arrows.push({
+              x: a.x, y: a.y,
+              tx: nearest.x, ty: nearest.y,
+              speed: 8.5, damage: 16 + Math.floor(wave / 2.5),
+              trail: []
+            });
+            a.cooldown = 28;
+          }
+        } else a.cooldown--;
+      }
+      
+      // 矢の移動＆ヒット (エフェクト強化)
+      for (let i = 0; i < arrows.length; i++) {
+        let ar = arrows[i];
+        let dx = ar.tx - ar.x, dy = ar.ty - ar.y;
+        let len = Math.hypot(dx, dy);
+        if (len < 12) {
+          for (let j = 0; j < enemies.length; j++) {
+            let e = enemies[j];
+            if (Math.hypot(ar.x - e.x, ar.y - e.y) < 40) {
+              e.hp -= ar.damage;
+              // ヒットエフェクト
+              burstEffect(e.x + e.w/2, e.y + e.h/2, 12, '#ffaa66');
+              if (e.hp <= 0) {
+                gold += 14 + Math.floor(wave * 0.8);
+                burstEffect(e.x + e.w/2, e.y + e.h/2, 24, '#ff8844');
+                enemies.splice(j, 1);
+                updateUI();
+              }
+              break;
+            }
+          }
+          arrows.splice(i, 1);
+          i--; continue;
+        }
+        ar.x += (dx / len) * ar.speed;
+        ar.y += (dy / len) * ar.speed;
+        // 軌跡パーティクル
+        if (frame % 2 === 0) {
+          addParticle(ar.x, ar.y, (Math.random()-0.5)*1, (Math.random()-0.5)*1, 0.3, '#ffcc88', 2);
+        }
+      }
+      
+      if (barrier > 0) {
+        barrier--;
+        if (barrier === 0) {
+          burstEffect(THRONE_X, THRONE_Y-30, 40, '#88aaff');
+        }
+      }
+      
+      // ウェーブフラッシュ減衰
+      if (waveFlash > 0) waveFlash -= 2;
+      if (waveTransitionTimer > 0) waveTransitionTimer--;
+      
+      // パーティクル更新
+      for (let i=0;i<particles.length;i++) {
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life -= 0.02;
+        if (particles[i].life <= 0 || particles[i].y > canvas.height+50 || particles[i].x < -50 || particles[i].x > canvas.width+50) {
+          particles.splice(i,1);
+          i--;
+        }
+      }
     }
     
-    // 敵
-    for(let e of enemies){
-      let grad = ctx.createLinearGradient(e.x, e.y, e.x+10, e.y+10);
-      grad.addColorStop(0, '#aa3333');
-      grad.addColorStop(1, '#551111');
+    // ========== 描画（クール強化版） ==========
+    function draw() {
+      // 背景 黒〜深紫グラデ
+      let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#0a0a20');
+      grad.addColorStop(1, '#030310');
       ctx.fillStyle = grad;
-      ctx.fillRect(e.x, e.y, e.w, e.h);
-      ctx.fillStyle = '#ffaa66';
-      ctx.fillRect(e.x, e.y-8, e.w * (e.hp/e.maxHp), 5);
-      ctx.fillStyle = '#fff';
-      ctx.font = "bold 20px monospace";
-      ctx.fillText("👺", e.x+6, e.y+26);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 星フィールド（キラキラ）
+      for (let i=0;i<150;i++) {
+        if ((frame + i) % 97 === 0) continue;
+        ctx.fillStyle = `rgba(255,240,200,${0.1+Math.sin(i+frame*0.02)*0.05})`;
+        ctx.beginPath();
+        ctx.arc( (i*131)%canvas.width, (i*57)%canvas.height, 1.2, 0, Math.PI*2);
+        ctx.fill();
+      }
+      
+      // 玉座の影とオーラ
+      ctx.shadowBlur = 20; ctx.shadowColor = '#c8a96e66';
+      ctx.fillStyle = '#4a2e1a'; ctx.fillRect(THRONE_X-62, THRONE_Y-25, 124, 55);
+      ctx.fillStyle = '#7a5a3a'; ctx.fillRect(THRONE_X-55, THRONE_Y-20, 110, 48);
+      ctx.fillStyle = '#c8a96e'; ctx.font = "bold 24px 'Cinema', monospace"; 
+      ctx.shadowBlur = 8; ctx.fillText("⚜️", THRONE_X-9, THRONE_Y+8);
+      ctx.font = "bold 16px monospace"; ctx.fillStyle = '#ffe0aa';
+      ctx.fillText("玉座", THRONE_X-20, THRONE_Y-2);
+      
+      // 城壁バー (ゴージャス)
+      ctx.fillStyle = '#2a2a3a'; ctx.fillRect(THRONE_X-48, THRONE_Y-35, 96, 12);
+      let hpPercent = wallHp/100;
+      let gradBar = ctx.createLinearGradient(THRONE_X-48, THRONE_Y-35, THRONE_X+48, THRONE_Y-35);
+      gradBar.addColorStop(0, wallHp>50?'#88ffaa':'#ffaa66');
+      gradBar.addColorStop(1, wallHp>30?'#44cc77':'#dd6644');
+      ctx.fillStyle = gradBar; ctx.fillRect(THRONE_X-48, THRONE_Y-35, 96*hpPercent, 12);
+      ctx.strokeStyle = '#ffdfaa'; ctx.strokeRect(THRONE_X-48, THRONE_Y-35, 96, 12);
+      
+      // バリア表現
+      if (barrier > 0) {
+        ctx.globalAlpha = 0.5 + Math.sin(frame * 0.1) * 0.2;
+        ctx.fillStyle = '#88aaff'; ctx.beginPath();
+        ctx.arc(THRONE_X, THRONE_Y-28, 38, 0, Math.PI*2);
+        ctx.fill();
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = '#ffffff'; ctx.font = "bold 12px monospace";
+        ctx.fillText("聖域", THRONE_X-15, THRONE_Y-38);
+        ctx.globalAlpha = 1;
+      }
+      
+      // 弓兵 (クール)
+      for (let a of archers) {
+        // オーラ
+        ctx.beginPath(); ctx.arc(a.x, a.y, 17, 0, Math.PI*2);
+        ctx.fillStyle = '#88cc8855'; ctx.fill();
+        ctx.fillStyle = '#88aa44'; ctx.beginPath(); ctx.arc(a.x, a.y, 13, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.font = "22px monospace"; ctx.fillText("🏹", a.x-10, a.y+7);
+        // 射程範囲 (薄く)
+        ctx.beginPath(); ctx.arc(a.x, a.y, 145, 0, Math.PI*2);
+        ctx.strokeStyle = '#88ff8844'; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+      
+      // 敵
+      for (let e of enemies) {
+        let gradEnemy = ctx.createLinearGradient(e.x, e.y, e.x+10, e.y+10);
+        if (e.colorType === 0) gradEnemy.addColorStop(0,'#aa3333');
+        else if (e.colorType === 1) gradEnemy.addColorStop(0,'#884455');
+        else gradEnemy.addColorStop(0,'#cc6644');
+        gradEnemy.addColorStop(1,'#441111');
+        ctx.fillStyle = gradEnemy; ctx.fillRect(e.x, e.y, e.w, e.h);
+        // 鎧/スピード表示
+        if (e.colorType === 1) ctx.fillStyle = '#aa8866';
+        else if (e.colorType === 2) ctx.fillStyle = '#ffaa66';
+        else ctx.fillStyle = '#885522';
+        ctx.fillRect(e.x+5, e.y-8, e.w-10, 5);
+        ctx.fillStyle = '#ffaa66'; ctx.fillRect(e.x+5, e.y-8, (e.w-10) * (e.hp/e.maxHp), 5);
+        ctx.fillStyle = '#000000aa'; ctx.font = "bold 22px monospace";
+        ctx.fillText(e.colorType===2?"⚡":"👺", e.x+8, e.y+28);
+        if(e.colorType===1) ctx.fillStyle = '#ffccaa'; ctx.font = "bold 12px monospace"; ctx.fillText("🛡️", e.x+2, e.y+18);
+      }
+      
+      // 矢
+      for (let a of arrows) {
+        ctx.fillStyle = '#ffaa55'; ctx.shadowBlur = 12; ctx.fillRect(a.x-3, a.y-2, 6, 5);
+        ctx.fillStyle = '#ffdd88'; ctx.fillRect(a.x-1, a.y-4, 2, 8);
+      }
+      ctx.shadowBlur = 0;
+      
+      // パーティクル描画
+      for (let p of particles) {
+        ctx.globalAlpha = Math.min(1, p.life * 1.5);
+        ctx.fillStyle = p.color;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (0.5 + p.life), 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      
+      // ウェーブフラッシュ
+      if (waveFlash > 0) {
+        ctx.fillStyle = `rgba(255, 220, 150, ${waveFlash/40})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      
+      // ウェーブ開始テキスト
+      if (waveTransitionTimer > 5) {
+        ctx.font = "bold 28px 'Cinema', monospace";
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = `rgba(255, 200, 100, ${Math.min(1, waveTransitionTimer/15)})`;
+        ctx.fillText(`WAVE ${wave}`, canvas.width/2-75, canvas.height/2-40);
+        ctx.font = "14px monospace";
+        ctx.fillStyle = `rgba(200, 169, 110, 0.8)`;
+        ctx.fillText("闇の軍勢 袭来", canvas.width/2-90, canvas.height/2+10);
+        ctx.shadowBlur = 0;
+      }
+      
+      // UI補足
+      ctx.font = "bold 14px monospace";
+      ctx.fillStyle = '#ccaa77';
+      ctx.fillText(`⚔️ 神撃: ${baseDamage}`, 20, 50);
+      ctx.fillStyle = '#aaaacc';
+      ctx.font = "10px monospace";
+      ctx.fillText("⚡ タップで直接攻撃 | 弓兵が自動迎撃", 20, 85);
+      
+      // ゲームオーバー描画
+      if (!gameRunning) {
+        ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.font = "bold 32px monospace"; ctx.fillStyle = '#ff8866'; ctx.fillText("GAME OVER", canvas.width/2-115, canvas.height/2);
+        ctx.font = "16px monospace"; ctx.fillStyle = '#c8a96e'; ctx.fillText("再読み込みで挑戦", canvas.width/2-100, canvas.height/2+50);
+      }
     }
     
-    // 矢
-    for(let a of arrows){
-      ctx.fillStyle = '#ffdd88';
-      ctx.fillRect(a.x-2, a.y-2, 4, 8);
+    // 攻撃処理 (タップでクリック)
+    function handleAttack(clientX, clientY) {
+      if (!gameRunning) return;
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      let mx = (clientX - rect.left) * scaleX;
+      let my = (clientY - rect.top) * scaleY;
+      for (let i = 0; i < enemies.length; i++) {
+        let e = enemies[i];
+        if (mx > e.x && mx < e.x + e.w && my > e.y && my < e.y + e.h) {
+          e.hp -= baseDamage;
+          // ヒットエフェクト盛大に
+          burstEffect(e.x + e.w/2, e.y + e.h/2, 18, '#ffaa66');
+          if (e.hp <= 0) {
+            gold += 15;
+            burstEffect(e.x + e.w/2, e.y + e.h/2, 28, '#ff8844');
+            enemies.splice(i, 1);
+            updateUI();
+          }
+          break;
+        }
+      }
     }
     
-    ctx.fillStyle = '#aaa';
-    ctx.font = "12px monospace";
-    ctx.fillText("タップ/クリックで敵を直接攻撃", 12, 30);
+    function onAttack(e) {
+      e.preventDefault();
+      const point = e.touches ? e.touches[0] : e;
+      handleAttack(point.clientX, point.clientY);
+    }
     
-    // 弓兵の配置説明
-    ctx.fillStyle = '#6a6a8a';
-    ctx.font = "10px monospace";
-    ctx.fillText("弓兵は玉座を守るように配置されます", 12, 50);
-  }
-  
-  function loop(){
-    updateGame();
-    draw();
-    requestAnimationFrame(loop);
-  }
-  
-  startWave();
-  updateUI();
-  loop();
+    canvas.addEventListener('mousedown', onAttack);
+    canvas.addEventListener('touchstart', onAttack, { passive: false });
+    
+    // エントリ
+    function gameLoop() {
+      updateGame();
+      draw();
+      requestAnimationFrame(gameLoop);
+    }
+    
+    startWave();
+    updateUI();
+    gameLoop();
+  })();
 </script>
 </body>
 </html>

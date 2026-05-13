@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Dino Pixel Runner | ランキング付き</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0a0e1a 0%, #0f1422 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Courier New', 'SF Mono', monospace;
+      padding: 20px;
+    }
+
+    .game-wrapper {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .game-container {
+      background: rgba(12, 16, 26, 0.8);
+      backdrop-filter: blur(2px);
+      border-radius: 32px;
+      padding: 20px 28px 28px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 215, 150, 0.2);
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+      image-rendering: crisp-edges;
+      image-rendering: pixelated;
+      cursor: pointer;
+    }
+
+    .info-panel {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 18px;
+      padding: 0 8px;
+    }
+
+    .score-area {
+      font-family: 'Courier New', monospace;
+      font-size: 1.8rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #f0e6c5, #d4bc7a);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .highscore-area {
+      font-family: monospace;
+      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 4px 14px;
+      border-radius: 40px;
+      color: #d4bc7a;
+    }
+
+    .ranking-container {
+      background: rgba(12, 16, 26, 0.8);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 18px 22px;
+      min-width: 200px;
+      border: 1px solid rgba(200, 169, 110, 0.4);
+      box-shadow: 0 15px 25px rgba(0,0,0,0.3);
+    }
+
+    .ranking-container h3 {
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      color: #ebd6a4;
+      text-align: center;
+      margin-bottom: 12px;
+      border-bottom: 1px dashed #c8a96e66;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .ranking-list {
+      font-family: monospace;
+      font-size: 0.8rem;
+    }
+
+    .rank-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 5px 8px;
+      border-bottom: 1px dotted #3a3a4a;
+    }
+
+    .rank-number {
+      color: #c8a96e;
+      font-weight: bold;
+      width: 30px;
+    }
+
+    .rank-score {
+      color: #f0e6c5;
+      font-weight: bold;
+    }
+
+    .rank-date {
+      color: #8a8a9a;
+      font-size: 0.65rem;
+    }
+
+    .reset-rank-btn {
+      background: #2a2a3a;
+      border: none;
+      color: #c8a96e;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.6rem;
+      margin-top: 12px;
+      cursor: pointer;
+      width: 100%;
+      font-family: monospace;
+    }
+
+    .reset-rank-btn:hover {
+      background: #c8a96e;
+      color: #111;
+    }
+
+    .restart-hint {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #9a8a6a;
+      margin-top: 12px;
+    }
+
+    .restart-hint span {
+      background: #1e1e2a;
+      padding: 3px 10px;
+      border-radius: 60px;
+    }
+
+    .back-link {
+      display: inline-block;
+      margin-top: 16px;
+      color: #c8a96e;
+      font-size: 0.75rem;
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-align: center;
+      width: 100%;
+    }
+
+    .back-link:hover {
+      text-shadow: 0 0 4px #ffcc88;
+    }
+  </style>
+</head>
+<body>
+<div class="game-wrapper">
+  <div class="game-container">
+    <canvas id="gameCanvas" width="800" height="300"></canvas>
+    <div class="info-panel">
+      <div class="score-area">🏆 <span id="scoreValue">0</span></div>
+      <div class="highscore-area">⭐ BEST <span id="highScoreValue">0</span></div>
+    </div>
+    <div class="restart-hint"><span>␣ SPACE / クリック / タップでジャンプ</span></div>
+    <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+  </div>
+
+  <!-- ランキングボード -->
+  <div class="ranking-container">
+    <h3>🏅  TOP 5  RUNNERS</h3>
+    <div class="ranking-list" id="rankList">
+      <div class="rank-item">- ランキングを読み込み中 -</div>
+    </div>
+    <button class="reset-rank-btn" id="resetRankBtn">🗑️ ランキングリセット</button>
+  </div>
+</div>
+
+<script>
+  (function(){
+    // ---------- キャンバス ----------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 800;
+    canvas.height = 300;
+    ctx.imageSmoothingEnabled = false;
+    
+    // ---------- ゲーム状態 ----------
+    let gameRunning = true;
+    let score = 0;
+    let frame = 0;
+    let baseSpeed = 4.2;
+    let speedMultiplier = 1.0;
+    
+    const GROUND_Y = canvas.height - 38;
+    
+    // ---------- 恐竜 ----------
+    const DINO_W = 24;
+    const DINO_H = 28;
+    let dino = {
+      x: 70,
+      y: GROUND_Y - DINO_H,
+      vy: 0,
+      gravity: 0.68,
+      jumpPower: -9.5,
+      grounded: true
+    };
+    
+    // ---------- 障害物 ----------
+    let obstacles = [];
+    const OBSTACLE_TYPES = [
+      { name: 'cactus', width: 12, height: 28, pixelColors: ['#4a6a3a','#3a5530'], yOffset: 0 },
+      { name: 'cactusBig', width: 16, height: 34, pixelColors: ['#5a7a44','#3e5a2e'], yOffset: 0 },
+      { name: 'rock', width: 18, height: 18, pixelColors: ['#7a6a5a','#5a4a3a'], yOffset: 0 },
+      // 鳥：より高く、見た目を鳥らしく (ジャンプしないと当たらない)
+      { name: 'bird', width: 22, height: 18, pixelColors: ['#c97a4a','#a5522a'], yOffset: -32, fly: true }
+    ];
+    
+    let spawnDelay = 0;
+    let particles = [];
+    
+    // ---------- ランキング ----------
+    let ranking = [];
+    const RANK_KEY = 'dinoPixelRanking';
+    
+    function loadRanking(){
+      const stored = localStorage.getItem(RANK_KEY);
+      ranking = stored ? JSON.parse(stored) : [];
+      ranking.sort((a,b) => b.score - a.score);
+      if(ranking.length > 5) ranking = ranking.slice(0,5);
+      renderRanking();
+    }
+    
+    function saveRanking(){
+      ranking.sort((a,b) => b.score - a.score);
+      if(ranking.length > 5) ranking = ranking.slice(0,5);
+      localStorage.setItem(RANK_KEY, JSON.stringify(ranking));
+      renderRanking();
+    }
+    
+    function addScoreToRanking(scoreVal){
+      if(scoreVal === 0) return;
+      const now = new Date();
+      const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2,'0')}`;
+      ranking.push({ score: Math.floor(scoreVal), date: dateStr });
+      ranking.sort((a,b) => b.score - a.score);
+      if(ranking.length > 5) ranking = ranking.slice(0,5);
+      saveRanking();
+    }
+    
+    function resetRanking(){
+      ranking = [];
+      localStorage.setItem(RANK_KEY, JSON.stringify(ranking));
+      renderRanking();
+    }
+    
+    function renderRanking(){
+      const rankDiv = document.getElementById('rankList');
+      rankDiv.innerHTML = '';
+      if(ranking.length === 0){
+        rankDiv.innerHTML = '<div class="rank-item" style="justify-content:center;">🏁 まだ記録がありません</div>';
+        return;
+      }
+      for(let i=0;i<ranking.length;i++){
+        const r = ranking[i];
+        const item = document.createElement('div');
+        item.className = 'rank-item';
+        item.innerHTML = `<span class="rank-number">#${i+1}</span><span class="rank-score">${r.score} m</span><span class="rank-date">${r.date}</span>`;
+        rankDiv.appendChild(item);
+      }
+    }
+    
+    let bestScoreLocal = 0;
+    function updateBestScoreUI(){
+      if(score > bestScoreLocal) bestScoreLocal = Math.floor(score);
+      document.getElementById('highScoreValue').innerText = bestScoreLocal;
+    }
+    function loadBestScore(){
+      const savedBest = localStorage.getItem('dinoPixelBest');
+      bestScoreLocal = savedBest ? parseInt(savedBest) : 0;
+      updateBestScoreUI();
+    }
+    function saveBestScore(){
+      if(score > bestScoreLocal){
+        bestScoreLocal = Math.floor(score);
+        localStorage.setItem('dinoPixelBest', bestScoreLocal);
+        updateBestScoreUI();
+      }
+    }
+    
+    function updateScoreUI(){
+      document.getElementById('scoreValue').innerText = Math.floor(score);
+    }
+    
+    function addScore(inc){
+      if(!gameRunning) return;
+      score += inc;
+      updateScoreUI();
+      let newMult = 1 + Math.floor(score / 480) * 0.1;
+      speedMultiplier = Math.min(2.0, newMult);
+    }
+    
+    function addDust(x,y){
+      for(let i=0;i<4;i++){
+        particles.push({
+          x: x + (Math.random() - 0.5) * 12,
+          y: y + 4,
+          vx: (Math.random() - 0.5) * 1.1,
+          vy: -Math.random() * 1.8,
+          life: 0.5,
+          color: `#b8a87a`
+        });
+      }
+    }
+    
+    function jump(){
+      if(!gameRunning) return;
+      if(dino.grounded){
+        dino.vy = dino.jumpPower;
+        dino.grounded = false;
+        addDust(dino.x + DINO_W/2, GROUND_Y);
+      }
+    }
+    
+    function gameOver(){
+      if(!gameRunning) return;
+      gameRunning = false;
+      if(score > 0){
+        addScoreToRanking(score);
+        saveBestScore();
+      }
+    }
+    
+    function restart(){
+      gameRunning = true;
+      score = 0;
+      updateScoreUI();
+      obstacles = [];
+      particles = [];
+      dino.y = GROUND_Y - DINO_H;
+      dino.vy = 0;
+      dino.grounded = true;
+      speedMultiplier = 1.0;
+      frame = 0;
+      spawnDelay = 8;
+    }
+    
+    function spawnObstacle(){
+      const type = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
+      obstacles.push({
+        x: canvas.width,
+        y: GROUND_Y - type.height + (type.yOffset || 0),
+        width: type.width,
+        height: type.height,
+        type: type.name,
+        pixelColors: type.pixelColors,
+        fly: type.fly || false
+      });
+    }
+    
+    function updatePhysics(){
+      if(!gameRunning) return;
+      
+      dino.vy += dino.gravity;
+      dino.y += dino.vy;
+      if(dino.y >= GROUND_Y - DINO_H){
+        dino.y = GROUND_Y - DINO_H;
+        dino.vy = 0;
+        if(!dino.grounded){
+          dino.grounded = true;
+          addDust(dino.x + DINO_W/2, GROUND_Y);
+        }
+      }
+      if(dino.y < GROUND_Y - DINO_H - 55){
+        dino.y = GROUND_Y - DINO_H - 55;
+        if(dino.vy < 0) dino.vy = 0;
+      }
+      
+      const currentSpeed = baseSpeed * speedMultiplier;
+      for(let i=0;i<obstacles.length;i++){
+        const obs = obstacles[i];
+        obs.x -= currentSpeed;
+        
+        // 衝突判定 (調整済み)
+        let dinoLeft = dino.x + 5;
+        let dinoRight = dino.x + DINO_W - 7;
+        let dinoTop = dino.y + 4;
+        let dinoBottom = dino.y + DINO_H - 4;
+        let obsLeft = obs.x + 3;
+        let obsRight = obs.x + obs.width - 4;
+        let obsTop = obs.y + 3;
+        let obsBottom = obs.y + obs.height - 3;
+        
+        if(dinoRight > obsLeft && dinoLeft < obsRight && dinoBottom > obsTop && dinoTop < obsBottom){
+          gameOver();
+          break;
+        }
+        
+        if(obs.x + obs.width < 0){
+          obstacles.splice(i,1);
+          i--;
+          addScore(12);
+        }
+      }
+      
+      if(gameRunning && frame % 7 === 0) addScore(1);
+      
+      if(gameRunning){
+        if(spawnDelay <= 0){
+          let delayBase = Math.max(34, 54 - Math.floor(speedMultiplier * 10));
+          spawnObstacle();
+          spawnDelay = delayBase;
+          if(Math.random() < 0.3 && speedMultiplier > 1.15){
+            spawnDelay = Math.max(20, delayBase - 6);
+          }
+        } else {
+          spawnDelay--;
+        }
+      }
+    }
+    
+    function updateParticles(){
+      for(let i=0;i<particles.length;i++){
+        particles[i].x += particles[i].vx;
+        particles[i].y += particles[i].vy;
+        particles[i].life -= 0.03;
+        if(particles[i].life <= 0 || particles[i].y > GROUND_Y+20){
+          particles.splice(i,1);
+          i--;
+        }
+      }
+    }
+    
+    // ---------- 雲 (純粋な背景、衝突なし) ----------
+    let clouds = [];
+    function initClouds(){
+      for(let i=0;i<3;i++){
+        clouds.push({
+          x: Math.random() * canvas.width,
+          y: 30 + Math.random() * 55,
+          blocks: [
+            [0,0,1,1,1,0,0],
+            [0,1,1,1,1,1,0],
+            [1,1,1,1,1,1,1]
+          ],
+        });
+      }
+    }
+    function updateClouds(){
+      for(let c of clouds){
+        c.x -= 0.35;
+        if(c.x + 70 < 0){
+          c.x = canvas.width + 40;
+          c.y = 25 + Math.random() * 65;
+        }
+      }
+    }
+    
+    // ========== 描画 (鳥をはっきり鳥に) ==========
+    function drawDinoPixel(){
+      const dinoSprite = [
+        [0,0,1,1,1,0,0,0],
+        [0,1,1,1,1,1,0,0],
+        [1,1,1,1,1,1,1,0],
+        [1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1],
+        [0,1,1,0,0,1,1,0],
+        [0,0,1,0,0,1,0,0],
+        [0,0,1,0,0,1,0,0]
+      ];
+      const colors = ['#5f8b6f', '#4a705a', '#3c5a48'];
+      let px = dino.x, py = dino.y;
+      for(let row=0; row<dinoSprite.length; row++){
+        for(let col=0; col<dinoSprite[row].length; col++){
+          if(dinoSprite[row][col]){
+            ctx.fillStyle = colors[(row+col) % colors.length];
+            ctx.fillRect(px + col*3, py + row*3, 3, 3);
+          }
+        }
+      }
+      ctx.fillStyle = '#f5f0dc';
+      ctx.fillRect(px + 17, py + 6, 2, 2);
+      ctx.fillStyle = '#101010';
+      ctx.fillRect(px + 18, py + 6, 1, 1);
+    }
+    
+    function drawObstaclePixel(obs){
+      let x = obs.x, y = obs.y;
+      if(obs.type === 'cactus' || obs.type === 'cactusBig'){
+        ctx.fillStyle = obs.pixelColors[0];
+        for(let i=0;i<obs.height;i+=3){
+          ctx.fillRect(x+3, y+i, 4, 2);
+          ctx.fillRect(x+8, y+i, 3, 2);
+          if(i%8===0) ctx.fillRect(x+1, y+i, 2, 4);
+        }
+        ctx.fillStyle = obs.pixelColors[1];
+        ctx.fillRect(x+2, y+4, 3, 5);
+        ctx.fillRect(x+9, y+10, 3, 5);
+      } 
+      else if(obs.type === 'rock'){
+        ctx.fillStyle = obs.pixelColors[0];
+        for(let i=0;i<obs.height;i+=4){
+          ctx.fillRect(x+2, y+i, 5, 3);
+          ctx.fillRect(x+8, y+i+2, 4, 3);
+        }
+      }
+      else if(obs.type === 'bird'){
+        // はっきり「鳥」とわかるドット絵 (赤茶色、くちばし)
+        ctx.fillStyle = obs.pixelColors[0];
+        // 胴体
+        ctx.fillRect(x+4, y+8, 14, 7);
+        // 翼
+        ctx.fillRect(x+2, y+6, 5, 4);
+        ctx.fillRect(x+15, y+6, 5, 4);
+        // 頭
+        ctx.fillRect(x+10, y+4, 6, 5);
+        // くちばし (黄色)
+        ctx.fillStyle = '#dd9944';
+        ctx.fillRect(x+16, y+5, 3, 2);
+        // 目
+        ctx.fillStyle = '#000';
+        ctx.fillRect(x+11, y+6, 1, 1);
+        ctx.fillRect(x+13, y+6, 1, 1);
+      }
+    }
+    
+    function drawGround(){
+      for(let i=0;i<canvas.width;i+=6){
+        ctx.fillStyle = '#5a6e4a';
+        ctx.fillRect(i, GROUND_Y-4, 3, 4);
+        ctx.fillStyle = '#7f8c5e';
+        ctx.fillRect(i+3, GROUND_Y-6, 2, 3);
+      }
+      ctx.fillStyle = '#3a4230';
+      ctx.fillRect(0, GROUND_Y-2, canvas.width, 4);
+      ctx.fillStyle = '#8f9e6e';
+      ctx.fillRect(0, GROUND_Y, canvas.width, 2);
+    }
+    
+    function drawClouds(){
+      for(let c of clouds){
+        ctx.fillStyle = '#eeddbb';
+        for(let row=0; row<c.blocks.length; row++){
+          for(let col=0; col<c.blocks[row].length; col++){
+            if(c.blocks[row][col]){
+              ctx.fillRect(c.x + col*5, c.y + row*4, 4, 4);
+            }
+          }
+        }
+        ctx.fillStyle = '#ddcca8';
+        for(let row=0; row<c.blocks.length; row++){
+          for(let col=0; col<c.blocks[row].length; col++){
+            if(c.blocks[row][col] && (row+col)%2===0){
+              ctx.fillRect(c.x + col*5+1, c.y + row*4+1, 2, 2);
+            }
+          }
+        }
+      }
+    }
+    
+    function drawStars(){
+      for(let i=0;i<110;i++){
+        if((frame + i*17) % 71 ===0) continue;
+        ctx.fillStyle = `rgba(255,240,170,0.6)`;
+        ctx.fillRect( (i*131)%canvas.width, (i*47)%canvas.height, 1, 1);
+      }
+    }
+    
+    function draw(){
+      ctx.fillStyle = '#192135';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      drawStars();
+      // 月
+      ctx.fillStyle = '#eeddaa';
+      for(let i=0;i<5;i++){
+        ctx.fillRect(canvas.width-48 + i*3, 32, 2, 2);
+        ctx.fillRect(canvas.width-36, 28+i*2, 2, 2);
+      }
+      drawClouds();
+      drawGround();
+      for(let obs of obstacles) drawObstaclePixel(obs);
+      drawDinoPixel();
+      for(let p of particles) { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); }
+      
+      if(!gameRunning){
+        ctx.font = "bold 24px 'Courier New'";
+        ctx.fillStyle = '#edd8aa';
+        ctx.fillText("GAME OVER", canvas.width/2-85, canvas.height/2-30);
+        ctx.font = "12px monospace";
+        ctx.fillStyle = "#c8b580";
+        ctx.fillText("スペース/クリックで再挑戦", canvas.width/2-120, canvas.height/2+10);
+      }
+      
+      if(gameRunning && speedMultiplier > 1.2){
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = '#f0d89a';
+        for(let i=0;i<6;i++){
+          let pos = (frame*5 + i*35) % canvas.width;
+          ctx.fillRect(pos, GROUND_Y-5, 12, 2);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    
+    // ---------- メインループ ----------
+    function updateLoop(){
+      if(gameRunning){
+        updateClouds();
+        updatePhysics();
+        updateParticles();
+      }
+      draw();
+      frame++;
+      requestAnimationFrame(updateLoop);
+    }
+    
+    // ---------- イベント ----------
+    function handleAction(e){
+      if(e.type === 'keydown'){
+        if(e.code === 'Space' || e.code === 'ArrowUp'){
+          e.preventDefault();
+          if(!gameRunning) restart();
+          else jump();
+        }
+      } else {
+        if(!gameRunning) restart();
+        else jump();
+      }
+    }
+    window.addEventListener('keydown', handleAction);
+    canvas.addEventListener('click', () => { if(!gameRunning) restart(); else jump(); });
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(!gameRunning) restart(); else jump(); });
+    document.getElementById('resetRankBtn').addEventListener('click', () => { resetRanking(); });
+    
+    // ---------- 初期化 ----------
+    initClouds();
+    loadRanking();
+    loadBestScore();
+    updateScoreUI();
+    restart();
+    updateLoop();
+  })();
+</script>
+</body>
+</html>
