@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>2048 パワーアップ完全版</title>
+  <title>2048 完全修正版</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -17,7 +17,27 @@
       transition: background 0.3s;
       user-select: none;
       overflow: hidden;
+      position: relative;
     }
+    .rain-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .raindrop {
+      position: absolute;
+      width: 2px;
+      height: 15px;
+      background: rgba(255,255,255,0.5);
+      top: -20px;
+      animation: fall linear infinite;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh); opacity: 0; }
+    }
+
     :root {
       --bg: #faf8ef;
       --board-bg: #bbada0;
@@ -139,6 +159,7 @@
       gap: 20px;
       margin-bottom: 10px;
       color: var(--text);
+      z-index: 1;
     }
     h1 { font-size: 32px; color: var(--text); }
     .score-box {
@@ -147,18 +168,17 @@
       padding: 5px 15px;
       border-radius: 5px;
       text-align: center;
+      z-index: 1;
     }
     .score-label { font-size: 12px; }
     #score { font-size: 24px; font-weight: bold; }
-    #high-score {
-      font-size: 14px;
-      color: #ffeaa7;
-    }
+    #high-score { font-size: 14px; color: #ffeaa7; }
     #message {
       font-size: 20px;
       height: 30px;
       color: #e74c3c;
       margin: 5px 0;
+      z-index: 1;
     }
     #board-container {
       position: relative;
@@ -171,6 +191,7 @@
       flex-wrap: wrap;
       gap: 10px;
       transition: transform 0.1s ease;
+      z-index: 1;
     }
     .shake {
       animation: shake 0.2s ease;
@@ -225,7 +246,6 @@
       0% { transform: scale(0); opacity: 0; }
       100% { transform: scale(1); opacity: 1; }
     }
-    /* スコアポップアップ */
     .score-popup {
       position: absolute;
       font-weight: bold;
@@ -239,7 +259,6 @@
       0% { opacity: 1; transform: translateY(0); }
       100% { opacity: 0; transform: translateY(-40px); }
     }
-    /* パーティクル */
     .particle {
       position: absolute;
       width: 8px;
@@ -249,7 +268,6 @@
       z-index: 9;
       pointer-events: none;
     }
-    /* ゲームオーバーオーバーレイ */
     .overlay {
       position: fixed;
       top: 0; left: 0;
@@ -262,9 +280,7 @@
       z-index: 100;
       visibility: hidden;
     }
-    .overlay.active {
-      visibility: visible;
-    }
+    .overlay.active { visibility: visible; }
     .overlay-text {
       color: white;
       font-size: 48px;
@@ -285,6 +301,7 @@
       display: flex;
       gap: 20px;
       align-items: center;
+      z-index: 1;
     }
     button, select {
       padding: 10px 20px;
@@ -299,6 +316,8 @@
   </style>
 </head>
 <body>
+  <div class="rain-container" id="rain-container"></div>
+
   <div class="header">
     <h1>2048</h1>
     <div class="score-box">
@@ -308,9 +327,7 @@
     </div>
   </div>
   <div id="message"></div>
-  <div id="board-container">
-    <!-- 背景セル -->
-  </div>
+  <div id="board-container"></div>
   <div class="controls">
     <button id="restart-btn">リスタート</button>
     <select id="skin-select">
@@ -322,365 +339,365 @@
       <option value="theme-neon">ネオン</option>
     </select>
   </div>
-  <!-- ゲームオーバーオーバーレイ -->
   <div id="overlay" class="overlay">
     <div class="overlay-text">GAME OVER</div>
     <button id="overlay-restart">もう一度</button>
   </div>
 
   <script>
-    // ---- サウンドエンジン ----
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx;
-    function initAudio() {
-      if (!audioCtx) audioCtx = new AudioContext();
-    }
-    function playTone(freq, duration, type = 'sine', volume = 0.3) {
-      if (!audioCtx) return;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = type;
-      osc.frequency.value = freq;
-      gain.gain.value = volume;
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duration);
-    }
-    function playMergeSound(value) {
-      if (!audioCtx) return;
-      // 数字が大きいほど高音＆豊かに
-      const baseFreq = 300 + Math.log2(value) * 50;
-      playTone(baseFreq, 0.2, 'sine', 0.3);
-      setTimeout(() => playTone(baseFreq * 1.5, 0.15, 'sine', 0.2), 0.1);
-    }
-    function playGameOverSound() {
-      if (!audioCtx) return;
-      playTone(200, 0.4, 'square', 0.2);
-      setTimeout(() => playTone(150, 0.5, 'square', 0.2), 0.3);
-    }
-
-    // ---- ゲームロジック ----
-    const SIZE = 4;
-    const GAP = 10;
-    const CELL_SIZE = 95;
-    let board = Array.from({length: SIZE}, () => Array(SIZE).fill(null));
-    let score = 0;
-    let highScore = 0;
-    let gameOver = false;
-    let tileIdCounter = 0;
-    const tileElements = {};
-
-    const boardEl = document.getElementById('board-container');
-    const scoreEl = document.getElementById('score');
-    const highScoreEl = document.getElementById('high-score');
-    const messageEl = document.getElementById('message');
-    const restartBtn = document.getElementById('restart-btn');
-    const skinSelect = document.getElementById('skin-select');
-    const overlay = document.getElementById('overlay');
-    const overlayRestartBtn = document.getElementById('overlay-restart');
-
-    // ---- 背景セル生成 ----
-    for (let i = 0; i < SIZE * SIZE; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell-bg';
-      boardEl.appendChild(cell);
-    }
-
-    // ---- ハイスコア読み込み ----
-    try {
-      const saved = localStorage.getItem('2048_highScore');
-      if (saved) highScore = parseInt(saved) || 0;
-    } catch(e) {}
-    highScoreEl.textContent = `BEST ${highScore}`;
-
-    function getPosition(row, col) {
-      return {
-        top: GAP + row * (CELL_SIZE + GAP),
-        left: GAP + col * (CELL_SIZE + GAP)
-      };
-    }
-
-    function createTileElement(tile) {
-      if (tileElements[tile.id]) return tileElements[tile.id];
-      const el = document.createElement('div');
-      el.className = 'tile';
-      el.textContent = tile.value;
-      el.classList.add(`tile-${tile.value}`);
-      el.id = `tile-${tile.id}`;
-      boardEl.appendChild(el);
-      tileElements[tile.id] = el;
-      return el;
-    }
-
-    function removeTileElement(id) {
-      if (tileElements[id]) {
-        tileElements[id].remove();
-        delete tileElements[id];
+    (function() {
+      // Audio
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      var audioCtx = null;
+      function initAudio() {
+        if (!audioCtx) audioCtx = new AudioContext();
       }
-    }
+      function playTone(freq, duration, type, volume) {
+        if (!audioCtx) return;
+        type = type || 'sine';
+        volume = volume || 0.3;
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.value = freq;
+        gain.gain.value = volume;
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      }
+      function playMergeSound(value) {
+        if (!audioCtx) return;
+        var baseFreq = 300 + Math.log2(value) * 50;
+        playTone(baseFreq, 0.2, 'sine', 0.3);
+        setTimeout(function() { playTone(baseFreq * 1.5, 0.15, 'sine', 0.2); }, 100);
+      }
+      function playGameOverSound() {
+        if (!audioCtx) return;
+        playTone(200, 0.4, 'square', 0.2);
+        setTimeout(function() { playTone(150, 0.5, 'square', 0.2); }, 300);
+      }
 
-    function updateTileVisual(tile, el) {
-      if (parseInt(el.textContent) !== tile.value) {
-        el.textContent = tile.value;
+      // Rain
+      function createRain() {
+        var container = document.getElementById('rain-container');
+        setInterval(function() {
+          var drop = document.createElement('div');
+          drop.className = 'raindrop';
+          drop.style.left = Math.random() * 100 + '%';
+          drop.style.animationDuration = (0.5 + Math.random() * 1.5) + 's';
+          drop.style.opacity = 0.3 + Math.random() * 0.5;
+          drop.style.height = (10 + Math.random() * 20) + 'px';
+          container.appendChild(drop);
+          drop.addEventListener('animationend', function() { drop.remove(); });
+        }, 50);
+      }
+
+      // Game
+      var SIZE = 4;
+      var GAP = 10;
+      var CELL_SIZE = 95;
+      var board = [];
+      var score = 0;
+      var highScore = 0;
+      var gameOver = false;
+      var tileIdCounter = 0;
+      var tileElements = {};
+
+      var boardEl = document.getElementById('board-container');
+      var scoreEl = document.getElementById('score');
+      var highScoreEl = document.getElementById('high-score');
+      var messageEl = document.getElementById('message');
+      var restartBtn = document.getElementById('restart-btn');
+      var skinSelect = document.getElementById('skin-select');
+      var overlay = document.getElementById('overlay');
+      var overlayRestartBtn = document.getElementById('overlay-restart');
+
+      for (var i = 0; i < SIZE * SIZE; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'cell-bg';
+        boardEl.appendChild(cell);
+      }
+
+      try {
+        var saved = localStorage.getItem('2048_highScore');
+        if (saved) highScore = parseInt(saved) || 0;
+      } catch(e) {}
+      highScoreEl.textContent = 'BEST ' + highScore;
+
+      function getPosition(row, col) {
+        return {
+          top: GAP + row * (CELL_SIZE + GAP),
+          left: GAP + col * (CELL_SIZE + GAP)
+        };
+      }
+
+      function createTileElement(tile) {
+        if (tileElements[tile.id]) return tileElements[tile.id];
+        var el = document.createElement('div');
         el.className = 'tile';
-        el.classList.add(`tile-${tile.value}`);
+        el.textContent = tile.value;
+        el.classList.add('tile-' + tile.value);
+        el.id = 'tile-' + tile.id;
+        boardEl.appendChild(el);
+        tileElements[tile.id] = el;
+        return el;
       }
-    }
 
-    function renderBoard() {
-      for (let r = 0; r < SIZE; r++) {
-        for (let c = 0; c < SIZE; c++) {
-          const tile = board[r][c];
-          if (tile) {
-            const el = tileElements[tile.id];
-            if (el) {
-              const { top, left } = getPosition(r, c);
-              el.style.top = top + 'px';
-              el.style.left = left + 'px';
-              updateTileVisual(tile, el);
-            }
-          }
-        }
-      }
-      scoreEl.textContent = score;
-      // ハイスコア更新
-      if (score > highScore) {
-        highScore = score;
-        try { localStorage.setItem('2048_highScore', highScore); } catch(e) {}
-        highScoreEl.textContent = `BEST ${highScore}`;
-      }
-    }
-
-    function addRandomTile() {
-      const emptyCells = [];
-      for (let r = 0; r < SIZE; r++) {
-        for (let c = 0; c < SIZE; c++) {
-          if (!board[r][c]) emptyCells.push({r, c});
-        }
-      }
-      if (emptyCells.length === 0) return;
-      const {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      const value = Math.random() < 0.9 ? 2 : 4;
-      const tile = { id: tileIdCounter++, value, row: r, col: c };
-      board[r][c] = tile;
-      const el = createTileElement(tile);
-      const { top, left } = getPosition(r, c);
-      el.style.top = top + 'px';
-      el.style.left = left + 'px';
-      el.classList.add('new');
-      el.addEventListener('animationend', () => el.classList.remove('new'), { once: true });
-    }
-
-    function slideLine(line) {
-      let arr = line.filter(tile => tile !== null);
-      const merged = [];
-      for (let i = 0; i < arr.length - 1; i++) {
-        if (arr[i].value === arr[i+1].value) {
-          arr[i] = {
-            id: arr[i].id,
-            value: arr[i].value * 2,
-            mergedFrom: [arr[i].id, arr[i+1].id]
-          };
-          merged.push(arr[i+1].id);
-          arr[i+1] = null;
-        }
-      }
-      arr = arr.filter(tile => tile !== null);
-      while (arr.length < SIZE) arr.push(null);
-      return { newLine: arr, mergedIds: merged };
-    }
-
-    function shakeBoard() {
-      boardEl.classList.add('shake');
-      boardEl.addEventListener('animationend', () => boardEl.classList.remove('shake'), { once: true });
-    }
-
-    // ---- 演出：スコアポップアップ ----
-    function showScorePopup(value, row, col) {
-      const { top, left } = getPosition(row, col);
-      const popup = document.createElement('div');
-      popup.className = 'score-popup';
-      popup.textContent = `+${value}`;
-      popup.style.top = top + 'px';
-      popup.style.left = left + 'px';
-      boardEl.appendChild(popup);
-      popup.addEventListener('animationend', () => popup.remove());
-    }
-
-    // ---- 演出：パーティクル ----
-    function burstParticles(row, col) {
-      const { top, left } = getPosition(row, col);
-      const centerX = left + CELL_SIZE/2;
-      const centerY = top + CELL_SIZE/2;
-      for (let i = 0; i < 8; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        particle.style.background = `hsl(${Math.random() * 60 + 30}, 100%, 60%)`;
-        particle.style.left = centerX + 'px';
-        particle.style.top = centerY + 'px';
-        boardEl.appendChild(particle);
-        const angle = (Math.PI * 2 * i) / 8;
-        const velocity = 40 + Math.random() * 30;
-        const dx = Math.cos(angle) * velocity;
-        const dy = Math.sin(angle) * velocity;
-        particle.animate([
-          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
-          { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
-        ], {
-          duration: 400,
-          easing: 'ease-out',
-          fill: 'forwards'
-        }).onfinish = () => particle.remove();
-      }
-    }
-
-    function move(direction) {
-      if (gameOver) return;
-      initAudio();
-      const oldBoard = board.map(row => row.slice());
-      let moved = false;
-      const mergedIds = [];
-      // 合体後のタイル情報を一時保存
-      const mergedTiles = []; // { id, value, row, col }
-
-      const applyRow = (r, newRow) => {
-        if (JSON.stringify(oldBoard[r]) !== JSON.stringify(newRow)) {
-          moved = true;
-        }
-        board[r] = newRow;
-      };
-
-      const applyCol = (c, newCol) => {
-        const oldCol = oldBoard.map(row => row[c]);
-        if (JSON.stringify(oldCol) !== JSON.stringify(newCol)) {
-          moved = true;
-        }
-        for (let r = 0; r < SIZE; r++) board[r][c] = newCol[r];
-      };
-
-      if (direction === 'left') {
-        for (let r = 0; r < SIZE; r++) {
-          const line = [];
-          for (let c = 0; c < SIZE; c++) line.push(board[r][c]);
-          const { newLine, mergedIds: mIds } = slideLine(line);
-          mergedIds.push(...mIds);
-          applyRow(r, newLine);
-        }
-      } else if (direction === 'right') {
-        for (let r = 0; r < SIZE; r++) {
-          const line = [];
-          for (let c = SIZE-1; c >= 0; c--) line.push(board[r][c]);
-          const { newLine, mergedIds: mIds } = slideLine(line);
-          mergedIds.push(...mIds);
-          applyRow(r, newLine.reverse());
-        }
-      } else if (direction === 'up') {
-        for (let c = 0; c < SIZE; c++) {
-          const line = [];
-          for (let r = 0; r < SIZE; r++) line.push(board[r][c]);
-          const { newLine, mergedIds: mIds } = slideLine(line);
-          mergedIds.push(...mIds);
-          applyCol(c, newLine);
-        }
-      } else if (direction === 'down') {
-        for (let c = 0; c < SIZE; c++) {
-          const line = [];
-          for (let r = SIZE-1; r >= 0; r--) line.push(board[r][c]);
-          const { newLine, mergedIds: mIds } = slideLine(line);
-          mergedIds.push(...mIds);
-          applyCol(c, newLine.reverse());
+      function removeTileElement(id) {
+        if (tileElements[id]) {
+          tileElements[id].remove();
+          delete tileElements[id];
         }
       }
 
-      if (moved) {
-        // 消えるタイルを削除
-        mergedIds.forEach(id => removeTileElement(id));
-        // 合体したタイルを探して演出
-        for (let r = 0; r < SIZE; r++) {
-          for (let c = 0; c < SIZE; c++) {
-            const tile = board[r][c];
-            if (tile && tile.mergedFrom) {
-              const el = tileElements[tile.id];
+      function updateTileVisual(tile, el) {
+        if (parseInt(el.textContent) !== tile.value) {
+          el.textContent = tile.value;
+          el.className = 'tile';
+          el.classList.add('tile-' + tile.value);
+        }
+      }
+
+      function renderBoard() {
+        for (var r = 0; r < SIZE; r++) {
+          for (var c = 0; c < SIZE; c++) {
+            var tile = board[r][c];
+            if (tile) {
+              var el = tileElements[tile.id];
               if (el) {
-                el.classList.add('merged');
-                el.addEventListener('animationend', () => el.classList.remove('merged'), { once: true });
+                var pos = getPosition(r, c);
+                el.style.top = pos.top + 'px';
+                el.style.left = pos.left + 'px';
+                updateTileVisual(tile, el);
               }
-              // 演出呼び出し
-              showScorePopup(tile.value, r, c);
-              burstParticles(r, c);
-              playMergeSound(tile.value);
-              delete tile.mergedFrom;
             }
           }
         }
+        scoreEl.textContent = score;
+        if (score > highScore) {
+          highScore = score;
+          try { localStorage.setItem('2048_highScore', highScore); } catch(e) {}
+          highScoreEl.textContent = 'BEST ' + highScore;
+        }
+      }
+
+      function addRandomTile() {
+        var emptyCells = [];
+        for (var r = 0; r < SIZE; r++) {
+          for (var c = 0; c < SIZE; c++) {
+            if (!board[r][c]) emptyCells.push({r: r, c: c});
+          }
+        }
+        if (emptyCells.length === 0) return;
+        var cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        var value = Math.random() < 0.9 ? 2 : 4;
+        var tile = { id: tileIdCounter++, value: value, row: cell.r, col: cell.c };
+        board[cell.r][cell.c] = tile;
+        var el = createTileElement(tile);
+        var pos = getPosition(cell.r, cell.c);
+        el.style.top = pos.top + 'px';
+        el.style.left = pos.left + 'px';
+        el.classList.add('new');
+        el.addEventListener('animationend', function() { el.classList.remove('new'); }, { once: true });
+      }
+
+      // ラインをスライド＆合体。変更があったかどうかも返す
+      function slideLine(line) {
+        var originalIds = line.map(function(tile) { return tile ? tile.id : null; });
+        var arr = line.filter(function(t) { return t !== null; });
+        var mergedIds = [];
+        for (var i = 0; i < arr.length - 1; i++) {
+          if (arr[i].value === arr[i+1].value) {
+            arr[i] = {
+              id: arr[i].id,
+              value: arr[i].value * 2,
+              mergedFrom: [arr[i].id, arr[i+1].id]
+            };
+            mergedIds.push(arr[i+1].id);
+            arr[i+1] = null;
+          }
+        }
+        arr = arr.filter(function(t) { return t !== null; });
+        while (arr.length < SIZE) arr.push(null);
+
+        var newIds = arr.map(function(tile) { return tile ? tile.id : null; });
+        var changed = (JSON.stringify(originalIds) !== JSON.stringify(newIds));
+        return { newLine: arr, mergedIds: mergedIds, changed: changed };
+      }
+
+      function shakeBoard() {
+        boardEl.classList.add('shake');
+        boardEl.addEventListener('animationend', function() { boardEl.classList.remove('shake'); }, { once: true });
+      }
+
+      function showScorePopup(value, row, col) {
+        var pos = getPosition(row, col);
+        var popup = document.createElement('div');
+        popup.className = 'score-popup';
+        popup.textContent = '+' + value;
+        popup.style.top = pos.top + 'px';
+        popup.style.left = pos.left + 'px';
+        boardEl.appendChild(popup);
+        popup.addEventListener('animationend', function() { popup.remove(); });
+      }
+
+      function burstParticles(row, col) {
+        var pos = getPosition(row, col);
+        var centerX = pos.left + CELL_SIZE/2;
+        var centerY = pos.top + CELL_SIZE/2;
+        for (var i = 0; i < 8; i++) {
+          var particle = document.createElement('div');
+          particle.className = 'particle';
+          particle.style.background = 'hsl(' + (Math.random() * 60 + 30) + ', 100%, 60%)';
+          particle.style.left = centerX + 'px';
+          particle.style.top = centerY + 'px';
+          boardEl.appendChild(particle);
+          var angle = (Math.PI * 2 * i) / 8;
+          var velocity = 40 + Math.random() * 30;
+          var dx = Math.cos(angle) * velocity;
+          var dy = Math.sin(angle) * velocity;
+          particle.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: 'translate(' + dx + 'px, ' + dy + 'px) scale(0)', opacity: 0 }
+          ], {
+            duration: 400,
+            easing: 'ease-out',
+            fill: 'forwards'
+          }).onfinish = function() { particle.remove(); };
+        }
+      }
+
+      function move(direction) {
+        if (gameOver) return;
+        initAudio();
+        var moved = false;
+        var mergedIds = [];
+
+        if (direction === 'left') {
+          for (var r = 0; r < SIZE; r++) {
+            var line = [];
+            for (var c = 0; c < SIZE; c++) line.push(board[r][c]);
+            var res = slideLine(line);
+            mergedIds = mergedIds.concat(res.mergedIds);
+            if (res.changed) moved = true;
+            board[r] = res.newLine;
+          }
+        } else if (direction === 'right') {
+          for (var r = 0; r < SIZE; r++) {
+            var line = [];
+            for (var c = SIZE-1; c >= 0; c--) line.push(board[r][c]);
+            var res = slideLine(line);
+            mergedIds = mergedIds.concat(res.mergedIds);
+            if (res.changed) moved = true;
+            board[r] = res.newLine.reverse();
+          }
+        } else if (direction === 'up') {
+          for (var c = 0; c < SIZE; c++) {
+            var line = [];
+            for (var r = 0; r < SIZE; r++) line.push(board[r][c]);
+            var res = slideLine(line);
+            mergedIds = mergedIds.concat(res.mergedIds);
+            if (res.changed) moved = true;
+            for (var r2 = 0; r2 < SIZE; r2++) board[r2][c] = res.newLine[r2];
+          }
+        } else if (direction === 'down') {
+          for (var c = 0; c < SIZE; c++) {
+            var line = [];
+            for (var r = SIZE-1; r >= 0; r--) line.push(board[r][c]);
+            var res = slideLine(line);
+            mergedIds = mergedIds.concat(res.mergedIds);
+            if (res.changed) moved = true;
+            var reversed = res.newLine.reverse();
+            for (var r2 = 0; r2 < SIZE; r2++) board[r2][c] = reversed[r2];
+          }
+        }
+
+        if (moved) {
+          mergedIds.forEach(function(id) { removeTileElement(id); });
+          for (var r = 0; r < SIZE; r++) {
+            for (var c = 0; c < SIZE; c++) {
+              var tile = board[r][c];
+              if (tile && tile.mergedFrom) {
+                var el = tileElements[tile.id];
+                if (el) {
+                  el.classList.add('merged');
+                  el.addEventListener('animationend', function() { el.classList.remove('merged'); }, { once: true });
+                }
+                showScorePopup(tile.value, r, c);
+                burstParticles(r, c);
+                playMergeSound(tile.value);
+                delete tile.mergedFrom;
+              }
+            }
+          }
+          addRandomTile();
+          renderBoard();
+          checkGameOver();
+        } else {
+          shakeBoard();
+        }
+      }
+
+      function checkGameOver() {
+        for (var r = 0; r < SIZE; r++) {
+          for (var c = 0; c < SIZE; c++) {
+            if (!board[r][c]) return;
+            if (c < SIZE-1 && board[r][c].value === board[r][c+1].value) return;
+            if (r < SIZE-1 && board[r][c].value === board[r+1][c].value) return;
+          }
+        }
+        gameOver = true;
+        messageEl.textContent = '';
+        playGameOverSound();
+        overlay.classList.add('active');
+      }
+
+      function restart() {
+        Object.keys(tileElements).forEach(function(id) { removeTileElement(parseInt(id)); });
+        board = Array.from({length: SIZE}, function() { return Array(SIZE).fill(null); });
+        score = 0;
+        gameOver = false;
+        messageEl.textContent = '';
+        overlay.classList.remove('active');
+        addRandomTile();
         addRandomTile();
         renderBoard();
-        checkGameOver();
-      } else {
-        shakeBoard();
       }
-    }
 
-    function checkGameOver() {
-      for (let r = 0; r < SIZE; r++) {
-        for (let c = 0; c < SIZE; c++) {
-          if (!board[r][c]) return;
-          if (c < SIZE-1 && board[r][c].value === board[r][c+1].value) return;
-          if (r < SIZE-1 && board[r][c].value === board[r+1][c].value) return;
+      skinSelect.addEventListener('change', function(e) {
+        document.body.className = e.target.value;
+      });
+      restartBtn.addEventListener('click', restart);
+      overlayRestartBtn.addEventListener('click', restart);
+
+      document.addEventListener('keydown', function(e) {
+        e.preventDefault();
+        if (e.key === 'ArrowLeft') move('left');
+        else if (e.key === 'ArrowRight') move('right');
+        else if (e.key === 'ArrowUp') move('up');
+        else if (e.key === 'ArrowDown') move('down');
+      });
+
+      var touchStartX = 0, touchStartY = 0;
+      boardEl.addEventListener('touchstart', function(e) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      });
+      boardEl.addEventListener('touchend', function(e) {
+        var dx = e.changedTouches[0].clientX - touchStartX;
+        var dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          move(dx > 0 ? 'right' : 'left');
+        } else {
+          move(dy > 0 ? 'down' : 'up');
         }
-      }
-      gameOver = true;
-      messageEl.textContent = '';
-      playGameOverSound();
-      overlay.classList.add('active');
-    }
+      });
 
-    function restart() {
-      Object.keys(tileElements).forEach(id => removeTileElement(parseInt(id)));
-      board = Array.from({length: SIZE}, () => Array(SIZE).fill(null));
-      score = 0;
-      gameOver = false;
-      messageEl.textContent = '';
-      overlay.classList.remove('active');
-      addRandomTile();
-      addRandomTile();
-      renderBoard();
-    }
-
-    // ---- イベント ----
-    skinSelect.addEventListener('change', (e) => {
-      document.body.className = e.target.value;
-    });
-    restartBtn.addEventListener('click', restart);
-    overlayRestartBtn.addEventListener('click', restart);
-
-    document.addEventListener('keydown', e => {
-      e.preventDefault();
-      if (e.key === 'ArrowLeft') move('left');
-      else if (e.key === 'ArrowRight') move('right');
-      else if (e.key === 'ArrowUp') move('up');
-      else if (e.key === 'ArrowDown') move('down');
-    });
-
-    let touchStartX = 0, touchStartY = 0;
-    boardEl.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    });
-    boardEl.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        move(dx > 0 ? 'right' : 'left');
-      } else {
-        move(dy > 0 ? 'down' : 'up');
-      }
-    });
-
-    // 初回起動
-    restart();
+      createRain();
+      restart();
+    })();
   </script>
 </body>
 </html>
