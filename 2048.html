@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>2048 パワーアップ完全版</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      background: var(--bg);
+      transition: background 0.3s;
+      user-select: none;
+      overflow: hidden;
+    }
+    :root {
+      --bg: #faf8ef;
+      --board-bg: #bbada0;
+      --cell-bg: #cdc1b4;
+      --text: #776e65;
+      --tile-2-bg: #eee4da;
+      --tile-4-bg: #ede0c8;
+      --tile-8-bg: #f2b179;
+      --tile-16-bg: #f59563;
+      --tile-32-bg: #f67c5f;
+      --tile-64-bg: #f65e3b;
+      --tile-128-bg: #edcf72;
+      --tile-256-bg: #edcc61;
+      --tile-512-bg: #edc850;
+      --tile-1024-bg: #edc53f;
+      --tile-2048-bg: #edc22e;
+      --tile-color-light: #f9f6f2;
+      --tile-color-dark: #776e65;
+    }
+    .theme-dark {
+      --bg: #1e1e2f;
+      --board-bg: #2e2e4e;
+      --cell-bg: #3e3e5e;
+      --text: #e0e0e0;
+      --tile-2-bg: #4a4a6a;
+      --tile-4-bg: #5a5a7a;
+      --tile-8-bg: #ff6b6b;
+      --tile-16-bg: #ee5a24;
+      --tile-32-bg: #e84118;
+      --tile-64-bg: #c23616;
+      --tile-128-bg: #fbc531;
+      --tile-256-bg: #e1b12c;
+      --tile-512-bg: #44bd32;
+      --tile-1024-bg: #4cd137;
+      --tile-2048-bg: #00a8ff;
+      --tile-color-light: #fff;
+      --tile-color-dark: #fff;
+    }
+    .theme-ocean {
+      --bg: #e0f7fa;
+      --board-bg: #0077b6;
+      --cell-bg: #00b4d8;
+      --text: #03045e;
+      --tile-2-bg: #90e0ef;
+      --tile-4-bg: #48cae4;
+      --tile-8-bg: #00b4d8;
+      --tile-16-bg: #0096c7;
+      --tile-32-bg: #0077b6;
+      --tile-64-bg: #023e8a;
+      --tile-128-bg: #ffb703;
+      --tile-256-bg: #fb8500;
+      --tile-512-bg: #ff9e00;
+      --tile-1024-bg: #ff9100;
+      --tile-2048-bg: #ff6d00;
+      --tile-color-light: #fff;
+      --tile-color-dark: #fff;
+    }
+    .theme-forest {
+      --bg: #d4edda;
+      --board-bg: #2d6a4f;
+      --cell-bg: #52b788;
+      --text: #1b4332;
+      --tile-2-bg: #95d5b2;
+      --tile-4-bg: #74c69d;
+      --tile-8-bg: #52b788;
+      --tile-16-bg: #40916c;
+      --tile-32-bg: #2d6a4f;
+      --tile-64-bg: #1b4332;
+      --tile-128-bg: #f4a261;
+      --tile-256-bg: #e76f51;
+      --tile-512-bg: #e9c46a;
+      --tile-1024-bg: #f4a261;
+      --tile-2048-bg: #e76f51;
+      --tile-color-light: #fff;
+      --tile-color-dark: #fff;
+    }
+    .theme-sunset {
+      --bg: #fff3e0;
+      --board-bg: #ff8a65;
+      --cell-bg: #ffccbc;
+      --text: #bf360c;
+      --tile-2-bg: #ffe0b2;
+      --tile-4-bg: #ffcc80;
+      --tile-8-bg: #ffb74d;
+      --tile-16-bg: #ffa726;
+      --tile-32-bg: #ff9800;
+      --tile-64-bg: #fb8c00;
+      --tile-128-bg: #f57c00;
+      --tile-256-bg: #ef6c00;
+      --tile-512-bg: #e65100;
+      --tile-1024-bg: #d84315;
+      --tile-2048-bg: #bf360c;
+      --tile-color-light: #fff;
+      --tile-color-dark: #fff;
+    }
+    .theme-neon {
+      --bg: #0d0d0d;
+      --board-bg: #1a1a1a;
+      --cell-bg: #333;
+      --text: #0ff;
+      --tile-2-bg: #ff00ff;
+      --tile-4-bg: #ff0080;
+      --tile-8-bg: #ff0040;
+      --tile-16-bg: #ff4000;
+      --tile-32-bg: #ff8000;
+      --tile-64-bg: #ffbf00;
+      --tile-128-bg: #ffff00;
+      --tile-256-bg: #bfff00;
+      --tile-512-bg: #80ff00;
+      --tile-1024-bg: #00ff40;
+      --tile-2048-bg: #00ffff;
+      --tile-color-light: #000;
+      --tile-color-dark: #fff;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    h1 { font-size: 32px; color: var(--text); }
+    .score-box {
+      background: var(--board-bg);
+      color: #fff;
+      padding: 5px 15px;
+      border-radius: 5px;
+      text-align: center;
+    }
+    .score-label { font-size: 12px; }
+    #score { font-size: 24px; font-weight: bold; }
+    #high-score {
+      font-size: 14px;
+      color: #ffeaa7;
+    }
+    #message {
+      font-size: 20px;
+      height: 30px;
+      color: #e74c3c;
+      margin: 5px 0;
+    }
+    #board-container {
+      position: relative;
+      width: 430px;
+      height: 430px;
+      background: var(--board-bg);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      transition: transform 0.1s ease;
+    }
+    .shake {
+      animation: shake 0.2s ease;
+    }
+    @keyframes shake {
+      0%   { transform: translateX(0); }
+      25%  { transform: translateX(-5px); }
+      50%  { transform: translateX(5px); }
+      75%  { transform: translateX(-3px); }
+      100% { transform: translateX(0); }
+    }
+    .cell-bg {
+      width: 95px;
+      height: 95px;
+      background: var(--cell-bg);
+      border-radius: 5px;
+    }
+    .tile {
+      position: absolute;
+      width: 95px;
+      height: 95px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 35px;
+      font-weight: bold;
+      color: var(--tile-color-dark);
+      background: var(--cell-bg);
+      transition: top 0.15s ease-in-out, left 0.15s ease-in-out, transform 0.1s;
+      z-index: 2;
+    }
+    .tile-2    { background: var(--tile-2-bg); }
+    .tile-4    { background: var(--tile-4-bg); }
+    .tile-8    { background: var(--tile-8-bg); color: var(--tile-color-light); }
+    .tile-16   { background: var(--tile-16-bg); color: var(--tile-color-light); }
+    .tile-32   { background: var(--tile-32-bg); color: var(--tile-color-light); }
+    .tile-64   { background: var(--tile-64-bg); color: var(--tile-color-light); }
+    .tile-128  { background: var(--tile-128-bg); color: var(--tile-color-light); font-size: 30px; }
+    .tile-256  { background: var(--tile-256-bg); color: var(--tile-color-light); font-size: 30px; }
+    .tile-512  { background: var(--tile-512-bg); color: var(--tile-color-light); font-size: 30px; }
+    .tile-1024 { background: var(--tile-1024-bg); color: var(--tile-color-light); font-size: 25px; }
+    .tile-2048 { background: var(--tile-2048-bg); color: var(--tile-color-light); font-size: 25px; }
+    .tile.merged { animation: pop 0.2s ease; }
+    .tile.new    { animation: appear 0.2s ease; }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    @keyframes appear {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    /* スコアポップアップ */
+    .score-popup {
+      position: absolute;
+      font-weight: bold;
+      font-size: 24px;
+      color: var(--text);
+      z-index: 10;
+      pointer-events: none;
+      animation: floatUp 0.8s ease-out forwards;
+    }
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    /* パーティクル */
+    .particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: gold;
+      z-index: 9;
+      pointer-events: none;
+    }
+    /* ゲームオーバーオーバーレイ */
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 100;
+      visibility: hidden;
+    }
+    .overlay.active {
+      visibility: visible;
+    }
+    .overlay-text {
+      color: white;
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .overlay button {
+      padding: 15px 30px;
+      font-size: 24px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      background: #fff;
+      color: #333;
+      font-weight: bold;
+    }
+    .controls {
+      margin-top: 15px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    button, select {
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      background: var(--board-bg);
+      color: #fff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>2048</h1>
+    <div class="score-box">
+      <div class="score-label">SCORE</div>
+      <div id="score">0</div>
+      <div id="high-score">BEST 0</div>
+    </div>
+  </div>
+  <div id="message"></div>
+  <div id="board-container">
+    <!-- 背景セル -->
+  </div>
+  <div class="controls">
+    <button id="restart-btn">リスタート</button>
+    <select id="skin-select">
+      <option value="">クラシック</option>
+      <option value="theme-dark">ダーク</option>
+      <option value="theme-ocean">海</option>
+      <option value="theme-forest">森</option>
+      <option value="theme-sunset">サンセット</option>
+      <option value="theme-neon">ネオン</option>
+    </select>
+  </div>
+  <!-- ゲームオーバーオーバーレイ -->
+  <div id="overlay" class="overlay">
+    <div class="overlay-text">GAME OVER</div>
+    <button id="overlay-restart">もう一度</button>
+  </div>
+
+  <script>
+    // ---- サウンドエンジン ----
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx;
+    function initAudio() {
+      if (!audioCtx) audioCtx = new AudioContext();
+    }
+    function playTone(freq, duration, type = 'sine', volume = 0.3) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.value = volume;
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    }
+    function playMergeSound(value) {
+      if (!audioCtx) return;
+      // 数字が大きいほど高音＆豊かに
+      const baseFreq = 300 + Math.log2(value) * 50;
+      playTone(baseFreq, 0.2, 'sine', 0.3);
+      setTimeout(() => playTone(baseFreq * 1.5, 0.15, 'sine', 0.2), 0.1);
+    }
+    function playGameOverSound() {
+      if (!audioCtx) return;
+      playTone(200, 0.4, 'square', 0.2);
+      setTimeout(() => playTone(150, 0.5, 'square', 0.2), 0.3);
+    }
+
+    // ---- ゲームロジック ----
+    const SIZE = 4;
+    const GAP = 10;
+    const CELL_SIZE = 95;
+    let board = Array.from({length: SIZE}, () => Array(SIZE).fill(null));
+    let score = 0;
+    let highScore = 0;
+    let gameOver = false;
+    let tileIdCounter = 0;
+    const tileElements = {};
+
+    const boardEl = document.getElementById('board-container');
+    const scoreEl = document.getElementById('score');
+    const highScoreEl = document.getElementById('high-score');
+    const messageEl = document.getElementById('message');
+    const restartBtn = document.getElementById('restart-btn');
+    const skinSelect = document.getElementById('skin-select');
+    const overlay = document.getElementById('overlay');
+    const overlayRestartBtn = document.getElementById('overlay-restart');
+
+    // ---- 背景セル生成 ----
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'cell-bg';
+      boardEl.appendChild(cell);
+    }
+
+    // ---- ハイスコア読み込み ----
+    try {
+      const saved = localStorage.getItem('2048_highScore');
+      if (saved) highScore = parseInt(saved) || 0;
+    } catch(e) {}
+    highScoreEl.textContent = `BEST ${highScore}`;
+
+    function getPosition(row, col) {
+      return {
+        top: GAP + row * (CELL_SIZE + GAP),
+        left: GAP + col * (CELL_SIZE + GAP)
+      };
+    }
+
+    function createTileElement(tile) {
+      if (tileElements[tile.id]) return tileElements[tile.id];
+      const el = document.createElement('div');
+      el.className = 'tile';
+      el.textContent = tile.value;
+      el.classList.add(`tile-${tile.value}`);
+      el.id = `tile-${tile.id}`;
+      boardEl.appendChild(el);
+      tileElements[tile.id] = el;
+      return el;
+    }
+
+    function removeTileElement(id) {
+      if (tileElements[id]) {
+        tileElements[id].remove();
+        delete tileElements[id];
+      }
+    }
+
+    function updateTileVisual(tile, el) {
+      if (parseInt(el.textContent) !== tile.value) {
+        el.textContent = tile.value;
+        el.className = 'tile';
+        el.classList.add(`tile-${tile.value}`);
+      }
+    }
+
+    function renderBoard() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          const tile = board[r][c];
+          if (tile) {
+            const el = tileElements[tile.id];
+            if (el) {
+              const { top, left } = getPosition(r, c);
+              el.style.top = top + 'px';
+              el.style.left = left + 'px';
+              updateTileVisual(tile, el);
+            }
+          }
+        }
+      }
+      scoreEl.textContent = score;
+      // ハイスコア更新
+      if (score > highScore) {
+        highScore = score;
+        try { localStorage.setItem('2048_highScore', highScore); } catch(e) {}
+        highScoreEl.textContent = `BEST ${highScore}`;
+      }
+    }
+
+    function addRandomTile() {
+      const emptyCells = [];
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!board[r][c]) emptyCells.push({r, c});
+        }
+      }
+      if (emptyCells.length === 0) return;
+      const {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      const value = Math.random() < 0.9 ? 2 : 4;
+      const tile = { id: tileIdCounter++, value, row: r, col: c };
+      board[r][c] = tile;
+      const el = createTileElement(tile);
+      const { top, left } = getPosition(r, c);
+      el.style.top = top + 'px';
+      el.style.left = left + 'px';
+      el.classList.add('new');
+      el.addEventListener('animationend', () => el.classList.remove('new'), { once: true });
+    }
+
+    function slideLine(line) {
+      let arr = line.filter(tile => tile !== null);
+      const merged = [];
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i].value === arr[i+1].value) {
+          arr[i] = {
+            id: arr[i].id,
+            value: arr[i].value * 2,
+            mergedFrom: [arr[i].id, arr[i+1].id]
+          };
+          merged.push(arr[i+1].id);
+          arr[i+1] = null;
+        }
+      }
+      arr = arr.filter(tile => tile !== null);
+      while (arr.length < SIZE) arr.push(null);
+      return { newLine: arr, mergedIds: merged };
+    }
+
+    function shakeBoard() {
+      boardEl.classList.add('shake');
+      boardEl.addEventListener('animationend', () => boardEl.classList.remove('shake'), { once: true });
+    }
+
+    // ---- 演出：スコアポップアップ ----
+    function showScorePopup(value, row, col) {
+      const { top, left } = getPosition(row, col);
+      const popup = document.createElement('div');
+      popup.className = 'score-popup';
+      popup.textContent = `+${value}`;
+      popup.style.top = top + 'px';
+      popup.style.left = left + 'px';
+      boardEl.appendChild(popup);
+      popup.addEventListener('animationend', () => popup.remove());
+    }
+
+    // ---- 演出：パーティクル ----
+    function burstParticles(row, col) {
+      const { top, left } = getPosition(row, col);
+      const centerX = left + CELL_SIZE/2;
+      const centerY = top + CELL_SIZE/2;
+      for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.background = `hsl(${Math.random() * 60 + 30}, 100%, 60%)`;
+        particle.style.left = centerX + 'px';
+        particle.style.top = centerY + 'px';
+        boardEl.appendChild(particle);
+        const angle = (Math.PI * 2 * i) / 8;
+        const velocity = 40 + Math.random() * 30;
+        const dx = Math.cos(angle) * velocity;
+        const dy = Math.sin(angle) * velocity;
+        particle.animate([
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+          { transform: `translate(${dx}px, ${dy}px) scale(0)`, opacity: 0 }
+        ], {
+          duration: 400,
+          easing: 'ease-out',
+          fill: 'forwards'
+        }).onfinish = () => particle.remove();
+      }
+    }
+
+    function move(direction) {
+      if (gameOver) return;
+      initAudio();
+      const oldBoard = board.map(row => row.slice());
+      let moved = false;
+      const mergedIds = [];
+      // 合体後のタイル情報を一時保存
+      const mergedTiles = []; // { id, value, row, col }
+
+      const applyRow = (r, newRow) => {
+        if (JSON.stringify(oldBoard[r]) !== JSON.stringify(newRow)) {
+          moved = true;
+        }
+        board[r] = newRow;
+      };
+
+      const applyCol = (c, newCol) => {
+        const oldCol = oldBoard.map(row => row[c]);
+        if (JSON.stringify(oldCol) !== JSON.stringify(newCol)) {
+          moved = true;
+        }
+        for (let r = 0; r < SIZE; r++) board[r][c] = newCol[r];
+      };
+
+      if (direction === 'left') {
+        for (let r = 0; r < SIZE; r++) {
+          const line = [];
+          for (let c = 0; c < SIZE; c++) line.push(board[r][c]);
+          const { newLine, mergedIds: mIds } = slideLine(line);
+          mergedIds.push(...mIds);
+          applyRow(r, newLine);
+        }
+      } else if (direction === 'right') {
+        for (let r = 0; r < SIZE; r++) {
+          const line = [];
+          for (let c = SIZE-1; c >= 0; c--) line.push(board[r][c]);
+          const { newLine, mergedIds: mIds } = slideLine(line);
+          mergedIds.push(...mIds);
+          applyRow(r, newLine.reverse());
+        }
+      } else if (direction === 'up') {
+        for (let c = 0; c < SIZE; c++) {
+          const line = [];
+          for (let r = 0; r < SIZE; r++) line.push(board[r][c]);
+          const { newLine, mergedIds: mIds } = slideLine(line);
+          mergedIds.push(...mIds);
+          applyCol(c, newLine);
+        }
+      } else if (direction === 'down') {
+        for (let c = 0; c < SIZE; c++) {
+          const line = [];
+          for (let r = SIZE-1; r >= 0; r--) line.push(board[r][c]);
+          const { newLine, mergedIds: mIds } = slideLine(line);
+          mergedIds.push(...mIds);
+          applyCol(c, newLine.reverse());
+        }
+      }
+
+      if (moved) {
+        // 消えるタイルを削除
+        mergedIds.forEach(id => removeTileElement(id));
+        // 合体したタイルを探して演出
+        for (let r = 0; r < SIZE; r++) {
+          for (let c = 0; c < SIZE; c++) {
+            const tile = board[r][c];
+            if (tile && tile.mergedFrom) {
+              const el = tileElements[tile.id];
+              if (el) {
+                el.classList.add('merged');
+                el.addEventListener('animationend', () => el.classList.remove('merged'), { once: true });
+              }
+              // 演出呼び出し
+              showScorePopup(tile.value, r, c);
+              burstParticles(r, c);
+              playMergeSound(tile.value);
+              delete tile.mergedFrom;
+            }
+          }
+        }
+        addRandomTile();
+        renderBoard();
+        checkGameOver();
+      } else {
+        shakeBoard();
+      }
+    }
+
+    function checkGameOver() {
+      for (let r = 0; r < SIZE; r++) {
+        for (let c = 0; c < SIZE; c++) {
+          if (!board[r][c]) return;
+          if (c < SIZE-1 && board[r][c].value === board[r][c+1].value) return;
+          if (r < SIZE-1 && board[r][c].value === board[r+1][c].value) return;
+        }
+      }
+      gameOver = true;
+      messageEl.textContent = '';
+      playGameOverSound();
+      overlay.classList.add('active');
+    }
+
+    function restart() {
+      Object.keys(tileElements).forEach(id => removeTileElement(parseInt(id)));
+      board = Array.from({length: SIZE}, () => Array(SIZE).fill(null));
+      score = 0;
+      gameOver = false;
+      messageEl.textContent = '';
+      overlay.classList.remove('active');
+      addRandomTile();
+      addRandomTile();
+      renderBoard();
+    }
+
+    // ---- イベント ----
+    skinSelect.addEventListener('change', (e) => {
+      document.body.className = e.target.value;
+    });
+    restartBtn.addEventListener('click', restart);
+    overlayRestartBtn.addEventListener('click', restart);
+
+    document.addEventListener('keydown', e => {
+      e.preventDefault();
+      if (e.key === 'ArrowLeft') move('left');
+      else if (e.key === 'ArrowRight') move('right');
+      else if (e.key === 'ArrowUp') move('up');
+      else if (e.key === 'ArrowDown') move('down');
+    });
+
+    let touchStartX = 0, touchStartY = 0;
+    boardEl.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+    boardEl.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        move(dx > 0 ? 'right' : 'left');
+      } else {
+        move(dy > 0 ? 'down' : 'up');
+      }
+    });
+
+    // 初回起動
+    restart();
+  </script>
+</body>
+</html>
