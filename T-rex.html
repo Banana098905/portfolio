@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Dino Pixel Runner | ランキング付き</title>
+  <title>Dino Pixel Runner | エフェクト+サウンド版</title>
   <style>
     * {
       margin: 0;
@@ -230,12 +230,13 @@
       { name: 'cactus', width: 12, height: 28, pixelColors: ['#4a6a3a','#3a5530'], yOffset: 0 },
       { name: 'cactusBig', width: 16, height: 34, pixelColors: ['#5a7a44','#3e5a2e'], yOffset: 0 },
       { name: 'rock', width: 18, height: 18, pixelColors: ['#7a6a5a','#5a4a3a'], yOffset: 0 },
-      // 鳥：より高く、見た目を鳥らしく (ジャンプしないと当たらない)
       { name: 'bird', width: 22, height: 18, pixelColors: ['#c97a4a','#a5522a'], yOffset: -32, fly: true }
     ];
     
     let spawnDelay = 0;
-    let particles = [];
+    
+    // ========== エフェクト用パーティクル ==========
+    let particles = [];      // 砂煙・ジャンプリング
     
     // ---------- ランキング ----------
     let ranking = [];
@@ -318,17 +319,69 @@
       speedMultiplier = Math.min(2.0, newMult);
     }
     
-    function addDust(x,y){
-      for(let i=0;i<4;i++){
+    // ========== エフェクト追加関数 ==========
+    function addDust(x, y) {
+      for(let i=0;i<5;i++) {
         particles.push({
-          x: x + (Math.random() - 0.5) * 12,
+          x: x + (Math.random() - 0.5) * 14,
           y: y + 4,
-          vx: (Math.random() - 0.5) * 1.1,
+          vx: (Math.random() - 0.5) * 1.2,
           vy: -Math.random() * 1.8,
           life: 0.5,
-          color: `#b8a87a`
+          color: '#b8a87a'
         });
       }
+    }
+    
+    function addJumpRing(x, y) {
+      for(let i=0;i<8;i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        particles.push({
+          x: x + 12,
+          y: y + 20,
+          vx: Math.cos(angle) * 1.5,
+          vy: Math.sin(angle) * 1.2 - 1,
+          life: 0.45,
+          color: '#eedd99'
+        });
+      }
+    }
+    
+    // 衝突時エフェクト（クラッシュ）
+    function addCrashEffect(x, y) {
+      for(let i=0;i<12;i++) {
+        particles.push({
+          x: x + 12 + (Math.random() - 0.5) * 20,
+          y: y + 14 + (Math.random() - 0.5) * 20,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.5) * 3 - 1,
+          life: 0.6,
+          color: '#ff8866'
+        });
+      }
+    }
+    
+    // ========== 効果音 (Web Audio) ==========
+    let audioCtx = null;
+    function playSound(type) {
+      try {
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        let freq = 0;
+        if(type === 'jump') freq = 780;
+        else if(type === 'land') freq = 540;
+        else if(type === 'crash') freq = 320;
+        else return;
+        osc.frequency.value = freq;
+        gain.gain.value = 0.12;
+        osc.start();
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch(e) { /* 自動再生ポリシー対策: ユーザーアクション後に鳴る */ }
     }
     
     function jump(){
@@ -337,12 +390,16 @@
         dino.vy = dino.jumpPower;
         dino.grounded = false;
         addDust(dino.x + DINO_W/2, GROUND_Y);
+        addJumpRing(dino.x, dino.y);
+        playSound('jump');
       }
     }
     
     function gameOver(){
       if(!gameRunning) return;
       gameRunning = false;
+      addCrashEffect(dino.x, dino.y);
+      playSound('crash');
       if(score > 0){
         addScoreToRanking(score);
         saveBestScore();
@@ -382,12 +439,14 @@
       dino.vy += dino.gravity;
       dino.y += dino.vy;
       if(dino.y >= GROUND_Y - DINO_H){
+        if(!dino.grounded) {
+          // 着地エフェクト＋音
+          addDust(dino.x + DINO_W/2, GROUND_Y);
+          playSound('land');
+        }
         dino.y = GROUND_Y - DINO_H;
         dino.vy = 0;
-        if(!dino.grounded){
-          dino.grounded = true;
-          addDust(dino.x + DINO_W/2, GROUND_Y);
-        }
+        dino.grounded = true;
       }
       if(dino.y < GROUND_Y - DINO_H - 55){
         dino.y = GROUND_Y - DINO_H - 55;
@@ -399,7 +458,6 @@
         const obs = obstacles[i];
         obs.x -= currentSpeed;
         
-        // 衝突判定 (調整済み)
         let dinoLeft = dino.x + 5;
         let dinoRight = dino.x + DINO_W - 7;
         let dinoTop = dino.y + 4;
@@ -449,7 +507,7 @@
       }
     }
     
-    // ---------- 雲 (純粋な背景、衝突なし) ----------
+    // ---------- 雲 ----------
     let clouds = [];
     function initClouds(){
       for(let i=0;i<3;i++){
@@ -474,7 +532,7 @@
       }
     }
     
-    // ========== 描画 (鳥をはっきり鳥に) ==========
+    // ========== 描画 ==========
     function drawDinoPixel(){
       const dinoSprite = [
         [0,0,1,1,1,0,0,0],
@@ -523,19 +581,13 @@
         }
       }
       else if(obs.type === 'bird'){
-        // はっきり「鳥」とわかるドット絵 (赤茶色、くちばし)
         ctx.fillStyle = obs.pixelColors[0];
-        // 胴体
         ctx.fillRect(x+4, y+8, 14, 7);
-        // 翼
         ctx.fillRect(x+2, y+6, 5, 4);
         ctx.fillRect(x+15, y+6, 5, 4);
-        // 頭
         ctx.fillRect(x+10, y+4, 6, 5);
-        // くちばし (黄色)
         ctx.fillStyle = '#dd9944';
         ctx.fillRect(x+16, y+5, 3, 2);
-        // 目
         ctx.fillStyle = '#000';
         ctx.fillRect(x+11, y+6, 1, 1);
         ctx.fillRect(x+13, y+6, 1, 1);
@@ -584,11 +636,22 @@
       }
     }
     
+    function drawSpeedLines(){
+      if(speedMultiplier > 1.2){
+        ctx.globalAlpha = 0.2;
+        ctx.fillStyle = '#f0d89a';
+        for(let i=0;i<6;i++){
+          let pos = (frame*5 + i*35) % canvas.width;
+          ctx.fillRect(pos, GROUND_Y-5, 12, 2);
+        }
+        ctx.globalAlpha = 1;
+      }
+    }
+    
     function draw(){
       ctx.fillStyle = '#192135';
       ctx.fillRect(0,0,canvas.width,canvas.height);
       drawStars();
-      // 月
       ctx.fillStyle = '#eeddaa';
       for(let i=0;i<5;i++){
         ctx.fillRect(canvas.width-48 + i*3, 32, 2, 2);
@@ -599,6 +662,7 @@
       for(let obs of obstacles) drawObstaclePixel(obs);
       drawDinoPixel();
       for(let p of particles) { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); }
+      drawSpeedLines();
       
       if(!gameRunning){
         ctx.font = "bold 24px 'Courier New'";
@@ -607,16 +671,6 @@
         ctx.font = "12px monospace";
         ctx.fillStyle = "#c8b580";
         ctx.fillText("スペース/クリックで再挑戦", canvas.width/2-120, canvas.height/2+10);
-      }
-      
-      if(gameRunning && speedMultiplier > 1.2){
-        ctx.globalAlpha = 0.2;
-        ctx.fillStyle = '#f0d89a';
-        for(let i=0;i<6;i++){
-          let pos = (frame*5 + i*35) % canvas.width;
-          ctx.fillRect(pos, GROUND_Y-5, 12, 2);
-        }
-        ctx.globalAlpha = 1;
       }
     }
     

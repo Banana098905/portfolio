@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>オンライン掲示板</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .post-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .post-form input, .post-form textarea {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    .post-form textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+    .file-label {
+      display: inline-block;
+      padding: 8px 15px;
+      background: #4CAF50;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .file-label input {
+      display: none;
+    }
+    .preview-img {
+      max-width: 100%;
+      max-height: 150px;
+      margin-top: 10px;
+      border-radius: 5px;
+      display: none;
+    }
+    .submit-btn {
+      padding: 10px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .submit-btn:disabled {
+      background: #aaa;
+      cursor: not-allowed;
+    }
+    .post {
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+    }
+    .post .name {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .post .message {
+      color: #555;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .post img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 5px;
+    }
+    .post .time {
+      font-size: 12px;
+      color: #999;
+      margin-top: 8px;
+    }
+    .loading {
+      text-align: center;
+      color: #999;
+      padding: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🐾 みんなの掲示板</h1>
+
+    <!-- 投稿フォーム -->
+    <div class="post-form">
+      <input type="text" id="nameInput" placeholder="なまえ（任意）" maxlength="20">
+      <textarea id="messageInput" placeholder="メッセージを入力（必須）" required></textarea>
+      <label class="file-label">
+        📷 画像を選択（任意）
+        <input type="file" id="imageInput" accept="image/*">
+      </label>
+      <img id="preview" class="preview-img" alt="プレビュー">
+      <button class="submit-btn" id="submitBtn">投稿する</button>
+    </div>
+
+    <!-- 投稿一覧 -->
+    <div id="postsContainer">
+      <div class="loading">読み込み中...</div>
+    </div>
+  </div>
+
+  <script>
+    // ---- ここをあなたのFirebase Configに書き換えてください ----
+    const firebaseConfig = {
+      apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXX",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abc123def456"
+    };
+    // ------------------------------------------------------
+
+    // Firebase初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const postsRef = db.collection("posts");
+
+    // UI要素
+    const nameInput = document.getElementById('nameInput');
+    const messageInput = document.getElementById('messageInput');
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    const submitBtn = document.getElementById('submitBtn');
+    const postsContainer = document.getElementById('postsContainer');
+
+    let selectedImageBase64 = null;
+
+    // 画像プレビュー
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) {
+        preview.style.display = 'none';
+        selectedImageBase64 = null;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          // リサイズ（最大幅300px）
+          const canvas = document.createElement('canvas');
+          const maxWidth = 300;
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = (maxWidth / width) * height;
+            width = maxWidth;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          preview.src = selectedImageBase64;
+          preview.style.display = 'block';
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 投稿処理
+    submitBtn.addEventListener('click', async () => {
+      const name = nameInput.value.trim();
+      const message = messageInput.value.trim();
+      if (!message) {
+        alert('メッセージを入力してください');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = '送信中...';
+
+      try {
+        await postsRef.add({
+          name: name || 'ななし',
+          message: message,
+          imageBase64: selectedImageBase64 || null,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        // フォームをクリア
+        nameInput.value = '';
+        messageInput.value = '';
+        imageInput.value = '';
+        preview.style.display = 'none';
+        selectedImageBase64 = null;
+      } catch (error) {
+        console.error('投稿エラー:', error);
+        alert('投稿に失敗しました。コンソールを見てください');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '投稿する';
+      }
+    });
+
+    // リアルタイムで投稿を取得
+    postsRef.orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+      postsContainer.innerHTML = '';
+      if (snapshot.empty) {
+        postsContainer.innerHTML = '<div class="loading">まだ投稿がありません</div>';
+        return;
+      }
+      snapshot.forEach((doc) => {
+        const post = doc.data();
+        const div = document.createElement('div');
+        div.className = 'post';
+
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'name';
+        nameDiv.textContent = post.name;
+        div.appendChild(nameDiv);
+
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message';
+        msgDiv.textContent = post.message;
+        div.appendChild(msgDiv);
+
+        if (post.imageBase64) {
+          const img = document.createElement('img');
+          img.src = post.imageBase64;
+          img.alt = '投稿画像';
+          div.appendChild(img);
+        }
+
+        const timeDiv = document.createElement('div');
+        timeDiv.className = 'time';
+        if (post.timestamp) {
+          timeDiv.textContent = new Date(post.timestamp.toDate()).toLocaleString('ja-JP');
+        } else {
+          timeDiv.textContent = '日時不明';
+        }
+        div.appendChild(timeDiv);
+
+        postsContainer.appendChild(div);
+      });
+    }, (error) => {
+      console.error('取得エラー:', error);
+      postsContainer.innerHTML = '<div class="loading">読み込みに失敗しました</div>';
+    });
+  </script>
+</body>
+</html>
