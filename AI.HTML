@@ -13,12 +13,12 @@
       --surface: #1a1a1f;
       --surface2: #222228;
       --border: rgba(255,255,255,0.08);
-      --accent: #4f8ef7;
-      --accent-dim: rgba(79,142,247,0.15);
+      --accent: #f97316;
+      --accent-dim: rgba(249,115,22,0.15);
       --text: #e8e8ee;
       --text-muted: #888896;
-      --user-bg: #1a2540;
-      --user-border: rgba(79,142,247,0.3);
+      --user-bg: #271a0f;
+      --user-border: rgba(249,115,22,0.3);
     }
 
     body {
@@ -34,9 +34,7 @@
     header {
       padding: 14px 20px;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
       background: var(--surface);
       flex-shrink: 0;
     }
@@ -44,7 +42,7 @@
     .avatar {
       width: 34px; height: 34px; border-radius: 50%;
       background: var(--accent-dim);
-      border: 1px solid rgba(79,142,247,0.4);
+      border: 1px solid rgba(249,115,22,0.4);
       display: flex; align-items: center; justify-content: center;
       font-size: 16px;
     }
@@ -84,7 +82,7 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 13px; margin-top: 2px;
     }
-    .ai   .msg-avatar { background: var(--accent-dim); border: 1px solid rgba(79,142,247,0.3); }
+    .ai   .msg-avatar { background: var(--accent-dim); border: 1px solid rgba(249,115,22,0.3); }
     .user .msg-avatar { background: var(--surface2);   border: 1px solid var(--border); }
 
     .bubble {
@@ -94,7 +92,7 @@
       white-space: pre-wrap; word-break: break-word;
     }
     .ai   .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; }
-    .user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); color: #a8c4f5; border-radius: 14px 4px 14px 14px; }
+    .user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); color: #f5c4a0; border-radius: 14px 4px 14px 14px; }
 
     .typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; }
     .typing span {
@@ -129,7 +127,7 @@
       line-height: 1.5; max-height: 120px;
       transition: border-color 0.2s;
     }
-    textarea:focus { border-color: rgba(79,142,247,0.5); }
+    textarea:focus { border-color: rgba(249,115,22,0.5); }
     textarea::placeholder { color: var(--text-muted); }
 
     button {
@@ -159,10 +157,10 @@
 <body>
 
 <header>
-  <div class="avatar">🤖</div>
+  <div class="avatar">⚡</div>
   <div>
     <h1>マイAI</h1>
-    <p>Gemini 2.0 Flash 搭載（無料）</p>
+    <p>Llama 3.3 搭載（Groq・無料）</p>
   </div>
   <div class="status">
     <span class="status-dot"></span>
@@ -172,12 +170,12 @@
 
 <div id="setup-banner">
   ⚙️ <strong>初回設定が必要です。</strong>
-  <code>config.js</code> の <code>WORKER_URL</code> を Cloudflare Worker の URL に書き換えてください。詳しくは README.md を参照。
+  Cloudflare WorkerをDeployしたあと、<code>config.js</code> の <code>WORKER_URL</code> を書き換えてGitHubにPushしてください。
 </div>
 
 <div id="chat">
   <div class="message ai">
-    <div class="msg-avatar">🤖</div>
+    <div class="msg-avatar">⚡</div>
     <div class="bubble">こんにちは！なんでも気軽に話しかけてください。Roblox開発のことでも、なんでも大丈夫ですよ😊</div>
   </div>
 </div>
@@ -215,7 +213,7 @@
     const div = document.createElement('div');
     div.className = 'message ' + role;
     div.innerHTML = `
-      <div class="msg-avatar">${role === 'ai' ? '🤖' : '🧑'}</div>
+      <div class="msg-avatar">${role === 'ai' ? '⚡' : '🧑'}</div>
       <div class="bubble">${escHtml(text)}</div>
     `;
     chat.appendChild(div);
@@ -225,7 +223,7 @@
   function showTyping() {
     const div = document.createElement('div');
     div.className = 'message ai'; div.id = 'typing';
-    div.innerHTML = `<div class="msg-avatar">🤖</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+    div.innerHTML = `<div class="msg-avatar">⚡</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
   }
