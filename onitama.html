@@ -2,287 +2,877 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>鬼玉 Onitama - 強化版</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>鬼玉 Onitama - 雅・改</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    /* ========== テーマ / スキン ========== */
+    :root {
+      --bg-grad-start: #1a1a2e;
+      --bg-grad-end: #0f0f1a;
+      --panel-bg: rgba(28, 30, 45, 0.85);
+      --border-gold: #c8a96e;
+      --text-gold: #e4c48a;
+      --text-main: #f0ede8;
+      --board-bg: #2a1f0e;
+      --cell-base: #8B7355;
+      --cell-hover: #9B8365;
+      --cell-temple: #6b4c2c;
+      --hint-glow: rgba(144, 238, 144, 0.6);
+      --card-bg: #1c1f2b;
+      --card-border: #3a3a4a;
+      --card-selected: #2a2d4a;
+      --piece-player: #e8d5a3;
+      --piece-player-master: #c8a96e;
+      --piece-ai: #c0392b;
+      --piece-ai-master: #8b0000;
+      --shadow-heavy: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    /* 和風スキン */
+    .skin-wafu {
+      --bg-grad-start: #2c2418;
+      --bg-grad-end: #1a140e;
+      --panel-bg: rgba(45, 38, 28, 0.85);
+      --border-gold: #d4b87a;
+      --text-gold: #f0daa0;
+      --board-bg: #3e2a1f;
+      --cell-base: #9c7c5a;
+      --cell-hover: #b58f68;
+      --card-bg: #2f2a1f;
+      --card-border: #6a5a42;
+      --piece-player: #f5e7c8;
+      --piece-player-master: #e2bc6e;
+    }
+
+    /* 漆黒スキン */
+    .skin-dark {
+      --bg-grad-start: #0a0c12;
+      --bg-grad-end: #030408;
+      --panel-bg: rgba(18, 20, 28, 0.9);
+      --border-gold: #b88b4a;
+      --text-gold: #cb9e5e;
+      --board-bg: #1e1a12;
+      --cell-base: #4a3e2e;
+      --cell-hover: #5e4e38;
+      --card-bg: #11131c;
+      --piece-player: #c9bc9a;
+      --piece-ai: #9e2d1f;
+    }
+
     body {
-      background: #1a1a2e;
-      color: #f4f1ea;
-      font-family: "Noto Sans JP", sans-serif;
+      background: linear-gradient(145deg, var(--bg-grad-start) 0%, var(--bg-grad-end) 100%);
+      color: var(--text-main);
+      font-family: 'Noto Sans JP', 'Segoe UI', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      transition: background 0.3s;
     }
-    h1 { font-size: 2rem; letter-spacing: 0.3em; margin-bottom: 8px; color: #c8a96e; }
-    .subtitle { font-size: 0.8rem; color: #888; margin-bottom: 20px; letter-spacing: 0.2em; }
-    #setup { text-align: center; }
-    .setup-group { margin-bottom: 24px; }
-    .setup-group h3 { font-size: 0.9rem; color: #aaa; letter-spacing: 0.2em; margin-bottom: 12px; }
+
+    h1 {
+      font-size: 2.2rem;
+      letter-spacing: 0.3em;
+      font-weight: 500;
+      background: linear-gradient(135deg, var(--text-gold), #fff0c0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 0.7rem;
+      color: var(--text-gold);
+      opacity: 0.7;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+    }
+    .back-link {
+      color: var(--border-gold);
+      font-size: 0.8rem;
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 0.7; }
+
+    /* 設定画面 */
+    #setup {
+      background: var(--panel-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 48px;
+      padding: 32px 28px;
+      width: 100%;
+      max-width: 420px;
+      text-align: center;
+      border: 1px solid rgba(200, 169, 110, 0.4);
+      box-shadow: var(--shadow-heavy);
+    }
+    .setup-group { margin-bottom: 28px; }
+    .setup-group h3 {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--text-gold);
+      margin-bottom: 12px;
+    }
     .btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-select { padding: 10px 24px; border: 1px solid #444; background: transparent; color: #f4f1ea; border-radius: 999px; cursor: pointer; }
-    .btn-select.active { border-color: #c8a96e; color: #c8a96e; }
-    .btn-start { margin-top: 12px; padding: 14px 48px; background: #c8a96e; color: #111; border: none; border-radius: 999px; font-weight: 700; cursor: pointer; }
-    #game { display: none; text-align: center; }
-    #status { font-size: 0.9rem; color: #c8a96e; margin-bottom: 12px; }
-    .cards-area { display: flex; gap: 12px; justify-content: center; margin-bottom: 8px; flex-wrap: wrap; }
+    .btn-select {
+      padding: 10px 24px;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid #5a5a6e;
+      color: var(--text-main);
+      border-radius: 60px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-select.active {
+      border-color: var(--border-gold);
+      color: var(--text-gold);
+      background: rgba(200,169,110,0.15);
+      box-shadow: 0 0 8px rgba(200,169,110,0.3);
+    }
+    .btn-start {
+      background: var(--border-gold);
+      border: none;
+      padding: 12px 48px;
+      border-radius: 60px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #1e1a10;
+      cursor: pointer;
+      transition: 0.1s linear;
+      box-shadow: 0 5px 0 #7e5c2e;
+      transform: translateY(-2px);
+    }
+    .btn-start:active { transform: translateY(3px); box-shadow: 0 2px 0 #7e5c2e; }
+
+    /* スキン選択バー */
+    .skin-row {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px dashed rgba(200,169,110,0.3);
+    }
+    .skin-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .skin-bubble {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: 0.1s;
+      background-size: cover;
+    }
+    .skin-bubble.active-skin { border-color: white; transform: scale(1.05); }
+    .skin-default { background: linear-gradient(145deg, #1a1a2e, #0f0f1a); }
+    .skin-wafu-bubble { background: linear-gradient(145deg, #2c2418, #1a140e); }
+    .skin-dark-bubble { background: linear-gradient(145deg, #0a0c12, #030408); }
+
+    /* ゲーム画面 */
+    #game {
+      display: none;
+      text-align: center;
+      width: 100%;
+      max-width: 560px;
+    }
+    #status {
+      background: var(--panel-bg);
+      display: inline-block;
+      padding: 6px 20px;
+      border-radius: 60px;
+      font-size: 0.85rem;
+      color: var(--text-gold);
+      margin-bottom: 12px;
+      backdrop-filter: blur(4px);
+    }
+    /* カードエリア */
+    .cards-area {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 8px 0;
+      flex-wrap: wrap;
+    }
     .card {
-      background: #1c1f2b; border: 2px solid #333; border-radius: 8px; padding: 8px; cursor: pointer; transition: all 0.2s; width: 90px;
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px;
+      width: 96px;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
-    .card.selected { border-color: #c8a96e; background: #2a2d3e; }
-    .card.ai-card { cursor: default; opacity: 0.7; }
-    .card-name { font-size: 0.75rem; color: #c8a96e; margin-bottom: 6px; text-align: center; }
-    .card-grid { display: grid; grid-template-columns: repeat(5, 14px); grid-template-rows: repeat(5, 14px); gap: 1px; margin: 0 auto; width: fit-content; }
-    .card-cell { width: 14px; height: 14px; background: #2e3250; border-radius: 2px; }
-    .card-cell.move { background: #c8a96e; }
-    .card-cell.center { background: #4a4e6e; }
-    .waiting-card { background: #1c1f2b; border: 2px solid #555; border-radius: 8px; padding: 8px; width: 90px; margin: 0 auto 8px; }
+    .card.selected {
+      border-color: var(--border-gold);
+      background: var(--card-selected);
+      transform: scale(1.02);
+    }
+    .card.ai-card {
+      cursor: default;
+      opacity: 0.8;
+      filter: grayscale(0.1);
+    }
+    .card-name {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--text-gold);
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 14px);
+      grid-template-rows: repeat(5, 14px);
+      gap: 2px;
+      justify-content: center;
+      margin: 0 auto;
+      width: fit-content;
+    }
+    .card-cell {
+      width: 14px;
+      height: 14px;
+      background: #2e3250;
+      border-radius: 2px;
+    }
+    .card-cell.move { background: var(--border-gold); box-shadow: 0 0 2px gold; }
+    .card-cell.center { background: #6c6f8a; }
+
+    .waiting-card {
+      background: var(--card-bg);
+      border: 2px solid var(--card-border);
+      border-radius: 12px;
+      padding: 8px;
+      width: 96px;
+      margin: 8px auto;
+      opacity: 0.9;
+    }
+
+    /* ボード */
     #board {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; background: #2a1f0e; border: 3px solid #c8a96e; border-radius: 8px; padding: 6px;
-      width: min(90vw, 400px); height: min(90vw, 400px); margin: 8px auto;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      background: var(--board-bg);
+      border: 3px solid var(--border-gold);
+      border-radius: 16px;
+      padding: 8px;
+      width: min(85vw, 420px);
+      height: min(85vw, 420px);
+      margin: 10px auto;
+      box-shadow: var(--shadow-heavy);
     }
-    .cell { background: #8B7355; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.15s; }
-    .cell:hover { background: #9B8365; }
-    .cell.selected { background: #FFD700; }
-    .cell.hint { background: #90EE90; }
-    .cell.temple { background: #7B5B3A; border: 1px solid #c8a96e; }
-    .piece { width: 80%; height: 80%; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: clamp(10px, 3vw, 16px); font-weight: 700; border: 2px solid rgba(0,0,0,0.3); }
-    .piece.player { background: #e8d5a3; color: #111; }
-    .piece.player.master { background: #c8a96e; color: #111; border-color: #fff; }
-    .piece.ai { background: #c0392b; color: #fff; }
-    .piece.ai.master { background: #8b0000; color: #fff; border-color: #ff6666; }
-    .btn-reset { margin-top: 12px; padding: 8px 24px; border: 1px solid #c8a96e; color: #c8a96e; background: transparent; border-radius: 999px; cursor: pointer; }
-    a.back-link { color: #c8a96e; font-size: 0.85rem; text-decoration: none; display: block; margin-bottom: 16px; }
-    #result-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); align-items:center; justify-content:center; z-index:10; }
+    .cell {
+      background: var(--cell-base);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.05s linear;
+    }
+    .cell:hover { background: var(--cell-hover); transform: scale(1.02); }
+    .cell.selected { background: #ffd966; box-shadow: 0 0 0 2px gold; }
+    .cell.hint { background: var(--hint-glow); box-shadow: inset 0 0 0 2px #b0ffb0; }
+    .cell.temple { background: var(--cell-temple); border: 1px solid var(--border-gold); }
+
+    .piece {
+      width: 80%;
+      height: 80%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: clamp(12px, 4vw, 20px);
+      box-shadow: 0 2px 6px black;
+      transition: 0.1s;
+    }
+    .piece.player { background: var(--piece-player); color: #2c2418; }
+    .piece.player.master { background: var(--piece-player-master); color: #1e1a10; border: 2px solid #fff6cf; }
+    .piece.ai { background: var(--piece-ai); color: #ffe0d0; }
+    .piece.ai.master { background: var(--piece-ai-master); color: #fff0e0; border: 2px solid #ffad8a; }
+
+    .btn-reset {
+      margin-top: 15px;
+      background: transparent;
+      border: 1px solid var(--border-gold);
+      color: var(--border-gold);
+      padding: 6px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .btn-reset:hover { background: rgba(200,169,110,0.2); }
+
+    /* オーバーレイ */
+    #result-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
     #result-overlay.show { display: flex; }
-    .result-box { background: #1c1f2b; border: 1px solid #c8a96e; border-radius: 16px; padding: 32px; text-align: center; }
-    .result-box h2 { color: #c8a96e; margin-bottom: 16px; }
+    .result-box {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-gold);
+      border-radius: 48px;
+      padding: 32px;
+      text-align: center;
+      min-width: 260px;
+    }
+    .result-box h2 { color: var(--text-gold); margin-bottom: 12px; }
+    @keyframes fadePop {
+      0% { opacity: 0; transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
   </style>
 </head>
-<body>
-<h1>鬼玉</h1><p class="subtitle">ONITAMA</p><a href="index.html" class="back-link">← ポートフォリオに戻る</a>
+<body class="skin-default">
+<h1>鬼玉</h1>
+<p class="subtitle">ONITAMA ～ 雅・改</p>
+<a href="index.html" class="back-link">← ポートフォリオへ</a>
+
+<!-- 設定パネル -->
 <div id="setup">
-  <div class="setup-group"><h3>AIの強さ</h3><div class="btn-group">
-    <button class="btn-select active" onclick="selectLevel(1)">弱</button>
-    <button class="btn-select" onclick="selectLevel(3)">中</button>
-    <button class="btn-select" onclick="selectLevel(5)">強</button>
-    <button class="btn-select" onclick="selectLevel(7)">激強</button>
-  </div></div>
-  <button class="btn-start" onclick="startGame()">ゲームスタート</button>
+  <div class="setup-group">
+    <h3>⚔️ AI 強さ</h3>
+    <div class="btn-group" id="level-group">
+      <button data-level="1" class="btn-select active">🌱 弱</button>
+      <button data-level="3" class="btn-select">⚡ 中</button>
+      <button data-level="5" class="btn-select">🔥 強</button>
+      <button data-level="7" class="btn-select">🧠 鬼強</button>
+    </div>
+  </div>
+  <div class="setup-group skin-row">
+    <h3>🎨 スキン</h3>
+    <div class="skin-buttons" id="skin-selector">
+      <div class="skin-bubble skin-default active-skin" data-skin="skin-default" title="雅・基本"></div>
+      <div class="skin-bubble skin-wafu-bubble" data-skin="skin-wafu" title="和風・侘寂"></div>
+      <div class="skin-bubble skin-dark-bubble" data-skin="skin-dark" title="漆黒・夜陰"></div>
+    </div>
+  </div>
+  <button class="btn-start" id="startBtn">対局開始</button>
 </div>
+
+<!-- ゲーム画面 -->
 <div id="game">
-  <div id="status"></div>
+  <div id="status">✨ 準備中</div>
   <div class="cards-area" id="ai-cards"></div>
-  <div class="waiting-card" id="waiting-card"><div class="card-name" style="text-align:center">待機</div><div class="card-grid" id="waiting-grid"></div></div>
+  <div class="waiting-card" id="waiting-card">
+    <div class="card-name">待機札</div>
+    <div class="card-grid" id="waiting-grid"></div>
+  </div>
   <div id="board"></div>
   <div class="cards-area" id="player-cards"></div>
-  <button class="btn-reset" onclick="backToSetup()">← 設定に戻る</button>
+  <button class="btn-reset" id="backSetupBtn">⚙️ 設定に戻る</button>
 </div>
-<div id="result-overlay"><div class="result-box"><h2 id="result-title"></h2><p id="result-detail"></p><button class="btn-start" onclick="restartGame()">もう一度</button><br><br><button class="btn-reset" onclick="backToSetup()">設定に戻る</button></div></div>
+
+<div id="result-overlay">
+  <div class="result-box">
+    <h2 id="result-title"></h2>
+    <p id="result-detail"></p>
+    <button class="btn-start" id="rematchBtn">再戦</button><br><br>
+    <button class="btn-reset" id="exitToSetupBtn">設定へ戻る</button>
+  </div>
+</div>
 
 <script>
+  // ----- カードデータ (移動ベクトル) -----
   const CARD_DATA = [
-    { name:'虎', moves:[[-2,0],[1,0]] },{ name:'蟹', moves:[[-1,0],[1,-2],[1,2]] },{ name:'鶴', moves:[[-1,-1],[-1,1],[1,0]] },
-    { name:'蛙', moves:[[-1,1],[0,-2],[1,-1]] },{ name:'兎', moves:[[-1,-1],[0,2],[1,1]] },{ name:'龍', moves:[[-1,-2],[-1,2],[1,-1],[1,1]] },
-    { name:'象', moves:[[-1,-1],[-1,1],[1,-1],[1,1]] },{ name:'猿', moves:[[-1,-1],[-1,1],[1,-1],[1,1],[0,0]] },
-    { name:'鳳凰', moves:[[-1,-2],[-1,2],[1,-1],[1,0],[1,1]] },{ name:'牛', moves:[[-1,0],[0,1],[1,0]] },{ name:'馬', moves:[[-1,0],[0,-1],[1,0]] },
-    { name:'蛇', moves:[[-1,1],[0,-1],[1,-1]] },{ name:'鷹', moves:[[-1,-1],[0,1],[1,1]] },{ name:'猪', moves:[[-1,0],[0,-1],[0,1]] },
-    { name:'雄牛', moves:[[-1,0],[0,1],[1,0],[0,-1]] },{ name:'鰻', moves:[[-1,-1],[0,1],[1,-1]] }
+    { name:'虎', moves:[[-2,0],[1,0]] }, { name:'蟹', moves:[[-1,0],[1,-2],[1,2]] }, { name:'鶴', moves:[[-1,-1],[-1,1],[1,0]] },
+    { name:'蛙', moves:[[-1,1],[0,-2],[1,-1]] }, { name:'兎', moves:[[-1,-1],[0,2],[1,1]] }, { name:'龍', moves:[[-1,-2],[-1,2],[1,-1],[1,1]] },
+    { name:'象', moves:[[-1,-1],[-1,1],[1,-1],[1,1]] }, { name:'猿', moves:[[-1,-1],[-1,1],[1,-1],[1,1],[0,0]] },
+    { name:'鳳凰', moves:[[-1,-2],[-1,2],[1,-1],[1,0],[1,1]] }, { name:'牛', moves:[[-1,0],[0,1],[1,0]] }, { name:'馬', moves:[[-1,0],[0,-1],[1,0]] },
+    { name:'蛇', moves:[[-1,1],[0,-1],[1,-1]] }, { name:'鷹', moves:[[-1,-1],[0,1],[1,1]] }, { name:'猪', moves:[[-1,0],[0,-1],[0,1]] },
+    { name:'雄牛', moves:[[-1,0],[0,1],[1,0],[0,-1]] }, { name:'鰻', moves:[[-1,-1],[0,1],[1,-1]] }
   ];
-  let board=[], playerCards=[], aiCards=[], waitingCard=null, selectedCard=null, selectedCell=null, currentTurn='player', aiLevel=1, isAIThinking=false;
 
-  function selectLevel(level){ aiLevel=level; document.querySelectorAll('.setup-group .btn-select').forEach(b=>b.classList.remove('active')); event.target.classList.add('active'); }
-  function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-  function initGame(){
-    board=Array(5).fill().map(()=>Array(5).fill(null));
-    for(let c=0;c<5;c++) board[4][c]={side:'player', master:c===2};
-    for(let c=0;c<5;c++) board[0][c]={side:'ai', master:c===2};
-    const deck=shuffle([...CARD_DATA]).slice(0,5);
-    playerCards=[deck[0],deck[1]]; aiCards=[deck[2],deck[3]]; waitingCard=deck[4];
-    selectedCard=null; selectedCell=null; currentTurn='player';
+  // --- グローバル状態 ---
+  let board = [];           // 5x5 { side, master }
+  let playerCards = [];     // 手持ち2枚
+  let aiCards = [];
+  let waitingCard = null;
+  let selectedCardIdx = null;   // player手札のインデックス
+  let selectedPiecePos = null;   // [row,col]
+  let currentTurn = 'player';    // 'player' or 'ai'
+  let aiLevel = 1;
+  let isAIThinking = false;
+  let gameActive = true;
+
+  // スキン管理
+  function applySkin(skinClass) {
+    document.body.className = skinClass;
+    localStorage.setItem('onitama_skin', skinClass);
+    document.querySelectorAll('.skin-bubble').forEach(b => b.classList.remove('active-skin'));
+    document.querySelector(`.skin-bubble[data-skin="${skinClass}"]`)?.classList.add('active-skin');
   }
-  function startGame(){ document.getElementById('setup').style.display='none'; document.getElementById('game').style.display='block'; initGame(); render(); updateStatus(); }
-  function render(){ renderBoard(); renderCards(); renderWaiting(); }
-  function renderBoard(){
-    const boardEl=document.getElementById('board'); boardEl.innerHTML='';
-    const hints=getHintCells();
-    for(let r=0;r<5;r++) for(let c=0;c<5;c++){
-      const cell=document.createElement('div'); cell.className='cell';
-      if((r===0&&c===2)||(r===4&&c===2)) cell.classList.add('temple');
-      if(selectedCell && selectedCell[0]===r && selectedCell[1]===c) cell.classList.add('selected');
-      if(hints.some(h=>h[0]===r && h[1]===c)) cell.classList.add('hint');
-      if(board[r][c]){
-        const p=board[r][c]; const piece=document.createElement('div');
-        piece.className=`piece ${p.side}${p.master?' master':''}`;
-        piece.textContent=p.master?'王':'兵';
-        cell.appendChild(piece);
-      }
-      cell.onclick=()=>handleClick(r,c);
-      boardEl.appendChild(cell);
+
+  // --- ゲーム初期化 ---
+  function initGame() {
+    board = Array(5).fill().map(() => Array(5).fill(null));
+    // プレイヤー（下段 行4） / AI（上段 行0）
+    for (let c = 0; c < 5; c++) board[4][c] = { side: 'player', master: (c === 2) };
+    for (let c = 0; c < 5; c++) board[0][c] = { side: 'ai', master: (c === 2) };
+    
+    const shuffled = [...CARD_DATA];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
+    const deck = shuffled.slice(0, 5);
+    playerCards = [deck[0], deck[1]];
+    aiCards = [deck[2], deck[3]];
+    waitingCard = deck[4];
+    selectedCardIdx = null;
+    selectedPiecePos = null;
+    currentTurn = 'player';
+    gameActive = true;
+    isAIThinking = false;
   }
-  function renderCards(){
-    const pcEl=document.getElementById('player-cards'); pcEl.innerHTML='';
-    playerCards.forEach((card,i)=>{ const el=createCardEl(card,false,selectedCard===i); el.onclick=()=>{ if(currentTurn!=='player'||isAIThinking) return; selectedCard=selectedCard===i?null:i; selectedCell=null; render(); }; pcEl.appendChild(el); });
-    const acEl=document.getElementById('ai-cards'); acEl.innerHTML='';
-    aiCards.forEach(card=>{ acEl.appendChild(createCardEl(card,true,false)); });
-  }
-  function renderWaiting(){
-    const wg=document.getElementById('waiting-grid'); wg.innerHTML='';
-    document.querySelector('#waiting-card .card-name').textContent=waitingCard.name;
-    renderMiniGrid(wg,waitingCard.moves,false);
-  }
-  function createCardEl(card,isAI,isSelected){
-    const el=document.createElement('div'); el.className=`card${isAI?' ai-card':''}${isSelected?' selected':''}`;
-    const name=document.createElement('div'); name.className='card-name'; name.textContent=card.name; el.appendChild(name);
-    const grid=document.createElement('div'); grid.className='card-grid'; renderMiniGrid(grid,card.moves,isAI); el.appendChild(grid);
-    return el;
-  }
-  function renderMiniGrid(container,moves,flip){
-    for(let r=0;r<5;r++) for(let c=0;c<5;c++){
-      const cell=document.createElement('div'); cell.className='card-cell';
-      if(r===2 && c===2) cell.classList.add('center');
-      else{
-        const dr=flip?-(r-2):r-2, dc=c-2;
-        if(moves.some(m=>m[0]===dr && m[1]===dc)) cell.classList.add('move');
+
+  // --- 移動可能なマスを取得 (向きを考慮：プレイヤーは下→上, AIは上→下)---
+  function getMovesFromPiece(row, col, card, side) {
+    const moves = [];
+    const dirFactor = (side === 'player') ? -1 : 1;   // playerは上方向(-1) , AIは下方向(+1)
+    for (let [dr, dc] of card.moves) {
+      const nr = row + dr * dirFactor;
+      const nc = col + dc;
+      if (nr >= 0 && nr < 5 && nc >= 0 && nc < 5) {
+        const target = board[nr][nc];
+        if (!target || target.side !== side) { // 自分の駒は置けない、相手か空き
+          moves.push([nr, nc]);
+        }
       }
-      container.appendChild(cell);
-    }
-  }
-  function getHintCells(){
-    if(currentTurn!=='player' || selectedCard===null || !selectedCell) return [];
-    const [sr,sc]=selectedCell;
-    if(!board[sr][sc] || board[sr][sc].side!=='player') return [];
-    return getMovesForCard(sr,sc,playerCards[selectedCard],'player');
-  }
-  function getMovesForCard(r,c,card,side){
-    const moves=[]; const dir=side==='player'?-1:1;
-    for(let [dr,dc] of card.moves){
-      const nr=r+dr*dir, nc=c+dc;
-      if(nr>=0 && nr<5 && nc>=0 && nc<5 && (!board[nr][nc] || board[nr][nc].side!==side)) moves.push([nr,nc]);
     }
     return moves;
   }
-  function handleClick(r,c){
-    if(currentTurn!=='player'||isAIThinking) return;
-    if(selectedCard!==null && selectedCell){
-      const hints=getHintCells();
-      if(hints.some(h=>h[0]===r && h[1]===c)){
-        executeMove('player',selectedCell[0],selectedCell[1],r,c,selectedCard);
-        return;
+
+  // 現在のプレイヤーが選んでいる駒からのヒント
+  function getCurrentHint() {
+    if (currentTurn !== 'player' || selectedCardIdx === null || !selectedPiecePos) return [];
+    const [sr, sc] = selectedPiecePos;
+    const piece = board[sr][sc];
+    if (!piece || piece.side !== 'player') return [];
+    const card = playerCards[selectedCardIdx];
+    if (!card) return [];
+    return getMovesFromPiece(sr, sc, card, 'player');
+  }
+
+  // --- 実行移動 & カード交換 & ターン切替 ---
+  function tryMove(side, fromRow, fromCol, toRow, toCol, cardIdx) {
+    const cards = (side === 'player') ? playerCards : aiCards;
+    const usedCard = cards[cardIdx];
+    const targetPiece = board[toRow][toCol];
+    const movingPiece = board[fromRow][fromCol];
+    if (!movingPiece || movingPiece.side !== side) return false;
+    
+    // 勝利条件チェック (玉の捕獲 / 相手陣地侵入)
+    let winFlag = false;
+    if (targetPiece && targetPiece.master) winFlag = true;
+    if (movingPiece.master) {
+      if (side === 'player' && toRow === 0 && toCol === 2) winFlag = true;
+      if (side === 'ai' && toRow === 4 && toCol === 2) winFlag = true;
+    }
+    
+    // 移動実行
+    board[toRow][toCol] = movingPiece;
+    board[fromRow][fromCol] = null;
+    
+    // カード交換
+    cards[cardIdx] = waitingCard;
+    waitingCard = usedCard;
+    
+    // アニメーション風の描画更新
+    renderAll();
+    
+    if (winFlag) {
+      gameActive = false;
+      const winnerName = (side === 'player') ? 'あなた' : 'AI';
+      showResult(winnerName === 'あなた' ? '🏆 勝利！' : '💀 敗北...', `${winnerName}が玉を討ち取りました！`);
+      return true;
+    }
+    return false; // ゲーム続行
+  }
+
+  // --- 全ての合法手を列挙 (AI用)---
+  function getAllMoves(side) {
+    const cards = (side === 'player') ? playerCards : aiCards;
+    const moves = [];
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const piece = board[r][c];
+        if (piece && piece.side === side) {
+          cards.forEach((card, idx) => {
+            const destinations = getMovesFromPiece(r, c, card, side);
+            destinations.forEach(([tr, tc]) => {
+              moves.push({ fr: r, fc: c, tr, tc, cardIdx: idx });
+            });
+          });
+        }
       }
     }
-    if(board[r][c] && board[r][c].side==='player'){ selectedCell=[r,c]; render(); return; }
-    selectedCell=null; render();
+    return moves;
   }
-  function executeMove(side,fr,fc,tr,tc,cardIdx){
-    const cards=side==='player'?playerCards:aiCards;
-    const usedCard=cards[cardIdx];
-    const target=board[tr][tc];
-    let win=false;
-    if(target && target.master) win=true;
-    if(board[fr][fc].master){
-      if(side==='player' && tr===0 && tc===2) win=true;
-      if(side==='ai' && tr===4 && tc===2) win=true;
+
+  // --- 盤面評価 (AI視点) ---
+  function evaluateBoard() {
+    let score = 0;
+    const weightMap = [
+      [30, -10, 5, -10, 30],
+      [-10, -20, -2, -20, -10],
+      [5, -2, 8, -2, 5],
+      [-10, -20, -2, -20, -10],
+      [30, -10, 5, -10, 30]
+    ];
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const p = board[r][c];
+        if (!p) continue;
+        let val = p.master ? 180 : 18;
+        val += weightMap[r][c] * (p.master ? 2 : 1);
+        if (p.side === 'ai') score += val;
+        else score -= val;
+      }
     }
-    board[tr][tc]=board[fr][fc]; board[fr][fc]=null;
-    cards[cardIdx]=waitingCard; waitingCard=usedCard;
-    if(side==='player'){
-      selectedCard=null; selectedCell=null; currentTurn='ai'; render(); updateStatus();
-      if(win){ showResult('🎉 あなたの勝ち！',''); return; }
-      setTimeout(aiMove,700);
-    } else {
-      currentTurn='player'; render(); updateStatus();
-      if(win){ showResult('😞 AIの勝ち',''); return; }
-    }
+    // 移動可能手数ボーナス
+    const aiMoves = getAllMoves('ai').length;
+    const playerMoves = getAllMoves('player').length;
+    score += (aiMoves - playerMoves) * 2;
+    return score;
   }
-  function aiMove(){
-    if(currentTurn!=='ai') return;
-    isAIThinking=true; updateStatus(); render();
-    const best=getBestMove(aiLevel);
-    isAIThinking=false;
-    if(best) executeMove('ai',best.fr,best.fc,best.tr,best.tc,best.cardIdx);
-    else{ currentTurn='player'; render(); updateStatus(); }
-  }
-  function getBestMove(depth){
-    const moves=getAllMoves('ai');
-    if(moves.length===0) return null;
-    let best=null, bestScore=-Infinity;
-    for(let move of moves){
-      const state=saveState(); applyMove('ai',move); let score=minimax(depth-1,false,-Infinity,Infinity); restoreState(state);
-      if(score>bestScore){ bestScore=score; best=move; }
-    }
-    return best;
-  }
-  function minimax(depth,isMax,alpha,beta){
-    const side=isMax?'ai':'player';
-    if(depth===0) return evaluate();
-    const moves=getAllMoves(side);
-    if(moves.length===0) return isMax?-9999:9999;
-    if(isMax){
-      let maxEval=-Infinity;
-      for(let move of moves){
-        const state=saveState(); const result=applyMove(side,move); if(result==='win'){ restoreState(state); return 9999; }
-        let evaluation = minimax(depth-1,false,alpha,beta); restoreState(state);
-        maxEval=Math.max(maxEval,evaluation); alpha=Math.max(alpha,evaluation); if(beta<=alpha) break;
+
+  // --- Minimax + αβ ---
+  function minimax(depth, isMax, alpha, beta) {
+    const side = isMax ? 'ai' : 'player';
+    const moves = getAllMoves(side);
+    if (depth === 0 || moves.length === 0) return evaluateBoard();
+    
+    if (isMax) {
+      let maxEval = -Infinity;
+      for (const mv of moves) {
+        const snapshot = saveState();
+        const ended = tryMove('ai', mv.fr, mv.fc, mv.tr, mv.tc, mv.cardIdx);
+        let evalScore;
+        if (ended) evalScore = 10000;
+        else evalScore = minimax(depth - 1, false, alpha, beta);
+        restoreState(snapshot);
+        maxEval = Math.max(maxEval, evalScore);
+        alpha = Math.max(alpha, evalScore);
+        if (beta <= alpha) break;
       }
       return maxEval;
     } else {
-      let minEval=Infinity;
-      for(let move of moves){
-        const state=saveState(); const result=applyMove(side,move); if(result==='win'){ restoreState(state); return -9999; }
-        let evaluation = minimax(depth-1,true,alpha,beta); restoreState(state);
-        minEval=Math.min(minEval,evaluation); beta=Math.min(beta,evaluation); if(beta<=alpha) break;
+      let minEval = Infinity;
+      for (const mv of moves) {
+        const snapshot = saveState();
+        const ended = tryMove('player', mv.fr, mv.fc, mv.tr, mv.tc, mv.cardIdx);
+        let evalScore;
+        if (ended) evalScore = -10000;
+        else evalScore = minimax(depth - 1, true, alpha, beta);
+        restoreState(snapshot);
+        minEval = Math.min(minEval, evalScore);
+        beta = Math.min(beta, evalScore);
+        if (beta <= alpha) break;
       }
       return minEval;
     }
   }
-  function applyMove(side,move){
-    const cards=side==='player'?playerCards:aiCards;
-    const target=board[move.tr][move.tc];
-    let win=false;
-    if(target && target.master) win=true;
-    if(board[move.fr][move.fc].master){
-      if(side==='player' && move.tr===0 && move.tc===2) win=true;
-      if(side==='ai' && move.tr===4 && move.tc===2) win=true;
+
+  function getBestAIMove(depth) {
+    const moves = getAllMoves('ai');
+    if (moves.length === 0) return null;
+    if (depth === 1) {
+      // ランダム＋軽量
+      return moves[Math.floor(Math.random() * moves.length)];
     }
-    board[move.tr][move.tc]=board[move.fr][move.fc];
-    board[move.fr][move.fc]=null;
-    const used=cards[move.cardIdx];
-    cards[move.cardIdx]=waitingCard; waitingCard=used;
-    return win?'win':null;
-  }
-  function getAllMoves(side){
-    const cards=side==='player'?playerCards:aiCards;
-    const moves=[];
-    for(let r=0;r<5;r++) for(let c=0;c<5;c++) if(board[r][c] && board[r][c].side===side){
-      cards.forEach((card,cardIdx)=>{
-        getMovesForCard(r,c,card,side).forEach(([tr,tc])=>moves.push({fr:r,fc:c,tr,tc,cardIdx}));
-      });
+    let bestScore = -Infinity;
+    let bestMove = moves[0];
+    for (const mv of moves) {
+      const snapshot = saveState();
+      const ended = tryMove('ai', mv.fr, mv.fc, mv.tr, mv.tc, mv.cardIdx);
+      let score;
+      if (ended) score = 100000;
+      else score = minimax(depth - 1, false, -Infinity, Infinity);
+      restoreState(snapshot);
+      if (score > bestScore) {
+        bestScore = score;
+        bestMove = mv;
+      }
     }
-    return moves;
+    return bestMove;
   }
-  function evaluate(){
-    let score=0;
-    for(let r=0;r<5;r++) for(let c=0;c<5;c++) if(board[r][c]){
-      const p=board[r][c];
-      let val=p.master?100:10;
-      const templeDist=p.side==='ai'? Math.abs(r-4)+Math.abs(c-2) : Math.abs(r-0)+Math.abs(c-2);
-      const posBonus=p.master?(5-templeDist)*4:0;
-      const centerBonus=(Math.abs(r-2)+Math.abs(c-2))===0?5:0;
-      score += p.side==='ai'? val+posBonus+centerBonus : -(val+posBonus+centerBonus);
+
+  // 状態保存/復元 (完全ディープコピー)
+  function saveState() {
+    return {
+      board: JSON.parse(JSON.stringify(board)),
+      playerCards: JSON.parse(JSON.stringify(playerCards)),
+      aiCards: JSON.parse(JSON.stringify(aiCards)),
+      waitingCard: JSON.parse(JSON.stringify(waitingCard)),
+      turn: currentTurn,
+      active: gameActive
+    };
+  }
+  function restoreState(state) {
+    board = JSON.parse(JSON.stringify(state.board));
+    playerCards = JSON.parse(JSON.stringify(state.playerCards));
+    aiCards = JSON.parse(JSON.stringify(state.aiCards));
+    waitingCard = JSON.parse(JSON.stringify(state.waitingCard));
+    currentTurn = state.turn;
+    gameActive = state.active;
+    renderAll();
+  }
+
+  async function aiTurn() {
+    if (!gameActive || currentTurn !== 'ai') return;
+    if (isAIThinking) return;
+    isAIThinking = true;
+    renderAll();
+    await new Promise(r => setTimeout(r, 60));
+    
+    const depth = (aiLevel === 1) ? 1 : (aiLevel === 3 ? 2 : (aiLevel === 5 ? 3 : 4));
+    const best = getBestAIMove(depth);
+    if (best) {
+      const ended = tryMove('ai', best.fr, best.fc, best.tr, best.tc, best.cardIdx);
+      if (!ended) {
+        currentTurn = 'player';
+        // プレイヤーの手番で合法手がない場合パス処理
+        if (getAllMoves('player').length === 0 && getAllMoves('ai').length === 0) {
+          checkGameEndByNoMoves();
+        } else if (getAllMoves('player').length === 0) {
+          // 自動パスしてAIターン継続
+          currentTurn = 'ai';
+          setTimeout(() => aiTurn(), 200);
+        }
+      } else {
+        gameActive = false;
+      }
+    } else {
+      // AI に手がない -> パスしてプレイヤーへ
+      currentTurn = 'player';
+      if (getAllMoves('player').length === 0 && getAllMoves('ai').length === 0) checkGameEndByNoMoves();
     }
-    return score;
+    isAIThinking = false;
+    renderAll();
+    updateStatusText();
   }
-  function saveState(){ return { board:JSON.parse(JSON.stringify(board)), pc:[...playerCards], ac:[...aiCards], wc:JSON.parse(JSON.stringify(waitingCard)) }; }
-  function restoreState(s){ board=JSON.parse(JSON.stringify(s.board)); playerCards=[...s.pc]; aiCards=[...s.ac]; waitingCard=JSON.parse(JSON.stringify(s.wc)); }
-  function updateStatus(){ document.getElementById('status').textContent=currentTurn==='player'?'あなたのターン - カード→駒をクリック':'AIが考えています...'; }
-  function showResult(title,detail){ document.getElementById('result-title').textContent=title; document.getElementById('result-detail').textContent=detail; document.getElementById('result-overlay').classList.add('show'); }
-  function restartGame(){ document.getElementById('result-overlay').classList.remove('show'); initGame(); render(); updateStatus(); }
-  function backToSetup(){ document.getElementById('result-overlay').classList.remove('show'); document.getElementById('game').style.display='none'; document.getElementById('setup').style.display='block'; }
+
+  function checkGameEndByNoMoves() {
+    let black = 0, white = 0;
+    for(let r=0;r<5;r++) for(let c=0;c<5;c++) {
+      if(board[r][c] && board[r][c].side==='player') black++;
+      else if(board[r][c] && board[r][c].side==='ai') white++;
+    }
+    const winner = black > white ? 'player' : (white > black ? 'ai' : 'draw');
+    if(winner === 'player') showResult('🏆 勝利！', '盤面リードで勝利');
+    else if(winner === 'ai') showResult('💀 AIの勝ち', '盤面差で敗北');
+    else showResult('🤝 引き分け', '互角の闘い');
+  }
+
+  function showResult(title, detail) {
+    gameActive = false;
+    document.getElementById('result-title').innerHTML = title;
+    document.getElementById('result-detail').innerHTML = detail;
+    document.getElementById('result-overlay').classList.add('show');
+  }
+
+  // --- 完全描画 ---
+  function renderAll() {
+    renderBoard();
+    renderCards();
+    renderWaiting();
+    updateStatusText();
+  }
+
+  function renderBoard() {
+    const boardEl = document.getElementById('board');
+    boardEl.innerHTML = '';
+    const hints = (currentTurn === 'player' && !isAIThinking && selectedCardIdx !== null && selectedPiecePos) ? getCurrentHint() : [];
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        if ((r === 0 && c === 2) || (r === 4 && c === 2)) cell.classList.add('temple');
+        if (selectedPiecePos && selectedPiecePos[0] === r && selectedPiecePos[1] === c) cell.classList.add('selected');
+        if (hints.some(([hr, hc]) => hr === r && hc === c)) cell.classList.add('hint');
+        const piece = board[r][c];
+        if (piece) {
+          const disc = document.createElement('div');
+          disc.className = `piece ${piece.side}${piece.master ? ' master' : ''}`;
+          disc.textContent = piece.master ? '玉' : '兵';
+          cell.appendChild(disc);
+        }
+        cell.onclick = () => handleCellClick(r, c);
+        boardEl.appendChild(cell);
+      }
+    }
+  }
+
+  function handleCellClick(r, c) {
+    if (!gameActive || currentTurn !== 'player' || isAIThinking) return;
+    // 駒を選択中かつ移動可能な場合
+    if (selectedCardIdx !== null && selectedPiecePos) {
+      const hints = getCurrentHint();
+      if (hints.some(([hr, hc]) => hr === r && hc === c)) {
+        // 移動実行
+        const ended = tryMove('player', selectedPiecePos[0], selectedPiecePos[1], r, c, selectedCardIdx);
+        if (!ended) {
+          currentTurn = 'ai';
+          selectedCardIdx = null;
+          selectedPiecePos = null;
+          renderAll();
+          // AIターン開始
+          if (gameActive && currentTurn === 'ai') setTimeout(() => aiTurn(), 200);
+        } else {
+          renderAll();
+        }
+        return;
+      }
+    }
+    // 自分の駒を選択
+    const piece = board[r][c];
+    if (piece && piece.side === 'player') {
+      selectedPiecePos = [r, c];
+      selectedCardIdx = null; // カードはあとで選ぶ
+      renderAll();
+    } else {
+      selectedPiecePos = null;
+      selectedCardIdx = null;
+      renderAll();
+    }
+  }
+
+  function renderCards() {
+    const playerDiv = document.getElementById('player-cards');
+    playerDiv.innerHTML = '';
+    playerCards.forEach((card, idx) => {
+      const cardEl = createCardElement(card, false, selectedCardIdx === idx && selectedPiecePos !== null);
+      cardEl.onclick = () => {
+        if (currentTurn === 'player' && !isAIThinking && selectedPiecePos) {
+          selectedCardIdx = (selectedCardIdx === idx) ? null : idx;
+          renderAll();
+        } else if (currentTurn === 'player' && !selectedPiecePos) {
+          // 先に駒を選ぶよう促す
+          document.getElementById('status').innerHTML = '⚠️ 先に自分の駒をクリックしてください';
+          setTimeout(() => updateStatusText(), 800);
+        }
+      };
+      playerDiv.appendChild(cardEl);
+    });
+    const aiDiv = document.getElementById('ai-cards');
+    aiDiv.innerHTML = '';
+    aiCards.forEach(card => aiDiv.appendChild(createCardElement(card, true, false)));
+  }
+
+  function renderWaiting() {
+    const grid = document.getElementById('waiting-grid');
+    grid.innerHTML = '';
+    renderMiniGrid(grid, waitingCard.moves, false);
+  }
+
+  function createCardElement(card, isAI, isSelected) {
+    const div = document.createElement('div');
+    div.className = `card ${isAI ? 'ai-card' : ''} ${isSelected ? 'selected' : ''}`;
+    const nameSpan = document.createElement('div');
+    nameSpan.className = 'card-name';
+    nameSpan.textContent = card.name;
+    div.appendChild(nameSpan);
+    const grid = document.createElement('div');
+    grid.className = 'card-grid';
+    renderMiniGrid(grid, card.moves, false);
+    div.appendChild(grid);
+    return div;
+  }
+
+  function renderMiniGrid(container, moves, flip) {
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const cellDiv = document.createElement('div');
+        cellDiv.className = 'card-cell';
+        if (r === 2 && c === 2) cellDiv.classList.add('center');
+        else {
+          let dr = r - 2;
+          let dc = c - 2;
+          if (flip) dr = -dr; // 必要に応じて反転 (デバッグ用)
+          if (moves.some(m => m[0] === dr && m[1] === dc)) cellDiv.classList.add('move');
+        }
+        container.appendChild(cellDiv);
+      }
+    }
+  }
+
+  function updateStatusText() {
+    const stat = document.getElementById('status');
+    if (!gameActive) return;
+    if (isAIThinking) stat.innerHTML = '🤖 AI が深遠なる一手を考え中...';
+    else if (currentTurn === 'player') stat.innerHTML = selectedPiecePos ? '🎴 動かすカードを選んでください' : '⚡ 自分の駒をタップ → カード選択 → 移動';
+    else stat.innerHTML = '🧠 AI のターン';
+  }
+
+  // ゲーム開始
+  function startGameSession() {
+    initGame();
+    gameActive = true;
+    isAIThinking = false;
+    selectedCardIdx = null;
+    selectedPiecePos = null;
+    currentTurn = 'player';
+    renderAll();
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+  }
+
+  function backToSetup() {
+    document.getElementById('result-overlay').classList.remove('show');
+    document.getElementById('game').style.display = 'none';
+    document.getElementById('setup').style.display = 'block';
+  }
+  
+  // イベント登録
+  function bindEvents() {
+    document.getElementById('startBtn').onclick = startGameSession;
+    document.getElementById('backSetupBtn').onclick = backToSetup;
+    document.getElementById('exitToSetupBtn').onclick = backToSetup;
+    document.getElementById('rematchBtn').onclick = () => {
+      document.getElementById('result-overlay').classList.remove('show');
+      startGameSession();
+    };
+    // 難易度
+    document.querySelectorAll('#level-group .btn-select').forEach(btn => {
+      btn.onclick = (e) => {
+        document.querySelectorAll('#level-group .btn-select').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        aiLevel = parseInt(btn.getAttribute('data-level'), 10);
+      };
+    });
+    // スキン
+    const savedSkin = localStorage.getItem('onitama_skin') || 'skin-default';
+    applySkin(savedSkin);
+    document.querySelectorAll('.skin-bubble').forEach(bubble => {
+      bubble.onclick = () => applySkin(bubble.getAttribute('data-skin'));
+    });
+  }
+
+  bindEvents();
+  initGame(); // 初期データのみ
 </script>
 </body>
 </html>

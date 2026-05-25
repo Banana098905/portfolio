@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Dino Pixel Runner | エフェクト+サウンド版</title>
+  <title>Dino Pixel Runner | スキン+恐竜カスタム</title>
   <style>
     * {
       margin: 0;
@@ -76,18 +76,19 @@
       color: #d4bc7a;
     }
 
-    .ranking-container {
+    /* スキンパネル */
+    .skins-panel {
       background: rgba(12, 16, 26, 0.8);
       backdrop-filter: blur(4px);
       border-radius: 28px;
       padding: 18px 22px;
-      min-width: 200px;
+      min-width: 220px;
       border: 1px solid rgba(200, 169, 110, 0.4);
       box-shadow: 0 15px 25px rgba(0,0,0,0.3);
     }
 
-    .ranking-container h3 {
-      font-size: 1rem;
+    .skins-panel h3 {
+      font-size: 0.9rem;
       letter-spacing: 0.1em;
       color: #ebd6a4;
       text-align: center;
@@ -97,9 +98,58 @@
       width: 100%;
     }
 
-    .ranking-list {
+    .skin-group {
+      margin-bottom: 18px;
+    }
+    .skin-group p {
+      font-size: 0.7rem;
+      color: #b8aa7a;
+      margin-bottom: 8px;
+    }
+    .skin-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .skin-btn {
+      padding: 6px 14px;
+      border-radius: 60px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      background: #1e1e2a;
+      border: 1px solid #5a5a6e;
+      color: #ddd;
+      cursor: pointer;
+      transition: 0.1s;
       font-family: monospace;
-      font-size: 0.8rem;
+    }
+    .skin-btn.active-skin {
+      background: #c8a96e;
+      color: #111;
+      border-color: #ffeaaf;
+      box-shadow: 0 0 8px #ffdfa0;
+    }
+    .dino-skin-btn {
+      background: #2a2a3a;
+    }
+
+    .ranking-container {
+      background: rgba(12, 16, 26, 0.8);
+      backdrop-filter: blur(4px);
+      border-radius: 28px;
+      padding: 18px 22px;
+      min-width: 200px;
+      border: 1px solid rgba(200, 169, 110, 0.4);
+      margin-top: 16px;
+    }
+
+    .ranking-container h3 {
+      font-size: 1rem;
+      letter-spacing: 0.1em;
+      color: #ebd6a4;
+      text-align: center;
+      margin-bottom: 12px;
     }
 
     .rank-item {
@@ -107,23 +157,11 @@
       justify-content: space-between;
       padding: 5px 8px;
       border-bottom: 1px dotted #3a3a4a;
+      font-size: 0.8rem;
     }
-
-    .rank-number {
-      color: #c8a96e;
-      font-weight: bold;
-      width: 30px;
-    }
-
-    .rank-score {
-      color: #f0e6c5;
-      font-weight: bold;
-    }
-
-    .rank-date {
-      color: #8a8a9a;
-      font-size: 0.65rem;
-    }
+    .rank-number { color: #c8a96e; width: 30px; }
+    .rank-score { color: #f0e6c5; font-weight: bold; }
+    .rank-date { color: #8a8a9a; font-size: 0.65rem; }
 
     .reset-rank-btn {
       background: #2a2a3a;
@@ -135,40 +173,21 @@
       margin-top: 12px;
       cursor: pointer;
       width: 100%;
-      font-family: monospace;
     }
-
-    .reset-rank-btn:hover {
-      background: #c8a96e;
-      color: #111;
-    }
-
     .restart-hint {
       text-align: center;
       font-size: 0.7rem;
       color: #9a8a6a;
       margin-top: 12px;
     }
-
-    .restart-hint span {
-      background: #1e1e2a;
-      padding: 3px 10px;
-      border-radius: 60px;
-    }
-
     .back-link {
       display: inline-block;
       margin-top: 16px;
       color: #c8a96e;
       font-size: 0.75rem;
       text-decoration: none;
-      letter-spacing: 0.1em;
       text-align: center;
       width: 100%;
-    }
-
-    .back-link:hover {
-      text-shadow: 0 0 4px #ffcc88;
     }
   </style>
 </head>
@@ -184,13 +203,36 @@
     <a href="index.html" class="back-link">← ポートフォリオに戻る</a>
   </div>
 
-  <!-- ランキングボード -->
-  <div class="ranking-container">
-    <h3>🏅  TOP 5  RUNNERS</h3>
-    <div class="ranking-list" id="rankList">
-      <div class="rank-item">- ランキングを読み込み中 -</div>
+  <div style="display: flex; flex-direction: column; gap: 16px;">
+    <!-- スキンパネル -->
+    <div class="skins-panel">
+      <h3>🎨 スキンセレクト</h3>
+      <div class="skin-group">
+        <p>🌍 ワールドスキン</p>
+        <div class="skin-buttons" id="worldSkinButtons">
+          <button data-world="classic" class="skin-btn active-skin">クラシック</button>
+          <button data-world="dark" class="skin-btn">ダーク</button>
+          <button data-world="forest" class="skin-btn">フォレスト</button>
+          <button data-world="desert" class="skin-btn">デザート</button>
+        </div>
+      </div>
+      <div class="skin-group">
+        <p>🦖 恐竜スキン</p>
+        <div class="skin-buttons" id="dinoSkinButtons">
+          <button data-dino="classic" class="skin-btn dino-skin-btn active-skin">🍃 緑</button>
+          <button data-dino="lava" class="skin-btn dino-skin-btn">🌋 マグマ</button>
+          <button data-dino="ice" class="skin-btn dino-skin-btn">❄️ 氷河</button>
+          <button data-dino="golden" class="skin-btn dino-skin-btn">🏆 黄金</button>
+        </div>
+      </div>
     </div>
-    <button class="reset-rank-btn" id="resetRankBtn">🗑️ ランキングリセット</button>
+    
+    <!-- ランキング -->
+    <div class="ranking-container">
+      <h3>🏅 TOP 5 RUNNERS</h3>
+      <div class="ranking-list" id="rankList">- 読み込み中 -</div>
+      <button class="reset-rank-btn" id="resetRankBtn">🗑️ リセット</button>
+    </div>
   </div>
 </div>
 
@@ -203,45 +245,110 @@
     canvas.height = 300;
     ctx.imageSmoothingEnabled = false;
     
-    // ---------- ゲーム状態 ----------
+    // ---------- スキン設定 (ワールド & 恐竜) ----------
+    let currentWorldSkin = 'classic';   // classic, dark, forest, desert
+    let currentDinoSkin = 'classic';    // classic, lava, ice, golden
+    
+    // ワールドスキンデータ
+    const worldSkins = {
+      classic: {
+        skyStart: '#192135', skyEnd: '#1a2538',
+        groundDark: '#3a4230', groundMid: '#5a6e4a', groundLight: '#7f8c5e', groundTop: '#8f9e6e',
+        cloudMain: '#eeddbb', cloudSub: '#ddcca8',
+        starColor: 'rgba(255,240,170,0.6)',
+        obstacleColors: { cactus1: '#4a6a3a', cactus2: '#3a5530', rock: '#7a6a5a', bird: '#c97a4a' },
+        speedLine: '#f0d89a'
+      },
+      dark: {
+        skyStart: '#0a0c12', skyEnd: '#10141e',
+        groundDark: '#1f2a1c', groundMid: '#2c3a26', groundLight: '#3e4f36', groundTop: '#4d613f',
+        cloudMain: '#3a3a4a', cloudSub: '#2a2a3a',
+        starColor: 'rgba(200,190,140,0.5)',
+        obstacleColors: { cactus1: '#5a4a3a', cactus2: '#3a2c22', rock: '#5a4e3a', bird: '#9e5a3a' },
+        speedLine: '#a59a6e'
+      },
+      forest: {
+        skyStart: '#1a3a2a', skyEnd: '#0e2a1c',
+        groundDark: '#2a5a3a', groundMid: '#3e7a50', groundLight: '#5a9a6a', groundTop: '#7aba7a',
+        cloudMain: '#c8e0b0', cloudSub: '#aac88a',
+        starColor: 'rgba(220,255,180,0.5)',
+        obstacleColors: { cactus1: '#4a7a3e', cactus2: '#2a5a2a', rock: '#6a7a4a', bird: '#ba8a4a' },
+        speedLine: '#c8e07a'
+      },
+      desert: {
+        skyStart: '#b87c3a', skyEnd: '#9a5a2a',
+        groundDark: '#b87a4a', groundMid: '#d4985a', groundLight: '#e8b87a', groundTop: '#f5cea0',
+        cloudMain: '#f5e6c0', cloudSub: '#e5d0a0',
+        starColor: 'rgba(255,180,60,0.5)',
+        obstacleColors: { cactus1: '#6a8a4a', cactus2: '#4a6a2a', rock: '#aa8a5a', bird: '#d4783a' },
+        speedLine: '#ffd080'
+      }
+    };
+    
+    // 恐竜スキンパレット
+    const dinoSkins = {
+      classic: { body: ['#5f8b6f', '#4a705a', '#3c5a48'], eye: '#f5f0dc', pupil: '#101010' },
+      lava: { body: ['#cf5a2a', '#b03e1a', '#8a2a0e'], eye: '#ffdd88', pupil: '#2a0a00' },
+      ice: { body: ['#7ab8c8', '#5a98b0', '#3a7890'], eye: '#eef8ff', pupil: '#0a2a3a' },
+      golden: { body: ['#e8ba4a', '#d4a030', '#b88020'], eye: '#fff2cc', pupil: '#5a3a0a' }
+    };
+    
+    // 世界スキン適用関数 (描画時に参照)
+    function getWorldSkin() { return worldSkins[currentWorldSkin]; }
+    function getDinoPalette() { return dinoSkins[currentDinoSkin]; }
+    
+    // スキン保存・読込
+    function loadSkins() {
+      const savedWorld = localStorage.getItem('dinoWorldSkin');
+      const savedDino = localStorage.getItem('dinoDinoSkin');
+      if (savedWorld && worldSkins[savedWorld]) currentWorldSkin = savedWorld;
+      if (savedDino && dinoSkins[savedDino]) currentDinoSkin = savedDino;
+      updateSkinUI();
+    }
+    function saveWorldSkin(skin) { currentWorldSkin = skin; localStorage.setItem('dinoWorldSkin', skin); updateSkinUI(); }
+    function saveDinoSkin(skin) { currentDinoSkin = skin; localStorage.setItem('dinoDinoSkin', skin); updateSkinUI(); }
+    function updateSkinUI() {
+      document.querySelectorAll('#worldSkinButtons .skin-btn').forEach(btn => {
+        if (btn.getAttribute('data-world') === currentWorldSkin) btn.classList.add('active-skin');
+        else btn.classList.remove('active-skin');
+      });
+      document.querySelectorAll('#dinoSkinButtons .skin-btn').forEach(btn => {
+        if (btn.getAttribute('data-dino') === currentDinoSkin) btn.classList.add('active-skin');
+        else btn.classList.remove('active-skin');
+      });
+    }
+    
+    // ---------- ゲーム変数 ----------
     let gameRunning = true;
     let score = 0;
     let frame = 0;
     let baseSpeed = 4.2;
     let speedMultiplier = 1.0;
-    
     const GROUND_Y = canvas.height - 38;
     
-    // ---------- 恐竜 ----------
-    const DINO_W = 24;
-    const DINO_H = 28;
-    let dino = {
-      x: 70,
-      y: GROUND_Y - DINO_H,
-      vy: 0,
-      gravity: 0.68,
-      jumpPower: -9.5,
-      grounded: true
-    };
+    // 恐竜
+    const DINO_W = 24, DINO_H = 28;
+    let dino = { x: 70, y: GROUND_Y - DINO_H, vy: 0, gravity: 0.68, jumpPower: -9.5, grounded: true };
     
-    // ---------- 障害物 ----------
+    // 障害物
     let obstacles = [];
     const OBSTACLE_TYPES = [
-      { name: 'cactus', width: 12, height: 28, pixelColors: ['#4a6a3a','#3a5530'], yOffset: 0 },
-      { name: 'cactusBig', width: 16, height: 34, pixelColors: ['#5a7a44','#3e5a2e'], yOffset: 0 },
-      { name: 'rock', width: 18, height: 18, pixelColors: ['#7a6a5a','#5a4a3a'], yOffset: 0 },
-      { name: 'bird', width: 22, height: 18, pixelColors: ['#c97a4a','#a5522a'], yOffset: -32, fly: true }
+      { name: 'cactus', width: 12, height: 28, yOffset: 0, fly: false },
+      { name: 'cactusBig', width: 16, height: 34, yOffset: 0, fly: false },
+      { name: 'rock', width: 18, height: 18, yOffset: 0, fly: false },
+      { name: 'bird', width: 22, height: 18, yOffset: -32, fly: true }
     ];
-    
     let spawnDelay = 0;
     
-    // ========== エフェクト用パーティクル ==========
-    let particles = [];      // 砂煙・ジャンプリング
+    // エフェクト
+    let particles = [];
     
-    // ---------- ランキング ----------
+    // ランキング
     let ranking = [];
     const RANK_KEY = 'dinoPixelRanking';
+    let bestScoreLocal = 0;
     
+    // ---------- ランキング処理 ----------
     function loadRanking(){
       const stored = localStorage.getItem(RANK_KEY);
       ranking = stored ? JSON.parse(stored) : [];
@@ -249,14 +356,12 @@
       if(ranking.length > 5) ranking = ranking.slice(0,5);
       renderRanking();
     }
-    
     function saveRanking(){
       ranking.sort((a,b) => b.score - a.score);
       if(ranking.length > 5) ranking = ranking.slice(0,5);
       localStorage.setItem(RANK_KEY, JSON.stringify(ranking));
       renderRanking();
     }
-    
     function addScoreToRanking(scoreVal){
       if(scoreVal === 0) return;
       const now = new Date();
@@ -266,13 +371,6 @@
       if(ranking.length > 5) ranking = ranking.slice(0,5);
       saveRanking();
     }
-    
-    function resetRanking(){
-      ranking = [];
-      localStorage.setItem(RANK_KEY, JSON.stringify(ranking));
-      renderRanking();
-    }
-    
     function renderRanking(){
       const rankDiv = document.getElementById('rankList');
       rankDiv.innerHTML = '';
@@ -288,8 +386,8 @@
         rankDiv.appendChild(item);
       }
     }
+    function resetRanking(){ ranking = []; localStorage.setItem(RANK_KEY, JSON.stringify(ranking)); renderRanking(); }
     
-    let bestScoreLocal = 0;
     function updateBestScoreUI(){
       if(score > bestScoreLocal) bestScoreLocal = Math.floor(score);
       document.getElementById('highScoreValue').innerText = bestScoreLocal;
@@ -306,11 +404,7 @@
         updateBestScoreUI();
       }
     }
-    
-    function updateScoreUI(){
-      document.getElementById('scoreValue').innerText = Math.floor(score);
-    }
-    
+    function updateScoreUI(){ document.getElementById('scoreValue').innerText = Math.floor(score); }
     function addScore(inc){
       if(!gameRunning) return;
       score += inc;
@@ -319,69 +413,34 @@
       speedMultiplier = Math.min(2.0, newMult);
     }
     
-    // ========== エフェクト追加関数 ==========
-    function addDust(x, y) {
-      for(let i=0;i<5;i++) {
-        particles.push({
-          x: x + (Math.random() - 0.5) * 14,
-          y: y + 4,
-          vx: (Math.random() - 0.5) * 1.2,
-          vy: -Math.random() * 1.8,
-          life: 0.5,
-          color: '#b8a87a'
-        });
-      }
+    // エフェクト
+    function addDust(x, y){
+      const skin = getWorldSkin();
+      for(let i=0;i<5;i++) particles.push({ x: x+(Math.random()-0.5)*14, y: y+4, vx: (Math.random()-0.5)*1.2, vy: -Math.random()*1.8, life: 0.5, color: '#b8a87a' });
+    }
+    function addJumpRing(x, y){
+      for(let i=0;i<8;i++){ const a = (i/8)*Math.PI*2; particles.push({ x: x+12, y: y+20, vx: Math.cos(a)*1.5, vy: Math.sin(a)*1.2-1, life: 0.45, color: '#eedd99' }); }
+    }
+    function addCrashEffect(x,y){
+      for(let i=0;i<12;i++) particles.push({ x: x+12+(Math.random()-0.5)*20, y: y+14+(Math.random()-0.5)*20, vx: (Math.random()-0.5)*3, vy: (Math.random()-0.5)*3-1, life: 0.6, color: '#ff8866' });
     }
     
-    function addJumpRing(x, y) {
-      for(let i=0;i<8;i++) {
-        const angle = (i / 8) * Math.PI * 2;
-        particles.push({
-          x: x + 12,
-          y: y + 20,
-          vx: Math.cos(angle) * 1.5,
-          vy: Math.sin(angle) * 1.2 - 1,
-          life: 0.45,
-          color: '#eedd99'
-        });
-      }
-    }
-    
-    // 衝突時エフェクト（クラッシュ）
-    function addCrashEffect(x, y) {
-      for(let i=0;i<12;i++) {
-        particles.push({
-          x: x + 12 + (Math.random() - 0.5) * 20,
-          y: y + 14 + (Math.random() - 0.5) * 20,
-          vx: (Math.random() - 0.5) * 3,
-          vy: (Math.random() - 0.5) * 3 - 1,
-          life: 0.6,
-          color: '#ff8866'
-        });
-      }
-    }
-    
-    // ========== 効果音 (Web Audio) ==========
+    // 簡易サウンド
     let audioCtx = null;
-    function playSound(type) {
-      try {
+    function playSound(type){
+      try{
         if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
+        osc.connect(gain); gain.connect(audioCtx.destination);
         osc.type = 'sine';
-        let freq = 0;
-        if(type === 'jump') freq = 780;
-        else if(type === 'land') freq = 540;
-        else if(type === 'crash') freq = 320;
-        else return;
+        let freq = type==='jump'?780: type==='land'?540:320;
         osc.frequency.value = freq;
         gain.gain.value = 0.12;
         osc.start();
         gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.25);
-        osc.stop(audioCtx.currentTime + 0.2);
-      } catch(e) { /* 自動再生ポリシー対策: ユーザーアクション後に鳴る */ }
+        osc.stop(audioCtx.currentTime+0.2);
+      }catch(e){}
     }
     
     function jump(){
@@ -394,18 +453,13 @@
         playSound('jump');
       }
     }
-    
     function gameOver(){
       if(!gameRunning) return;
       gameRunning = false;
       addCrashEffect(dino.x, dino.y);
       playSound('crash');
-      if(score > 0){
-        addScoreToRanking(score);
-        saveBestScore();
-      }
+      if(score > 0){ addScoreToRanking(score); saveBestScore(); }
     }
-    
     function restart(){
       gameRunning = true;
       score = 0;
@@ -422,289 +476,152 @@
     
     function spawnObstacle(){
       const type = OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
-      obstacles.push({
-        x: canvas.width,
-        y: GROUND_Y - type.height + (type.yOffset || 0),
-        width: type.width,
-        height: type.height,
-        type: type.name,
-        pixelColors: type.pixelColors,
-        fly: type.fly || false
-      });
+      obstacles.push({ x: canvas.width, y: GROUND_Y - type.height + (type.yOffset||0), width: type.width, height: type.height, type: type.name, fly: type.fly });
     }
     
     function updatePhysics(){
       if(!gameRunning) return;
-      
       dino.vy += dino.gravity;
       dino.y += dino.vy;
       if(dino.y >= GROUND_Y - DINO_H){
-        if(!dino.grounded) {
-          // 着地エフェクト＋音
-          addDust(dino.x + DINO_W/2, GROUND_Y);
-          playSound('land');
-        }
-        dino.y = GROUND_Y - DINO_H;
-        dino.vy = 0;
-        dino.grounded = true;
+        if(!dino.grounded){ addDust(dino.x + DINO_W/2, GROUND_Y); playSound('land'); }
+        dino.y = GROUND_Y - DINO_H; dino.vy = 0; dino.grounded = true;
       }
-      if(dino.y < GROUND_Y - DINO_H - 55){
-        dino.y = GROUND_Y - DINO_H - 55;
-        if(dino.vy < 0) dino.vy = 0;
-      }
+      if(dino.y < GROUND_Y - DINO_H - 55){ dino.y = GROUND_Y - DINO_H - 55; if(dino.vy<0) dino.vy=0; }
       
       const currentSpeed = baseSpeed * speedMultiplier;
       for(let i=0;i<obstacles.length;i++){
         const obs = obstacles[i];
         obs.x -= currentSpeed;
-        
-        let dinoLeft = dino.x + 5;
-        let dinoRight = dino.x + DINO_W - 7;
-        let dinoTop = dino.y + 4;
-        let dinoBottom = dino.y + DINO_H - 4;
-        let obsLeft = obs.x + 3;
-        let obsRight = obs.x + obs.width - 4;
-        let obsTop = obs.y + 3;
-        let obsBottom = obs.y + obs.height - 3;
-        
-        if(dinoRight > obsLeft && dinoLeft < obsRight && dinoBottom > obsTop && dinoTop < obsBottom){
-          gameOver();
-          break;
-        }
-        
-        if(obs.x + obs.width < 0){
-          obstacles.splice(i,1);
-          i--;
-          addScore(12);
-        }
+        let dinoLeft = dino.x+5, dinoRight = dino.x+DINO_W-7, dinoTop = dino.y+4, dinoBottom = dino.y+DINO_H-4;
+        let obsLeft = obs.x+3, obsRight = obs.x+obs.width-4, obsTop = obs.y+3, obsBottom = obs.y+obs.height-3;
+        if(dinoRight > obsLeft && dinoLeft < obsRight && dinoBottom > obsTop && dinoTop < obsBottom){ gameOver(); break; }
+        if(obs.x + obs.width < 0){ obstacles.splice(i,1); i--; addScore(12); }
       }
-      
       if(gameRunning && frame % 7 === 0) addScore(1);
-      
       if(gameRunning){
-        if(spawnDelay <= 0){
-          let delayBase = Math.max(34, 54 - Math.floor(speedMultiplier * 10));
-          spawnObstacle();
-          spawnDelay = delayBase;
-          if(Math.random() < 0.3 && speedMultiplier > 1.15){
-            spawnDelay = Math.max(20, delayBase - 6);
-          }
-        } else {
-          spawnDelay--;
-        }
+        if(spawnDelay <= 0){ spawnObstacle(); spawnDelay = Math.max(34, 54 - Math.floor(speedMultiplier*10)); if(Math.random()<0.3 && speedMultiplier>1.15) spawnDelay = Math.max(20, spawnDelay-6); }
+        else spawnDelay--;
       }
     }
-    
     function updateParticles(){
       for(let i=0;i<particles.length;i++){
         particles[i].x += particles[i].vx;
         particles[i].y += particles[i].vy;
         particles[i].life -= 0.03;
-        if(particles[i].life <= 0 || particles[i].y > GROUND_Y+20){
-          particles.splice(i,1);
-          i--;
-        }
+        if(particles[i].life <= 0 || particles[i].y > GROUND_Y+20){ particles.splice(i,1); i--; }
       }
     }
     
-    // ---------- 雲 ----------
+    // 雲
     let clouds = [];
     function initClouds(){
-      for(let i=0;i<3;i++){
-        clouds.push({
-          x: Math.random() * canvas.width,
-          y: 30 + Math.random() * 55,
-          blocks: [
-            [0,0,1,1,1,0,0],
-            [0,1,1,1,1,1,0],
-            [1,1,1,1,1,1,1]
-          ],
-        });
-      }
+      for(let i=0;i<3;i++) clouds.push({ x: Math.random() * canvas.width, y: 30 + Math.random() * 55, blocks: [[0,0,1,1,1,0,0],[0,1,1,1,1,1,0],[1,1,1,1,1,1,1]] });
     }
-    function updateClouds(){
-      for(let c of clouds){
-        c.x -= 0.35;
-        if(c.x + 70 < 0){
-          c.x = canvas.width + 40;
-          c.y = 25 + Math.random() * 65;
-        }
-      }
-    }
+    function updateClouds(){ for(let c of clouds){ c.x -= 0.35; if(c.x + 70 < 0){ c.x = canvas.width + 40; c.y = 25 + Math.random() * 65; } } }
     
-    // ========== 描画 ==========
-    function drawDinoPixel(){
-      const dinoSprite = [
-        [0,0,1,1,1,0,0,0],
-        [0,1,1,1,1,1,0,0],
-        [1,1,1,1,1,1,1,0],
-        [1,1,1,1,1,1,1,1],
-        [1,1,1,1,1,1,1,1],
-        [0,1,1,0,0,1,1,0],
-        [0,0,1,0,0,1,0,0],
-        [0,0,1,0,0,1,0,0]
-      ];
-      const colors = ['#5f8b6f', '#4a705a', '#3c5a48'];
-      let px = dino.x, py = dino.y;
-      for(let row=0; row<dinoSprite.length; row++){
-        for(let col=0; col<dinoSprite[row].length; col++){
-          if(dinoSprite[row][col]){
-            ctx.fillStyle = colors[(row+col) % colors.length];
-            ctx.fillRect(px + col*3, py + row*3, 3, 3);
-          }
-        }
-      }
-      ctx.fillStyle = '#f5f0dc';
-      ctx.fillRect(px + 17, py + 6, 2, 2);
-      ctx.fillStyle = '#101010';
-      ctx.fillRect(px + 18, py + 6, 1, 1);
-    }
-    
-    function drawObstaclePixel(obs){
-      let x = obs.x, y = obs.y;
-      if(obs.type === 'cactus' || obs.type === 'cactusBig'){
-        ctx.fillStyle = obs.pixelColors[0];
-        for(let i=0;i<obs.height;i+=3){
-          ctx.fillRect(x+3, y+i, 4, 2);
-          ctx.fillRect(x+8, y+i, 3, 2);
-          if(i%8===0) ctx.fillRect(x+1, y+i, 2, 4);
-        }
-        ctx.fillStyle = obs.pixelColors[1];
-        ctx.fillRect(x+2, y+4, 3, 5);
-        ctx.fillRect(x+9, y+10, 3, 5);
-      } 
-      else if(obs.type === 'rock'){
-        ctx.fillStyle = obs.pixelColors[0];
-        for(let i=0;i<obs.height;i+=4){
-          ctx.fillRect(x+2, y+i, 5, 3);
-          ctx.fillRect(x+8, y+i+2, 4, 3);
-        }
-      }
-      else if(obs.type === 'bird'){
-        ctx.fillStyle = obs.pixelColors[0];
-        ctx.fillRect(x+4, y+8, 14, 7);
-        ctx.fillRect(x+2, y+6, 5, 4);
-        ctx.fillRect(x+15, y+6, 5, 4);
-        ctx.fillRect(x+10, y+4, 6, 5);
-        ctx.fillStyle = '#dd9944';
-        ctx.fillRect(x+16, y+5, 3, 2);
-        ctx.fillStyle = '#000';
-        ctx.fillRect(x+11, y+6, 1, 1);
-        ctx.fillRect(x+13, y+6, 1, 1);
-      }
-    }
-    
-    function drawGround(){
-      for(let i=0;i<canvas.width;i+=6){
-        ctx.fillStyle = '#5a6e4a';
-        ctx.fillRect(i, GROUND_Y-4, 3, 4);
-        ctx.fillStyle = '#7f8c5e';
-        ctx.fillRect(i+3, GROUND_Y-6, 2, 3);
-      }
-      ctx.fillStyle = '#3a4230';
-      ctx.fillRect(0, GROUND_Y-2, canvas.width, 4);
-      ctx.fillStyle = '#8f9e6e';
-      ctx.fillRect(0, GROUND_Y, canvas.width, 2);
-    }
-    
-    function drawClouds(){
-      for(let c of clouds){
-        ctx.fillStyle = '#eeddbb';
-        for(let row=0; row<c.blocks.length; row++){
-          for(let col=0; col<c.blocks[row].length; col++){
-            if(c.blocks[row][col]){
-              ctx.fillRect(c.x + col*5, c.y + row*4, 4, 4);
-            }
-          }
-        }
-        ctx.fillStyle = '#ddcca8';
-        for(let row=0; row<c.blocks.length; row++){
-          for(let col=0; col<c.blocks[row].length; col++){
-            if(c.blocks[row][col] && (row+col)%2===0){
-              ctx.fillRect(c.x + col*5+1, c.y + row*4+1, 2, 2);
-            }
-          }
-        }
-      }
-    }
-    
+    // ---------- 描画 (スキン反映) ----------
     function drawStars(){
-      for(let i=0;i<110;i++){
-        if((frame + i*17) % 71 ===0) continue;
-        ctx.fillStyle = `rgba(255,240,170,0.6)`;
-        ctx.fillRect( (i*131)%canvas.width, (i*47)%canvas.height, 1, 1);
+      const skin = getWorldSkin();
+      for(let i=0;i<110;i++){ if((frame + i*17) % 71 ===0) continue; ctx.fillStyle = skin.starColor; ctx.fillRect( (i*131)%canvas.width, (i*47)%canvas.height, 1, 1); }
+    }
+    function drawClouds(){
+      const skin = getWorldSkin();
+      for(let c of clouds){
+        ctx.fillStyle = skin.cloudMain;
+        for(let row=0; row<c.blocks.length; row++) for(let col=0; col<c.blocks[row].length; col++) if(c.blocks[row][col]) ctx.fillRect(c.x + col*5, c.y + row*4, 4, 4);
+        ctx.fillStyle = skin.cloudSub;
+        for(let row=0; row<c.blocks.length; row++) for(let col=0; col<c.blocks[row].length; col++) if(c.blocks[row][col] && (row+col)%2===0) ctx.fillRect(c.x + col*5+1, c.y + row*4+1, 2, 2);
       }
     }
-    
+    function drawGround(){
+      const skin = getWorldSkin();
+      for(let i=0;i<canvas.width;i+=6){
+        ctx.fillStyle = skin.groundMid; ctx.fillRect(i, GROUND_Y-4, 3, 4);
+        ctx.fillStyle = skin.groundLight; ctx.fillRect(i+3, GROUND_Y-6, 2, 3);
+      }
+      ctx.fillStyle = skin.groundDark; ctx.fillRect(0, GROUND_Y-2, canvas.width, 4);
+      ctx.fillStyle = skin.groundTop; ctx.fillRect(0, GROUND_Y, canvas.width, 2);
+    }
+    function drawObstaclePixel(obs){
+      const skin = getWorldSkin();
+      ctx.fillStyle = skin.obstacleColors.cactus1;
+      if(obs.type === 'cactus' || obs.type === 'cactusBig'){
+        for(let i=0;i<obs.height;i+=3){ ctx.fillRect(obs.x+3, obs.y+i, 4, 2); ctx.fillRect(obs.x+8, obs.y+i, 3, 2); if(i%8===0) ctx.fillRect(obs.x+1, obs.y+i, 2, 4); }
+        ctx.fillStyle = skin.obstacleColors.cactus2;
+        ctx.fillRect(obs.x+2, obs.y+4, 3, 5); ctx.fillRect(obs.x+9, obs.y+10, 3, 5);
+      } else if(obs.type === 'rock'){
+        ctx.fillStyle = skin.obstacleColors.rock;
+        for(let i=0;i<obs.height;i+=4){ ctx.fillRect(obs.x+2, obs.y+i, 5, 3); ctx.fillRect(obs.x+8, obs.y+i+2, 4, 3); }
+      } else if(obs.type === 'bird'){
+        ctx.fillStyle = skin.obstacleColors.bird;
+        ctx.fillRect(obs.x+4, obs.y+8, 14, 7); ctx.fillRect(obs.x+2, obs.y+6, 5, 4); ctx.fillRect(obs.x+15, obs.y+6, 5, 4); ctx.fillRect(obs.x+10, obs.y+4, 6, 5);
+        ctx.fillStyle = '#dd9944'; ctx.fillRect(obs.x+16, obs.y+5, 3, 2);
+        ctx.fillStyle = '#000'; ctx.fillRect(obs.x+11, obs.y+6, 1, 1); ctx.fillRect(obs.x+13, obs.y+6, 1, 1);
+      }
+    }
+    function drawDinoPixel(){
+      const pal = getDinoPalette();
+      const dinoSprite = [
+        [0,0,1,1,1,0,0,0],[0,1,1,1,1,1,0,0],[1,1,1,1,1,1,1,0],[1,1,1,1,1,1,1,1],
+        [1,1,1,1,1,1,1,1],[0,1,1,0,0,1,1,0],[0,0,1,0,0,1,0,0],[0,0,1,0,0,1,0,0]
+      ];
+      let px = dino.x, py = dino.y;
+      for(let row=0; row<dinoSprite.length; row++) for(let col=0; col<dinoSprite[row].length; col++) if(dinoSprite[row][col]){ ctx.fillStyle = pal.body[(row+col) % pal.body.length]; ctx.fillRect(px + col*3, py + row*3, 3, 3); }
+      ctx.fillStyle = pal.eye; ctx.fillRect(px + 17, py + 6, 2, 2);
+      ctx.fillStyle = pal.pupil; ctx.fillRect(px + 18, py + 6, 1, 1);
+    }
     function drawSpeedLines(){
       if(speedMultiplier > 1.2){
-        ctx.globalAlpha = 0.2;
-        ctx.fillStyle = '#f0d89a';
-        for(let i=0;i<6;i++){
-          let pos = (frame*5 + i*35) % canvas.width;
-          ctx.fillRect(pos, GROUND_Y-5, 12, 2);
-        }
+        const skin = getWorldSkin();
+        ctx.globalAlpha = 0.2; ctx.fillStyle = skin.speedLine;
+        for(let i=0;i<6;i++){ let pos = (frame*5 + i*35) % canvas.width; ctx.fillRect(pos, GROUND_Y-5, 12, 2); }
         ctx.globalAlpha = 1;
       }
     }
-    
     function draw(){
-      ctx.fillStyle = '#192135';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      drawStars();
-      ctx.fillStyle = '#eeddaa';
-      for(let i=0;i<5;i++){
-        ctx.fillRect(canvas.width-48 + i*3, 32, 2, 2);
-        ctx.fillRect(canvas.width-36, 28+i*2, 2, 2);
-      }
-      drawClouds();
-      drawGround();
+      const skin = getWorldSkin();
+      const grad = ctx.createLinearGradient(0,0,0,canvas.height);
+      grad.addColorStop(0, skin.skyStart); grad.addColorStop(1, skin.skyEnd);
+      ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+      drawStars(); drawClouds(); drawGround();
       for(let obs of obstacles) drawObstaclePixel(obs);
       drawDinoPixel();
-      for(let p of particles) { ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); }
+      for(let p of particles){ ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, 2, 2); }
       drawSpeedLines();
-      
       if(!gameRunning){
-        ctx.font = "bold 24px 'Courier New'";
-        ctx.fillStyle = '#edd8aa';
-        ctx.fillText("GAME OVER", canvas.width/2-85, canvas.height/2-30);
-        ctx.font = "12px monospace";
-        ctx.fillStyle = "#c8b580";
-        ctx.fillText("スペース/クリックで再挑戦", canvas.width/2-120, canvas.height/2+10);
+        ctx.font = "bold 24px 'Courier New'"; ctx.fillStyle = '#edd8aa'; ctx.fillText("GAME OVER", canvas.width/2-85, canvas.height/2-30);
+        ctx.font = "12px monospace"; ctx.fillStyle = "#c8b580"; ctx.fillText("スペース/クリックで再挑戦", canvas.width/2-120, canvas.height/2+10);
       }
     }
     
-    // ---------- メインループ ----------
+    // メインループ
     function updateLoop(){
-      if(gameRunning){
-        updateClouds();
-        updatePhysics();
-        updateParticles();
-      }
-      draw();
-      frame++;
+      if(gameRunning){ updateClouds(); updatePhysics(); updateParticles(); }
+      draw(); frame++;
       requestAnimationFrame(updateLoop);
     }
     
-    // ---------- イベント ----------
+    // イベント
     function handleAction(e){
-      if(e.type === 'keydown'){
-        if(e.code === 'Space' || e.code === 'ArrowUp'){
-          e.preventDefault();
-          if(!gameRunning) restart();
-          else jump();
-        }
-      } else {
-        if(!gameRunning) restart();
-        else jump();
-      }
+      if(e.type === 'keydown' && (e.code === 'Space' || e.code === 'ArrowUp')){ e.preventDefault(); if(!gameRunning) restart(); else jump(); }
+      else if(e.type !== 'keydown'){ if(!gameRunning) restart(); else jump(); }
     }
     window.addEventListener('keydown', handleAction);
     canvas.addEventListener('click', () => { if(!gameRunning) restart(); else jump(); });
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); if(!gameRunning) restart(); else jump(); });
-    document.getElementById('resetRankBtn').addEventListener('click', () => { resetRanking(); });
+    document.getElementById('resetRankBtn').addEventListener('click', () => resetRanking());
     
-    // ---------- 初期化 ----------
+    // スキンイベント
+    document.querySelectorAll('#worldSkinButtons .skin-btn').forEach(btn => {
+      btn.addEventListener('click', () => { saveWorldSkin(btn.getAttribute('data-world')); });
+    });
+    document.querySelectorAll('#dinoSkinButtons .skin-btn').forEach(btn => {
+      btn.addEventListener('click', () => { saveDinoSkin(btn.getAttribute('data-dino')); });
+    });
+    
+    // 初期化
+    loadSkins();
     initClouds();
     loadRanking();
     loadBestScore();
