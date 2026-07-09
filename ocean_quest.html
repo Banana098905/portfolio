@@ -39,10 +39,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      touch-action: none; /* ブラウザ標準のスクロールやズームを完全無効化 */
+      touch-action: none;
     }
 
-    /* メインコンテナ */
     #game-container {
       position: relative;
       width: 100%;
@@ -59,7 +58,6 @@
       flex-direction: column;
     }
 
-    /* ヘッダーHUD */
     header {
       display: flex;
       justify-content: space-between;
@@ -78,7 +76,6 @@
       gap: 12px;
     }
 
-    /* ポートフォリオに戻るボタン */
     .back-portfolio-btn {
       color: var(--neon-cyan);
       text-decoration: none;
@@ -120,7 +117,6 @@
     .hud-gem { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5); font-weight: bold; }
     .hud-lvl { color: var(--neon-cyan); text-shadow: var(--glow-cyan); font-weight: bold; }
 
-    /* メインゲームステージ */
     #stage {
       position: relative;
       flex: 1;
@@ -129,7 +125,6 @@
       flex-direction: column;
     }
 
-    /* 天候・環境エフェクト用Canvas */
     #fx-canvas {
       position: absolute;
       top: 0;
@@ -140,7 +135,6 @@
       z-index: 2;
     }
 
-    /* 水中・釣り竿描画用Canvas */
     #water-canvas {
       position: absolute;
       top: 0;
@@ -150,7 +144,6 @@
       z-index: 1;
     }
 
-    /* 各種インジケーター */
     .env-indicator {
       position: absolute;
       top: 12px;
@@ -178,7 +171,6 @@
     .badge-time { background: rgba(255, 215, 0, 0.2); color: var(--neon-gold); border-color: var(--neon-gold); }
     .badge-season { background: rgba(57, 255, 20, 0.2); color: var(--neon-green); border-color: var(--neon-green); }
 
-    /* マップ名表示 */
     .map-title {
       position: absolute;
       top: 12px;
@@ -198,7 +190,6 @@
       color: var(--text-sub);
     }
 
-    /* コントロールパネル */
     #control-panel {
       position: absolute;
       bottom: 20px;
@@ -242,7 +233,6 @@
       box-shadow: 0 8px 20px rgba(255, 0, 127, 0.5);
     }
 
-    /* タイミング／パワーゲージ */
     #power-gauge-wrap {
       width: 220px;
       height: 14px;
@@ -273,7 +263,6 @@
       background: rgba(255,255,255,0.15);
     }
 
-    /* フローティングメッセージ */
     #action-msg {
       position: absolute;
       top: 38%;
@@ -299,7 +288,6 @@
     #action-msg.catch { color: var(--neon-gold); text-shadow: var(--glow-gold), 0 2px 10px rgba(0,0,0,0.8); }
     #action-msg.miss { color: var(--text-sub); }
 
-    /* ミニゲームオーバーレイ (リールファイト用) */
     #fight-overlay {
       position: absolute;
       top: 0;
@@ -347,7 +335,6 @@
       text-shadow: 0 0 8px rgba(255,0,127,0.4);
     }
 
-    /* 進捗ゲージ */
     .catch-bar-wrap {
       width: 100%;
       height: 12px;
@@ -365,7 +352,6 @@
       transition: width 0.05s linear;
     }
 
-    /* リールミニゲームスライダー */
     .reel-track {
       position: relative;
       width: 100%;
@@ -378,7 +364,6 @@
       box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
     }
 
-    /* プレイヤーの安全バー */
     .player-bar {
       position: absolute;
       top: 0;
@@ -398,7 +383,6 @@
       box-shadow: inset 0 0 10px rgba(57, 255, 20, 0.4), 0 0 10px rgba(57, 255, 20, 0.5);
     }
 
-    /* 魚のアイコン影 */
     .fish-icon {
       position: absolute;
       top: 50%;
@@ -429,7 +413,6 @@
       margin-top: 2px;
     }
 
-    /* 下部ナビゲーションメニュー */
     footer-nav {
       background: rgba(4, 8, 15, 0.95);
       border-top: 1px solid var(--panel-border);
@@ -529,16 +512,22 @@
 
     .modal-body {
       flex: 1;
+      min-height: 0;
       display: flex;
       flex-direction: column;
       gap: 12px;
+      overflow: hidden;
     }
 
-    /* カード・グリッド */
     .grid-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 4px;
+      align-content: start;
     }
 
     .item-card {
@@ -630,11 +619,13 @@
     .buy-btn:hover { background: var(--neon-cyan); color: #000; }
     .buy-btn:disabled { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: var(--text-sub); cursor: not-allowed; }
 
-    /* マップ選択画面 */
     .map-grid {
       display: flex;
       flex-direction: column;
       gap: 8px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
     }
 
     .map-row {
@@ -680,11 +671,14 @@
     .map-action-btn.travel:hover { background: var(--neon-green); color: #000; }
     .map-action-btn.current { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--text-sub); cursor: default; }
 
-    /* 図鑑画面 */
     .fish-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+      align-content: start;
     }
 
     .fish-card {
@@ -732,8 +726,14 @@
     }
     .fish-card.locked .fish-card-stats { visibility: hidden; }
 
-    /* スキルツリー */
-    .skills-container { display: flex; flex-direction: column; gap: 12px; }
+    .skills-container { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
     .skill-pts-remain {
       font-size: 0.85rem;
       color: var(--neon-cyan);
@@ -743,6 +743,7 @@
       background: rgba(0, 240, 255, 0.05);
       border: 1px solid rgba(0, 240, 255, 0.15);
       border-radius: 8px;
+      flex-shrink: 0;
     }
 
     .skill-row {
@@ -753,6 +754,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
       padding: 12px 16px;
+      flex-shrink: 0;
     }
 
     .skill-info { display: flex; flex-direction: column; gap: 2px; flex: 1; }
@@ -773,8 +775,14 @@
     .skill-btn:hover { background: var(--neon-cyan); color: #000; }
     .skill-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* クラフト画面 */
-    .craft-list { display: flex; flex-direction: column; gap: 10px; }
+    .craft-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 10px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
     .craft-item {
       display: flex;
       justify-content: space-between;
@@ -783,6 +791,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
       padding: 12px;
+      flex-shrink: 0;
     }
     .craft-materials { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; }
     .mat-badge {
@@ -801,7 +810,6 @@
       background: rgba(255, 0, 127, 0.05);
     }
 
-    /* アバター・コスメ画面 */
     .avatar-setup-wrap {
       display: flex;
       gap: 16px;
@@ -810,6 +818,7 @@
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
+      flex-shrink: 0;
     }
 
     .avatar-preview-box {
@@ -839,7 +848,6 @@
       gap: 6px;
     }
 
-    /* クエスト・実績 */
     .quest-card {
       background: rgba(255,255,255,0.02);
       border: 1px solid rgba(255,255,255,0.08);
@@ -848,12 +856,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-shrink: 0;
     }
     .quest-bar { width: 80px; height: 5px; background: rgba(0,0,0,0.5); border-radius: 999px; overflow: hidden; margin-top: 3px; }
     .quest-bar-fill { height: 100%; background: var(--neon-cyan); }
     .quest-reward { font-size: 0.68rem; color: var(--neon-gold); margin-top: 2px; }
 
-    /* 成果ポップアップ (釣ったとき) */
     #catch-result-overlay {
       position: absolute;
       top: 0;
@@ -931,7 +939,6 @@
       box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
     }
 
-    /* レア度別カラースキーム */
     .rarity-common { color: #8b9bb4; border-color: #8b9bb4; background: rgba(139,155,180,0.1); }
     .rarity-uncommon { color: #00f0ff; border-color: #00f0ff; background: rgba(0,240,255,0.1); }
     .rarity-rare { color: #39ff14; border-color: #39ff14; background: rgba(57,255,20,0.1); }
@@ -946,15 +953,20 @@
       100% { box-shadow: 0 0 5px rgba(255,255,255,0.5); }
     }
 
-    /* ランキング */
-    .ranking-list { display: flex; flex-direction: column; gap: 6px; }
-    .ranking-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; }
+    .ranking-list { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px;
+      overflow-y: auto;
+      flex: 1;
+      min-height: 0;
+    }
+    .ranking-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; flex-shrink: 0; }
     .ranking-row.player { border-color: var(--neon-cyan); background: rgba(0, 240, 255, 0.05); }
     .rank-num { font-weight: 800; font-size: 1rem; width: 24px; }
     .rank-name { flex: 1; font-weight: 600; font-size: 0.85rem; }
     .rank-score { font-family: monospace; color: var(--neon-gold); font-size: 0.85rem; }
 
-    /* スマートフォン/縦長画面（ポートレート）に完全最適化するレスポンシブ定義 */
     @media (max-width: 576px) or (orientation: portrait) {
       #game-container {
         max-width: 100vw;
@@ -979,7 +991,6 @@
         padding: 5px 8px;
         font-size: 0.72rem;
       }
-      /* 下部メニューを少しコンパクトに */
       footer-nav {
         padding: 6px 4px;
       }
@@ -990,7 +1001,6 @@
         width: 16px;
         height: 16px;
       }
-      /* コントロールボタン調整 */
       #control-panel {
         bottom: 16px;
       }
@@ -1014,6 +1024,9 @@
       }
       .grid-container {
         grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+      }
+      .modal-overlay {
+        padding: 12px;
       }
     }
   </style>
@@ -1042,28 +1055,22 @@
 
     <!-- メインステージ -->
     <div id="stage">
-      <!-- 天気・環境 Canvas -->
       <canvas id="fx-canvas"></canvas>
-      <!-- 水・釣り竿 Canvas -->
       <canvas id="water-canvas"></canvas>
 
-      <!-- 左上：マップ表示 -->
       <div class="map-title">
         <h2 id="map-name-display">小さな港</h2>
         <p id="map-depth-display">水深: 0m ~ 5m</p>
       </div>
 
-      <!-- 右上：環境バッジ -->
       <div class="env-indicator">
         <div class="badge badge-weather" id="env-weather-val">晴れ</div>
         <div class="badge badge-time" id="env-time-val">昼</div>
         <div class="badge badge-season" id="env-season-val">春</div>
       </div>
 
-      <!-- アクションメッセージ -->
       <div id="action-msg">HIT!</div>
 
-      <!-- リールファイト用オーバーレイ -->
       <div id="fight-overlay">
         <div class="fight-panel">
           <div class="fight-title">🦈 BATTLE: <span id="fight-fish-name">???</span></div>
@@ -1071,9 +1078,7 @@
             <div class="catch-bar-fill" id="fight-catch-fill"></div>
           </div>
           <div class="reel-track" id="fight-track">
-            <!-- プレイヤーバー -->
             <div class="player-bar" id="fight-player-bar"></div>
-            <!-- 魚 -->
             <div class="fish-icon" id="fight-fish-icon">
               <svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
             </div>
@@ -1082,7 +1087,6 @@
         </div>
       </div>
 
-      <!-- コントロールボタン -->
       <div id="control-panel">
         <div id="power-gauge-wrap">
           <div id="power-gauge-fill"></div>
@@ -1092,8 +1096,7 @@
       </div>
     </div>
 
-    <!-- 各種モーダル -->
-    <!-- 1. マップ移動 -->
+    <!-- モーダル一覧（戻るボタンは削除済み） -->
     <div class="modal-overlay" id="modal-map">
       <div class="modal-header">
         <h3>🗺️ 海域マップの移動</h3>
@@ -1104,34 +1107,31 @@
       </div>
     </div>
 
-    <!-- 2. ショップ -->
     <div class="modal-overlay" id="modal-shop">
       <div class="modal-header">
         <h3>🛒 マリンショップ</h3>
         <button class="close-btn" onclick="closeModal('modal-shop')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
-        <div style="display:flex; gap: 8px; margin-bottom: 12px; flex-shrink:0;">
+        <div style="display:flex; gap: 8px; margin-bottom: 12px; flex-shrink: 0;">
           <button class="buy-btn" onclick="switchShopTab('shop-rods')" style="padding: 8px;">釣り竿</button>
           <button class="buy-btn" onclick="switchShopTab('shop-boats')" style="padding: 8px;">ボート</button>
           <button class="buy-btn" onclick="switchShopTab('shop-baits')" style="padding: 8px;">エサ</button>
         </div>
-        <div class="grid-container" id="shop-items-list" style="overflow-y:auto; flex: 1;"></div>
+        <div class="grid-container" id="shop-items-list"></div>
       </div>
     </div>
 
-    <!-- 3. 図鑑 -->
     <div class="modal-overlay" id="modal-book">
       <div class="modal-header">
         <h3>📖 魚類図鑑 (<span id="book-completion-ratio">0</span>%)</h3>
         <button class="close-btn" onclick="closeModal('modal-book')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
-      <div class="modal-body" style="overflow-y:auto;">
+      <div class="modal-body">
         <div class="fish-grid" id="fish-book-list"></div>
       </div>
     </div>
 
-    <!-- 4. スキル -->
     <div class="modal-overlay" id="modal-skills">
       <div class="modal-header">
         <h3>⚡ アビリティー強化</h3>
@@ -1143,7 +1143,6 @@
       </div>
     </div>
 
-    <!-- 5. クラフト & コスメ -->
     <div class="modal-overlay" id="modal-craft">
       <div class="modal-header">
         <h3>🛠️ クラフト & アバターコスメ</h3>
@@ -1167,41 +1166,39 @@
             </div>
           </div>
         </div>
-        <div style="display:flex; gap: 8px; margin-top: 8px; flex-shrink:0;">
+        <div style="display:flex; gap: 8px; margin-top: 8px; flex-shrink: 0;">
           <button class="buy-btn" onclick="switchCraftTab('craft')" style="padding: 8px;">🛠️ クラフト</button>
           <button class="buy-btn" onclick="switchCraftTab('cosmetics')" style="padding: 8px;">👔 アバター</button>
         </div>
-        <div id="craft-tab-content" style="flex:1; overflow-y:auto; margin-top:6px;"></div>
+        <div id="craft-tab-content" style="flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:8px;"></div>
       </div>
     </div>
 
-    <!-- 6. クエスト & 実績 -->
     <div class="modal-overlay" id="modal-quests">
       <div class="modal-header">
         <h3>🏆 クエスト & 功績</h3>
         <button class="close-btn" onclick="closeModal('modal-quests')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
       <div class="modal-body">
-        <div style="display:flex; gap: 8px; margin-bottom: 12px; flex-shrink:0;">
+        <div style="display:flex; gap: 8px; margin-bottom: 12px; flex-shrink: 0;">
           <button class="buy-btn" onclick="switchQuestTab('quests')" style="padding: 8px;">デイリークエスト</button>
           <button class="buy-btn" onclick="switchQuestTab('achievements')" style="padding: 8px;">永続実績</button>
         </div>
-        <div id="quest-tab-content" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+        <div id="quest-tab-content" style="flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:8px;"></div>
       </div>
     </div>
 
-    <!-- 7. ランキング -->
     <div class="modal-overlay" id="modal-ranking">
       <div class="modal-header">
         <h3>🥇 世界フィッシングランキング</h3>
         <button class="close-btn" onclick="closeModal('modal-ranking')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
       </div>
-      <div class="modal-body" style="overflow-y:auto;">
+      <div class="modal-body">
         <div class="ranking-list" id="ranking-list-box"></div>
       </div>
     </div>
 
-    <!-- 釣果リザルト画面 -->
+    <!-- 釣果リザルト -->
     <div id="catch-result-overlay">
       <div class="result-panel">
         <div class="result-badge" id="result-rarity-badge">COMMON</div>
@@ -1224,33 +1221,33 @@
       </div>
     </div>
 
-    <!-- 下部フッターナビゲーション -->
+    <!-- 下部ナビゲーション（トグル操作用） -->
     <footer-nav>
-      <button class="nav-btn" onclick="openModal('modal-map')">
+      <button class="nav-btn" data-modal="modal-map" onclick="openModal('modal-map')">
         <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
         <span>マップ</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-shop')">
+      <button class="nav-btn" data-modal="modal-shop" onclick="openModal('modal-shop')">
         <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span>ショップ</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-book')">
+      <button class="nav-btn" data-modal="modal-book" onclick="openModal('modal-book')">
         <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
         <span>図鑑</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-skills')">
+      <button class="nav-btn" data-modal="modal-skills" onclick="openModal('modal-skills')">
         <svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span>スキル</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-craft')">
+      <button class="nav-btn" data-modal="modal-craft" onclick="openModal('modal-craft')">
         <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
         <span>クラフト</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-quests')">
+      <button class="nav-btn" data-modal="modal-quests" onclick="openModal('modal-quests')">
         <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         <span>クエスト</span>
       </button>
-      <button class="nav-btn" onclick="openModal('modal-ranking')">
+      <button class="nav-btn" data-modal="modal-ranking" onclick="openModal('modal-ranking')">
         <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 0 0-8h-1zM2 8h1V0H2a4 4 0 0 0 0 8zm19 11H3v2h18v-2zm-3-9v6H6v-6h12z"/></svg>
         <span>ランキング</span>
       </button>
@@ -1363,7 +1360,7 @@
       { type: 'aura', name: '虚空 of オーラ', cost: 25000, owned: false, desc: '周囲の空間が紫色のネオンパーティクルでゆらめく。' }
     ];
 
-    // ===== ゲーム状態オブジェクト =====
+    // ===== ゲーム状態 =====
     let game = {
       level: 1,
       xp: 0,
@@ -1415,7 +1412,7 @@
       { name: 'スカイ・フィッシャー', baseWeight: 2900, bookRate: 58 }
     ];
 
-    // ===== 初期化とシステム開始 =====
+    // ===== 初期化 =====
     window.addEventListener('DOMContentLoaded', () => {
       loadGame();
       initFXCanvas();
@@ -1428,33 +1425,24 @@
       document.getElementById('cast-btn').addEventListener('click', handleCastClick);
       document.getElementById('result-close-btn').addEventListener('click', closeResult);
       
-      // リールゲーム長押し操作 (Touch & Mouse対応)
       const fightOverlay = document.getElementById('fight-overlay');
-      
       fightOverlay.addEventListener('mousedown', (e) => { e.preventDefault(); isReeling = true; });
       fightOverlay.addEventListener('mouseup', () => { isReeling = false; });
       fightOverlay.addEventListener('mouseleave', () => { isReeling = false; });
-      
       fightOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); isReeling = true; }, { passive: false });
       fightOverlay.addEventListener('touchend', (e) => { e.preventDefault(); isReeling = false; }, { passive: false });
 
-      // オートセーブ
       setInterval(saveGame, 10000);
     });
 
-    // iOS/iPadOS サファリ等のピンチズーム・拡大スクロールを強制防止するJS
     document.addEventListener('touchstart', (e) => {
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
+      if (e.touches.length > 1) e.preventDefault();
     }, { passive: false });
 
     let lastTouchEnd = 0;
     document.addEventListener('touchend', (e) => {
       const now = (new Date()).getTime();
-      if (now - lastTouchEnd <= 300) {
-        e.preventDefault(); // ダブルタップズーム防止
-      }
+      if (now - lastTouchEnd <= 300) e.preventDefault();
       lastTouchEnd = now;
     }, { passive: false });
 
@@ -1462,20 +1450,17 @@
     function saveGame() {
       localStorage.setItem('ocean_quest_save', JSON.stringify(game));
     }
-
     function loadGame() {
       const saved = localStorage.getItem('ocean_quest_save');
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
           game = { ...game, ...parsed };
-        } catch (e) {
-          console.error("セーブデータのロードに失敗", e);
-        }
+        } catch (e) { console.error("ロード失敗", e); }
       }
     }
 
-    // ===== HUD / 表示更新 =====
+    // ===== HUD更新 =====
     function updateHUD() {
       document.getElementById('hud-lvl-val').innerText = game.level;
       const nextXp = game.level * 100;
@@ -1510,14 +1495,20 @@
       return dict[s] || s;
     }
 
-    // ===== モーダル開閉 =====
+    // ===== モーダル開閉（トグル＋アクティブ表示）=====
     let activeModal = null;
+
     function openModal(id) {
-      if (castState !== 'idle') return;
-      closeActiveModal();
+      if (activeModal === id) {
+        closeModal(id);
+        return;
+      }
+      if (activeModal) {
+        closeModal(activeModal);
+      }
       document.getElementById(id).style.display = 'flex';
       activeModal = id;
-
+      updateNavActive(id);
       if (id === 'modal-map') renderMapSelection();
       if (id === 'modal-shop') renderShopItems();
       if (id === 'modal-book') renderFishBook();
@@ -1529,67 +1520,62 @@
 
     function closeModal(id) {
       document.getElementById(id).style.display = 'none';
-      if (activeModal === id) activeModal = null;
+      if (activeModal === id) {
+        activeModal = null;
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+      }
     }
 
     function closeActiveModal() {
       if (activeModal) {
-        document.getElementById(activeModal).style.display = 'none';
-        activeModal = null;
+        closeModal(activeModal);
       }
     }
 
-    // ===== 環境・時間進行 =====
+    function updateNavActive(modalId) {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.modal === modalId) {
+          btn.classList.add('active');
+        }
+      });
+    }
+
+    // ===== 環境・時間 =====
     function updateWorldClock() {
       game.clock += 0.5;
       if (game.clock >= 24) {
         game.clock = 0;
         game.daysPassed++;
-        
         const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
         const currentIdx = seasons.indexOf(game.season);
         game.season = seasons[(currentIdx + 1) % 4];
       }
-
       if (Math.random() < 0.15) {
         const weathers = ['Sunny', 'Sunny', 'Cloudy', 'Rainy', 'Stormy', 'Typhoon', 'Aurora', 'Meteor'];
         let selection = weathers;
-        if (game.mapId < 4) {
-          selection = ['Sunny', 'Sunny', 'Cloudy', 'Rainy'];
-        }
+        if (game.mapId < 4) selection = ['Sunny', 'Sunny', 'Cloudy', 'Rainy'];
         game.weather = selection[Math.floor(Math.random() * selection.length)];
       }
-
       updateHUD();
     }
 
-    // ===== マップ画面描画 =====
+    // ===== マップ =====
     function renderMapSelection() {
       const list = document.getElementById('map-selection-list');
       list.innerHTML = '';
       MAPS.forEach(m => {
         const isLocked = game.level < m.reqLvl;
         const isActive = game.mapId === m.id;
-        
         const row = document.createElement('div');
         row.className = `map-row ${isLocked ? 'locked' : ''} ${isActive ? 'active' : ''}`;
-        
         row.innerHTML = `
           <div class="map-info">
-            <div class="map-name">
-              ${m.name} ${isLocked ? '🔒' : ''}
-              ${isActive ? '<span style="font-size:0.65rem; color:var(--neon-green)">現在地</span>' : ''}
-            </div>
+            <div class="map-name">${m.name} ${isLocked ? '🔒' : ''} ${isActive ? '<span style="font-size:0.65rem; color:var(--neon-green)">現在地</span>' : ''}</div>
             <div class="map-desc">${m.desc} (Lv.${m.reqLvl})</div>
           </div>
           <div>
-            ${isLocked ? 
-              `<button class="map-action-btn current" disabled>Lv.${m.reqLvl}</button>` : 
-              (isActive ? 
-                `<button class="map-action-btn current">滞在中</button>` : 
-                `<button class="map-action-btn travel" onclick="travelToMap(${m.id})">移動</button>`
-              )
-            }
+            ${isLocked ? `<button class="map-action-btn current" disabled>Lv.${m.reqLvl}</button>` : (isActive ? `<button class="map-action-btn current">滞在中</button>` : `<button class="map-action-btn travel" onclick="travelToMap(${m.id})">移動</button>`)}
           </div>
         `;
         list.appendChild(row);
@@ -1605,7 +1591,7 @@
       }
     }
 
-    // ===== ショップ機能 =====
+    // ===== ショップ =====
     let activeShopTab = 'shop-rods';
     function switchShopTab(tab) {
       activeShopTab = tab;
@@ -1615,7 +1601,6 @@
     function renderShopItems() {
       const list = document.getElementById('shop-items-list');
       list.innerHTML = '';
-      
       if (activeShopTab === 'shop-rods') {
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
@@ -1626,14 +1611,7 @@
             <div class="item-icon">🎣</div>
             <div class="item-title">${r.name}</div>
             <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span></div>
-            ${isOwned ? 
-              (isEquipped ? 
-                `<button class="buy-btn" disabled>装備中</button>` : 
-                `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`
-              ) : 
-              `<div class="item-cost">${r.cost} G</div>
-               <button class="buy-btn" onclick="buyRod(${r.id}, ${r.cost})" ${game.gold < r.cost ? 'disabled' : ''}>購入</button>`
-            }
+            ${isOwned ? (isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`) : `<div class="item-cost">${r.cost} G</div><button class="buy-btn" onclick="buyRod(${r.id}, ${r.cost})" ${game.gold < r.cost ? 'disabled' : ''}>購入</button>`}
           `;
           list.appendChild(card);
         });
@@ -1647,14 +1625,7 @@
             <div class="item-icon">🚢</div>
             <div class="item-title">${b.name}</div>
             <div class="item-desc">${b.desc}<br><span style="color:var(--neon-green)">収納 ${b.slots}匹 / 速度x${b.speed}</span></div>
-            ${isOwned ? 
-              (isEquipped ? 
-                `<button class="buy-btn" disabled>装備中</button>` : 
-                `<button class="buy-btn" onclick="equipBoat(${b.id})">装備</button>`
-              ) : 
-              `<div class="item-cost">${b.cost} G</div>
-               <button class="buy-btn" onclick="buyBoat(${b.id}, ${b.cost})" ${game.gold < b.cost ? 'disabled' : ''}>購入</button>`
-            }
+            ${isOwned ? (isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipBoat(${b.id})">装備</button>`) : `<div class="item-cost">${b.cost} G</div><button class="buy-btn" onclick="buyBoat(${b.id}, ${b.cost})" ${game.gold < b.cost ? 'disabled' : ''}>購入</button>`}
           `;
           list.appendChild(card);
         });
@@ -1689,7 +1660,6 @@
         addVisualSplashEffect("NEW ROD PURCHASED!");
       }
     }
-
     function equipRod(id) {
       if (game.ownedRods.includes(id)) {
         game.rodId = id;
@@ -1697,7 +1667,6 @@
         renderShopItems();
       }
     }
-
     function buyBoat(id, cost) {
       if (game.gold >= cost && !game.ownedBoats.includes(id)) {
         game.gold -= cost;
@@ -1709,7 +1678,6 @@
         addVisualSplashEffect("NEW BOAT PURCHASED!");
       }
     }
-
     function equipBoat(id) {
       if (game.ownedBoats.includes(id)) {
         game.boatId = id;
@@ -1717,7 +1685,6 @@
         renderShopItems();
       }
     }
-
     function buyBait(name, cost, qty) {
       const totalCost = cost * qty;
       if (game.gold >= totalCost) {
@@ -1733,34 +1700,22 @@
     function renderFishBook() {
       const list = document.getElementById('fish-book-list');
       list.innerHTML = '';
-      
       let registered = 0;
       FISH_DATABASE.forEach(f => {
         const record = game.book[f.id];
         const isLocked = !record;
         const card = document.createElement('div');
         card.className = `fish-card ${isLocked ? 'locked' : ''}`;
-        
         if (isLocked) {
-          card.innerHTML = `
-            <div class="fish-card-visual" style="font-size:1.8rem; color: rgba(255,255,255,0.05)">❓</div>
-            <div class="fish-card-name">未確認の魚</div>
-            <div class="fish-card-rarity" style="background:#333; color:#aaa">???</div>
-          `;
+          card.innerHTML = `<div class="fish-card-visual" style="font-size:1.8rem; color: rgba(255,255,255,0.05)">❓</div><div class="fish-card-name">未確認の魚</div><div class="fish-card-rarity" style="background:#333; color:#aaa">???</div>`;
         } else {
           registered++;
           const rarityClass = `rarity-${f.rarity.toLowerCase()}`;
           card.innerHTML = `
-            <div class="fish-card-visual">
-              <canvas id="book-canvas-${f.id}" width="120" height="60"></canvas>
-            </div>
+            <div class="fish-card-visual"><canvas id="book-canvas-${f.id}" width="120" height="60"></canvas></div>
             <div class="fish-card-name">${f.name}</div>
             <div class="fish-card-rarity ${rarityClass}">${f.rarity}</div>
-            <div class="fish-card-stats">
-              <div>📏 最大長: <span>${record.maxLen.toFixed(1)} cm</span></div>
-              <div>⚖️ 最大重: <span>${record.maxWeight.toFixed(1)} kg</span></div>
-              <div>🎣 匹数: <span>${record.caught} 匹</span></div>
-            </div>
+            <div class="fish-card-stats"><div>📏 最大長: <span>${record.maxLen.toFixed(1)} cm</span></div><div>⚖️ 最大重: <span>${record.maxWeight.toFixed(1)} kg</span></div><div>🎣 匹数: <span>${record.caught} 匹</span></div></div>
           `;
           setTimeout(() => {
             const canvas = document.getElementById(`book-canvas-${f.id}`);
@@ -1769,22 +1724,16 @@
         }
         list.appendChild(card);
       });
-
-      const compRatio = Math.round((registered / FISH_DATABASE.length) * 100);
-      document.getElementById('book-completion-ratio').innerText = compRatio;
+      document.getElementById('book-completion-ratio').innerText = Math.round((registered / FISH_DATABASE.length) * 100);
     }
 
     function drawFishOnCanvas(canvas, color, len, name) {
       const ctx = canvas.getContext('2d');
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const w = canvas.width;
-      const h = canvas.height;
-
+      const w = canvas.width, h = canvas.height;
       ctx.fillStyle = color;
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1;
-
-      // 尾ビレ
       ctx.beginPath();
       ctx.moveTo(w * 0.25, h * 0.5);
       ctx.lineTo(w * 0.1, h * 0.3);
@@ -1793,14 +1742,10 @@
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-
-      // 胴体
       ctx.beginPath();
       ctx.ellipse(w * 0.55, h * 0.5, w * 0.3, h * 0.22, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-
-      // ヒレ
       ctx.fillStyle = 'rgba(255,255,255,0.2)';
       ctx.beginPath();
       ctx.moveTo(w * 0.5, h * 0.6);
@@ -1808,8 +1753,6 @@
       ctx.lineTo(w * 0.56, h * 0.6);
       ctx.closePath();
       ctx.fill();
-
-      // 目
       ctx.fillStyle = '#fff';
       ctx.beginPath();
       ctx.arc(w * 0.75, h * 0.46, 3, 0, Math.PI * 2);
@@ -1821,11 +1764,18 @@
     }
 
     // ===== スキル =====
+    const SKILLS_DB = [
+      { key: 'luck', name: '幸運 Lv', max: 5, desc: 'レア魚の出現率が上がる。' },
+      { key: 'power', name: 'パワー Lv', max: 5, desc: 'リールゲームのテンションが上がりやすい。' },
+      { key: 'trade', name: '取引 Lv', max: 5, desc: '魚を売る時のゴールドが増える。' },
+      { key: 'study', name: '学び Lv', max: 5, desc: '獲得経験値が増加する。' },
+      { key: 'sailing', name: '航海 Lv', max: 5, desc: 'ボートの速度と収納が向上する。' }
+    ];
+
     function renderSkills() {
       document.getElementById('skill-pts-val').innerText = game.skillPoints;
       const list = document.getElementById('skills-list');
       list.innerHTML = '';
-      
       SKILLS_DB.forEach(s => {
         const curLvl = game.skills[s.key] || 0;
         const isMax = curLvl >= s.max;
@@ -1833,17 +1783,10 @@
         row.className = 'skill-row';
         row.innerHTML = `
           <div class="skill-info">
-            <div class="skill-name-wrap">
-              <strong style="color:#fff; font-size:0.85rem">${s.name}</strong>
-              <span class="skill-lvl-badge">${curLvl} / ${s.max}</span>
-            </div>
+            <div class="skill-name-wrap"><strong style="color:#fff; font-size:0.85rem">${s.name}</strong><span class="skill-lvl-badge">${curLvl} / ${s.max}</span></div>
             <div class="item-desc" style="margin-top:4px">${s.desc}</div>
           </div>
-          <div>
-            <button class="skill-btn" onclick="upgradeSkill('${s.key}')" ${isMax || game.skillPoints <= 0 ? 'disabled' : ''}>
-              ${isMax ? 'MAX' : '強化'}
-            </button>
-          </div>
+          <div><button class="skill-btn" onclick="upgradeSkill('${s.key}')" ${isMax || game.skillPoints <= 0 ? 'disabled' : ''}>${isMax ? 'MAX' : '強化'}</button></div>
         `;
         list.appendChild(row);
       });
@@ -1869,15 +1812,8 @@
     function renderCraft() {
       const container = document.getElementById('craft-tab-content');
       container.innerHTML = '';
-
       const matHeader = document.createElement('div');
-      matHeader.style.display = 'flex';
-      matHeader.style.flexWrap = 'wrap';
-      matHeader.style.gap = '6px';
-      matHeader.style.marginBottom = '12px';
-      matHeader.style.padding = '8px';
-      matHeader.style.background = 'rgba(255,255,255,0.03)';
-      matHeader.style.borderRadius = '8px';
+      matHeader.style.cssText = 'display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px; padding:8px; background:rgba(255,255,255,0.03); border-radius:8px; flex-shrink:0;';
       matHeader.innerHTML = '<div style="width:100%; font-size:0.7rem; color:var(--text-sub)">所持クラフト素材:</div>';
       Object.keys(game.materials).forEach(mat => {
         matHeader.innerHTML += `<div class="mat-badge">💎 ${mat}: <span style="color:var(--neon-green); font-weight:bold;">${game.materials[mat]}</span></div>`;
@@ -1890,14 +1826,12 @@
         CRAFT_RECIPES.forEach(r => {
           let canCraft = game.gold >= r.cost;
           let matListHtml = '';
-          
           r.materials.forEach(m => {
             const hasQty = game.materials[m.name] || 0;
             const isShort = hasQty < m.qty;
             if (isShort) canCraft = false;
             matListHtml += `<div class="mat-badge ${isShort ? 'insufficient' : ''}">${m.name} ${hasQty}/${m.qty}</div>`;
           });
-
           const item = document.createElement('div');
           item.className = 'craft-item';
           item.innerHTML = `
@@ -1926,13 +1860,7 @@
             <div class="item-icon">${c.type === 'aura' ? '✨' : '🎩'}</div>
             <div class="item-title">${c.name}</div>
             <div class="item-desc">${c.desc}</div>
-            ${isOwned ? 
-              (isEquipped ? 
-                `<button class="buy-btn" onclick="unequipCosmetic('${c.type}')">外す</button>` : 
-                `<button class="buy-btn" onclick="equipCosmetic('${c.type}', '${c.name}')">装備</button>`
-              ) : 
-              `<div style="font-size:0.65rem; color:var(--text-sub);">ガチャ限定</div>`
-            }
+            ${isOwned ? (isEquipped ? `<button class="buy-btn" onclick="unequipCosmetic('${c.type}')">外す</button>` : `<button class="buy-btn" onclick="equipCosmetic('${c.type}', '${c.name}')">装備</button>`) : `<div style="font-size:0.65rem; color:var(--text-sub);">ガチャ限定</div>`}
           `;
           grid.appendChild(card);
         });
@@ -1943,23 +1871,15 @@
     function executeCraft(name) {
       const recipe = CRAFT_RECIPES.find(r => r.result === name);
       if (!recipe) return;
-      
       let canCraft = game.gold >= recipe.cost;
-      recipe.materials.forEach(m => {
-        if ((game.materials[m.name] || 0) < m.qty) canCraft = false;
-      });
-
+      recipe.materials.forEach(m => { if ((game.materials[m.name] || 0) < m.qty) canCraft = false; });
       if (canCraft) {
         game.gold -= recipe.cost;
-        recipe.materials.forEach(m => {
-          game.materials[m.name] -= m.qty;
-        });
-
+        recipe.materials.forEach(m => { game.materials[m.name] -= m.qty; });
         if (name === '神エサ') game.baits['神エサ']++;
         if (name === '特殊ルアー') game.baits['特殊エサ'] += 5;
         if (name === '神話の竿') { if(!game.ownedRods.includes(8)) game.ownedRods.push(8); game.rodId = 8; }
         if (name === '海神の竿') { if(!game.ownedRods.includes(9)) game.ownedRods.push(9); game.rodId = 9; }
-
         saveGame();
         renderCraft();
         updateHUD();
@@ -1973,7 +1893,6 @@
       renderCraft();
       initAvatarCanvas();
     }
-    
     function unequipCosmetic(type) {
       game.equippedCosmetics[type] = '';
       saveGame();
@@ -1984,12 +1903,9 @@
     function pullGacha(currency) {
       const cost = currency === 'gold' ? 500 : 3;
       const isAfford = currency === 'gold' ? game.gold >= 500 : game.gems >= 3;
-      
       if (!isAfford) return;
-      
       if (currency === 'gold') game.gold -= 500;
       else game.gems -= 3;
-
       const lockedCosmetics = COSMETICS.filter(c => !game.ownedCosmetics.includes(c.name));
       if (lockedCosmetics.length === 0) {
         game.gold += 300;
@@ -1999,7 +1915,6 @@
         game.ownedCosmetics.push(prize.name);
         alert(`🎉 新アバターアイテム獲得！\n【${prize.name}】`);
       }
-      
       saveGame();
       renderCraft();
       updateHUD();
@@ -2015,14 +1930,11 @@
     function renderQuests() {
       const container = document.getElementById('quest-tab-content');
       container.innerHTML = '';
-
       if (activeQuestTab === 'quests') {
         game.quests.forEach((q, idx) => {
           const card = document.createElement('div');
           card.className = 'quest-card';
-          
-          let progPercent = 0;
-          let progressTxt = '';
+          let progPercent = 0, progressTxt = '';
           if (q.type === 'catch') {
             progPercent = Math.min(100, (q.progress / q.targetQty) * 100);
             progressTxt = `${q.progress}/${q.targetQty}匹`;
@@ -2033,7 +1945,6 @@
             progPercent = Math.min(100, (q.progress / q.targetQty) * 100);
             progressTxt = `${q.progress}/${q.targetQty}回`;
           }
-
           card.innerHTML = `
             <div>
               <strong style="color:#fff; font-size:0.8rem;">${q.desc}</strong>
@@ -2043,12 +1954,7 @@
                 <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">${progressTxt}</span>
               </div>
             </div>
-            <div>
-              ${q.done ? 
-                `<button class="buy-btn" disabled style="padding:4px 8px; background:rgba(255,255,255,0.05); border-color:transparent; color:#555;">済</button>` : 
-                `<button class="buy-btn" onclick="claimQuestReward(${idx})" ${progPercent < 100 ? 'disabled' : ''} style="padding:4px 8px;">受取</button>`
-              }
-            </div>
+            <div>${q.done ? `<button class="buy-btn" disabled style="padding:4px 8px; background:rgba(255,255,255,0.05); border-color:transparent; color:#555;">済</button>` : `<button class="buy-btn" onclick="claimQuestReward(${idx})" ${progPercent < 100 ? 'disabled' : ''} style="padding:4px 8px;">受取</button>`}</div>
           `;
           container.appendChild(card);
         });
@@ -2056,18 +1962,12 @@
         game.achievements.forEach((a, idx) => {
           const card = document.createElement('div');
           card.className = 'quest-card';
-          
-          let progPercent = 0;
-          let progressTxt = '';
-          
+          let progPercent = 0, progressTxt = '';
           if (a.type === 'total_caught') {
             progPercent = Math.min(100, (game.totalCaught / a.target) * 100);
             progressTxt = `${game.totalCaught}/${a.target}匹`;
           } else if (a.type === 'rarity_legendary') {
-            const hasLegend = Object.keys(game.book).some(fid => {
-              const fish = FISH_DATABASE.find(fd => fd.id == fid);
-              return fish && (fish.rarity === 'Legendary' || fish.rarity === 'Mythic' || fish.rarity === 'Divine');
-            });
+            const hasLegend = Object.keys(game.book).some(fid => { const fish = FISH_DATABASE.find(fd => fd.id == fid); return fish && (fish.rarity === 'Legendary' || fish.rarity === 'Mythic' || fish.rarity === 'Divine'); });
             progPercent = hasLegend ? 100 : 0;
             progressTxt = hasLegend ? '1/1' : '0/1';
           } else if (a.type === 'book_count') {
@@ -2078,7 +1978,6 @@
             progPercent = Math.min(100, (game.gold / a.target) * 100);
             progressTxt = `${game.gold.toLocaleString()}/${a.target.toLocaleString()}G`;
           }
-
           card.innerHTML = `
             <div>
               <strong style="color:#fff; font-size:0.8rem;">🏆 ${a.name}</strong>
@@ -2089,12 +1988,7 @@
                 <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">${progressTxt}</span>
               </div>
             </div>
-            <div>
-              ${a.done ? 
-                `<button class="buy-btn" disabled style="padding:4px 8px; background:rgba(255,255,255,0.05); border-color:transparent; color:#555;">獲得済</button>` : 
-                `<button class="buy-btn" onclick="claimAchievementReward(${idx})" ${progPercent < 100 ? 'disabled' : ''} style="padding:4px 8px; background:rgba(255,0,127,0.15); border-color:var(--neon-pink);">獲得</button>`
-              }
-            </div>
+            <div>${a.done ? `<button class="buy-btn" disabled style="padding:4px 8px; background:rgba(255,255,255,0.05); border-color:transparent; color:#555;">獲得済</button>` : `<button class="buy-btn" onclick="claimAchievementReward(${idx})" ${progPercent < 100 ? 'disabled' : ''} style="padding:4px 8px; background:rgba(255,0,127,0.15); border-color:var(--neon-pink);">獲得</button>`}</div>
           `;
           container.appendChild(card);
         });
@@ -2108,7 +2002,6 @@
         game.gold += q.rewardGold;
         gainXP(q.rewardXp);
         game.gems += q.rewardGem;
-        
         saveGame();
         renderQuests();
         updateHUD();
@@ -2121,7 +2014,6 @@
       if (a && !a.done) {
         a.done = true;
         game.gems += a.rewardGem;
-        
         saveGame();
         renderQuests();
         updateHUD();
@@ -2132,13 +2024,9 @@
     function progressQuest(type, data) {
       game.quests.forEach(q => {
         if (q.done) return;
-        if (q.type === 'catch' && type === 'catch' && q.targetId === data.fishId) {
-          q.progress += data.qty;
-        } else if (q.type === 'weight' && type === 'weight') {
-          q.progress += data.weight;
-        } else if (q.type === 'cast' && type === 'cast' && q.targetMap === data.mapId) {
-          q.progress++;
-        }
+        if (q.type === 'catch' && type === 'catch' && q.targetId === data.fishId) q.progress += data.qty;
+        else if (q.type === 'weight' && type === 'weight') q.progress += data.weight;
+        else if (q.type === 'cast' && type === 'cast' && q.targetMap === data.mapId) q.progress++;
       });
     }
 
@@ -2146,7 +2034,6 @@
       const studyLevel = game.skills.study || 0;
       const bonusXp = Math.round(amt * (1 + studyLevel * 0.2));
       game.xp += bonusXp;
-      
       let nextXp = game.level * 100;
       while (game.xp >= nextXp) {
         game.xp -= nextXp;
@@ -2157,40 +2044,21 @@
       }
     }
 
-    // ===== 世界ランキング =====
+    // ===== ランキング =====
     function renderLeaderboard() {
       const box = document.getElementById('ranking-list-box');
       box.innerHTML = '';
-
       let playerWeight = 0;
       let playerBookCount = Object.keys(game.book).length;
-      Object.keys(game.book).forEach(fid => {
-        playerWeight += game.book[fid].maxWeight;
-      });
-
-      const list = LEADERBOARD_NPCS.map(npc => {
-        return { name: npc.name, weight: npc.baseWeight, bookRate: npc.bookRate, isPlayer: false };
-      });
-
+      Object.keys(game.book).forEach(fid => { playerWeight += game.book[fid].maxWeight; });
+      const list = LEADERBOARD_NPCS.map(npc => ({ name: npc.name, weight: npc.baseWeight, bookRate: npc.bookRate, isPlayer: false }));
       const bookRate = Math.round((playerBookCount / FISH_DATABASE.length) * 100);
-      list.push({
-        name: 'FM (あなた)',
-        weight: Math.round(playerWeight),
-        bookRate: bookRate,
-        isPlayer: true
-      });
-
+      list.push({ name: 'FM (あなた)', weight: Math.round(playerWeight), bookRate: bookRate, isPlayer: true });
       list.sort((a, b) => b.weight - a.weight);
-
       list.forEach((item, index) => {
         const row = document.createElement('div');
         row.className = `ranking-row ${item.isPlayer ? 'player' : ''}`;
-        row.innerHTML = `
-          <div class="rank-num">#${index + 1}</div>
-          <div class="rank-name">${item.name}</div>
-          <div style="font-size:0.7rem; color:var(--text-sub); margin-right:12px;">図鑑:${item.bookRate}%</div>
-          <div class="rank-score">${item.weight.toLocaleString()}kg</div>
-        `;
+        row.innerHTML = `<div class="rank-num">#${index + 1}</div><div class="rank-name">${item.name}</div><div style="font-size:0.7rem; color:var(--text-sub); margin-right:12px;">図鑑:${item.bookRate}%</div><div class="rank-score">${item.weight.toLocaleString()}kg</div>`;
         box.appendChild(row);
       });
     }
@@ -2201,17 +2069,11 @@
     let powerDir = 1;
     let castTimer = null;
     let timingLoop = null;
-
     let targetFish = null;
     let lineDistance = 0;
-
-    let fishPos = 50;
-    let fishVel = 0;
-    let playerPos = 40;
-    let playerVel = 0;
+    let fishPos = 50, fishVel = 0, playerPos = 40, playerVel = 0;
     let isReeling = false;
     let catchGauge = 30;
-
     let fightLoop = null;
 
     function handleCastClick() {
@@ -2225,7 +2087,7 @@
       } else if (castState === 'casting') {
         stopCasting();
       } else if (castState === 'hit') {
-        triggerFight();
+        // この状態では何もしない（自動でバトルに移行するため）
       }
     }
 
@@ -2234,16 +2096,14 @@
       castState = 'casting';
       castPower = 0;
       powerDir = 1;
-      
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'STOP';
       btn.classList.add('casting');
-      
       const wrap = document.getElementById('power-gauge-wrap');
       wrap.style.display = 'block';
-
       timingLoop = setInterval(() => {
-        castPower += 4 * powerDir;
+        // ★ ゲージ速度を「2」に減速（元は4）
+        castPower += 2 * powerDir;
         if (castPower >= 100) { powerDir = -1; castPower = 100; }
         if (castPower <= 0) { powerDir = 1; castPower = 0; }
         document.getElementById('power-gauge-fill').style.width = castPower + '%';
@@ -2253,63 +2113,56 @@
     function stopCasting() {
       clearInterval(timingLoop);
       castState = 'waiting';
-      
       const wrap = document.getElementById('power-gauge-wrap');
       wrap.style.display = 'none';
-
       const rod = RODS[game.rodId];
       const castAcc = 1 - Math.abs(castPower - 50) / 50;
       lineDistance = Math.round(rod.dist * (0.3 + castAcc * 0.7));
-      
       const btn = document.getElementById('cast-btn');
       btn.innerText = '待機中';
       btn.disabled = true;
-
       game.baits[game.selectedBait]--;
       saveGame();
       updateHUD();
-
       progressQuest('cast', { mapId: game.mapId });
-
       throwBobber(lineDistance);
-
       const waitTime = 2000 + Math.random() * 2500;
       castTimer = setTimeout(triggerHit, waitTime);
     }
 
+    // ★ 魚がヒットしたら自動でバトル開始（HITボタン不要）
     function triggerHit() {
       castState = 'hit';
-      
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'HIT!';
       btn.disabled = false;
       btn.classList.remove('casting');
       btn.classList.add('hit');
-
       const msg = document.getElementById('action-msg');
       msg.innerText = 'HIT!';
       msg.className = 'show hit';
-
+      
       selectRandomFish();
 
-      const delay = 600 + (RODS[game.rodId].reelSpeed * 100);
-      castTimer = setTimeout(triggerMiss, delay);
+      // 0.4秒後に自動でバトルへ突入
+      setTimeout(() => {
+        if (castState === 'hit') {
+          triggerFight();
+        }
+      }, 400);
     }
 
     function triggerMiss() {
       clearTimeout(castTimer);
       castState = 'idle';
-      
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'CAST';
       btn.className = 'cast-btn';
       btn.disabled = false;
-
       const msg = document.getElementById('action-msg');
       msg.innerText = '逃げられた...';
       msg.className = 'show miss';
       setTimeout(() => { msg.className = ''; }, 1200);
-
       bobberThrown = false;
       drawWaterSurface();
     }
@@ -2317,23 +2170,18 @@
     function triggerFight() {
       clearTimeout(castTimer);
       castState = 'fight';
-      
       const msg = document.getElementById('action-msg');
       msg.className = '';
-
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'バトル';
       btn.disabled = true;
-
       document.getElementById('fight-fish-name').innerText = targetFish.name;
       document.getElementById('fight-overlay').style.display = 'flex';
-
       fishPos = 50;
       fishVel = 0;
       playerPos = 40;
       playerVel = 0;
       catchGauge = 40;
-
       isReeling = false;
       startReelBattleLoop();
     }
@@ -2342,30 +2190,21 @@
       const playerBar = document.getElementById('fight-player-bar');
       const fishIcon = document.getElementById('fight-fish-icon');
       const fillBar = document.getElementById('fight-catch-fill');
-      
       const rarityMultiplier = { Common: 1.0, Uncommon: 1.2, Rare: 1.5, Epic: 2.0, Legendary: 2.8, Mythic: 3.8, Divine: 5.0 };
       const diff = rarityMultiplier[targetFish.rarity] || 1.0;
-
       const skillPower = game.skills.power || 0;
       const barWidth = 25 + (skillPower * 3);
       playerBar.style.width = barWidth + '%';
-
       let lastTime = performance.now();
 
       function updateFight(time) {
         if (castState !== 'fight') return;
-
         const dt = (time - lastTime) / 1000;
         lastTime = time;
-
-        if (Math.random() < 0.06) {
-          fishVel = (Math.random() - 0.5) * 80 * diff;
-        }
+        if (Math.random() < 0.06) fishVel = (Math.random() - 0.5) * 80 * diff;
         fishPos += fishVel * dt;
-        
         if (fishPos < 0) { fishPos = 0; fishVel = -fishVel * 0.5; }
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
-
         if (isReeling) {
           playerVel += 150 * dt;
         } else {
@@ -2373,13 +2212,10 @@
         }
         playerVel *= 0.95;
         playerPos += playerVel * dt;
-
         if (playerPos < 0) { playerPos = 0; playerVel = 0; }
         if (playerPos > 100 - barWidth) { playerPos = 100 - barWidth; playerVel = 0; }
-
         const fishCenter = fishPos + 5;
         const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + barWidth);
-
         if (isMatched) {
           playerBar.classList.add('matching');
           catchGauge += (16 + skillPower * 2) * dt;
@@ -2387,11 +2223,9 @@
           playerBar.classList.remove('matching');
           catchGauge -= (18 + diff * 2) * dt;
         }
-
         playerBar.style.left = playerPos + '%';
         fishIcon.style.left = fishPos + '%';
         fillBar.style.width = Math.max(0, Math.min(100, catchGauge)) + '%';
-
         if (catchGauge >= 100) {
           triggerCatch();
         } else if (catchGauge <= 0) {
@@ -2401,7 +2235,6 @@
           fightLoop = requestAnimationFrame(updateFight);
         }
       }
-
       fightLoop = requestAnimationFrame(updateFight);
     }
 
@@ -2409,35 +2242,21 @@
       castState = 'result';
       cancelAnimationFrame(fightLoop);
       document.getElementById('fight-overlay').style.display = 'none';
-
       const lenFactor = 0.8 + Math.random() * 0.5;
       const weightFactor = lenFactor * lenFactor * (0.9 + Math.random() * 0.2);
-
       let finalLen = targetFish.baseLen * lenFactor;
       let finalWeight = targetFish.baseWeight * weightFactor;
-
       let isCrown = false;
-      if (Math.random() < 0.03) {
-        isCrown = true;
-        finalLen *= 1.6;
-        finalWeight *= 2.5;
-      }
-
+      if (Math.random() < 0.03) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
       let isShiny = false;
-      if (Math.random() < 0.02) {
-        isShiny = true;
-      }
-
+      if (Math.random() < 0.02) { isShiny = true; }
       const tradeLvl = game.skills.trade || 0;
       let finalGold = Math.round(targetFish.cost * (1 + tradeLvl * 0.15));
       if (isCrown) finalGold = Math.round(finalGold * 2.0);
       if (isShiny) finalGold = Math.round(finalGold * 3.0);
-
       game.gold += finalGold;
       gainXP(targetFish.xp);
-
-      let dropMat = '';
-      let dropQty = 0;
+      let dropMat = '', dropQty = 0;
       const matRand = Math.random();
       if (targetFish.rarity === 'Common') {
         if (matRand < 0.5) { dropMat = '魚のウロコ'; dropQty = Math.floor(Math.random() * 2) + 1; }
@@ -2457,11 +2276,9 @@
       } else if (targetFish.rarity === 'Divine') {
         dropMat = '海神の輝石'; dropQty = 1;
       }
-
       if (dropMat) {
         game.materials[dropMat] = (game.materials[dropMat] || 0) + dropQty;
       }
-
       const existing = game.book[targetFish.id];
       const today = new Date().toISOString().split('T')[0];
       if (!existing) {
@@ -2471,9 +2288,7 @@
         if (finalLen > existing.maxLen) existing.maxLen = finalLen;
         if (finalWeight > existing.maxWeight) existing.maxWeight = finalWeight;
       }
-
       game.totalCaught++;
-
       progressQuest('catch', { fishId: targetFish.id, qty: 1 });
       progressQuest('weight', { weight: finalWeight });
       game.achievements.forEach(a => {
@@ -2481,17 +2296,14 @@
         if (a.type === 'rarity_legendary' && (targetFish.rarity === 'Legendary' || targetFish.rarity === 'Mythic' || targetFish.rarity === 'Divine')) a.progress = 1;
         if (a.type === 'book_count') a.progress = Object.keys(game.book).length;
       });
-
       const rarityBadge = document.getElementById('result-rarity-badge');
       rarityBadge.innerText = targetFish.rarity + (isShiny ? " ✨SHINY" : "") + (isCrown ? " 👑CROWN" : "");
       rarityBadge.className = `result-badge rarity-${targetFish.rarity.toLowerCase()}`;
-
       document.getElementById('result-fish-name').innerText = (isShiny ? "シャイニー" : "") + targetFish.name;
       document.getElementById('result-fish-length').innerText = finalLen.toFixed(1);
       document.getElementById('result-fish-weight').innerText = finalWeight.toFixed(1);
       document.getElementById('result-gold').innerText = `+${finalGold} G`;
       document.getElementById('result-xp').innerText = `+${targetFish.xp} XP`;
-      
       const bonusRow = document.getElementById('result-bonus-row');
       if (isCrown || isShiny) {
         bonusRow.style.display = 'flex';
@@ -2502,7 +2314,6 @@
       } else {
         bonusRow.style.display = 'none';
       }
-
       const matRow = document.getElementById('result-mat-row');
       if (dropMat) {
         matRow.style.display = 'flex';
@@ -2510,12 +2321,9 @@
       } else {
         matRow.style.display = 'none';
       }
-
       const resCanvas = document.getElementById('result-fish-canvas');
       drawFishOnCanvas(resCanvas, isShiny ? 'gold' : targetFish.color, finalLen, targetFish.name);
-
       document.getElementById('catch-result-overlay').style.display = 'flex';
-      
       saveGame();
       updateHUD();
       createSplashParticles();
@@ -2524,67 +2332,48 @@
     function closeResult() {
       document.getElementById('catch-result-overlay').style.display = 'none';
       castState = 'idle';
-      
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'CAST';
       btn.className = 'cast-btn';
       btn.disabled = false;
-
       bobberThrown = false;
       drawWaterSurface();
     }
 
     function selectRandomFish() {
       const candidates = FISH_DATABASE.filter(f => f.mapId === game.mapId);
-      if (candidates.length === 0) {
-        targetFish = FISH_DATABASE[0];
-        return;
-      }
-
+      if (candidates.length === 0) { targetFish = FISH_DATABASE[0]; return; }
       const isNight = (game.clock >= 19 || game.clock < 6);
       let filtered = candidates.filter(f => {
         if (f.name === 'リュウグウノツカイ' && !isNight) return Math.random() < 0.2;
         if (f.name === '時空魚' && game.weather !== 'Aurora') return Math.random() < 0.1;
         return true;
       });
-
       if (filtered.length === 0) filtered = candidates;
-
       const rarityWeights = { Common: 100, Uncommon: 50, Rare: 20, Epic: 8, Legendary: 3, Mythic: 1, Divine: 0.2 };
-      
       const luckLvl = game.skills.luck || 0;
       const rod = RODS[game.rodId];
       const luckMultiplier = 1 + (luckLvl * 0.12) + (rod.rare - 1.0);
-
       let totalWeight = 0;
       const weights = filtered.map(f => {
         let w = rarityWeights[f.rarity] || 10;
-        if (f.rarity !== 'Common' && f.rarity !== 'Uncommon') {
-          w *= luckMultiplier;
-        }
-        if (f.preferBait === game.selectedBait) {
-          w *= 2.5;
-        }
+        if (f.rarity !== 'Common' && f.rarity !== 'Uncommon') w *= luckMultiplier;
+        if (f.preferBait === game.selectedBait) w *= 2.5;
         totalWeight += w;
         return w;
       });
-
       let rand = Math.random() * totalWeight;
       for (let i = 0; i < filtered.length; i++) {
         rand -= weights[i];
-        if (rand <= 0) {
-          targetFish = filtered[i];
-          return;
-        }
+        if (rand <= 0) { targetFish = filtered[i]; return; }
       }
       targetFish = filtered[0];
     }
 
-    // ===== キャンバス演出 =====
+    // ===== キャンバス関連 =====
     let waterCtx = null;
     let bobberThrown = false;
-    let bobberX = 0;
-    let bobberY = 0;
+    let bobberX = 0, bobberY = 0;
     let ripples = [];
 
     function initWaterCanvas() {
@@ -2593,7 +2382,6 @@
       canvas.width = stage.clientWidth;
       canvas.height = stage.clientHeight;
       waterCtx = canvas.getContext('2d');
-
       function animate() {
         drawWaterSurface();
         requestAnimationFrame(animate);
@@ -2606,14 +2394,12 @@
       const w = waterCtx.canvas.width;
       const h = waterCtx.canvas.height;
       waterCtx.clearRect(0,0,w,h);
-
       const map = MAPS[game.mapId];
       const grad = waterCtx.createLinearGradient(0, 0, 0, h);
       grad.addColorStop(0, map.colors[0]);
       grad.addColorStop(1, map.colors[1]);
       waterCtx.fillStyle = grad;
       waterCtx.fillRect(0,0,w,h);
-
       waterCtx.fillStyle = 'rgba(255,255,255,0.02)';
       for (let i = 0; i < 3; i++) {
         const offset = Date.now() * 0.001 * (i + 1);
@@ -2628,34 +2414,28 @@
         waterCtx.closePath();
         waterCtx.fill();
       }
-
       if (bobberThrown) {
         bobberY = h * 0.6 + Math.sin(Date.now() * 0.003) * 3;
-        
         waterCtx.strokeStyle = 'rgba(255,255,255,0.2)';
         waterCtx.lineWidth = 1;
         waterCtx.beginPath();
         waterCtx.moveTo(w * 0.5, h * 0.9);
         waterCtx.quadraticCurveTo(w * 0.4, h * 0.5, bobberX, bobberY);
         waterCtx.stroke();
-
         waterCtx.fillStyle = '#ff3366';
         waterCtx.beginPath();
         waterCtx.arc(bobberX, bobberY, 7, 0, Math.PI, true);
         waterCtx.closePath();
         waterCtx.fill();
-
         waterCtx.fillStyle = '#ffffff';
         waterCtx.beginPath();
         waterCtx.arc(bobberX, bobberY, 7, 0, Math.PI, false);
         waterCtx.closePath();
         waterCtx.fill();
-
         if (Math.random() < 0.05) {
           ripples.push({ x: bobberX, y: bobberY, r: 2, alpha: 0.6 });
         }
       }
-
       waterCtx.lineWidth = 1.2;
       for (let i = ripples.length - 1; i >= 0; i--) {
         const r = ripples[i];
@@ -2670,7 +2450,6 @@
           waterCtx.stroke();
         }
       }
-
       drawFishShadows();
     }
 
@@ -2678,21 +2457,13 @@
     function drawFishShadows() {
       const h = waterCtx.canvas.height;
       const w = waterCtx.canvas.width;
-
       if (fishShadows.length < 3 && Math.random() < 0.02) {
-        fishShadows.push({
-          x: Math.random() < 0.5 ? -30 : w + 30,
-          y: h * 0.55 + Math.random() * (h * 0.3),
-          speed: (0.3 + Math.random() * 0.7) * (Math.random() < 0.5 ? 1 : -1),
-          size: 15 + Math.random() * 25
-        });
+        fishShadows.push({ x: Math.random() < 0.5 ? -30 : w + 30, y: h * 0.55 + Math.random() * (h * 0.3), speed: (0.3 + Math.random() * 0.7) * (Math.random() < 0.5 ? 1 : -1), size: 15 + Math.random() * 25 });
       }
-
       waterCtx.fillStyle = 'rgba(0,0,0,0.12)';
       for (let i = fishShadows.length - 1; i >= 0; i--) {
         const s = fishShadows[i];
         s.x += s.speed;
-
         if (s.x < -80 || s.x > w + 80) {
           fishShadows.splice(i, 1);
         } else {
@@ -2713,14 +2484,12 @@
 
     let fxCtx = null;
     let particles = [];
-
     function initFXCanvas() {
       const canvas = document.getElementById('fx-canvas');
       const stage = document.getElementById('stage');
       canvas.width = stage.clientWidth;
       canvas.height = stage.clientHeight;
       fxCtx = canvas.getContext('2d');
-
       function animate() {
         drawFX();
         requestAnimationFrame(animate);
@@ -2733,9 +2502,7 @@
       const w = fxCtx.canvas.width;
       const h = fxCtx.canvas.height;
       fxCtx.clearRect(0,0,w,h);
-
       const type = game.weather;
-      
       if (type === 'Rainy' || type === 'Stormy' || type === 'Typhoon') {
         fxCtx.strokeStyle = 'rgba(174, 219, 255, 0.35)';
         fxCtx.lineWidth = 1;
@@ -2750,13 +2517,11 @@
           fxCtx.lineTo(x - angle, y + len);
           fxCtx.stroke();
         }
-
         if (type === 'Stormy' && Math.random() < 0.01) {
           fxCtx.fillStyle = 'rgba(255,255,255,0.6)';
           fxCtx.fillRect(0,0,w,h);
         }
       }
-
       if (type === 'Aurora') {
         const time = Date.now() * 0.001;
         const grad = fxCtx.createLinearGradient(0, 0, w, 0);
@@ -2764,7 +2529,6 @@
         grad.addColorStop(0.5, `hsla(${(time * 10 + 120) % 360}, 100%, 50%, 0.2)`);
         grad.addColorStop(1, `hsla(${(time * 10 + 240) % 360}, 100%, 50%, 0.12)`);
         fxCtx.fillStyle = grad;
-        
         fxCtx.beginPath();
         fxCtx.moveTo(0, 0);
         for (let x = 0; x <= w; x += 50) {
@@ -2775,25 +2539,15 @@
         fxCtx.closePath();
         fxCtx.fill();
       }
-
       if (type === 'Meteor') {
         if (Math.random() < 0.04) {
-          particles.push({
-            x: Math.random() * w * 1.3,
-            y: 0,
-            speedX: -6 - Math.random() * 6,
-            speedY: 5 + Math.random() * 5,
-            len: 30 + Math.random() * 40,
-            alpha: 1.0
-          });
+          particles.push({ x: Math.random() * w * 1.3, y: 0, speedX: -6 - Math.random() * 6, speedY: 5 + Math.random() * 5, len: 30 + Math.random() * 40, alpha: 1.0 });
         }
-
         for (let i = particles.length - 1; i >= 0; i--) {
           const p = particles[i];
           p.x += p.speedX;
           p.y += p.speedY;
           p.alpha -= 0.025;
-
           if (p.alpha <= 0) {
             particles.splice(i, 1);
           } else {
@@ -2808,7 +2562,6 @@
       }
     }
 
-    // 3. アバタープレビュー
     let avatarCtx = null;
     function initAvatarCanvas() {
       const canvas = document.getElementById('avatar-canvas');
@@ -2822,10 +2575,8 @@
       const w = ctx.canvas.width;
       const h = ctx.canvas.height;
       ctx.clearRect(0,0,w,h);
-
       const cx = w / 2;
       const cy = h / 2 + 8;
-
       const aura = game.equippedCosmetics.aura;
       if (aura === '水のオーラ') {
         ctx.fillStyle = 'rgba(0, 240, 255, 0.18)';
@@ -2845,14 +2596,13 @@
         ctx.arc(cx, cy, 38, 0, Math.PI*2);
         ctx.fill();
         ctx.shadowBlur = 0;
-      } else if (aura === '虚空のオーラ' || aura === '虚空 of オーラ') {
+      } else if (aura === '虚空 of オーラ') {
         const time = Date.now() * 0.005;
         ctx.fillStyle = 'rgba(122, 66, 245, 0.18)';
         ctx.beginPath();
         ctx.ellipse(cx, cy, 38 + Math.sin(time)*4, 26 + Math.cos(time)*4, time * 0.1, 0, Math.PI*2);
         ctx.fill();
       }
-
       const wing = game.equippedCosmetics.wing;
       if (wing === '天使の羽') {
         ctx.fillStyle = '#fff';
@@ -2882,23 +2632,16 @@
         ctx.closePath();
         ctx.fill(); ctx.stroke();
       }
-
       ctx.fillStyle = '#1a233d';
       ctx.strokeStyle = 'rgba(255,255,255,0.2)';
       ctx.lineWidth = 1.5;
-      
       const cloth = game.equippedCosmetics.cloth;
-      if (cloth === 'セーラー服') {
-        ctx.fillStyle = '#263b6e';
-      } else if (cloth === 'タキシード') {
-        ctx.fillStyle = '#0a0a0c';
-      }
-
+      if (cloth === 'セーラー服') ctx.fillStyle = '#263b6e';
+      else if (cloth === 'タキシード') ctx.fillStyle = '#0a0a0c';
       ctx.beginPath();
       ctx.ellipse(cx, cy + 32, 20, 24, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-
       if (cloth === 'セーラー服') {
         ctx.fillStyle = '#fff';
         ctx.beginPath();
@@ -2920,25 +2663,21 @@
         ctx.arc(cx, cy+14, 3, 0, Math.PI*2);
         ctx.fill();
       }
-
       ctx.fillStyle = '#ffd6a5';
       ctx.beginPath();
       ctx.arc(cx, cy - 8, 20, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-
       ctx.fillStyle = '#333';
       ctx.beginPath();
       ctx.arc(cx - 6, cy - 8, 2.5, 0, Math.PI * 2);
       ctx.arc(cx + 6, cy - 8, 2.5, 0, Math.PI * 2);
       ctx.fill();
-      
       ctx.strokeStyle = '#333';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(cx, cy - 3, 3, 0, Math.PI);
       ctx.stroke();
-
       const glass = game.equippedCosmetics.glass;
       if (glass === 'サングラス') {
         ctx.fillStyle = '#111';
@@ -2961,7 +2700,6 @@
         ctx.lineTo(cx - 15, cy);
         ctx.stroke();
       }
-
       const hat = game.equippedCosmetics.hat;
       if (hat === '麦わら帽子') {
         ctx.fillStyle = '#e3c676';
@@ -3011,21 +2749,14 @@
         ctx.arc(cx, cy - 24, 2, 0, Math.PI*2);
         ctx.fill();
       }
-
       if (activeModal === 'modal-craft') {
         requestAnimationFrame(drawAvatar);
       }
     }
 
     function createSplashParticles() {
-      let count = 20;
-      for (let i = 0; i < count; i++) {
-        ripples.push({
-          x: bobberX + (Math.random() - 0.5) * 60,
-          y: bobberY + (Math.random() - 0.5) * 30,
-          r: 2 + Math.random() * 3,
-          alpha: 0.8 + Math.random() * 0.2
-        });
+      for (let i = 0; i < 20; i++) {
+        ripples.push({ x: bobberX + (Math.random() - 0.5) * 60, y: bobberY + (Math.random() - 0.5) * 30, r: 2 + Math.random() * 3, alpha: 0.8 + Math.random() * 0.2 });
       }
     }
 
