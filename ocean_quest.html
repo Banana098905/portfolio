@@ -812,35 +812,62 @@
     .skill-btn:hover { background: var(--neon-cyan); color: #000; }
     .skill-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ===== スキルツリー ===== */
-    .skilltree-branches { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; flex: 1; min-height: 0; padding-bottom: 6px; }
-    .skilltree-branch { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 120px; flex-shrink: 0; }
-    .skilltree-branch-title { font-size: clamp(0.55rem, 0.8vw, 0.7rem); font-weight: 800; color: #fff; text-align: center; padding: 4px 6px; margin-bottom: 4px; border-radius: 6px; width: 100%; }
-    .skilltree-node-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
-    .skilltree-connector { width: 2px; height: 12px; background: rgba(255,255,255,0.15); }
-    .skilltree-connector.filled { background: var(--neon-cyan); box-shadow: var(--glow-cyan); }
-    .skilltree-node {
-      width: 100%;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.12);
+    /* ===== スキルツリー（中心から放射状に広がる） ===== */
+    #skilltree-radial-wrap {
+      position: relative;
+      width: min(620px, 92vw, 58vh, 100%);
+      aspect-ratio: 1 / 1;
+      margin: 4px auto;
+      flex-shrink: 0;
+    }
+    #skilltree-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+    #skilltree-center {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: clamp(46px, 9vw, 76px); height: clamp(46px, 9vw, 76px);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,240,255,0.3) 0%, rgba(3,7,15,0.9) 75%);
+      border: 2px solid var(--neon-cyan);
+      box-shadow: var(--glow-cyan), inset 0 0 12px rgba(0,240,255,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(1.1rem, 2.6vw, 1.7rem);
+      z-index: 2;
+      text-align: center;
+      line-height: 1;
+    }
+    .skilltree-branch-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      font-size: clamp(0.48rem, 0.8vw, 0.66rem);
+      font-weight: 800;
+      white-space: nowrap;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+      z-index: 2;
+      pointer-events: none;
+    }
+    .skilltree-radial-node {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: clamp(48px, 7vw, 78px);
+      background: rgba(13,22,38,0.9);
+      border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
-      padding: 6px 7px;
+      padding: 3px 4px;
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 1px;
       cursor: pointer;
+      text-align: center;
       transition: border-color 0.15s, background 0.15s, transform 0.1s;
-      position: relative;
+      z-index: 2;
     }
-    .skilltree-node:active { transform: scale(0.96); }
-    .skilltree-node.locked { opacity: 0.4; cursor: not-allowed; }
-    .skilltree-node.unlocked { border-color: var(--neon-green); background: rgba(57,255,20,0.08); }
-    .skilltree-node.available { border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,240,255,0.25); }
-    .skilltree-node-name { font-size: clamp(0.5rem, 0.7vw, 0.62rem); font-weight: 700; color: #fff; }
-    .skilltree-node-desc { font-size: clamp(0.42rem, 0.6vw, 0.53rem); color: var(--text-sub); line-height: 1.25; }
-    .skilltree-node-cost { font-size: 0.45rem; font-weight: 800; color: var(--neon-gold); align-self: flex-end; }
-    .skilltree-node.unlocked .skilltree-node-cost { color: var(--neon-green); }
-    .skilltree-node.unlocked::after { content: '✓'; position: absolute; top: 3px; right: 5px; color: var(--neon-green); font-weight: 900; font-size: 0.6rem; }
+    .skilltree-radial-node:active { transform: translate(-50%, -50%) scale(0.93); }
+    .skilltree-radial-node.locked { opacity: 0.35; cursor: not-allowed; }
+    .skilltree-radial-node.unlocked { border-color: var(--neon-green); background: rgba(57,255,20,0.12); }
+    .skilltree-radial-node.available { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.35); }
+    .skilltree-radial-node-name { font-size: clamp(0.42rem, 0.6vw, 0.54rem); font-weight: 700; color: #fff; line-height: 1.15; }
+    .skilltree-radial-node-desc { font-size: clamp(0.36rem, 0.5vw, 0.45rem); color: var(--text-sub); line-height: 1.15; }
+    .skilltree-radial-node-cost { font-size: 0.4rem; font-weight: 800; color: var(--neon-gold); }
+    .skilltree-radial-node.unlocked .skilltree-radial-node-cost { color: var(--neon-green); }
 
     /* ===== 魚インベントリ（左パネル） ===== */
     #inventory-panel {
@@ -910,7 +937,7 @@
 
     @media (max-width: 600px) {
       #inventory-panel { top: 36px; width: 72px; }
-      .skilltree-branch { min-width: 96px; }
+      #skilltree-radial-wrap { width: min(94vw, 52vh, 100%); }
     }
 
     .craft-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; min-height: 0; }
@@ -1206,7 +1233,7 @@
       </div>
       <div class="modal-body">
         <div class="skill-pts-remain">アビリティーポイント: <span id="skill-pts-val">0</span></div>
-        <div class="skilltree-branches" id="skills-list"></div>
+        <div id="skills-list" style="flex:1; min-height:0; overflow:auto; display:flex; align-items:flex-start; justify-content:center;"></div>
       </div>
     </div>
 
@@ -1377,7 +1404,13 @@
       { id: 6, name: 'ダイヤの竿', cost: 50000, dist: 180, rare: 3.3, dur: 130, reelSpeed: 2.2, desc: 'ダイヤ散りばめ。' },
       { id: 7, name: 'クリスタル竿', cost: 120000, dist: 240, rare: 4.0, dur: 180, reelSpeed: 2.6, desc: '魔力を帯びた竿。' },
       { id: 8, name: '神話の竿', cost: 300000, dist: 320, rare: 5.0, dur: 250, reelSpeed: 3.1, desc: '神々の祝福。' },
-      { id: 9, name: '海神の竿', cost: 1000000, dist: 500, rare: 7.0, dur: 999, reelSpeed: 4.0, desc: '究極のロッド。' }
+      { id: 9, name: '海神の竿', cost: 1000000, dist: 500, rare: 7.0, dur: 999, reelSpeed: 4.0, desc: '究極のロッド。' },
+      { id: 10, name: '鱗の竿', cost: null, dist: 300, rare: 5.0, dur: 300, reelSpeed: 2.0, duplicateChance: 0.18, gachaOnly: true, desc: '鱗ルーレット激レア景品。稀に同じ魚を複製する神秘の竿。' },
+      { id: 11, name: '見習い卒業の竿', cost: 1500, dist: 35, rare: 1.3, dur: 18, reelSpeed: 1.15, reqLvl: 10, desc: '港を巣立った証の竿。' },
+      { id: 12, name: '深海監視員の竿', cost: 18000, dist: 140, rare: 2.0, dur: 70, reelSpeed: 1.3, reqLvl: 20, desc: '深海調査隊が愛用する特注品。' },
+      { id: 13, name: '皆伝の竿', cost: null, dist: 350, rare: 4.5, dur: 260, reelSpeed: 2.3, duplicateChance: 0.05, achievementOnly: true, unlockDesc: '図鑑を100%コンプリートすると自動で入手できる。', desc: '図鑑を極めた者だけが持つ竿。稀に魚を複製する。' },
+      { id: 14, name: '竜の落とし子の竿', cost: 400000, dist: 400, rare: 6.0, dur: 400, reelSpeed: 2.8, reqLvl: 50, reqDivineCaught: true, desc: '神話級の魚を釣った者だけが扱える竿。' },
+      { id: 15, name: '百戦錬磨の竿', cost: null, dist: 200, rare: 3.0, dur: 150, reelSpeed: 2.0, achievementOnly: true, unlockDesc: '実績「海の覇者」(累計100匹)を達成すると自動で入手できる。', desc: '百の死闘を乗り越えた老練の竿。' }
     ];
 
     const BOATS = [
@@ -1392,18 +1425,73 @@
     ];
 
     const BAITS = [
-      { name: 'ミミズ', cost: 5, rate: 1.0, desc: '一般的なエサ。' },
-      { name: 'エビ', cost: 15, rate: 1.3, desc: '甲殻類の定番。' },
-      { name: '小魚', cost: 40, rate: 1.7, desc: '生きた小魚。' },
-      { name: 'イカ', cost: 100, rate: 2.2, desc: 'ジューシーなエサ。' },
-      { name: '特殊エサ', cost: 300, rate: 3.5, desc: '合成誘引エサ。' },
-      { name: '神エサ', cost: 1000, rate: 6.0, desc: '奇跡のエサ。' }
+      { name: 'ミミズ', rate: 1.0, desc: '一般的なエサ。' },
+      { name: 'エビ', rate: 1.3, desc: '甲殻類の定番。' },
+      { name: '貝虫', rate: 1.1, desc: '砂地でよく見かける虫。' },
+      { name: 'パン粉エサ', rate: 0.9, desc: '練り込んだ手軽なエサ。' },
+      { name: '小魚', rate: 1.7, desc: '生きた小魚。' },
+      { name: 'ミルワーム', rate: 1.2, desc: '養殖された虫エサ。' },
+      { name: 'イカ', rate: 2.2, desc: 'ジューシーなエサ。' },
+      { name: '発光エサ', rate: 2.5, desc: '暗い場所で光る人工エサ。' },
+      { name: '甲殻エキス餌', rate: 2.0, desc: '甲殻類のエキスを凝縮。' },
+      { name: '特殊エサ', rate: 3.5, desc: '合成誘引エサ。' },
+      { name: '血合いエサ', rate: 2.8, desc: '匂いの強い切り身エサ。' },
+      { name: '深海プランクトン', rate: 3.0, desc: '深海生物が好む微生物。' },
+      { name: '神エサ', rate: 6.0, desc: '奇跡のエサ。' },
+      { name: '虹色エサ', rate: 5.0, desc: '七色に輝く不思議なエサ。' },
+      { name: '隕石の欠片エサ', rate: 5.5, desc: '宇宙由来の鉱物エサ。' },
+      { name: '龍のひげエサ', rate: 7.0, desc: '伝説の龍から抜けたひげ。' },
+      { name: '太古の餌', rate: 6.5, desc: '化石から抽出した古代のエサ。' },
+      { name: '海神の雫', rate: 8.0, desc: '海神の加護が宿る一滴。' }
     ];
 
     const BAIT_ICONS = {
-      'ミミズ': '🪱', 'エビ': '🦐', '小魚': '🐟',
-      'イカ': '🦑', '特殊エサ': '✨', '神エサ': '👑'
+      'ミミズ': '🪱', 'エビ': '🦐', '貝虫': '🐚', 'パン粉エサ': '🍞', '小魚': '🐟', 'ミルワーム': '🐛',
+      'イカ': '🦑', '発光エサ': '💡', '甲殻エキス餌': '🦀', '特殊エサ': '✨', '血合いエサ': '🥩', '深海プランクトン': '🦠',
+      '神エサ': '👑', '虹色エサ': '🌈', '隕石の欠片エサ': '☄️', '龍のひげエサ': '🐉', '太古の餌': '🦴', '海神の雫': '💧'
     };
+
+    // ============================================================
+    // 餌箱（エサはショップで直接買うのではなく、箱を開けて引き当てる）
+    // ============================================================
+    const BAIT_BOXES = [
+      {
+        id: 'common', name: '常備の餌箱', icon: '📦', cost: 150, currency: 'gold',
+        desc: '港でよく使われる定番のエサが入った箱。',
+        pool: [
+          { name: 'ミミズ',      weight: 28, qtyMin: 4, qtyMax: 8 },
+          { name: 'エビ',        weight: 22, qtyMin: 3, qtyMax: 6 },
+          { name: '貝虫',        weight: 20, qtyMin: 3, qtyMax: 6 },
+          { name: 'パン粉エサ',  weight: 16, qtyMin: 4, qtyMax: 7 },
+          { name: '小魚',        weight: 10, qtyMin: 2, qtyMax: 4 },
+          { name: 'ミルワーム',  weight: 4,  qtyMin: 2, qtyMax: 4 }
+        ]
+      },
+      {
+        id: 'advanced', name: '匠の餌箱', icon: '🎁', cost: 650, currency: 'gold',
+        desc: 'ベテラン漁師御用達の上質なエサが入った箱。',
+        pool: [
+          { name: 'イカ',           weight: 26, qtyMin: 2, qtyMax: 4 },
+          { name: '甲殻エキス餌',    weight: 22, qtyMin: 2, qtyMax: 4 },
+          { name: '血合いエサ',      weight: 20, qtyMin: 2, qtyMax: 4 },
+          { name: '発光エサ',        weight: 16, qtyMin: 1, qtyMax: 3 },
+          { name: '深海プランクトン', weight: 11, qtyMin: 1, qtyMax: 3 },
+          { name: '特殊エサ',        weight: 5,  qtyMin: 1, qtyMax: 2 }
+        ]
+      },
+      {
+        id: 'legendary', name: '秘宝の餌箱', icon: '💠', cost: 5, currency: 'gem',
+        desc: '伝説の漁師が遺したという、特別な素材で作られた箱。',
+        pool: [
+          { name: '神エサ',        weight: 28, qtyMin: 1, qtyMax: 2 },
+          { name: '虹色エサ',      weight: 24, qtyMin: 1, qtyMax: 2 },
+          { name: '太古の餌',      weight: 20, qtyMin: 1, qtyMax: 1 },
+          { name: '隕石の欠片エサ', weight: 15, qtyMin: 1, qtyMax: 1 },
+          { name: '龍のひげエサ',   weight: 9,  qtyMin: 1, qtyMax: 1 },
+          { name: '海神の雫',      weight: 4,  qtyMin: 1, qtyMax: 1 }
+        ]
+      }
+    ];
 
     const ROULETTE_COST = 8;
     const ROULETTE_PRIZES = [
@@ -1418,7 +1506,8 @@
       { label: '500G', icon: '💰', type: 'gold', amount: 500, weight: 4, rare: true },
       { label: '特殊エサ', icon: '✨', type: 'bait', name: '特殊エサ', amount: 1, weight: 4, rare: true },
       { label: '3 GEM', icon: '💎', type: 'gem', amount: 3, weight: 2, rare: true },
-      { label: '神エサ', icon: '👑', type: 'bait', name: '神エサ', amount: 1, weight: 1, rare: true }
+      { label: '神エサ', icon: '👑', type: 'bait', name: '神エサ', amount: 1, weight: 1, rare: true },
+      { label: '🎣鱗の竿', icon: '🎣', type: 'rod', rodId: 10, weight: 0.05, rare: true }
     ];
 
     const FISH_FIGHT_PROFILES = {
@@ -1460,56 +1549,71 @@
       luck: {
         label: '🍀 幸運の樹', color: 'var(--neon-gold)',
         nodes: [
-          { key: 'luck1', name: '幸運の勘',   cost: 1, desc: 'レア魚出現率 +8%',        effect: { rareChance: 0.08 } },
-          { key: 'luck2', name: '虹の予兆',   cost: 1, desc: 'レア魚出現率 +8%(累積)',   effect: { rareChance: 0.08 } },
-          { key: 'luck3', name: '変異体質',   cost: 2, desc: '天候変異の発生率 +10%',    effect: { mutationChance: 0.10 } },
-          { key: 'luck4', name: '黄金の目',   cost: 2, desc: 'シャイニー確率 +1.5%',     effect: { shinyChance: 0.015 } },
-          { key: 'luck5', name: '巨獣の絆',   cost: 3, desc: '巨大個体(クラウン)確率 +2%', effect: { crownChance: 0.02 } },
-          { key: 'luck6', name: '伝説の導き', cost: 3, desc: 'レア魚出現率 +15%(最終)',  effect: { rareChance: 0.15 } },
+          { key: 'luck1', name: '幸運の勘',     cost: 1, desc: 'レア魚出現率 +8%',          effect: { rareChance: 0.08 } },
+          { key: 'luck2', name: '虹の予兆',     cost: 1, desc: 'レア魚出現率 +8%(累積)',     effect: { rareChance: 0.08 } },
+          { key: 'luck3', name: '変異体質',     cost: 2, desc: '天候変異の発生率 +10%',      effect: { mutationChance: 0.10 } },
+          { key: 'luck4', name: '黄金の目',     cost: 2, desc: 'シャイニー確率 +1.5%',       effect: { shinyChance: 0.015 } },
+          { key: 'luck5', name: '巨獣の絆',     cost: 3, desc: '巨大個体(クラウン)確率 +2%',  effect: { crownChance: 0.02 } },
+          { key: 'luck6', name: '伝説の導き',   cost: 3, desc: 'レア魚出現率 +15%',          effect: { rareChance: 0.15 } },
+          { key: 'luck7', name: '天啓の直感',   cost: 4, desc: '天候変異の発生率 +15%',      effect: { mutationChance: 0.15 } },
+          { key: 'luck8', name: '幻魚の目撃者', cost: 4, desc: 'シャイニー確率 +2.5%',       effect: { shinyChance: 0.025 } },
+          { key: 'luck9', name: '女神の寵愛',   cost: 5, desc: 'レア魚出現率 +25%(最終)',    effect: { rareChance: 0.25 } },
         ]
       },
       power: {
         label: '💪 剛力の樹', color: 'var(--neon-cyan)',
         nodes: [
-          { key: 'power1', name: '握力強化',       cost: 1, desc: '巻き速度 +10%',                    effect: { reelSpeed: 0.10 } },
-          { key: 'power2', name: '安定した構え',    cost: 1, desc: 'テンションバー幅 +4%',             effect: { barWidth: 4 } },
-          { key: 'power3', name: '不屈の握力',      cost: 2, desc: 'レア魚の巻き抵抗 -8%',              effect: { rarityResist: 0.08 } },
-          { key: 'power4', name: '漁師の反射神経',  cost: 2, desc: '巻き速度 +15%',                    effect: { reelSpeed: 0.15 } },
-          { key: 'power5', name: '鋼の握力',        cost: 3, desc: 'レア魚の巻き抵抗 -12%',             effect: { rarityResist: 0.12 } },
-          { key: 'power6', name: '海神の腕力',      cost: 3, desc: '巻き速度 +25%(最終)',              effect: { reelSpeed: 0.25 } },
+          { key: 'power1', name: '握力強化',       cost: 1, desc: '巻き速度 +10%',           effect: { reelSpeed: 0.10 } },
+          { key: 'power2', name: '安定した構え',    cost: 1, desc: 'テンションバー幅 +4%',    effect: { barWidth: 4 } },
+          { key: 'power3', name: '不屈の握力',      cost: 2, desc: 'レア魚の巻き抵抗 -8%',    effect: { rarityResist: 0.08 } },
+          { key: 'power4', name: '漁師の反射神経',  cost: 2, desc: '巻き速度 +15%',           effect: { reelSpeed: 0.15 } },
+          { key: 'power5', name: '鋼の握力',        cost: 3, desc: 'レア魚の巻き抵抗 -12%',   effect: { rarityResist: 0.12 } },
+          { key: 'power6', name: '海神の腕力',      cost: 3, desc: '巻き速度 +25%',           effect: { reelSpeed: 0.25 } },
+          { key: 'power7', name: '不動の構え',      cost: 4, desc: 'テンションバー幅 +6%',    effect: { barWidth: 6 } },
+          { key: 'power8', name: '龍を抑える力',    cost: 4, desc: 'レア魚の巻き抵抗 -15%',   effect: { rarityResist: 0.15 } },
+          { key: 'power9', name: '究極の腕力',      cost: 5, desc: '巻き速度 +35%(最終)',     effect: { reelSpeed: 0.35 } },
         ]
       },
       trade: {
         label: '💰 交易の樹', color: 'var(--neon-pink)',
         nodes: [
-          { key: 'trade1', name: '目利き',       cost: 1, desc: '売却額 +8%',            effect: { goldMult: 0.08 } },
-          { key: 'trade2', name: '仲買人の伝手', cost: 1, desc: '売却額 +8%(累積)',       effect: { goldMult: 0.08 } },
-          { key: 'trade3', name: '交渉術',       cost: 2, desc: '売却額 +12%',            effect: { goldMult: 0.12 } },
-          { key: 'trade4', name: '一括卸し契約', cost: 2, desc: 'クエスト報酬G +15%',     effect: { questGoldMult: 0.15 } },
-          { key: 'trade5', name: '市場の顔役',   cost: 3, desc: '売却額 +15%',            effect: { goldMult: 0.15 } },
-          { key: 'trade6', name: '海の豪商',     cost: 3, desc: '売却額 +20%(最終)',      effect: { goldMult: 0.20 } },
+          { key: 'trade1', name: '目利き',       cost: 1, desc: '売却額 +8%',           effect: { goldMult: 0.08 } },
+          { key: 'trade2', name: '仲買人の伝手', cost: 1, desc: '売却額 +8%(累積)',      effect: { goldMult: 0.08 } },
+          { key: 'trade3', name: '交渉術',       cost: 2, desc: '売却額 +12%',           effect: { goldMult: 0.12 } },
+          { key: 'trade4', name: '一括卸し契約', cost: 2, desc: 'クエスト報酬G +15%',    effect: { questGoldMult: 0.15 } },
+          { key: 'trade5', name: '市場の顔役',   cost: 3, desc: '売却額 +15%',           effect: { goldMult: 0.15 } },
+          { key: 'trade6', name: '海の豪商',     cost: 3, desc: '売却額 +20%',           effect: { goldMult: 0.20 } },
+          { key: 'trade7', name: '国際貿易網',   cost: 4, desc: '売却額 +18%',           effect: { goldMult: 0.18 } },
+          { key: 'trade8', name: '独占契約',     cost: 4, desc: 'クエスト報酬G +20%',    effect: { questGoldMult: 0.20 } },
+          { key: 'trade9', name: '伝説の商人',   cost: 5, desc: '売却額 +30%(最終)',     effect: { goldMult: 0.30 } },
         ]
       },
       study: {
         label: '📘 学問の樹', color: 'var(--neon-green)',
         nodes: [
-          { key: 'study1', name: '観察眼',     cost: 1, desc: '経験値 +10%',          effect: { xpMult: 0.10 } },
-          { key: 'study2', name: '記録術',     cost: 1, desc: '経験値 +10%(累積)',    effect: { xpMult: 0.10 } },
-          { key: 'study3', name: '生態研究',   cost: 2, desc: '経験値 +15%',          effect: { xpMult: 0.15 } },
-          { key: 'study4', name: '実績への理解', cost: 2, desc: 'クエスト経験値 +15%', effect: { questXpMult: 0.15 } },
-          { key: 'study5', name: '博識',       cost: 3, desc: '経験値 +15%',          effect: { xpMult: 0.15 } },
-          { key: 'study6', name: '賢者の書',   cost: 3, desc: '経験値 +20%(最終)',    effect: { xpMult: 0.20 } },
+          { key: 'study1', name: '観察眼',       cost: 1, desc: '経験値 +10%',           effect: { xpMult: 0.10 } },
+          { key: 'study2', name: '記録術',       cost: 1, desc: '経験値 +10%(累積)',      effect: { xpMult: 0.10 } },
+          { key: 'study3', name: '生態研究',     cost: 2, desc: '経験値 +15%',           effect: { xpMult: 0.15 } },
+          { key: 'study4', name: '実績への理解', cost: 2, desc: 'クエスト経験値 +15%',    effect: { questXpMult: 0.15 } },
+          { key: 'study5', name: '博識',         cost: 3, desc: '経験値 +15%',           effect: { xpMult: 0.15 } },
+          { key: 'study6', name: '賢者の書',     cost: 3, desc: '経験値 +20%',           effect: { xpMult: 0.20 } },
+          { key: 'study7', name: '深淵の知識',   cost: 4, desc: '経験値 +20%',           effect: { xpMult: 0.20 } },
+          { key: 'study8', name: '究理の眼',     cost: 4, desc: 'クエスト経験値 +20%',    effect: { questXpMult: 0.20 } },
+          { key: 'study9', name: '全知の書',     cost: 5, desc: '経験値 +30%(最終)',     effect: { xpMult: 0.30 } },
         ]
       },
       sailing: {
         label: '⚓ 航海の樹', color: '#39d0ff',
         nodes: [
-          { key: 'sail1', name: '船倉拡張I',   cost: 1, desc: '生簀の容量 +2枠',         effect: { extraSlots: 2 } },
+          { key: 'sail1', name: '船倉拡張I',   cost: 1, desc: '生簀の容量 +2枠',          effect: { extraSlots: 2 } },
           { key: 'sail2', name: '風読み',      cost: 1, desc: 'キャスト飛距離 +10%',      effect: { castDistBonus: 0.10 } },
           { key: 'sail3', name: '船倉拡張II',  cost: 2, desc: '生簀の容量 +3枠',          effect: { extraSlots: 3 } },
           { key: 'sail4', name: '荒天航海術',  cost: 2, desc: '悪天候の魚バトル難度 -10%', effect: { stormResist: 0.10 } },
           { key: 'sail5', name: '船倉拡張III', cost: 3, desc: '生簀の容量 +5枠',          effect: { extraSlots: 5 } },
-          { key: 'sail6', name: '大航海時代',  cost: 3, desc: 'キャスト飛距離 +20%(最終)', effect: { castDistBonus: 0.20 } },
+          { key: 'sail6', name: '大航海時代',  cost: 3, desc: 'キャスト飛距離 +20%',      effect: { castDistBonus: 0.20 } },
+          { key: 'sail7', name: '船倉拡張IV',  cost: 4, desc: '生簀の容量 +6枠',          effect: { extraSlots: 6 } },
+          { key: 'sail8', name: '嵐を裂く舵',  cost: 4, desc: '悪天候の魚バトル難度 -15%', effect: { stormResist: 0.15 } },
+          { key: 'sail9', name: '伝説の船長',  cost: 5, desc: 'キャスト飛距離 +30%(最終)', effect: { castDistBonus: 0.30 } },
         ]
       }
     };
@@ -1569,7 +1673,11 @@
       boatId: 0,
       skillPoints: 0,
       selectedBait: 'ミミズ',
-      baits: { 'ミミズ': 10, 'エビ': 2, '小魚': 0, 'イカ': 0, '特殊エサ': 0, '神エサ': 0 },
+      baits: {
+        'ミミズ': 10, 'エビ': 2, '貝虫': 0, 'パン粉エサ': 0, '小魚': 0, 'ミルワーム': 0,
+        'イカ': 0, '発光エサ': 0, '甲殻エキス餌': 0, '特殊エサ': 0, '血合いエサ': 0, '深海プランクトン': 0,
+        '神エサ': 0, '虹色エサ': 0, '隕石の欠片エサ': 0, '龍のひげエサ': 0, '太古の餌': 0, '海神の雫': 0
+      },
       ownedRods: [0],
       ownedBoats: [0],
       equippedCosmetics: { hat: '', glass: '', cloth: '', wing: '', aura: '' },
@@ -1618,6 +1726,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       console.log('=== Ocean Quest 起動 ===');
       loadGame();
+      checkRodUnlocks();
       initAudio();
       initFXCanvas();
       initWaterCanvas();
@@ -1943,14 +2052,32 @@
       if (activeShopTab === 'shop-rods') {
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
+          if ((r.gachaOnly || r.achievementOnly) && !isOwned) return; // ルーレット/実績限定ロッドは入手するまでショップに表示しない
           const isEquipped = game.rodId === r.id;
+          const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
+          const meetsLevel = !r.reqLvl || game.level >= r.reqLvl;
+          const meetsDivine = !r.reqDivineCaught || hasDivine;
+          const isLocked = !isOwned && (!meetsLevel || !meetsDivine);
           const card = document.createElement('div');
           card.className = `item-card ${isEquipped ? 'equipped' : ''}`;
+          let reqText = '';
+          if (!isOwned && r.reqLvl) reqText += `<br><span style="color:${meetsLevel ? 'var(--neon-green)' : 'var(--neon-pink)'}">要Lv.${r.reqLvl}</span>`;
+          if (!isOwned && r.reqDivineCaught) reqText += `<br><span style="color:${meetsDivine ? 'var(--neon-green)' : 'var(--neon-pink)'}">要:Divine魚の捕獲実績</span>`;
+          let actionHtml;
+          if (isOwned) {
+            actionHtml = isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`;
+          } else if (r.gachaOnly || r.achievementOnly) {
+            actionHtml = '';
+          } else if (isLocked) {
+            actionHtml = `<button class="buy-btn" disabled>条件未達成</button>`;
+          } else {
+            actionHtml = `<div class="item-cost">${r.cost} G</div><button class="buy-btn" onclick="buyRod(${r.id}, ${r.cost})" ${game.gold < r.cost ? 'disabled' : ''}>購入</button>`;
+          }
           card.innerHTML = `
             <div class="item-icon">🎣</div>
             <div class="item-title">${r.name}</div>
-            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((r.reelSpeed-1)*100)}%</span></div>
-            ${isOwned ? (isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`) : `<div class="item-cost">${r.cost} G</div><button class="buy-btn" onclick="buyRod(${r.id}, ${r.cost})" ${game.gold < r.cost ? 'disabled' : ''}>購入</button>`}
+            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((r.reelSpeed-1)*100)}%</span>${r.duplicateChance ? `<br><span style="color:var(--neon-pink)">✨魚複製率 ${Math.round(r.duplicateChance*100)}%</span>` : ''}${reqText}</div>
+            ${actionHtml}
           `;
           list.appendChild(card);
         });
@@ -1969,26 +2096,61 @@
           list.appendChild(card);
         });
       } else if (activeShopTab === 'shop-baits') {
-        BAITS.forEach(b => {
-          const qty = game.baits[b.name] || 0;
+        const boxWrap = document.createElement('div');
+        boxWrap.style.cssText = 'grid-column: 1 / -1; display:flex; flex-direction:column; gap:8px;';
+        BAIT_BOXES.forEach(box => {
+          const cur = box.currency === 'gem' ? game.gems : game.gold;
+          const canAfford = cur >= box.cost;
+          const poolPreview = box.pool.map(p => `<span title="${p.name}" style="margin-right:3px;">${BAIT_ICONS[p.name] || '🪱'}</span>`).join('');
           const card = document.createElement('div');
-          card.className = `item-card`;
+          card.className = 'craft-item';
           card.innerHTML = `
-            <div class="item-icon">🪱</div>
-            <div class="item-title">${b.name} (所持: ${qty})</div>
-            <div class="item-desc">${b.desc}<br><span style="color:var(--neon-pink)">レア惹きつけ率x${b.rate}</span></div>
-            <div class="item-cost">${b.cost} G</div>
-            <div style="display:flex; gap:4px; width:100%;">
-              <button class="buy-btn" onclick="buyBait('${b.name}', ${b.cost}, 1)" ${game.gold < b.cost ? 'disabled' : ''}>1個</button>
-              <button class="buy-btn" onclick="buyBait('${b.name}', ${b.cost}, 10)" style="background:rgba(255,215,0,0.15); border-color:var(--neon-gold);" ${game.gold < b.cost * 10 ? 'disabled' : ''}>10個</button>
+            <div style="flex:1;">
+              <strong style="color:#fff; font-size:0.75rem;">${box.icon} ${box.name}</strong>
+              <div style="font-size:0.55rem; color:var(--text-sub); margin-top:2px;">${box.desc}</div>
+              <div style="margin-top:4px; font-size:0.85rem;">${poolPreview}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
+              <span style="font-size:0.65rem; color:${box.currency==='gem' ? 'var(--neon-pink)' : 'var(--neon-gold)'}; font-weight:bold;">${box.cost} ${box.currency==='gem' ? 'GEM' : 'G'}</span>
+              <button class="buy-btn" onclick="openBaitBox('${box.id}')" ${!canAfford ? 'disabled' : ''} style="padding:4px 10px; width:auto;">開封する</button>
             </div>
           `;
-          list.appendChild(card);
+          boxWrap.appendChild(card);
         });
+
+        const invHeader = document.createElement('div');
+        invHeader.style.cssText = 'grid-column: 1 / -1; font-size:0.55rem; color:var(--text-sub); margin-top:6px;';
+        invHeader.innerText = '所持しているエサ:';
+        boxWrap.appendChild(invHeader);
+
+        const invGrid = document.createElement('div');
+        invGrid.style.cssText = 'grid-column: 1 / -1; display:flex; flex-wrap:wrap; gap:4px;';
+        BAITS.forEach(b => {
+          const qty = game.baits[b.name] || 0;
+          if (qty <= 0) return;
+          const badge = document.createElement('div');
+          badge.className = 'mat-badge';
+          badge.innerText = `${BAIT_ICONS[b.name] || '🪱'} ${b.name} x${qty}`;
+          invGrid.appendChild(badge);
+        });
+        if (![...Object.values(game.baits)].some(v => v > 0)) {
+          const none = document.createElement('div');
+          none.className = 'mat-badge';
+          none.innerText = 'エサなし';
+          invGrid.appendChild(none);
+        }
+        boxWrap.appendChild(invGrid);
+
+        list.appendChild(boxWrap);
       }
     }
 
     function buyRod(id, cost) {
+      const rod = RODS.find(r => r.id === id);
+      if (!rod) return;
+      const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
+      if (rod.reqLvl && game.level < rod.reqLvl) return;
+      if (rod.reqDivineCaught && !hasDivine) return;
       if (game.gold >= cost && !game.ownedRods.includes(id)) {
         game.gold -= cost; game.ownedRods.push(id); game.rodId = id;
         saveGame(); updateHUD(); renderShopItems();
@@ -2008,13 +2170,27 @@
     function equipBoat(id) {
       if (game.ownedBoats.includes(id)) { game.boatId = id; saveGame(); renderShopItems(); }
     }
-    function buyBait(name, cost, qty) {
-      const totalCost = cost * qty;
-      if (game.gold >= totalCost) {
-        game.gold -= totalCost;
-        game.baits[name] = (game.baits[name] || 0) + qty;
-        saveGame(); updateHUD(); renderShopItems();
+    function openBaitBox(boxId) {
+      const box = BAIT_BOXES.find(b => b.id === boxId);
+      if (!box) return;
+      const cur = box.currency === 'gem' ? game.gems : game.gold;
+      if (cur < box.cost) return;
+      if (box.currency === 'gem') game.gems -= box.cost; else game.gold -= box.cost;
+
+      let totalWeight = 0;
+      box.pool.forEach(p => totalWeight += p.weight);
+      let rand = Math.random() * totalWeight;
+      let picked = box.pool[0];
+      for (let i = 0; i < box.pool.length; i++) {
+        rand -= box.pool[i].weight;
+        if (rand <= 0) { picked = box.pool[i]; break; }
       }
+      const qty = picked.qtyMin + Math.floor(Math.random() * (picked.qtyMax - picked.qtyMin + 1));
+      game.baits[picked.name] = (game.baits[picked.name] || 0) + qty;
+
+      sfxRouletteWin();
+      addVisualSplashEffect(`${box.icon} ${BAIT_ICONS[picked.name] || '🪱'} ${picked.name} x${qty} 獲得！`);
+      saveGame(); updateHUD(); renderShopItems();
     }
 
     // ============================================================
@@ -2091,44 +2267,74 @@
       document.getElementById('skill-pts-val').innerText = game.skillPoints;
       const container = document.getElementById('skills-list');
       container.innerHTML = '';
-      Object.keys(SKILL_TREE).forEach(branchKey => {
+
+      const wrap = document.createElement('div');
+      wrap.id = 'skilltree-radial-wrap';
+
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('id', 'skilltree-svg');
+      svg.setAttribute('viewBox', '0 0 100 100');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      wrap.appendChild(svg);
+
+      const centerEl = document.createElement('div');
+      centerEl.id = 'skilltree-center';
+      centerEl.innerText = '🎣';
+      wrap.appendChild(centerEl);
+
+      const branchKeys = Object.keys(SKILL_TREE);
+      const angleStep = 360 / branchKeys.length;
+
+      branchKeys.forEach((branchKey, bIdx) => {
         const branch = SKILL_TREE[branchKey];
         const unlockedCount = game.skillTree[branchKey] || 0;
-        const branchEl = document.createElement('div');
-        branchEl.className = 'skilltree-branch';
-        const titleEl = document.createElement('div');
-        titleEl.className = 'skilltree-branch-title';
-        titleEl.style.background = 'rgba(255,255,255,0.05)';
-        titleEl.style.color = branch.color;
-        titleEl.innerText = `${branch.label} (${unlockedCount}/${branch.nodes.length})`;
-        branchEl.appendChild(titleEl);
+        const angleDeg = -90 + bIdx * angleStep; // 上を起点に等間隔で放射
+        const angleRad = angleDeg * Math.PI / 180;
+        const dx = Math.cos(angleRad), dy = Math.sin(angleRad);
 
+        // 系統ラベル（外周）
+        const labelR = 86;
+        const labelEl = document.createElement('div');
+        labelEl.className = 'skilltree-branch-label';
+        labelEl.style.left = (50 + dx * labelR) + '%';
+        labelEl.style.top = (50 + dy * labelR) + '%';
+        labelEl.style.color = branch.color;
+        labelEl.innerText = `${branch.label} (${unlockedCount}/${branch.nodes.length})`;
+        wrap.appendChild(labelEl);
+
+        let prevX = 50, prevY = 50;
         branch.nodes.forEach((node, i) => {
-          if (i > 0) {
-            const connector = document.createElement('div');
-            connector.className = 'skilltree-connector' + (i <= unlockedCount ? ' filled' : '');
-            branchEl.appendChild(connector);
-          }
+          const r = 9 + i * 7.9; // 中心からの距離(%) — 段が進むほど外側へ広がる（9段でも枠内に収まる間隔）
+          const x = 50 + dx * r;
+          const y = 50 + dy * r;
+
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', prevX); line.setAttribute('y1', prevY);
+          line.setAttribute('x2', x); line.setAttribute('y2', y);
+          line.setAttribute('stroke', i < unlockedCount ? '#39ff14' : 'rgba(255,255,255,0.18)');
+          line.setAttribute('stroke-width', i < unlockedCount ? '0.9' : '0.5');
+          svg.appendChild(line);
+          prevX = x; prevY = y;
+
           const isUnlocked = i < unlockedCount;
           const isAvailable = i === unlockedCount && game.skillPoints >= node.cost;
-          const isLocked = i > unlockedCount || (i === unlockedCount && game.skillPoints < node.cost);
-          const wrap = document.createElement('div');
-          wrap.className = 'skilltree-node-wrap';
           const nodeEl = document.createElement('div');
-          nodeEl.className = `skilltree-node ${isUnlocked ? 'unlocked' : (isAvailable ? 'available' : 'locked')}`;
+          nodeEl.className = `skilltree-radial-node ${isUnlocked ? 'unlocked' : (isAvailable ? 'available' : 'locked')}`;
+          nodeEl.style.left = x + '%';
+          nodeEl.style.top = y + '%';
           nodeEl.innerHTML = `
-            <div class="skilltree-node-name">${node.name}</div>
-            <div class="skilltree-node-desc">${node.desc}</div>
-            <div class="skilltree-node-cost">${isUnlocked ? '習得済' : `${node.cost} AP`}</div>
+            <div class="skilltree-radial-node-name">${node.name}</div>
+            <div class="skilltree-radial-node-desc">${node.desc}</div>
+            <div class="skilltree-radial-node-cost">${isUnlocked ? '習得済' : `${node.cost} AP`}</div>
           `;
           if (i === unlockedCount) {
             nodeEl.onclick = () => unlockSkillNode(branchKey, i);
           }
           wrap.appendChild(nodeEl);
-          branchEl.appendChild(wrap);
         });
-        container.appendChild(branchEl);
       });
+
+      container.appendChild(wrap);
     }
 
     function unlockSkillNode(branchKey, nodeIndex) {
@@ -2268,7 +2474,7 @@
           </div>
         </div>
         <div class="roulette-result" id="roulette-result"></div>
-        <div class="roulette-cost">✨ <strong>無料</strong>で何回でも回せます！</div>
+        <div class="roulette-cost">回すコスト: <strong>${ROULETTE_COST} 🎣ウロコ</strong> (鱗がある限り何回でも回せます)</div>
         <button class="roulette-spin-btn" id="roulette-spin-btn" onclick="spinRoulette()">スピン！</button>
       `;
       container.appendChild(wrap);
@@ -2293,13 +2499,16 @@
     function updateRouletteSpinButton() {
       const btn = document.getElementById('roulette-spin-btn');
       if (!btn) return;
-      btn.disabled = isSpinning;
+      const canSpin = (game.materials['魚のウロコ'] || 0) >= ROULETTE_COST;
+      btn.disabled = isSpinning || !canSpin;
     }
 
     let isSpinning = false;
     function spinRoulette() {
       if (isSpinning) return;
+      if ((game.materials['魚のウロコ'] || 0) < ROULETTE_COST) return;
       isSpinning = true;
+      game.materials['魚のウロコ'] -= ROULETTE_COST;
 
       let totalWeight = 0;
       ROULETTE_PRIZES.forEach(p => totalWeight += p.weight);
@@ -2337,7 +2546,16 @@
         else if (prize.type === 'gem') { game.gems += prize.amount; }
         else if (prize.type === 'bait') { game.baits[prize.name] = (game.baits[prize.name] || 0) + prize.amount; }
         else if (prize.type === 'material') { game.materials[prize.name] = (game.materials[prize.name] || 0) + prize.amount; }
-        resultEl.innerText = `🎉 獲得: ${prize.label}`;
+        else if (prize.type === 'rod') {
+          if (!game.ownedRods.includes(prize.rodId)) {
+            game.ownedRods.push(prize.rodId);
+            resultEl.innerText = `🎣✨ 激レア【${RODS[prize.rodId].name}】獲得！`;
+          } else {
+            game.gold += 5000;
+            resultEl.innerText = `🎣 既に所持済みのため代わりに +5000 G`;
+          }
+        }
+        if (prize.type !== 'rod') resultEl.innerText = `🎉 獲得: ${prize.label}`;
         saveGame(); updateHUD(); updateRouletteSpinButton();
         isSpinning = false;
       }, 3300);
@@ -2423,8 +2641,22 @@
       if (a && !a.done) {
         a.done = true;
         game.gems += a.rewardGem;
+        // 「海の覇者」(累計100匹)実績を達成すると特殊竿「百戦錬磨の竿」を自動入手
+        let gotRod = false;
+        if (a.id === 1 && !game.ownedRods.includes(15)) {
+          game.ownedRods.push(15);
+          gotRod = true;
+        }
         saveGame(); renderQuests(); updateHUD();
-        addVisualSplashEffect("ACHIEVEMENT!");
+        addVisualSplashEffect(gotRod ? "ACHIEVEMENT! 🎣百戦錬磨の竿を入手！" : "ACHIEVEMENT!");
+      }
+    }
+
+    // 図鑑を100%コンプリートすると特殊竿「皆伝の竿」を自動入手
+    function checkRodUnlocks() {
+      if (!game.ownedRods.includes(13) && Object.keys(game.book).length >= FISH_DATABASE.length) {
+        game.ownedRods.push(13);
+        addVisualSplashEffect('🎣 皆伝の竿を入手！');
       }
     }
 
@@ -2775,6 +3007,7 @@
       if (!game.book[targetFish.id]) game.book[targetFish.id] = { caught:1, maxLen:finalLen, maxWeight:finalWeight, firstDate:new Date().toISOString().split('T')[0] };
       else { game.book[targetFish.id].caught++; game.book[targetFish.id].maxLen = Math.max(game.book[targetFish.id].maxLen, finalLen); game.book[targetFish.id].maxWeight = Math.max(game.book[targetFish.id].maxWeight, finalWeight); }
       game.totalCaught++;
+      checkRodUnlocks();
       progressQuest('catch', { fishId: targetFish.id, qty: 1 });
       progressQuest('weight', { weight: finalWeight });
       game.achievements.forEach(a => { if(a.type==='total_caught' && game.totalCaught>=a.target) a.progress=a.target; if(a.type==='rarity_legendary' && (targetFish.rarity==='Legendary'||targetFish.rarity==='Mythic'||targetFish.rarity==='Divine')) a.progress=1; if(a.type==='book_count') a.progress=Object.keys(game.book).length; });
@@ -2783,15 +3016,26 @@
       const displayName = (isShiny?'シャイニー':'') + (mutation?`${mutation.name}の`:'') + targetFish.name;
       const invNote = document.getElementById('result-inv-note');
       const goldLabel = document.getElementById('result-gold-label');
+      const fishEntry = {
+        fishId: targetFish.id, name: displayName, rarity: targetFish.rarity,
+        length: finalLen, weight: finalWeight, gold: finalGold,
+        color: isShiny ? '#f5d442' : (mutation ? mutation.color : targetFish.color)
+      };
+      let isDuplicated = false;
       if (game.fishInventory.length < getInventoryCapacity()) {
-        game.fishInventory.push({
-          fishId: targetFish.id, name: displayName, rarity: targetFish.rarity,
-          length: finalLen, weight: finalWeight, gold: finalGold,
-          color: isShiny ? '#f5d442' : (mutation ? mutation.color : targetFish.color)
-        });
+        game.fishInventory.push(fishEntry);
         goldLabel.innerText = '査定額:';
         invNote.innerText = '🐟 生簀に追加されました。売却するとゴールドになります。';
         invNote.style.color = '';
+
+        // 鱗の竿装備時：稀に同じ魚がもう1匹複製される
+        const equippedRod = RODS[game.rodId];
+        if (equippedRod.duplicateChance && Math.random() < equippedRod.duplicateChance && game.fishInventory.length < getInventoryCapacity()) {
+          game.fishInventory.push({ ...fishEntry });
+          isDuplicated = true;
+          invNote.innerText = '🐟✨ 鱗の竿の力で魚が複製されました！生簀に2匹追加。';
+          invNote.style.color = 'var(--neon-pink)';
+        }
       } else {
         game.gold += finalGold;
         goldLabel.innerText = '獲得ゴールド(生簀満杯・即売却):';
@@ -2799,7 +3043,7 @@
         invNote.style.color = 'var(--neon-pink)';
       }
 
-      document.getElementById('result-rarity-badge').innerText = targetFish.rarity + (isShiny?' ✨SHINY':'') + (isCrown?' 👑CROWN':'') + (mutation?` 🌈${mutation.name}`:'');
+      document.getElementById('result-rarity-badge').innerText = targetFish.rarity + (isShiny?' ✨SHINY':'') + (isCrown?' 👑CROWN':'') + (mutation?` 🌈${mutation.name}`:'') + (isDuplicated?' 🐟×2':'');
       document.getElementById('result-rarity-badge').className = `result-badge rarity-${targetFish.rarity.toLowerCase()}`;
       document.getElementById('result-fish-name').innerText = displayName;
       document.getElementById('result-fish-length').innerText = finalLen.toFixed(1);
