@@ -226,6 +226,269 @@
       gap: 8px;
     }
 
+    .cast-bait-row {
+      display: flex;
+      align-items: center;
+      gap: clamp(8px, 1.5vw, 14px);
+    }
+
+    .bait-picker {
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 14px;
+      padding: clamp(6px, 1vw, 10px);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,240,255,0.04);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: clamp(72px, 12vw, 110px);
+      touch-action: manipulation;
+    }
+
+    .bait-picker-label {
+      font-size: clamp(0.4rem, 0.65vw, 0.55rem);
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: var(--neon-cyan);
+      text-shadow: var(--glow-cyan);
+    }
+
+    .bait-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 4px 6px;
+      border-radius: 10px;
+      background: rgba(0,240,255,0.06);
+      border: 1px solid rgba(0,240,255,0.2);
+      width: 100%;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .bait-display.empty {
+      border-color: rgba(255,0,127,0.3);
+      background: rgba(255,0,127,0.05);
+    }
+
+    .bait-display-icon {
+      font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+      line-height: 1;
+      filter: drop-shadow(0 0 6px rgba(0,240,255,0.4));
+    }
+
+    .bait-display-name {
+      font-size: clamp(0.45rem, 0.7vw, 0.6rem);
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .bait-display-qty {
+      font-size: clamp(0.4rem, 0.6vw, 0.5rem);
+      color: var(--neon-gold);
+      font-weight: 800;
+      font-family: monospace;
+    }
+
+    .bait-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      width: 100%;
+    }
+
+    .bait-nav-btn {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 6px;
+      color: var(--text-sub);
+      font-size: clamp(0.55rem, 0.9vw, 0.7rem);
+      padding: 3px 0;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .bait-nav-btn:hover {
+      background: rgba(0,240,255,0.15);
+      border-color: var(--neon-cyan);
+      color: #fff;
+    }
+
+    .bait-nav-btn:active { transform: scale(0.92); }
+
+    .bait-dots {
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+
+    .bait-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+
+    .bait-dot.active {
+      background: var(--neon-cyan);
+      box-shadow: var(--glow-cyan);
+      transform: scale(1.3);
+    }
+
+    .bait-dot.has-stock { background: rgba(57,255,20,0.4); }
+    .bait-dot.has-stock.active { background: var(--neon-cyan); }
+
+    /* ウロコルーレット */
+    .roulette-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+    }
+
+    .roulette-machine {
+      width: 100%;
+      max-width: 340px;
+      background: rgba(0,0,0,0.4);
+      border: 2px solid var(--panel-border);
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    }
+
+    .roulette-viewport {
+      height: 64px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .roulette-viewport::before,
+    .roulette-viewport::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 30%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .roulette-viewport::before {
+      left: 0;
+      background: linear-gradient(90deg, rgba(3,7,15,0.95), transparent);
+    }
+
+    .roulette-viewport::after {
+      right: 0;
+      background: linear-gradient(-90deg, rgba(3,7,15,0.95), transparent);
+    }
+
+    .roulette-pointer {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 3px;
+      background: var(--neon-gold);
+      box-shadow: var(--glow-gold);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    .roulette-track {
+      display: flex;
+      gap: 6px;
+      padding: 8px 0;
+      will-change: transform;
+    }
+
+    .roulette-slot {
+      flex-shrink: 0;
+      width: 72px;
+      height: 48px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 0.55rem;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .roulette-slot-icon { font-size: 1.1rem; }
+
+    .roulette-slot.rare-slot {
+      border-color: var(--neon-pink);
+      background: rgba(255,0,127,0.08);
+    }
+
+    .roulette-cost {
+      font-size: clamp(0.55rem, 0.8vw, 0.7rem);
+      color: var(--text-sub);
+      text-align: center;
+    }
+
+    .roulette-cost strong { color: var(--neon-green); }
+
+    .roulette-result {
+      font-size: clamp(0.65rem, 1vw, 0.85rem);
+      font-weight: 800;
+      color: var(--neon-gold);
+      text-shadow: var(--glow-gold);
+      min-height: 1.2em;
+      text-align: center;
+    }
+
+    .roulette-spin-btn {
+      padding: 8px 24px;
+      background: linear-gradient(135deg, rgba(57,255,20,0.3), rgba(0,240,255,0.2));
+      border: 2px solid var(--neon-green);
+      border-radius: 999px;
+      color: #fff;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.65rem, 1vw, 0.8rem);
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .roulette-spin-btn:hover:not(:disabled) {
+      box-shadow: 0 0 16px rgba(57,255,20,0.4);
+    }
+
+    .roulette-spin-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .fish-icon.luring {
+      filter: drop-shadow(0 0 8px #ff6600);
+      animation: lurePulse 0.4s infinite alternate;
+    }
+
+    @keyframes lurePulse {
+      0% { opacity: 1; transform: translateY(-50%) scale(1); }
+      100% { opacity: 0.4; transform: translateY(-50%) scale(1.2); }
+    }
+
+    .fight-title.angler-warning span { animation: lurePulse 0.6s infinite alternate; }
+
     .cast-btn {
       width: clamp(64px, 10vw, 110px);
       height: clamp(64px, 10vw, 110px);
@@ -333,6 +596,19 @@
     .fight-title span { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,0,127,0.4); }
     .catch-bar-wrap { width: 100%; height: 10px; background: rgba(0,0,0,0.5); border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
     .catch-bar-fill { height: 100%; width: 30%; background: linear-gradient(90deg, #ff007f, #ffd700); box-shadow: 0 0 10px rgba(255,0,127,0.5); transition: width 0.05s linear; }
+    .reel-speed-indicator {
+      width: 100%;
+      text-align: center;
+      font-size: clamp(0.5rem, 0.75vw, 0.62rem);
+      color: var(--neon-green);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      background: rgba(57,255,20,0.06);
+      border: 1px solid rgba(57,255,20,0.2);
+      border-radius: 5px;
+      padding: 2px 6px;
+      margin-top: -4px;
+    }
     .reel-track {
       position: relative;
       width: 100%;
@@ -536,6 +812,107 @@
     .skill-btn:hover { background: var(--neon-cyan); color: #000; }
     .skill-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+    /* ===== スキルツリー ===== */
+    .skilltree-branches { display: flex; gap: 10px; overflow-x: auto; overflow-y: hidden; flex: 1; min-height: 0; padding-bottom: 6px; }
+    .skilltree-branch { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 120px; flex-shrink: 0; }
+    .skilltree-branch-title { font-size: clamp(0.55rem, 0.8vw, 0.7rem); font-weight: 800; color: #fff; text-align: center; padding: 4px 6px; margin-bottom: 4px; border-radius: 6px; width: 100%; }
+    .skilltree-node-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
+    .skilltree-connector { width: 2px; height: 12px; background: rgba(255,255,255,0.15); }
+    .skilltree-connector.filled { background: var(--neon-cyan); box-shadow: var(--glow-cyan); }
+    .skilltree-node {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 6px 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      position: relative;
+    }
+    .skilltree-node:active { transform: scale(0.96); }
+    .skilltree-node.locked { opacity: 0.4; cursor: not-allowed; }
+    .skilltree-node.unlocked { border-color: var(--neon-green); background: rgba(57,255,20,0.08); }
+    .skilltree-node.available { border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0,240,255,0.25); }
+    .skilltree-node-name { font-size: clamp(0.5rem, 0.7vw, 0.62rem); font-weight: 700; color: #fff; }
+    .skilltree-node-desc { font-size: clamp(0.42rem, 0.6vw, 0.53rem); color: var(--text-sub); line-height: 1.25; }
+    .skilltree-node-cost { font-size: 0.45rem; font-weight: 800; color: var(--neon-gold); align-self: flex-end; }
+    .skilltree-node.unlocked .skilltree-node-cost { color: var(--neon-green); }
+    .skilltree-node.unlocked::after { content: '✓'; position: absolute; top: 3px; right: 5px; color: var(--neon-green); font-weight: 900; font-size: 0.6rem; }
+
+    /* ===== 魚インベントリ（左パネル） ===== */
+    #inventory-panel {
+      position: absolute;
+      top: 44px;
+      left: 6px;
+      bottom: 6px;
+      width: clamp(76px, 15vw, 140px);
+      background: var(--panel-bg);
+      border: 2px solid var(--panel-border);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+    }
+    #inventory-header {
+      padding: 6px 6px 4px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      flex-shrink: 0;
+    }
+    #inventory-title { font-size: clamp(0.5rem, 0.75vw, 0.62rem); font-weight: 800; color: var(--neon-cyan); text-shadow: var(--glow-cyan); text-align: center; }
+    #inventory-cap { font-size: clamp(0.42rem, 0.6vw, 0.52rem); color: var(--text-sub); text-align: center; font-family: monospace; }
+    #inventory-list { flex: 1; overflow-y: auto; padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
+    .inv-fish-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 6px;
+      padding: 3px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      position: relative;
+    }
+    .inv-fish-name { font-size: clamp(0.42rem, 0.62vw, 0.55rem); font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inv-fish-gold { font-size: clamp(0.4rem, 0.58vw, 0.5rem); color: var(--neon-gold); font-weight: 700; font-family: monospace; }
+    .inv-fish-sell-btn {
+      position: absolute; top: 2px; right: 2px;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: rgba(255,0,127,0.2);
+      border: 1px solid var(--neon-pink);
+      color: var(--neon-pink);
+      font-size: 0.5rem;
+      line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .inv-fish-sell-btn:hover { background: var(--neon-pink); color: #fff; }
+    #inventory-empty { font-size: clamp(0.42rem, 0.6vw, 0.52rem); color: var(--text-sub); text-align: center; padding: 10px 4px; }
+    #inventory-footer { flex-shrink: 0; padding: 5px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 3px; }
+    #inventory-total { font-size: clamp(0.45rem, 0.65vw, 0.56rem); color: var(--neon-gold); text-align: center; font-weight: 700; font-family: monospace; }
+    #inventory-sellall-btn {
+      padding: 5px 0;
+      background: linear-gradient(135deg, var(--neon-gold) 0%, #cc9900 100%);
+      border: none;
+      color: #000;
+      font-family: inherit;
+      font-weight: 800;
+      font-size: clamp(0.45rem, 0.65vw, 0.58rem);
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #inventory-sellall-btn:disabled { background: rgba(255,255,255,0.08); color: var(--text-sub); cursor: not-allowed; }
+
+    @media (max-width: 600px) {
+      #inventory-panel { top: 36px; width: 72px; }
+      .skilltree-branch { min-width: 96px; }
+    }
+
     .craft-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; min-height: 0; }
     .craft-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; flex-shrink: 0; }
     .craft-materials { display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap; }
@@ -656,6 +1033,8 @@
       .map-title h2 { font-size: 0.8rem; }
       .map-title p { font-size: 0.4rem; }
       .cast-btn { width: 56px; height: 56px; font-size: 0.7rem; border-width: 3px; }
+      .bait-picker { min-width: 64px; padding: 4px; border-radius: 10px; }
+      .bait-display-icon { font-size: 1rem; }
       #power-gauge-wrap { width: 120px; height: 8px; }
       .nav-btn { max-width: 40px; font-size: 0.4rem; }
       .nav-btn svg { width: 12px; height: 12px; }
@@ -735,12 +1114,25 @@
         <div class="badge badge-season" id="env-season-val">春</div>
       </div>
 
+      <div id="inventory-panel">
+        <div id="inventory-header">
+          <div id="inventory-title">🐟 生簀</div>
+          <div id="inventory-cap"><span id="inventory-cap-val">0/10</span></div>
+        </div>
+        <div id="inventory-list"></div>
+        <div id="inventory-footer">
+          <div id="inventory-total">合計: 0 G</div>
+          <button id="inventory-sellall-btn" onclick="sellAllFish()">一括売却</button>
+        </div>
+      </div>
+
       <div id="action-msg">HIT!</div>
 
       <div id="fight-overlay">
         <div class="fight-panel">
           <div class="fight-title">🦈 BATTLE: <span id="fight-fish-name">???</span></div>
           <div class="catch-bar-wrap"><div class="catch-bar-fill" id="fight-catch-fill"></div></div>
+          <div class="reel-speed-indicator" id="reel-speed-indicator">巻き速度 +0%</div>
           <div class="reel-track" id="fight-track">
             <div class="player-bar" id="fight-player-bar"></div>
             <div class="fish-icon" id="fight-fish-icon">
@@ -756,7 +1148,22 @@
           <div id="power-gauge-fill"></div>
           <div class="power-marker"></div>
         </div>
-        <button class="cast-btn" id="cast-btn" onclick="handleCastClick()">CAST</button>
+        <div class="cast-bait-row">
+          <button class="cast-btn" id="cast-btn" onclick="handleCastClick()">CAST</button>
+          <div class="bait-picker" id="bait-picker">
+            <span class="bait-picker-label">BAIT</span>
+            <div class="bait-display" id="bait-display">
+              <span class="bait-display-icon" id="bait-display-icon">🪱</span>
+              <span class="bait-display-name" id="bait-display-name">ミミズ</span>
+              <span class="bait-display-qty" id="bait-display-qty">x10</span>
+            </div>
+            <div class="bait-nav">
+              <button class="bait-nav-btn" id="bait-prev-btn" onclick="cycleBait(-1)" aria-label="前のエサ">◀</button>
+              <button class="bait-nav-btn" id="bait-next-btn" onclick="cycleBait(1)" aria-label="次のエサ">▶</button>
+            </div>
+            <div class="bait-dots" id="bait-dots"></div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -786,7 +1193,7 @@
 
     <div class="modal-overlay" id="modal-book">
       <div class="modal-header">
-        <h3>📖 図鑑</h3>
+        <h3>📖 図鑑 <span style="font-size:0.65em; color:var(--neon-cyan); font-weight:600;">(<span id="book-completion-ratio">0</span>%)</span></h3>
         <button class="close-btn" onclick="closeModal('modal-book')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body"><div class="fish-grid" id="fish-book-list"></div></div>
@@ -799,7 +1206,7 @@
       </div>
       <div class="modal-body">
         <div class="skill-pts-remain">アビリティーポイント: <span id="skill-pts-val">0</span></div>
-        <div class="skills-container" id="skills-list"></div>
+        <div class="skilltree-branches" id="skills-list"></div>
       </div>
     </div>
 
@@ -823,6 +1230,7 @@
         </div>
         <div style="display:flex; gap:6px; margin-top:6px; flex-shrink:0; flex-wrap:wrap;">
           <button class="buy-btn" onclick="switchCraftTab('craft')" style="padding:5px 12px; width:auto;">🛠️ クラフト</button>
+          <button class="buy-btn" onclick="switchCraftTab('roulette')" style="padding:5px 12px; width:auto; background:rgba(57,255,20,0.12); border-color:var(--neon-green);">🎰 ウロコルーレット</button>
           <button class="buy-btn" onclick="switchCraftTab('cosmetics')" style="padding:5px 12px; width:auto;">👔 アバター</button>
         </div>
         <div id="craft-tab-content" style="flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:6px;"></div>
@@ -863,11 +1271,12 @@
           <div class="result-fish-spec">重量: <span id="result-fish-weight">0.0</span> kg</div>
         </div>
         <div style="width:100%; border-top:1px solid rgba(255,255,255,0.1); padding-top:5px; display:flex; flex-direction:column; gap:3px;">
-          <div class="result-row"><span>獲得ゴールド:</span> <span id="result-gold">+0 G</span></div>
+          <div class="result-row" id="result-gold-row"><span id="result-gold-label">査定額:</span> <span id="result-gold">+0 G</span></div>
           <div class="result-row"><span>獲得経験値:</span> <span id="result-xp">+0 XP</span></div>
           <div class="result-row" id="result-bonus-row" style="color:var(--neon-cyan)"><span>個体ボーナス:</span> <span id="result-bonus-txt">-</span></div>
           <div class="result-row" id="result-mat-row" style="color:var(--neon-green)"><span>素材:</span> <span id="result-mat-txt">-</span></div>
         </div>
+        <div id="result-inv-note" style="font-size:clamp(0.45rem, 0.65vw, 0.55rem); color:var(--text-sub);">🐟 生簀に追加されました。売却するとゴールドになります。</div>
         <button class="result-close-btn" id="result-close-btn" onclick="closeResult()">次のキャストへ</button>
       </div>
     </div>
@@ -991,6 +1400,140 @@
       { name: '神エサ', cost: 1000, rate: 6.0, desc: '奇跡のエサ。' }
     ];
 
+    const BAIT_ICONS = {
+      'ミミズ': '🪱', 'エビ': '🦐', '小魚': '🐟',
+      'イカ': '🦑', '特殊エサ': '✨', '神エサ': '👑'
+    };
+
+    const ROULETTE_COST = 8;
+    const ROULETTE_PRIZES = [
+      { label: '30G', icon: '💰', type: 'gold', amount: 30, weight: 22, rare: false },
+      { label: '80G', icon: '💰', type: 'gold', amount: 80, weight: 18, rare: false },
+      { label: '200G', icon: '💰', type: 'gold', amount: 200, weight: 10, rare: false },
+      { label: 'ミミズ×5', icon: '🪱', type: 'bait', name: 'ミミズ', amount: 5, weight: 16, rare: false },
+      { label: 'エビ×3', icon: '🦐', type: 'bait', name: 'エビ', amount: 3, weight: 12, rare: false },
+      { label: '小魚×2', icon: '🐟', type: 'bait', name: '小魚', amount: 2, weight: 8, rare: false },
+      { label: '虹色のヒレ', icon: '🌈', type: 'material', name: '虹色のヒレ', amount: 1, weight: 7, rare: false },
+      { label: '1 GEM', icon: '💎', type: 'gem', amount: 1, weight: 6, rare: true },
+      { label: '500G', icon: '💰', type: 'gold', amount: 500, weight: 4, rare: true },
+      { label: '特殊エサ', icon: '✨', type: 'bait', name: '特殊エサ', amount: 1, weight: 4, rare: true },
+      { label: '3 GEM', icon: '💎', type: 'gem', amount: 3, weight: 2, rare: true },
+      { label: '神エサ', icon: '👑', type: 'bait', name: '神エサ', amount: 1, weight: 1, rare: true }
+    ];
+
+    const FISH_FIGHT_PROFILES = {
+      17: {
+        diffOverride: 2.5,
+        velMult: 2.0,
+        changeRate: 0.18,
+        dashInterval: 1.4,
+        dashPower: 140,
+        lureFlash: true,
+        drainMult: 1.45,
+        gainMult: 0.78,
+        startGauge: 25,
+        barShrink: 4
+      }
+    };
+
+    // 天候ごとの「変異」システム: 特定の天候中に釣れた魚に付与されるボーナス個体
+    const WEATHER_MUTATIONS = {
+      Sunny:   null,
+      Cloudy:  null,
+      Rainy:   { name: 'ウェット',     mult: 1.3, chance: 0.22, color: '#4fa8ff' },
+      Typhoon: { name: 'タービュランス', mult: 1.8, chance: 0.30, color: '#8899aa' },
+      Aurora:  { name: 'オーロラ',     mult: 2.0, chance: 0.35, color: '#c07bff' },
+      Meteor:  { name: '隕石',        mult: 2.5, chance: 0.28, color: '#ffaa33' }
+    };
+
+    // レア度が高いほど「巻き」の反応が重くなる抵抗係数（スキルツリーの power 系ノードで軽減できる）
+    const RARITY_RESISTANCE = {
+      Common: 0, Uncommon: 0.05, Rare: 0.16, Epic: 0.28,
+      Legendary: 0.42, Mythic: 0.55, Divine: 0.68
+    };
+
+    // ============================================================
+    // スキルツリー定義（5系統 x 6段、計30ノードのワイドなツリー）
+    // 各ノードは同系統の1つ前のノードを解放していないと選べない
+    // ============================================================
+    const SKILL_TREE = {
+      luck: {
+        label: '🍀 幸運の樹', color: 'var(--neon-gold)',
+        nodes: [
+          { key: 'luck1', name: '幸運の勘',   cost: 1, desc: 'レア魚出現率 +8%',        effect: { rareChance: 0.08 } },
+          { key: 'luck2', name: '虹の予兆',   cost: 1, desc: 'レア魚出現率 +8%(累積)',   effect: { rareChance: 0.08 } },
+          { key: 'luck3', name: '変異体質',   cost: 2, desc: '天候変異の発生率 +10%',    effect: { mutationChance: 0.10 } },
+          { key: 'luck4', name: '黄金の目',   cost: 2, desc: 'シャイニー確率 +1.5%',     effect: { shinyChance: 0.015 } },
+          { key: 'luck5', name: '巨獣の絆',   cost: 3, desc: '巨大個体(クラウン)確率 +2%', effect: { crownChance: 0.02 } },
+          { key: 'luck6', name: '伝説の導き', cost: 3, desc: 'レア魚出現率 +15%(最終)',  effect: { rareChance: 0.15 } },
+        ]
+      },
+      power: {
+        label: '💪 剛力の樹', color: 'var(--neon-cyan)',
+        nodes: [
+          { key: 'power1', name: '握力強化',       cost: 1, desc: '巻き速度 +10%',                    effect: { reelSpeed: 0.10 } },
+          { key: 'power2', name: '安定した構え',    cost: 1, desc: 'テンションバー幅 +4%',             effect: { barWidth: 4 } },
+          { key: 'power3', name: '不屈の握力',      cost: 2, desc: 'レア魚の巻き抵抗 -8%',              effect: { rarityResist: 0.08 } },
+          { key: 'power4', name: '漁師の反射神経',  cost: 2, desc: '巻き速度 +15%',                    effect: { reelSpeed: 0.15 } },
+          { key: 'power5', name: '鋼の握力',        cost: 3, desc: 'レア魚の巻き抵抗 -12%',             effect: { rarityResist: 0.12 } },
+          { key: 'power6', name: '海神の腕力',      cost: 3, desc: '巻き速度 +25%(最終)',              effect: { reelSpeed: 0.25 } },
+        ]
+      },
+      trade: {
+        label: '💰 交易の樹', color: 'var(--neon-pink)',
+        nodes: [
+          { key: 'trade1', name: '目利き',       cost: 1, desc: '売却額 +8%',            effect: { goldMult: 0.08 } },
+          { key: 'trade2', name: '仲買人の伝手', cost: 1, desc: '売却額 +8%(累積)',       effect: { goldMult: 0.08 } },
+          { key: 'trade3', name: '交渉術',       cost: 2, desc: '売却額 +12%',            effect: { goldMult: 0.12 } },
+          { key: 'trade4', name: '一括卸し契約', cost: 2, desc: 'クエスト報酬G +15%',     effect: { questGoldMult: 0.15 } },
+          { key: 'trade5', name: '市場の顔役',   cost: 3, desc: '売却額 +15%',            effect: { goldMult: 0.15 } },
+          { key: 'trade6', name: '海の豪商',     cost: 3, desc: '売却額 +20%(最終)',      effect: { goldMult: 0.20 } },
+        ]
+      },
+      study: {
+        label: '📘 学問の樹', color: 'var(--neon-green)',
+        nodes: [
+          { key: 'study1', name: '観察眼',     cost: 1, desc: '経験値 +10%',          effect: { xpMult: 0.10 } },
+          { key: 'study2', name: '記録術',     cost: 1, desc: '経験値 +10%(累積)',    effect: { xpMult: 0.10 } },
+          { key: 'study3', name: '生態研究',   cost: 2, desc: '経験値 +15%',          effect: { xpMult: 0.15 } },
+          { key: 'study4', name: '実績への理解', cost: 2, desc: 'クエスト経験値 +15%', effect: { questXpMult: 0.15 } },
+          { key: 'study5', name: '博識',       cost: 3, desc: '経験値 +15%',          effect: { xpMult: 0.15 } },
+          { key: 'study6', name: '賢者の書',   cost: 3, desc: '経験値 +20%(最終)',    effect: { xpMult: 0.20 } },
+        ]
+      },
+      sailing: {
+        label: '⚓ 航海の樹', color: '#39d0ff',
+        nodes: [
+          { key: 'sail1', name: '船倉拡張I',   cost: 1, desc: '生簀の容量 +2枠',         effect: { extraSlots: 2 } },
+          { key: 'sail2', name: '風読み',      cost: 1, desc: 'キャスト飛距離 +10%',      effect: { castDistBonus: 0.10 } },
+          { key: 'sail3', name: '船倉拡張II',  cost: 2, desc: '生簀の容量 +3枠',          effect: { extraSlots: 3 } },
+          { key: 'sail4', name: '荒天航海術',  cost: 2, desc: '悪天候の魚バトル難度 -10%', effect: { stormResist: 0.10 } },
+          { key: 'sail5', name: '船倉拡張III', cost: 3, desc: '生簀の容量 +5枠',          effect: { extraSlots: 5 } },
+          { key: 'sail6', name: '大航海時代',  cost: 3, desc: 'キャスト飛距離 +20%(最終)', effect: { castDistBonus: 0.20 } },
+        ]
+      }
+    };
+
+    // 現在アンロックされているスキルツリーの効果を合算して返す
+    function getSkillEffects() {
+      const eff = {
+        rareChance: 0, mutationChance: 0, shinyChance: 0, crownChance: 0,
+        reelSpeed: 0, barWidth: 0, rarityResist: 0,
+        goldMult: 0, questGoldMult: 0, xpMult: 0, questXpMult: 0,
+        extraSlots: 0, castDistBonus: 0, stormResist: 0
+      };
+      if (!game.skillTree) return eff;
+      Object.keys(SKILL_TREE).forEach(branchKey => {
+        const unlockedCount = game.skillTree[branchKey] || 0;
+        const nodes = SKILL_TREE[branchKey].nodes;
+        for (let i = 0; i < unlockedCount && i < nodes.length; i++) {
+          const e = nodes[i].effect;
+          Object.keys(e).forEach(k => { eff[k] = (eff[k] || 0) + e[k]; });
+        }
+      });
+      return eff;
+    }
+
     const CRAFT_RECIPES = [
       { result: '神エサ', cost: 200, materials: [{ name: '魚のウロコ', qty: 10 }, { name: '深海の結晶', qty: 1 }], desc: '極上のエサ。' },
       { result: '特殊ルアー', cost: 500, materials: [{ name: '魚のウロコ', qty: 25 }, { name: '虹色のヒレ', qty: 3 }], desc: '特殊エサ×5相当。' },
@@ -1032,7 +1575,8 @@
       equippedCosmetics: { hat: '', glass: '', cloth: '', wing: '', aura: '' },
       ownedCosmetics: [],
       materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0 },
-      skills: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 },
+      skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 },
+      fishInventory: [],
       book: {},
       quests: [
         { desc: 'フナを 3 匹釣る', type: 'catch', targetId: 0, targetQty: 3, progress: 0, rewardGold: 100, rewardXp: 50, rewardGem: 1, done: false },
@@ -1051,6 +1595,7 @@
       clock: 12.0,
       weather: 'Sunny',
       season: 'Spring',
+      weatherTicksLeft: 20,
     };
 
     const LEADERBOARD_NPCS = [
@@ -1073,9 +1618,11 @@
     window.addEventListener('DOMContentLoaded', () => {
       console.log('=== Ocean Quest 起動 ===');
       loadGame();
+      initAudio();
       initFXCanvas();
       initWaterCanvas();
       initAvatarCanvas();
+      initBaitPicker();
       updateHUD();
       updateMapInfo();
       setInterval(updateWorldClock, 2000);
@@ -1116,6 +1663,17 @@
         try {
           const parsed = JSON.parse(saved);
           game = { ...game, ...parsed };
+          if (game.weatherTicksLeft === undefined) game.weatherTicksLeft = 20;
+          if (game.weather === 'Stormy') game.weather = 'Cloudy';
+          if (!game.fishInventory) game.fishInventory = [];
+          // 旧スキルシステム(skills)からスキルツリーへの移行：使用済みポイントを全額返却する
+          if (parsed.skills && !parsed.skillTree) {
+            const oldTotal = Object.values(parsed.skills).reduce((sum, v) => sum + (v || 0), 0);
+            game.skillPoints = (game.skillPoints || 0) + oldTotal;
+            game.skillTree = { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 };
+            delete game.skills;
+          }
+          if (!game.skillTree) game.skillTree = { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 };
         } catch (e) { console.error("ロード失敗", e); }
       }
     }
@@ -1133,6 +1691,116 @@
       document.getElementById('env-weather-val').innerText = translateWeather(game.weather);
       document.getElementById('env-time-val').innerText = translateTime(game.clock);
       document.getElementById('env-season-val').innerText = translateSeason(game.season);
+      updateBaitPicker();
+      renderInventory();
+    }
+
+    // ============================================================
+    // 効果音（Web Audio API）
+    // ============================================================
+    let audioCtx = null;
+    let audioUnlocked = false;
+
+    function initAudio() {
+      const unlock = () => {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        audioUnlocked = true;
+      };
+      document.addEventListener('click', unlock, { once: false });
+      document.addEventListener('touchstart', unlock, { once: false });
+    }
+
+    function playTone(freq, duration, type = 'sine', vol = 0.12, delay = 0) {
+      if (!audioCtx || !audioUnlocked) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime + delay);
+      osc.stop(audioCtx.currentTime + delay + duration);
+    }
+
+    function sfxCast() { playTone(180, 0.08, 'sawtooth', 0.06); playTone(320, 0.12, 'sine', 0.08, 0.04); }
+    function sfxStopCast() { playTone(420, 0.06, 'square', 0.07); }
+    function sfxHit() { playTone(880, 0.1, 'square', 0.1); playTone(1100, 0.15, 'sine', 0.08, 0.05); }
+    function sfxCatch() {
+      [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.18, 'sine', 0.1, i * 0.07));
+    }
+    function sfxMiss() { playTone(220, 0.25, 'sawtooth', 0.08); playTone(160, 0.3, 'sine', 0.06, 0.1); }
+    function sfxClick() { playTone(600, 0.04, 'sine', 0.05); }
+    function sfxLevelUp() {
+      [440, 554, 659, 880].forEach((f, i) => playTone(f, 0.2, 'triangle', 0.1, i * 0.08));
+    }
+    function sfxRouletteTick() { playTone(800 + Math.random() * 200, 0.03, 'square', 0.04); }
+    function sfxRouletteWin() {
+      [523, 659, 784, 988, 1175].forEach((f, i) => playTone(f, 0.15, 'sine', 0.09, i * 0.06));
+    }
+    function sfxFightReel() {
+      if (!audioCtx || !audioUnlocked || Math.random() > 0.3) return;
+      playTone(120 + Math.random() * 40, 0.05, 'sawtooth', 0.03);
+    }
+
+    // ============================================================
+    // エサ選択UI
+    // ============================================================
+    let baitIndex = 0;
+
+    function initBaitPicker() {
+      const idx = BAITS.findIndex(b => b.name === game.selectedBait);
+      baitIndex = idx >= 0 ? idx : 0;
+      updateBaitPicker();
+    }
+
+    function cycleBait(dir) {
+      if (castState !== 'idle') return;
+      sfxClick();
+      baitIndex = (baitIndex + dir + BAITS.length) % BAITS.length;
+      game.selectedBait = BAITS[baitIndex].name;
+      updateBaitPicker();
+      saveGame();
+    }
+
+    function selectBaitByIndex(idx) {
+      if (castState !== 'idle') return;
+      baitIndex = idx;
+      game.selectedBait = BAITS[baitIndex].name;
+      sfxClick();
+      updateBaitPicker();
+      saveGame();
+    }
+
+    function updateBaitPicker() {
+      const bait = BAITS[baitIndex];
+      const qty = game.baits[bait.name] || 0;
+      const display = document.getElementById('bait-display');
+      document.getElementById('bait-display-icon').innerText = BAIT_ICONS[bait.name] || '🪱';
+      document.getElementById('bait-display-name').innerText = bait.name;
+      document.getElementById('bait-display-qty').innerText = `x${qty}`;
+      display.classList.toggle('empty', qty <= 0);
+
+      const dots = document.getElementById('bait-dots');
+      dots.innerHTML = '';
+      BAITS.forEach((b, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'bait-dot' + (i === baitIndex ? ' active' : '') + ((game.baits[b.name] || 0) > 0 ? ' has-stock' : '');
+        dot.title = b.name;
+        dot.onclick = () => selectBaitByIndex(i);
+        dots.appendChild(dot);
+      });
+
+      const picker = document.getElementById('bait-picker');
+      if (picker) picker.style.opacity = (castState === 'idle') ? '1' : '0.5';
+      const prevBtn = document.getElementById('bait-prev-btn');
+      const nextBtn = document.getElementById('bait-next-btn');
+      if (prevBtn) prevBtn.disabled = castState !== 'idle';
+      if (nextBtn) nextBtn.disabled = castState !== 'idle';
     }
 
     function updateMapInfo() {
@@ -1143,7 +1811,7 @@
     }
 
     function translateWeather(w) {
-      const dict = { Sunny: '晴れ☀️', Rainy: '雨🌧️', Stormy: '雷雨⛈️', Cloudy: '曇り☁️', Typhoon: '台風🌀', Aurora: 'オーロラ🌌', Meteor: '流星群🌠' };
+      const dict = { Sunny: '晴れ☀️', Rainy: '雨🌧️', Cloudy: '曇り☁️', Typhoon: '台風🌀', Aurora: 'オーロラ🌌', Meteor: '流星群🌠' };
       return dict[w] || w;
     }
     function translateTime(c) {
@@ -1210,11 +1878,22 @@
         const currentIdx = seasons.indexOf(game.season);
         game.season = seasons[(currentIdx + 1) % 4];
       }
-      if (Math.random() < 0.15) {
-        const weathers = ['Sunny', 'Sunny', 'Cloudy', 'Rainy', 'Stormy', 'Typhoon', 'Aurora', 'Meteor'];
+      // 天候はティックカウント方式で、じっくり長めに持続する
+      if (game.weatherTicksLeft === undefined) game.weatherTicksLeft = 20;
+      game.weatherTicksLeft--;
+      if (game.weatherTicksLeft <= 0) {
+        const weathers = ['Sunny', 'Sunny', 'Sunny', 'Cloudy', 'Rainy', 'Typhoon', 'Aurora', 'Meteor'];
         let selection = weathers;
-        if (game.mapId < 4) selection = ['Sunny', 'Sunny', 'Cloudy', 'Rainy'];
-        game.weather = selection[Math.floor(Math.random() * selection.length)];
+        if (game.mapId < 4) selection = ['Sunny', 'Sunny', 'Sunny', 'Cloudy', 'Rainy'];
+        const prevWeather = game.weather;
+        let next = selection[Math.floor(Math.random() * selection.length)];
+        if (next === prevWeather && selection.length > 1) {
+          // 連続で同じ天候が続きすぎないよう軽く振り直す
+          next = selection[Math.floor(Math.random() * selection.length)];
+        }
+        game.weather = next;
+        // 天候の持続時間を長めに設定（1ティック=2秒として 約60秒〜160秒）
+        game.weatherTicksLeft = 30 + Math.floor(Math.random() * 50);
       }
       updateHUD();
     }
@@ -1270,7 +1949,7 @@
           card.innerHTML = `
             <div class="item-icon">🎣</div>
             <div class="item-title">${r.name}</div>
-            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span></div>
+            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((r.reelSpeed-1)*100)}%</span></div>
             ${isOwned ? (isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`) : `<div class="item-cost">${r.cost} G</div><button class="buy-btn" onclick="buyRod(${r.id}, ${r.cost})" ${game.gold < r.cost ? 'disabled' : ''}>購入</button>`}
           `;
           list.appendChild(card);
@@ -1406,42 +2085,62 @@
     }
 
     // ============================================================
-    // スキル
+    // スキルツリー
     // ============================================================
-    const SKILLS_DB = [
-      { key: 'luck', name: '幸運 Lv', max: 5, desc: 'レア魚出現率UP' },
-      { key: 'power', name: 'パワー Lv', max: 5, desc: 'リールテンションUP' },
-      { key: 'trade', name: '取引 Lv', max: 5, desc: 'ゴールド増加' },
-      { key: 'study', name: '学び Lv', max: 5, desc: '経験値増加' },
-      { key: 'sailing', name: '航海 Lv', max: 5, desc: 'ボート性能UP' }
-    ];
-
     function renderSkills() {
       document.getElementById('skill-pts-val').innerText = game.skillPoints;
-      const list = document.getElementById('skills-list');
-      list.innerHTML = '';
-      SKILLS_DB.forEach(s => {
-        const curLvl = game.skills[s.key] || 0;
-        const isMax = curLvl >= s.max;
-        const row = document.createElement('div');
-        row.className = 'skill-row';
-        row.innerHTML = `
-          <div class="skill-info">
-            <div class="skill-name-wrap"><strong>${s.name}</strong><span class="skill-lvl-badge">${curLvl} / ${s.max}</span></div>
-            <div class="item-desc">${s.desc}</div>
-          </div>
-          <div><button class="skill-btn" onclick="upgradeSkill('${s.key}')" ${isMax || game.skillPoints <= 0 ? 'disabled' : ''}>${isMax ? 'MAX' : '強化'}</button></div>
-        `;
-        list.appendChild(row);
+      const container = document.getElementById('skills-list');
+      container.innerHTML = '';
+      Object.keys(SKILL_TREE).forEach(branchKey => {
+        const branch = SKILL_TREE[branchKey];
+        const unlockedCount = game.skillTree[branchKey] || 0;
+        const branchEl = document.createElement('div');
+        branchEl.className = 'skilltree-branch';
+        const titleEl = document.createElement('div');
+        titleEl.className = 'skilltree-branch-title';
+        titleEl.style.background = 'rgba(255,255,255,0.05)';
+        titleEl.style.color = branch.color;
+        titleEl.innerText = `${branch.label} (${unlockedCount}/${branch.nodes.length})`;
+        branchEl.appendChild(titleEl);
+
+        branch.nodes.forEach((node, i) => {
+          if (i > 0) {
+            const connector = document.createElement('div');
+            connector.className = 'skilltree-connector' + (i <= unlockedCount ? ' filled' : '');
+            branchEl.appendChild(connector);
+          }
+          const isUnlocked = i < unlockedCount;
+          const isAvailable = i === unlockedCount && game.skillPoints >= node.cost;
+          const isLocked = i > unlockedCount || (i === unlockedCount && game.skillPoints < node.cost);
+          const wrap = document.createElement('div');
+          wrap.className = 'skilltree-node-wrap';
+          const nodeEl = document.createElement('div');
+          nodeEl.className = `skilltree-node ${isUnlocked ? 'unlocked' : (isAvailable ? 'available' : 'locked')}`;
+          nodeEl.innerHTML = `
+            <div class="skilltree-node-name">${node.name}</div>
+            <div class="skilltree-node-desc">${node.desc}</div>
+            <div class="skilltree-node-cost">${isUnlocked ? '習得済' : `${node.cost} AP`}</div>
+          `;
+          if (i === unlockedCount) {
+            nodeEl.onclick = () => unlockSkillNode(branchKey, i);
+          }
+          wrap.appendChild(nodeEl);
+          branchEl.appendChild(wrap);
+        });
+        container.appendChild(branchEl);
       });
     }
 
-    function upgradeSkill(key) {
-      if (game.skillPoints > 0 && (game.skills[key] || 0) < 5) {
-        game.skillPoints--;
-        game.skills[key] = (game.skills[key] || 0) + 1;
-        saveGame(); renderSkills(); updateHUD();
-      }
+    function unlockSkillNode(branchKey, nodeIndex) {
+      const branch = SKILL_TREE[branchKey];
+      const unlockedCount = game.skillTree[branchKey] || 0;
+      if (nodeIndex !== unlockedCount) return; // 前のノードを先に解放する必要がある
+      const node = branch.nodes[nodeIndex];
+      if (game.skillPoints < node.cost) return;
+      game.skillPoints -= node.cost;
+      game.skillTree[branchKey] = unlockedCount + 1;
+      saveGame(); renderSkills(); updateHUD();
+      addVisualSplashEffect(`${node.name} 習得！`);
     }
 
     // ============================================================
@@ -1489,6 +2188,8 @@
           list.appendChild(item);
         });
         container.appendChild(list);
+      } else if (activeCraftTab === 'roulette') {
+        renderRouletteUI(container);
       } else {
         const grid = document.createElement('div');
         grid.className = 'grid-container';
@@ -1551,6 +2252,95 @@
         alert(`🎉 獲得: ${prize.name}`);
       }
       saveGame(); renderCraft(); updateHUD();
+    }
+
+    // ============================================================
+    // ウロコルーレット
+    // ============================================================
+    function renderRouletteUI(container) {
+      const wrap = document.createElement('div');
+      wrap.className = 'roulette-wrap';
+      wrap.innerHTML = `
+        <div class="roulette-machine">
+          <div class="roulette-pointer"></div>
+          <div class="roulette-viewport">
+            <div class="roulette-track" id="roulette-track"></div>
+          </div>
+        </div>
+        <div class="roulette-result" id="roulette-result"></div>
+        <div class="roulette-cost">✨ <strong>無料</strong>で何回でも回せます！</div>
+        <button class="roulette-spin-btn" id="roulette-spin-btn" onclick="spinRoulette()">スピン！</button>
+      `;
+      container.appendChild(wrap);
+      renderRouletteTrack();
+      updateRouletteSpinButton();
+    }
+
+    function renderRouletteTrack() {
+      const track = document.getElementById('roulette-track');
+      if (!track) return;
+      track.innerHTML = '';
+      const loopedPrizes = [];
+      for (let i = 0; i < 6; i++) loopedPrizes.push(...ROULETTE_PRIZES);
+      loopedPrizes.forEach(p => {
+        const slot = document.createElement('div');
+        slot.className = `roulette-slot ${p.rare ? 'rare-slot' : ''}`;
+        slot.innerHTML = `<div class="roulette-slot-icon">${p.icon}</div><div>${p.label}</div>`;
+        track.appendChild(slot);
+      });
+    }
+
+    function updateRouletteSpinButton() {
+      const btn = document.getElementById('roulette-spin-btn');
+      if (!btn) return;
+      btn.disabled = isSpinning;
+    }
+
+    let isSpinning = false;
+    function spinRoulette() {
+      if (isSpinning) return;
+      isSpinning = true;
+
+      let totalWeight = 0;
+      ROULETTE_PRIZES.forEach(p => totalWeight += p.weight);
+      let rand = Math.random() * totalWeight;
+      let resultIndex = 0;
+      for (let i = 0; i < ROULETTE_PRIZES.length; i++) {
+        rand -= ROULETTE_PRIZES[i].weight;
+        if (rand <= 0) { resultIndex = i; break; }
+      }
+      const prize = ROULETTE_PRIZES[resultIndex];
+
+      const track = document.getElementById('roulette-track');
+      const slotWidth = 78;
+      const baseLoop = 3;
+      const targetIndex = baseLoop * ROULETTE_PRIZES.length + resultIndex;
+      const finalOffset = targetIndex * slotWidth + slotWidth / 2 - (track.parentElement.clientWidth / 2) + (Math.random() * 20 - 10);
+
+      track.style.transition = 'none';
+      track.style.transform = 'translateX(0px)';
+      void track.offsetWidth;
+      track.style.transition = 'transform 3.2s cubic-bezier(0.15, 0.75, 0.2, 1)';
+      track.style.transform = `translateX(-${finalOffset}px)`;
+
+      const tickInterval = setInterval(() => sfxRouletteTick(), 90);
+
+      const resultEl = document.getElementById('roulette-result');
+      resultEl.innerText = '';
+      const spinBtn = document.getElementById('roulette-spin-btn');
+      spinBtn.disabled = true;
+
+      setTimeout(() => {
+        clearInterval(tickInterval);
+        sfxRouletteWin();
+        if (prize.type === 'gold') { game.gold += prize.amount; }
+        else if (prize.type === 'gem') { game.gems += prize.amount; }
+        else if (prize.type === 'bait') { game.baits[prize.name] = (game.baits[prize.name] || 0) + prize.amount; }
+        else if (prize.type === 'material') { game.materials[prize.name] = (game.materials[prize.name] || 0) + prize.amount; }
+        resultEl.innerText = `🎉 獲得: ${prize.label}`;
+        saveGame(); updateHUD(); updateRouletteSpinButton();
+        isSpinning = false;
+      }, 3300);
     }
 
     // ============================================================
@@ -1619,8 +2409,9 @@
       const q = game.quests[idx];
       if (q && !q.done) {
         q.done = true;
-        game.gold += q.rewardGold;
-        gainXP(q.rewardXp);
+        const eff = getSkillEffects();
+        game.gold += Math.round(q.rewardGold * (1 + eff.questGoldMult));
+        gainXP(q.rewardXp, true);
         game.gems += q.rewardGem;
         saveGame(); renderQuests(); updateHUD();
         addVisualSplashEffect("QUEST CLEAR!");
@@ -1646,9 +2437,11 @@
       });
     }
 
-    function gainXP(amt) {
-      const studyLevel = game.skills.study || 0;
-      const bonusXp = Math.round(amt * (1 + studyLevel * 0.2));
+    function gainXP(amt, isQuest) {
+      const eff = getSkillEffects();
+      let mult = 1 + eff.xpMult;
+      if (isQuest) mult += eff.questXpMult;
+      const bonusXp = Math.round(amt * mult);
       game.xp += bonusXp;
       let nextXp = game.level * 100;
       while (game.xp >= nextXp) {
@@ -1658,6 +2451,58 @@
         addVisualSplashEffect(`LEVEL UP! LV.${game.level}`);
         nextXp = game.level * 100;
       }
+    }
+
+    // ============================================================
+    // 魚インベントリ（生簀）
+    // ============================================================
+    function renderInventory() {
+      const listEl = document.getElementById('inventory-list');
+      const capEl = document.getElementById('inventory-cap-val');
+      const totalEl = document.getElementById('inventory-total');
+      const sellBtn = document.getElementById('inventory-sellall-btn');
+      if (!listEl) return;
+      const cap = getInventoryCapacity();
+      capEl.innerText = `${game.fishInventory.length}/${cap}`;
+      capEl.style.color = game.fishInventory.length >= cap ? 'var(--neon-pink)' : '';
+      listEl.innerHTML = '';
+      if (game.fishInventory.length === 0) {
+        listEl.innerHTML = '<div id="inventory-empty">まだ魚がいません</div>';
+      } else {
+        game.fishInventory.forEach((f, idx) => {
+          const card = document.createElement('div');
+          card.className = 'inv-fish-card';
+          card.style.borderLeft = `3px solid ${f.color || '#8b9bb4'}`;
+          card.innerHTML = `
+            <div class="inv-fish-name" title="${f.name}">${f.name}</div>
+            <div class="inv-fish-gold">💰${f.gold}G</div>
+            <button class="inv-fish-sell-btn" onclick="sellFish(${idx})" title="売る">✕</button>
+          `;
+          listEl.appendChild(card);
+        });
+      }
+      const total = game.fishInventory.reduce((sum, f) => sum + f.gold, 0);
+      totalEl.innerText = `合計: ${total.toLocaleString()} G`;
+      sellBtn.disabled = game.fishInventory.length === 0;
+    }
+
+    function sellFish(idx) {
+      const f = game.fishInventory[idx];
+      if (!f) return;
+      game.gold += f.gold;
+      game.fishInventory.splice(idx, 1);
+      sfxCatch();
+      saveGame(); updateHUD();
+    }
+
+    function sellAllFish() {
+      if (game.fishInventory.length === 0) return;
+      const total = game.fishInventory.reduce((sum, f) => sum + f.gold, 0);
+      game.gold += total;
+      game.fishInventory = [];
+      sfxCatch();
+      addVisualSplashEffect(`一括売却！ +${total} G`);
+      saveGame(); updateHUD();
     }
 
     // ============================================================
@@ -1695,6 +2540,7 @@
     let isReeling = false;
     let catchGauge = 30;
     let fightLoop = null;
+    let activeMutation = null;
 
     function handleCastClick() {
       console.log('=== handleCastClick 実行 === castState:', castState);
@@ -1703,6 +2549,10 @@
         const bait = game.selectedBait;
         if (!game.baits[bait] || game.baits[bait] <= 0) {
           alert(`エサ【${bait}】がありません！`);
+          return;
+        }
+        if (game.fishInventory.length >= getInventoryCapacity()) {
+          alert('生簀が満杯です！魚を売ってから釣りに出ましょう。');
           return;
         }
         startCasting();
@@ -1749,8 +2599,9 @@
       const wrap = document.getElementById('power-gauge-wrap');
       wrap.style.display = 'none';
       const rod = RODS[game.rodId];
+      const eff = getSkillEffects();
       const castAcc = 1 - Math.abs(castPower - 50) / 50;
-      lineDistance = Math.round(rod.dist * (0.3 + castAcc * 0.7));
+      lineDistance = Math.round(rod.dist * (0.3 + castAcc * 0.7) * (1 + eff.castDistBonus));
       const btn = document.getElementById('cast-btn');
       btn.innerText = '待機中';
       btn.disabled = true;
@@ -1811,6 +2662,16 @@
       }
       document.getElementById('fight-fish-name').innerText = targetFish.name;
       document.getElementById('fight-overlay').style.display = 'flex';
+      const rod = RODS[game.rodId];
+      const eff = getSkillEffects();
+      const rodPercent = Math.round((rod.reelSpeed - 1) * 100);
+      const skillPercent = Math.round(eff.reelSpeed * 100);
+      const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
+      const resistPercent = Math.round(Math.max(0, rawResist - eff.rarityResist) * 100);
+      const netMult = rod.reelSpeed * (1 + eff.reelSpeed) * (1 - Math.max(0, rawResist - eff.rarityResist));
+      const netPercent = Math.round((netMult - 1) * 100);
+      const reelIndicator = document.getElementById('reel-speed-indicator');
+      reelIndicator.innerText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗-${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
       fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0; catchGauge = 40; isReeling = false;
       startReelBattleLoop();
     }
@@ -1820,9 +2681,16 @@
       const fishIcon = document.getElementById('fight-fish-icon');
       const fillBar = document.getElementById('fight-catch-fill');
       const rarityMultiplier = { Common:1.0, Uncommon:1.2, Rare:1.5, Epic:2.0, Legendary:2.8, Mythic:3.8, Divine:5.0 };
-      const diff = rarityMultiplier[targetFish.rarity] || 1.0;
-      const skillPower = game.skills.power || 0;
-      const barWidth = 25 + (skillPower * 3);
+      let diff = rarityMultiplier[targetFish.rarity] || 1.0;
+      const eff = getSkillEffects();
+      // 悪天候(台風・流星群)では魚が暴れやすいが、航海スキルで軽減できる
+      if (game.weather === 'Typhoon' || game.weather === 'Meteor') diff *= Math.max(0.5, 1 - eff.stormResist);
+      const rod = RODS[game.rodId];
+      // レア度が高いほど巻きが重くなる抵抗（powerツリーのrarityResistで軽減）
+      const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
+      const resistance = Math.max(0, rawResist - eff.rarityResist);
+      const reelSpeedMult = rod.reelSpeed * (1 + eff.reelSpeed) * (1 - resistance);
+      const barWidth = 25 + eff.barWidth;
       playerBar.style.width = barWidth + '%';
       let lastTime = performance.now();
 
@@ -1834,7 +2702,8 @@
         fishPos += fishVel * dt;
         if (fishPos < 0) { fishPos = 0; fishVel = -fishVel * 0.5; }
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
-        if (isReeling) playerVel += 150 * dt;
+        // ロッド+スキルの巻き速度が高いほど反応が速くなるが、レアな魚ほど抵抗で相殺される
+        if (isReeling) playerVel += 150 * dt * reelSpeedMult;
         else playerVel -= 120 * dt;
         playerVel *= 0.95;
         playerPos += playerVel * dt;
@@ -1844,7 +2713,7 @@
         const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + barWidth);
         if (isMatched) {
           playerBar.classList.add('matching');
-          catchGauge += (16 + skillPower * 2) * dt;
+          catchGauge += (16 + eff.barWidth) * dt * (1 + (reelSpeedMult - 1) * 0.5);
         } else {
           playerBar.classList.remove('matching');
           catchGauge -= (18 + diff * 2) * dt;
@@ -1859,23 +2728,39 @@
       fightLoop = requestAnimationFrame(updateFight);
     }
 
+    // 現在の生簀(インベントリ)の容量：ボートの収納数 + 航海スキルツリーのボーナス
+    function getInventoryCapacity() {
+      const boat = BOATS[game.boatId];
+      const eff = getSkillEffects();
+      return boat.slots + eff.extraSlots;
+    }
+
     function triggerCatch() {
       console.log('CATCH!');
       castState = 'result';
       cancelAnimationFrame(fightLoop);
       document.getElementById('fight-overlay').style.display = 'none';
+      const eff = getSkillEffects();
       const lenFactor = 0.8 + Math.random() * 0.5;
       const weightFactor = lenFactor * lenFactor * (0.9 + Math.random() * 0.2);
       let finalLen = targetFish.baseLen * lenFactor;
       let finalWeight = targetFish.baseWeight * weightFactor;
       let isCrown = false, isShiny = false;
-      if (Math.random() < 0.03) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
-      if (Math.random() < 0.02) { isShiny = true; }
-      const tradeLvl = game.skills.trade || 0;
-      let finalGold = Math.round(targetFish.cost * (1 + tradeLvl * 0.15));
+      if (Math.random() < (0.03 + eff.crownChance)) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
+      if (Math.random() < (0.02 + eff.shinyChance)) { isShiny = true; }
+
+      // 天候による「変異」判定（幸運スキルで発生率アップ）
+      let mutation = null;
+      const weatherMutDef = WEATHER_MUTATIONS[game.weather];
+      if (weatherMutDef && Math.random() < (weatherMutDef.chance + eff.mutationChance)) {
+        mutation = weatherMutDef;
+      }
+
+      let finalGold = Math.round(targetFish.cost * (1 + eff.goldMult));
       if (isCrown) finalGold = Math.round(finalGold * 2.0);
       if (isShiny) finalGold = Math.round(finalGold * 3.0);
-      game.gold += finalGold;
+      if (mutation) finalGold = Math.round(finalGold * mutation.mult);
+
       gainXP(targetFish.xp);
       let dropMat = '', dropQty = 0;
       if (targetFish.rarity === 'Common') { if(Math.random()<0.5){dropMat='魚のウロコ'; dropQty=1+Math.floor(Math.random()*2);} }
@@ -1894,19 +2779,39 @@
       progressQuest('weight', { weight: finalWeight });
       game.achievements.forEach(a => { if(a.type==='total_caught' && game.totalCaught>=a.target) a.progress=a.target; if(a.type==='rarity_legendary' && (targetFish.rarity==='Legendary'||targetFish.rarity==='Mythic'||targetFish.rarity==='Divine')) a.progress=1; if(a.type==='book_count') a.progress=Object.keys(game.book).length; });
 
-      document.getElementById('result-rarity-badge').innerText = targetFish.rarity + (isShiny?' ✨SHINY':'') + (isCrown?' 👑CROWN':'');
+      // 生簀(インベントリ)へ追加。満杯の場合はやむを得ず即売却
+      const displayName = (isShiny?'シャイニー':'') + (mutation?`${mutation.name}の`:'') + targetFish.name;
+      const invNote = document.getElementById('result-inv-note');
+      const goldLabel = document.getElementById('result-gold-label');
+      if (game.fishInventory.length < getInventoryCapacity()) {
+        game.fishInventory.push({
+          fishId: targetFish.id, name: displayName, rarity: targetFish.rarity,
+          length: finalLen, weight: finalWeight, gold: finalGold,
+          color: isShiny ? '#f5d442' : (mutation ? mutation.color : targetFish.color)
+        });
+        goldLabel.innerText = '査定額:';
+        invNote.innerText = '🐟 生簀に追加されました。売却するとゴールドになります。';
+        invNote.style.color = '';
+      } else {
+        game.gold += finalGold;
+        goldLabel.innerText = '獲得ゴールド(生簀満杯・即売却):';
+        invNote.innerText = '⚠️ 生簀が満杯だったため自動的に売却されました。';
+        invNote.style.color = 'var(--neon-pink)';
+      }
+
+      document.getElementById('result-rarity-badge').innerText = targetFish.rarity + (isShiny?' ✨SHINY':'') + (isCrown?' 👑CROWN':'') + (mutation?` 🌈${mutation.name}`:'');
       document.getElementById('result-rarity-badge').className = `result-badge rarity-${targetFish.rarity.toLowerCase()}`;
-      document.getElementById('result-fish-name').innerText = (isShiny?'シャイニー':'') + targetFish.name;
+      document.getElementById('result-fish-name').innerText = displayName;
       document.getElementById('result-fish-length').innerText = finalLen.toFixed(1);
       document.getElementById('result-fish-weight').innerText = finalWeight.toFixed(1);
       document.getElementById('result-gold').innerText = `+${finalGold} G`;
       document.getElementById('result-xp').innerText = `+${targetFish.xp} XP`;
       const bonusRow = document.getElementById('result-bonus-row');
-      if (isCrown || isShiny) { bonusRow.style.display='flex'; let t=''; if(isCrown) t+='巨大冠(x2) '; if(isShiny) t+='シャイニー(x3) '; document.getElementById('result-bonus-txt').innerText=t; } else bonusRow.style.display='none';
+      if (isCrown || isShiny || mutation) { bonusRow.style.display='flex'; let t=''; if(isCrown) t+='巨大冠(x2) '; if(isShiny) t+='シャイニー(x3) '; if(mutation) t+=`${mutation.name}変異(x${mutation.mult}) `; document.getElementById('result-bonus-txt').innerText=t; } else bonusRow.style.display='none';
       const matRow = document.getElementById('result-mat-row');
       if (dropMat) { matRow.style.display='flex'; document.getElementById('result-mat-txt').innerText=`${dropMat} x${dropQty}`; } else matRow.style.display='none';
       const resCanvas = document.getElementById('result-fish-canvas');
-      drawFishOnCanvas(resCanvas, isShiny?'gold':targetFish.color);
+      drawFishOnCanvas(resCanvas, isShiny?'gold':(mutation?mutation.color:targetFish.color));
       document.getElementById('catch-result-overlay').style.display = 'flex';
       saveGame(); updateHUD(); createSplashParticles();
     }
@@ -1933,9 +2838,9 @@
       });
       if (filtered.length === 0) filtered = candidates;
       const rarityWeights = { Common:100, Uncommon:50, Rare:20, Epic:8, Legendary:3, Mythic:1, Divine:0.2 };
-      const luckLvl = game.skills.luck || 0;
+      const eff = getSkillEffects();
       const rod = RODS[game.rodId];
-      const luckMultiplier = 1 + (luckLvl * 0.12) + (rod.rare - 1.0);
+      const luckMultiplier = 1 + eff.rareChance + (rod.rare - 1.0);
       let totalWeight = 0;
       const weights = filtered.map(f => {
         let w = rarityWeights[f.rarity] || 10;
@@ -2058,7 +2963,7 @@
       const w = fxCtx.canvas.width, h = fxCtx.canvas.height;
       fxCtx.clearRect(0,0,w,h);
       const type = game.weather;
-      if (type==='Rainy'||type==='Stormy'||type==='Typhoon') {
+      if (type==='Rainy'||type==='Typhoon') {
         fxCtx.strokeStyle = 'rgba(174,219,255,0.35)';
         fxCtx.lineWidth = 1;
         const count = type==='Typhoon'?30:15;
@@ -2066,7 +2971,6 @@
           const x=Math.random()*w, y=Math.random()*h, len=12+Math.random()*15, angle=type==='Typhoon'?12:4;
           fxCtx.beginPath(); fxCtx.moveTo(x,y); fxCtx.lineTo(x-angle, y+len); fxCtx.stroke();
         }
-        if (type==='Stormy' && Math.random()<0.01) { fxCtx.fillStyle='rgba(255,255,255,0.6)'; fxCtx.fillRect(0,0,w,h); }
       }
       if (type==='Aurora') {
         const time=Date.now()*0.001;
