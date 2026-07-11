@@ -812,32 +812,76 @@
     .skill-btn:hover { background: var(--neon-cyan); color: #000; }
     .skill-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ===== スキルツリー（中心から放射状に広がる） ===== */
-    #skilltree-radial-wrap {
+    /* ===== スキルツリー（渦巻き状に広がり、ドラッグで動かせる） ===== */
+    #skilltree-viewport {
       position: relative;
-      width: min(620px, 92vw, 58vh, 100%);
-      aspect-ratio: 1 / 1;
-      margin: 4px auto;
+      width: 100%;
+      height: min(64vh, 520px);
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--panel-border);
+      background: radial-gradient(circle at center, rgba(0,240,255,0.05), transparent 70%);
+      cursor: grab;
+      touch-action: none;
       flex-shrink: 0;
+    }
+    #skilltree-viewport.dragging { cursor: grabbing; }
+    #skilltree-hint {
+      position: absolute;
+      top: 6px; left: 50%;
+      transform: translateX(-50%);
+      font-size: clamp(0.42rem, 0.6vw, 0.55rem);
+      color: var(--text-sub);
+      background: rgba(3,7,15,0.7);
+      padding: 3px 9px;
+      border-radius: 999px;
+      z-index: 5;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    #skilltree-reset-btn {
+      position: absolute;
+      top: 6px; right: 6px;
+      z-index: 5;
+      background: rgba(3,7,15,0.7);
+      border: 1px solid var(--panel-border);
+      color: var(--neon-cyan);
+      font-size: clamp(0.5rem, 0.75vw, 0.62rem);
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+    #skilltree-reset-btn:hover { background: var(--neon-cyan); color: #000; }
+    #skilltree-radial-wrap {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 900px;
+      height: 900px;
+      margin-left: -450px;
+      margin-top: -450px;
+      will-change: transform;
     }
     #skilltree-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
     #skilltree-center {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: clamp(46px, 9vw, 76px); height: clamp(46px, 9vw, 76px);
+      width: 78px; height: 78px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(0,240,255,0.3) 0%, rgba(3,7,15,0.9) 75%);
       border: 2px solid var(--neon-cyan);
       box-shadow: var(--glow-cyan), inset 0 0 12px rgba(0,240,255,0.3);
       display: flex; align-items: center; justify-content: center;
-      font-size: clamp(1.1rem, 2.6vw, 1.7rem);
+      font-size: 1.7rem;
       z-index: 2;
       text-align: center;
       line-height: 1;
+      pointer-events: none;
     }
     .skilltree-branch-label {
       position: absolute;
       transform: translate(-50%, -50%);
-      font-size: clamp(0.48rem, 0.8vw, 0.66rem);
+      font-size: 0.72rem;
       font-weight: 800;
       white-space: nowrap;
       text-shadow: 0 2px 6px rgba(0,0,0,0.9);
@@ -847,11 +891,11 @@
     .skilltree-radial-node {
       position: absolute;
       transform: translate(-50%, -50%);
-      width: clamp(48px, 7vw, 78px);
-      background: rgba(13,22,38,0.9);
+      width: 82px;
+      background: rgba(13,22,38,0.92);
       border: 1px solid rgba(255,255,255,0.15);
       border-radius: 8px;
-      padding: 3px 4px;
+      padding: 4px 5px;
       display: flex;
       flex-direction: column;
       gap: 1px;
@@ -862,11 +906,11 @@
     }
     .skilltree-radial-node:active { transform: translate(-50%, -50%) scale(0.93); }
     .skilltree-radial-node.locked { opacity: 0.35; cursor: not-allowed; }
-    .skilltree-radial-node.unlocked { border-color: var(--neon-green); background: rgba(57,255,20,0.12); }
+    .skilltree-radial-node.unlocked { border-color: var(--neon-green); background: rgba(57,255,20,0.14); }
     .skilltree-radial-node.available { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0,240,255,0.35); }
-    .skilltree-radial-node-name { font-size: clamp(0.42rem, 0.6vw, 0.54rem); font-weight: 700; color: #fff; line-height: 1.15; }
-    .skilltree-radial-node-desc { font-size: clamp(0.36rem, 0.5vw, 0.45rem); color: var(--text-sub); line-height: 1.15; }
-    .skilltree-radial-node-cost { font-size: 0.4rem; font-weight: 800; color: var(--neon-gold); }
+    .skilltree-radial-node-name { font-size: 0.56rem; font-weight: 700; color: #fff; line-height: 1.15; }
+    .skilltree-radial-node-desc { font-size: 0.46rem; color: var(--text-sub); line-height: 1.15; }
+    .skilltree-radial-node-cost { font-size: 0.42rem; font-weight: 800; color: var(--neon-gold); }
     .skilltree-radial-node.unlocked .skilltree-radial-node-cost { color: var(--neon-green); }
 
     /* ===== 魚インベントリ（左パネル） ===== */
@@ -943,7 +987,7 @@
     .craft-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; min-height: 0; }
     .craft-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; flex-shrink: 0; }
     .craft-materials { display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap; }
-    .mat-badge { font-size: 0.45rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; display: flex; align-items: center; gap: 2px; }
+    .mat-badge { font-size: 0.45rem; color: var(--text-main); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; display: flex; align-items: center; gap: 2px; }
     .mat-badge.insufficient { color: var(--neon-pink); border-color: rgba(255, 0, 127, 0.3); background: rgba(255, 0, 127, 0.05); }
 
     .avatar-setup-wrap { display: flex; gap: 10px; align-items: center; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; flex-shrink: 0; }
@@ -1233,7 +1277,7 @@
       </div>
       <div class="modal-body">
         <div class="skill-pts-remain">アビリティーポイント: <span id="skill-pts-val">0</span></div>
-        <div id="skills-list" style="flex:1; min-height:0; overflow:auto; display:flex; align-items:flex-start; justify-content:center;"></div>
+        <div id="skills-list" style="flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column;"></div>
       </div>
     </div>
 
@@ -1356,7 +1400,16 @@
       { id: 7, name: '氷の海', desc: '極寒の海。', reqLvl: 32, depth: '5m ~ 150m', colors: ['#1d3c4d', '#081720'] },
       { id: 8, name: 'ジャングル', desc: '熱帯雨林の濁流。', reqLvl: 40, depth: '2m ~ 8m', colors: ['#173815', '#081907'] },
       { id: 9, name: '洞窟湖', desc: '神秘の湖。', reqLvl: 50, depth: '10m ~ 80m', colors: ['#1f0d36', '#0c0417'] },
-      { id: 10, name: '天空の湖', desc: '伝説の聖地。', reqLvl: 65, depth: '999m ~ ???m', colors: ['#10355c', '#2c0e44'] }
+      { id: 10, name: '天空の湖', desc: '伝説の聖地。', reqLvl: 65, depth: '999m ~ ???m', colors: ['#10355c', '#2c0e44'] },
+      { id: 11, name: '珊瑚礁の楽園', desc: '色とりどりの珊瑚が広がる浅瀬。', reqLvl: 75, depth: '2m ~ 20m', colors: ['#0a4a52', '#052228'] },
+      { id: 12, name: '沈没船の墓場', desc: '無数の難破船が眠る海域。', reqLvl: 85, depth: '15m ~ 60m', colors: ['#1a2438', '#0a0f1a'] },
+      { id: 13, name: 'マングローブの河口', desc: '汽水域が広がる複雑な水路。', reqLvl: 95, depth: '1m ~ 10m', colors: ['#1f3320', '#0c150c'] },
+      { id: 14, name: '灼熱の溶岩洞窟', desc: '溶岩が流れる灼熱の洞窟。', reqLvl: 110, depth: '5m ~ 50m', colors: ['#5c1505', '#210701'] },
+      { id: 15, name: '極夜の海', desc: '太陽が沈んだままの極寒の海。', reqLvl: 125, depth: '50m ~ 500m', colors: ['#0a1830', '#030812'] },
+      { id: 16, name: '異次元の狭間', desc: '現実と幻が交錯する空間。', reqLvl: 140, depth: '???m', colors: ['#2a0a4a', '#0f0320'] },
+      { id: 17, name: '竜宮の門前海域', desc: '伝説の竜宮城へと続く海域。', reqLvl: 155, depth: '100m ~ 999m', colors: ['#0d3d5c', '#031420'] },
+      { id: 18, name: '星屑の海', desc: '夜空がそのまま海に落ちたような場所。', reqLvl: 170, depth: '∞', colors: ['#1a1040', '#050318'] },
+      { id: 19, name: '万象の終着点', desc: 'すべての魚が辿り着くという最果て。', reqLvl: 200, depth: '???m ~ ???m', colors: ['#000000', '#0a0a15'] },
     ];
 
     const FISH_DATABASE = [
@@ -1391,7 +1444,135 @@
       { id: 28, name: 'スターフィッシュキング', rarity: 'Legendary', baseLen: 80, baseWeight: 14, cost: 3000, xp: 1500, mapId: 9, preferBait: '特殊エサ', desc: '星の形のヒトデ王。', color: '#f5c842' },
       { id: 29, name: 'スカイレイ', rarity: 'Epic', baseLen: 200, baseWeight: 90, cost: 1200, xp: 600, mapId: 10, preferBait: '小魚', desc: '雲の海を泳ぐ。', color: '#7baede' },
       { id: 30, name: 'ブラックホールフィッシュ', rarity: 'Divine', baseLen: 210, baseWeight: 420, cost: 12000, xp: 6000, mapId: 10, preferBait: '神エサ', desc: '光を吸い込む。', color: '#05030d' },
-      { id: 31, name: '海神の魚', rarity: 'Divine', baseLen: 350, baseWeight: 500, cost: 15000, xp: 7500, mapId: 10, preferBait: '神エサ', desc: '海神の加護。', color: '#00ffc8' }
+      { id: 31, name: '海神の魚', rarity: 'Divine', baseLen: 350, baseWeight: 500, cost: 15000, xp: 7500, mapId: 10, preferBait: '神エサ', desc: '海神の加護。', color: '#00ffc8' },
+      { id: 32, name: 'メバル', rarity: 'Common', baseLen: 14.7, baseWeight: 0.134, cost: 21, xp: 9, mapId: 0, preferBait: '隕石の欠片エサ', desc: '岩場に潜む根魚。', color: '#7a8a6a' },
+      { id: 33, name: 'イワシ', rarity: 'Common', baseLen: 13.6, baseWeight: 0.158, cost: 20, xp: 8, mapId: 0, preferBait: '龍のひげエサ', desc: '群れで泳ぐ小魚。', color: '#c99a5b' },
+      { id: 34, name: 'ハゼ', rarity: 'Common', baseLen: 13.5, baseWeight: 0.156, cost: 19, xp: 8, mapId: 0, preferBait: '太古の餌', desc: '砂地に住む小魚。', color: '#5b8fa8' },
+      { id: 35, name: 'クロダイ', rarity: 'Uncommon', baseLen: 22.1, baseWeight: 0.344, cost: 42, xp: 17, mapId: 0, preferBait: '海神の雫', desc: '堤防釣りの人気者。', color: '#a85b7a' },
+      { id: 36, name: 'ヤマメ', rarity: 'Uncommon', baseLen: 23.1, baseWeight: 0.507, cost: 44, xp: 18, mapId: 1, preferBait: 'ミミズ', desc: '渓流の宝石。', color: '#8a6ac9' },
+      { id: 37, name: 'ウグイ', rarity: 'Common', baseLen: 15.3, baseWeight: 0.177, cost: 23, xp: 10, mapId: 1, preferBait: 'エビ', desc: '清流に群れる魚。', color: '#5bc9a8' },
+      { id: 38, name: 'カジカ', rarity: 'Common', baseLen: 17.0, baseWeight: 0.161, cost: 24, xp: 10, mapId: 1, preferBait: '貝虫', desc: '川底に張り付く魚。', color: '#c95b5b' },
+      { id: 39, name: 'オオサンショウウオ', rarity: 'Rare', baseLen: 31.7, baseWeight: 1.281, cost: 122, xp: 51, mapId: 1, preferBait: 'パン粉エサ', desc: '生きた化石と呼ばれる。', color: '#c9c15b' },
+      { id: 40, name: '幻の淡水クラゲ', rarity: 'Rare', baseLen: 32.7, baseWeight: 0.949, cost: 123, xp: 52, mapId: 1, preferBait: '小魚', desc: '稀にしか見られない不思議な生物。', color: '#5b6ac9' },
+      { id: 41, name: 'コクチバス', rarity: 'Common', baseLen: 19.4, baseWeight: 0.157, cost: 23, xp: 10, mapId: 2, preferBait: 'ミルワーム', desc: '岩礁を好む外来魚。', color: '#a8785b' },
+      { id: 42, name: 'ワカサギ', rarity: 'Common', baseLen: 18.5, baseWeight: 0.171, cost: 23, xp: 10, mapId: 2, preferBait: 'イカ', desc: '冬の風物詩。', color: '#6ac95b' },
+      { id: 43, name: 'ナマズ', rarity: 'Uncommon', baseLen: 21.5, baseWeight: 0.395, cost: 47, xp: 19, mapId: 2, preferBait: '発光エサ', desc: '夜行性のヒゲ魚。', color: '#c95ba0' },
+      { id: 44, name: 'レイクトラウト', rarity: 'Rare', baseLen: 39.8, baseWeight: 1.165, cost: 128, xp: 54, mapId: 2, preferBait: '甲殻エキス餌', desc: '深い湖に潜む大型マス。', color: '#5bafc9' },
+      { id: 45, name: '湖の主ナマズ', rarity: 'Epic', baseLen: 59.2, baseWeight: 2.944, cost: 317, xp: 143, mapId: 2, preferBait: '特殊エサ', desc: '湖底に潜む伝説の主。', color: '#8f5bc9' },
+      { id: 46, name: 'ミステリーアイ', rarity: 'Rare', baseLen: 41.1, baseWeight: 1.296, cost: 126, xp: 53, mapId: 2, preferBait: '血合いエサ', desc: '謎めいた瞳を持つ魚。', color: '#c98f5b' },
+      { id: 47, name: 'メジナ', rarity: 'Common', baseLen: 19.8, baseWeight: 0.2, cost: 26, xp: 11, mapId: 3, preferBait: '深海プランクトン', desc: '磯釣りの定番。', color: '#5bc9c1' },
+      { id: 48, name: 'カサゴ', rarity: 'Common', baseLen: 20.7, baseWeight: 0.181, cost: 26, xp: 11, mapId: 3, preferBait: '神エサ', desc: '岩陰に潜む魚。', color: '#c95b8f' },
+      { id: 49, name: 'タコ', rarity: 'Uncommon', baseLen: 23.4, baseWeight: 0.511, cost: 56, xp: 22, mapId: 3, preferBait: '虹色エサ', desc: '岩場に隠れる軟体動物。', color: '#7ec95b' },
+      { id: 50, name: 'ヒラメ', rarity: 'Rare', baseLen: 35.3, baseWeight: 1.314, cost: 127, xp: 53, mapId: 3, preferBait: '隕石の欠片エサ', desc: '砂に潜む高級魚。', color: '#c97e5b' },
+      { id: 51, name: 'ウツボ', rarity: 'Epic', baseLen: 62.4, baseWeight: 3.649, cost: 353, xp: 159, mapId: 3, preferBait: '龍のひげエサ', desc: '鋭い歯を持つ岩場の支配者。', color: '#5b7ec9' },
+      { id: 52, name: 'カツオ', rarity: 'Uncommon', baseLen: 31.8, baseWeight: 0.548, cost: 59, xp: 24, mapId: 4, preferBait: '太古の餌', desc: '俊足の回遊魚。', color: '#7a8a6a' },
+      { id: 53, name: 'シイラ', rarity: 'Uncommon', baseLen: 29.4, baseWeight: 0.611, cost: 57, xp: 23, mapId: 4, preferBait: '海神の雫', desc: '虹色に輝く外洋魚。', color: '#c99a5b' },
+      { id: 54, name: 'マンボウ', rarity: 'Rare', baseLen: 45.8, baseWeight: 1.743, cost: 149, xp: 63, mapId: 4, preferBait: 'ミミズ', desc: 'のんびり泳ぐ巨体。', color: '#5b8fa8' },
+      { id: 55, name: 'ジンベエザメ', rarity: 'Epic', baseLen: 64.6, baseWeight: 3.05, cost: 387, xp: 174, mapId: 4, preferBait: 'エビ', desc: '海のジャイアント。', color: '#a85b7a' },
+      { id: 56, name: 'バショウカジキ', rarity: 'Legendary', baseLen: 100.9, baseWeight: 14.175, cost: 1030, xp: 494, mapId: 4, preferBait: '貝虫', desc: '海で最速と言われる魚。', color: '#8a6ac9' },
+      { id: 57, name: 'デメニギス', rarity: 'Rare', baseLen: 42.0, baseWeight: 1.641, cost: 171, xp: 72, mapId: 5, preferBait: 'パン粉エサ', desc: '透明な頭を持つ深海魚。', color: '#5bc9a8' },
+      { id: 58, name: 'ラブカ', rarity: 'Epic', baseLen: 55.6, baseWeight: 4.234, cost: 381, xp: 171, mapId: 5, preferBait: '小魚', desc: '生きた化石ザメ。', color: '#c95b5b' },
+      { id: 59, name: 'ダイオウグソクムシ', rarity: 'Rare', baseLen: 39.7, baseWeight: 1.417, cost: 174, xp: 73, mapId: 5, preferBait: 'ミルワーム', desc: '深海の掃除屋。', color: '#c9c15b' },
+      { id: 60, name: 'シーラカンス', rarity: 'Legendary', baseLen: 88.8, baseWeight: 12.371, cost: 1029, xp: 494, mapId: 5, preferBait: 'イカ', desc: '太古から生きる魚。', color: '#5b6ac9' },
+      { id: 61, name: '深海の目玉魚', rarity: 'Mythic', baseLen: 166.6, baseWeight: 35.786, cost: 2603, xp: 1302, mapId: 5, preferBait: '発光エサ', desc: '闇の中で光る巨大な瞳。', color: '#a8785b' },
+      { id: 62, name: '溶岩ヤモリウオ', rarity: 'Common', baseLen: 29.2, baseWeight: 0.346, cost: 35, xp: 15, mapId: 6, preferBait: '甲殻エキス餌', desc: '熱に強い皮膚を持つ。', color: '#6ac95b' },
+      { id: 63, name: '熱水エビ', rarity: 'Common', baseLen: 31.9, baseWeight: 0.273, cost: 32, xp: 13, mapId: 6, preferBait: '特殊エサ', desc: '熱水噴出孔に群がる。', color: '#c95ba0' },
+      { id: 64, name: '灼熱ナマズ', rarity: 'Uncommon', baseLen: 34.2, baseWeight: 0.923, cost: 76, xp: 30, mapId: 6, preferBait: '血合いエサ', desc: '高温の水域を好む。', color: '#5bafc9' },
+      { id: 65, name: '硫黄魚', rarity: 'Rare', baseLen: 43.6, baseWeight: 1.741, cost: 173, xp: 73, mapId: 6, preferBait: '深海プランクトン', desc: '硫黄の匂いを纏う魚。', color: '#8f5bc9' },
+      { id: 66, name: 'マグマドラゴンフィッシュ', rarity: 'Epic', baseLen: 63.3, baseWeight: 4.97, cost: 458, xp: 206, mapId: 6, preferBait: '神エサ', desc: '溶岩の中を泳ぐと言われる。', color: '#c98f5b' },
+      { id: 67, name: '不死鳥魚フェニックス', rarity: 'Mythic', baseLen: 142.8, baseWeight: 40.082, cost: 2828, xp: 1414, mapId: 6, preferBait: '虹色エサ', desc: '炎から生まれた伝説の魚。', color: '#5bc9c1' },
+      { id: 68, name: 'タラ', rarity: 'Common', baseLen: 31.3, baseWeight: 0.351, cost: 39, xp: 16, mapId: 7, preferBait: '隕石の欠片エサ', desc: '冷たい海の定番魚。', color: '#c95b8f' },
+      { id: 69, name: 'ホッケ', rarity: 'Common', baseLen: 34.5, baseWeight: 0.344, cost: 37, xp: 16, mapId: 7, preferBait: '龍のひげエサ', desc: '北の海でよく獲れる。', color: '#7ec95b' },
+      { id: 70, name: 'シロクマウオ', rarity: 'Uncommon', baseLen: 41.7, baseWeight: 0.749, cost: 83, xp: 33, mapId: 7, preferBait: '太古の餌', desc: '白い毛並みのような鱗を持つ。', color: '#c97e5b' },
+      { id: 71, name: 'オーロラフィッシュ', rarity: 'Rare', baseLen: 57.0, baseWeight: 2.622, cost: 212, xp: 89, mapId: 7, preferBait: '海神の雫', desc: '鱗がオーロラのように輝く。', color: '#5b7ec9' },
+      { id: 72, name: '氷河のクジラウオ', rarity: 'Legendary', baseLen: 104.1, baseWeight: 17.503, cost: 1149, xp: 552, mapId: 7, preferBait: 'ミミズ', desc: '氷河の下を悠然と泳ぐ。', color: '#7a8a6a' },
+      { id: 73, name: 'シクリッド', rarity: 'Common', baseLen: 38.5, baseWeight: 0.322, cost: 37, xp: 16, mapId: 8, preferBait: 'エビ', desc: '色鮮やかな熱帯魚。', color: '#c99a5b' },
+      { id: 74, name: 'ナマズドジョウ', rarity: 'Common', baseLen: 33.8, baseWeight: 0.337, cost: 39, xp: 16, mapId: 8, preferBait: '貝虫', desc: '泥の中に潜む。', color: '#5b8fa8' },
+      { id: 75, name: '電気ウナギ', rarity: 'Uncommon', baseLen: 38.1, baseWeight: 0.832, cost: 79, xp: 32, mapId: 8, preferBait: 'パン粉エサ', desc: '強い電気を発する。', color: '#a85b7a' },
+      { id: 76, name: 'アロワナ', rarity: 'Rare', baseLen: 50.2, baseWeight: 2.458, cost: 199, xp: 84, mapId: 8, preferBait: '小魚', desc: '古代魚と呼ばれる美しい魚。', color: '#8a6ac9' },
+      { id: 77, name: 'ジャングルの主ワニウオ', rarity: 'Epic', baseLen: 85.6, baseWeight: 6.797, cost: 502, xp: 226, mapId: 8, preferBait: 'ミルワーム', desc: 'ジャングルの奥に潜む巨大魚。', color: '#5bc9a8' },
+      { id: 78, name: '洞窟メクラウオ', rarity: 'Common', baseLen: 39.3, baseWeight: 0.423, cost: 44, xp: 18, mapId: 9, preferBait: 'イカ', desc: '目を持たない洞窟魚。', color: '#c95b5b' },
+      { id: 79, name: '鍾乳石魚', rarity: 'Uncommon', baseLen: 43.9, baseWeight: 1.367, cost: 104, xp: 42, mapId: 9, preferBait: '発光エサ', desc: '鍾乳洞に擬態する魚。', color: '#c9c15b' },
+      { id: 80, name: '地底クラゲ', rarity: 'Rare', baseLen: 61.9, baseWeight: 2.981, cost: 225, xp: 94, mapId: 9, preferBait: '甲殻エキス餌', desc: '地底湖に漂うクラゲ。', color: '#5b6ac9' },
+      { id: 81, name: '洞窟の守護魚', rarity: 'Epic', baseLen: 72.7, baseWeight: 7.028, cost: 572, xp: 257, mapId: 9, preferBait: '特殊エサ', desc: '洞窟湖を守ると言われる。', color: '#a8785b' },
+      { id: 82, name: '古代の目覚め魚', rarity: 'Mythic', baseLen: 184.0, baseWeight: 64.843, cost: 3392, xp: 1696, mapId: 9, preferBait: '血合いエサ', desc: '長い眠りから目覚めた古代魚。', color: '#6ac95b' },
+      { id: 83, name: '浮遊クラゲウオ', rarity: 'Rare', baseLen: 80.3, baseWeight: 3.641, cost: 263, xp: 110, mapId: 10, preferBait: '深海プランクトン', desc: '空中を漂うように泳ぐ。', color: '#c95ba0' },
+      { id: 84, name: '天空のイワナ', rarity: 'Epic', baseLen: 91.9, baseWeight: 7.297, cost: 694, xp: 312, mapId: 10, preferBait: '神エサ', desc: '雲の上に生息するイワナ。', color: '#5bafc9' },
+      { id: 85, name: '雲海の巨魚', rarity: 'Legendary', baseLen: 143.8, baseWeight: 32.986, cost: 1777, xp: 853, mapId: 10, preferBait: '虹色エサ', desc: '雲海を悠々と泳ぐ巨魚。', color: '#8f5bc9' },
+      { id: 86, name: '星屑グッピー', rarity: 'Mythic', baseLen: 163.2, baseWeight: 85.201, cost: 3990, xp: 1995, mapId: 10, preferBait: '隕石の欠片エサ', desc: '鱗が星屑のように輝く。', color: '#c98f5b' },
+      { id: 87, name: '天の川の主', rarity: 'Divine', baseLen: 255.0, baseWeight: 218.816, cost: 10083, xp: 5042, mapId: 10, preferBait: '龍のひげエサ', desc: '天の川そのものを司る魚。', color: '#5bc9c1' },
+      { id: 88, name: 'クマノミ', rarity: 'Common', baseLen: 53.4, baseWeight: 0.534, cost: 61, xp: 26, mapId: 11, preferBait: '太古の餌', desc: 'イソギンチャクと共生する。', color: '#c95b8f' },
+      { id: 89, name: 'チョウチョウウオ', rarity: 'Common', baseLen: 64.4, baseWeight: 0.685, cost: 61, xp: 26, mapId: 11, preferBait: '海神の雫', desc: '蝶のように華やかな魚。', color: '#7ec95b' },
+      { id: 90, name: 'ハリセンボン', rarity: 'Uncommon', baseLen: 69.3, baseWeight: 1.754, cost: 113, xp: 45, mapId: 11, preferBait: 'ミミズ', desc: '膨らんで身を守る。', color: '#c97e5b' },
+      { id: 91, name: 'ナポレオンフィッシュ', rarity: 'Rare', baseLen: 76.7, baseWeight: 3.769, cost: 279, xp: 117, mapId: 11, preferBait: 'エビ', desc: '珊瑚礁の巨大魚。', color: '#5b7ec9' },
+      { id: 92, name: 'ウミガメウオ', rarity: 'Rare', baseLen: 65.5, baseWeight: 3.647, cost: 293, xp: 123, mapId: 11, preferBait: '貝虫', desc: 'ウミガメに似た甲羅を持つ。', color: '#7a8a6a' },
+      { id: 93, name: '珊瑚の女王エンゼルフィッシュ', rarity: 'Epic', baseLen: 101.8, baseWeight: 11.826, cost: 742, xp: 334, mapId: 11, preferBait: 'パン粉エサ', desc: '珊瑚礁の女王と呼ばれる。', color: '#c99a5b' },
+      { id: 94, name: '虹色モンガラ', rarity: 'Epic', baseLen: 108.9, baseWeight: 11.952, cost: 818, xp: 368, mapId: 11, preferBait: '小魚', desc: '鮮やかな色彩を持つ。', color: '#5b8fa8' },
+      { id: 95, name: '珊瑚礁の守護神ウオ', rarity: 'Legendary', baseLen: 125.9, baseWeight: 28.422, cost: 1749, xp: 840, mapId: 11, preferBait: 'ミルワーム', desc: '礁を守護する伝説の魚。', color: '#a85b7a' },
+      { id: 96, name: 'サビウナギ', rarity: 'Common', baseLen: 56.1, baseWeight: 0.582, cost: 64, xp: 27, mapId: 12, preferBait: 'イカ', desc: '錆びた船体に潜む。', color: '#8a6ac9' },
+      { id: 97, name: '難破船アナゴ', rarity: 'Common', baseLen: 69.2, baseWeight: 0.75, cost: 62, xp: 26, mapId: 12, preferBait: '発光エサ', desc: '沈没船の隙間を住処にする。', color: '#5bc9a8' },
+      { id: 98, name: '幽霊イカ', rarity: 'Uncommon', baseLen: 71.9, baseWeight: 1.971, cost: 119, xp: 48, mapId: 12, preferBait: '甲殻エキス餌', desc: '半透明の体を持つ。', color: '#c95b5b' },
+      { id: 99, name: '財宝ガニウオ', rarity: 'Rare', baseLen: 85.7, baseWeight: 5.121, cost: 351, xp: 147, mapId: 12, preferBait: '特殊エサ', desc: '財宝の匂いに引き寄せられる。', color: '#c9c15b' },
+      { id: 100, name: '呪われたクラーケンの子', rarity: 'Epic', baseLen: 109.4, baseWeight: 10.903, cost: 758, xp: 341, mapId: 12, preferBait: '血合いエサ', desc: '小さなクラーケンの幼体。', color: '#5b6ac9' },
+      { id: 101, name: '海賊王の亡霊魚', rarity: 'Epic', baseLen: 110.6, baseWeight: 10.263, cost: 859, xp: 387, mapId: 12, preferBait: '深海プランクトン', desc: '海賊の怨念が宿ると言われる。', color: '#a8785b' },
+      { id: 102, name: '沈没船の主イール', rarity: 'Legendary', baseLen: 156.1, baseWeight: 33.733, cost: 1951, xp: 936, mapId: 12, preferBait: '神エサ', desc: '沈没船に住み着く主。', color: '#6ac95b' },
+      { id: 103, name: '深淵のクラーケン', rarity: 'Mythic', baseLen: 211.8, baseWeight: 119.891, cost: 4647, xp: 2324, mapId: 12, preferBait: '虹色エサ', desc: '海の墓場に潜む巨大生物。', color: '#c95ba0' },
+      { id: 104, name: 'トビハゼ', rarity: 'Common', baseLen: 59.7, baseWeight: 0.62, cost: 73, xp: 31, mapId: 13, preferBait: '隕石の欠片エサ', desc: '泥の上を跳ねる魚。', color: '#5bafc9' },
+      { id: 105, name: 'シオマネキウオ', rarity: 'Common', baseLen: 73.4, baseWeight: 0.618, cost: 72, xp: 30, mapId: 13, preferBait: '龍のひげエサ', desc: 'ハサミを振る仕草が特徴。', color: '#8f5bc9' },
+      { id: 106, name: 'マングローブスズキ', rarity: 'Uncommon', baseLen: 84.9, baseWeight: 2.041, cost: 136, xp: 54, mapId: 13, preferBait: '太古の餌', desc: '根の間を縫うように泳ぐ。', color: '#c98f5b' },
+      { id: 107, name: '汽水域の主ナマズ', rarity: 'Rare', baseLen: 88.5, baseWeight: 4.091, cost: 323, xp: 136, mapId: 13, preferBait: '海神の雫', desc: '汽水域に君臨する大ナマズ。', color: '#5bc9c1' },
+      { id: 108, name: '泥の中の目玉魚', rarity: 'Rare', baseLen: 99.6, baseWeight: 5.087, cost: 359, xp: 151, mapId: 13, preferBait: 'ミミズ', desc: '泥の中から目だけを覗かせる。', color: '#c95b8f' },
+      { id: 109, name: '河口のヌシウナギ', rarity: 'Epic', baseLen: 121.2, baseWeight: 11.682, cost: 935, xp: 421, mapId: 13, preferBait: 'エビ', desc: '河口に長年住み着く主。', color: '#7ec95b' },
+      { id: 110, name: '満潮の女神魚', rarity: 'Legendary', baseLen: 156.2, baseWeight: 33.962, cost: 2024, xp: 972, mapId: 13, preferBait: '貝虫', desc: '満潮時にのみ姿を現す。', color: '#c97e5b' },
+      { id: 111, name: '干潟の伝説ワニウオ', rarity: 'Legendary', baseLen: 133.4, baseWeight: 34.415, cost: 2167, xp: 1040, mapId: 13, preferBait: 'パン粉エサ', desc: '干潟に伝わる伝説の魚。', color: '#5b7ec9' },
+      { id: 112, name: '溶岩イモリウオ', rarity: 'Common', baseLen: 70.0, baseWeight: 0.784, cost: 69, xp: 29, mapId: 14, preferBait: '小魚', desc: '熱に耐性を持つ。', color: '#7a8a6a' },
+      { id: 113, name: '火山ガニウオ', rarity: 'Common', baseLen: 84.8, baseWeight: 0.763, cost: 74, xp: 31, mapId: 14, preferBait: 'ミルワーム', desc: '火山岩の隙間に潜む。', color: '#c99a5b' },
+      { id: 114, name: '灼熱サラマンダーフィッシュ', rarity: 'Uncommon', baseLen: 84.6, baseWeight: 2.509, cost: 153, xp: 61, mapId: 14, preferBait: 'イカ', desc: '火を纏うように見える。', color: '#5b8fa8' },
+      { id: 115, name: 'マグマクラゲ', rarity: 'Rare', baseLen: 107.5, baseWeight: 5.404, cost: 398, xp: 167, mapId: 14, preferBait: '発光エサ', desc: '溶岩の中を漂う奇妙なクラゲ。', color: '#a85b7a' },
+      { id: 116, name: '溶岩の目玉魚', rarity: 'Rare', baseLen: 96.2, baseWeight: 4.36, cost: 390, xp: 164, mapId: 14, preferBait: '甲殻エキス餌', desc: '溶岩の中から見つめてくる。', color: '#8a6ac9' },
+      { id: 117, name: '業火のドラゴンイール', rarity: 'Epic', baseLen: 104.5, baseWeight: 10.821, cost: 1017, xp: 458, mapId: 14, preferBait: '特殊エサ', desc: '業火を纏う龍のようなウナギ。', color: '#5bc9a8' },
+      { id: 118, name: '灼熱の悪魔魚', rarity: 'Mythic', baseLen: 180.8, baseWeight: 133.569, cost: 6113, xp: 3056, mapId: 14, preferBait: '血合いエサ', desc: '火山の悪魔と恐れられる。', color: '#c95b5b' },
+      { id: 119, name: '大噴火の化身', rarity: 'Divine', baseLen: 264.9, baseWeight: 301.447, cost: 12747, xp: 6374, mapId: 14, preferBait: '深海プランクトン', desc: '噴火そのものが姿を成したという。', color: '#c9c15b' },
+      { id: 120, name: '極夜アンコウ', rarity: 'Common', baseLen: 85.1, baseWeight: 1.002, cost: 76, xp: 32, mapId: 15, preferBait: '神エサ', desc: '太陽の沈む海で光る。', color: '#5b6ac9' },
+      { id: 121, name: 'オーロラクラゲウオ', rarity: 'Uncommon', baseLen: 92.4, baseWeight: 2.159, cost: 162, xp: 65, mapId: 15, preferBait: '虹色エサ', desc: 'オーロラのように揺らめく。', color: '#a8785b' },
+      { id: 122, name: '氷結ゴーストフィッシュ', rarity: 'Uncommon', baseLen: 98.2, baseWeight: 2.407, cost: 172, xp: 69, mapId: 15, preferBait: '隕石の欠片エサ', desc: '氷に閉ざされた姿で現れる。', color: '#6ac95b' },
+      { id: 123, name: '極寒のバショウカジキ', rarity: 'Rare', baseLen: 111.8, baseWeight: 6.99, cost: 428, xp: 180, mapId: 15, preferBait: '龍のひげエサ', desc: '極寒の海を高速で泳ぐ。', color: '#c95ba0' },
+      { id: 124, name: '白夜のシャチウオ', rarity: 'Epic', baseLen: 127.9, baseWeight: 15.033, cost: 1053, xp: 474, mapId: 15, preferBait: '太古の餌', desc: '極夜の海に潜む捕食者。', color: '#5bafc9' },
+      { id: 125, name: '極夜の女王イール', rarity: 'Epic', baseLen: 130.9, baseWeight: 14.714, cost: 1057, xp: 476, mapId: 15, preferBait: '海神の雫', desc: '極夜の海に君臨する女王。', color: '#8f5bc9' },
+      { id: 126, name: '氷河期の生き残り', rarity: 'Legendary', baseLen: 157.7, baseWeight: 56.477, cost: 2652, xp: 1273, mapId: 15, preferBait: 'ミミズ', desc: '太古の氷河期を生き延びた。', color: '#c98f5b' },
+      { id: 127, name: '極夜に咲く氷華魚', rarity: 'Mythic', baseLen: 232.3, baseWeight: 176.531, cost: 6068, xp: 3034, mapId: 15, preferBait: 'エビ', desc: '極夜にのみ花開く氷の魚。', color: '#5bc9c1' },
+      { id: 128, name: '次元の裂け目メダカ', rarity: 'Common', baseLen: 93.6, baseWeight: 1.166, cost: 96, xp: 40, mapId: 16, preferBait: '貝虫', desc: '裂け目からこぼれ落ちた小魚。', color: '#c95b8f' },
+      { id: 129, name: '虚空を泳ぐクラゲ', rarity: 'Uncommon', baseLen: 88.2, baseWeight: 2.24, cost: 183, xp: 73, mapId: 16, preferBait: 'パン粉エサ', desc: '何もない空間を漂う。', color: '#7ec95b' },
+      { id: 130, name: '時渡りウナギ', rarity: 'Rare', baseLen: 97.6, baseWeight: 5.915, cost: 430, xp: 181, mapId: 16, preferBait: '小魚', desc: '時間を渡り歩くという。', color: '#c97e5b' },
+      { id: 131, name: '次元断層の主', rarity: 'Rare', baseLen: 117.7, baseWeight: 7.35, cost: 507, xp: 213, mapId: 16, preferBait: 'ミルワーム', desc: '断層の狭間に住む主。', color: '#5b7ec9' },
+      { id: 132, name: 'パラレルフィッシュ', rarity: 'Epic', baseLen: 118.3, baseWeight: 17.926, cost: 1177, xp: 530, mapId: 16, preferBait: 'イカ', desc: '並行世界からやってきた魚。', color: '#7a8a6a' },
+      { id: 133, name: '異次元カジキ', rarity: 'Epic', baseLen: 117.9, baseWeight: 19.027, cost: 1247, xp: 561, mapId: 16, preferBait: '発光エサ', desc: '異次元の海を泳ぐカジキ。', color: '#c99a5b' },
+      { id: 134, name: '虚無を纏う魚', rarity: 'Mythic', baseLen: 198.7, baseWeight: 194.865, cost: 6760, xp: 3380, mapId: 16, preferBait: '甲殻エキス餌', desc: '虚無そのものを纏うという。', color: '#5b8fa8' },
+      { id: 135, name: '次元王クリーチャー', rarity: 'Divine', baseLen: 275.9, baseWeight: 473.596, cost: 15784, xp: 7892, mapId: 16, preferBait: '特殊エサ', desc: 'あらゆる次元を統べる存在。', color: '#a85b7a' },
+      { id: 136, name: '竜宮の門番エビ', rarity: 'Common', baseLen: 90.1, baseWeight: 1.05, cost: 98, xp: 41, mapId: 17, preferBait: '血合いエサ', desc: '竜宮の門を守るエビ。', color: '#8a6ac9' },
+      { id: 137, name: '珊瑚の使者ウオ', rarity: 'Uncommon', baseLen: 102.1, baseWeight: 2.529, cost: 193, xp: 77, mapId: 17, preferBait: '深海プランクトン', desc: '竜宮からの使いとされる。', color: '#5bc9a8' },
+      { id: 138, name: '龍鱗魚', rarity: 'Rare', baseLen: 128.3, baseWeight: 5.816, cost: 513, xp: 215, mapId: 17, preferBait: '神エサ', desc: '龍の鱗を持つと言われる。', color: '#c95b5b' },
+      { id: 139, name: '竜宮の巫女魚', rarity: 'Rare', baseLen: 118.1, baseWeight: 5.812, cost: 490, xp: 206, mapId: 17, preferBait: '虹色エサ', desc: '竜宮に仕える巫女の化身。', color: '#c9c15b' },
+      { id: 140, name: '海竜の眷属', rarity: 'Epic', baseLen: 145.5, baseWeight: 18.088, cost: 1123, xp: 505, mapId: 17, preferBait: '隕石の欠片エサ', desc: '海竜に仕える眷属。', color: '#5b6ac9' },
+      { id: 141, name: '竜宮武将ウオ', rarity: 'Epic', baseLen: 160.7, baseWeight: 20.076, cost: 1346, xp: 606, mapId: 17, preferBait: '龍のひげエサ', desc: '竜宮を守る武将の魂を宿す。', color: '#a8785b' },
+      { id: 142, name: '竜宮の守護獣', rarity: 'Legendary', baseLen: 154.5, baseWeight: 52.199, cost: 2697, xp: 1295, mapId: 17, preferBait: '太古の餌', desc: '竜宮城を守護する伝説の獣。', color: '#6ac95b' },
+      { id: 143, name: '龍神の化身', rarity: 'Mythic', baseLen: 244.1, baseWeight: 163.472, cost: 6875, xp: 3438, mapId: 17, preferBait: '海神の雫', desc: '龍神そのものの化身とされる。', color: '#c95ba0' },
+      { id: 144, name: '星屑イワシ', rarity: 'Common', baseLen: 106.0, baseWeight: 1.363, cost: 112, xp: 47, mapId: 18, preferBait: 'ミミズ', desc: '鱗が星屑のように光る。', color: '#5bafc9' },
+      { id: 145, name: '流星クラゲ', rarity: 'Uncommon', baseLen: 107.1, baseWeight: 2.682, cost: 233, xp: 93, mapId: 18, preferBait: 'エビ', desc: '流れ星のように尾を引く。', color: '#8f5bc9' },
+      { id: 146, name: '銀河ウナギ', rarity: 'Rare', baseLen: 131.2, baseWeight: 8.425, cost: 500, xp: 210, mapId: 18, preferBait: '貝虫', desc: '銀河の渦を思わせる模様。', color: '#c98f5b' },
+      { id: 147, name: '彗星の尾ウオ', rarity: 'Rare', baseLen: 111.4, baseWeight: 8.387, cost: 537, xp: 226, mapId: 18, preferBait: 'パン粉エサ', desc: '彗星のような尾を持つ。', color: '#5bc9c1' },
+      { id: 148, name: '星雲マンタ', rarity: 'Epic', baseLen: 129.5, baseWeight: 22.919, cost: 1355, xp: 610, mapId: 18, preferBait: '小魚', desc: '星雲のような模様のマンタ。', color: '#c95b8f' },
+      { id: 149, name: 'ブラックホールの欠片魚', rarity: 'Epic', baseLen: 161.9, baseWeight: 16.253, cost: 1414, xp: 636, mapId: 18, preferBait: 'ミルワーム', desc: 'ブラックホールの欠片を宿す。', color: '#7ec95b' },
+      { id: 150, name: '宇宙クジラウオ', rarity: 'Legendary', baseLen: 159.6, baseWeight: 71.455, cost: 3151, xp: 1512, mapId: 18, preferBait: 'イカ', desc: '宇宙を悠然と泳ぐクジラ。', color: '#c97e5b' },
+      { id: 151, name: '星読みの巨魚', rarity: 'Mythic', baseLen: 222.2, baseWeight: 199.139, cost: 8628, xp: 4314, mapId: 18, preferBait: '発光エサ', desc: '星々の運命を読むという。', color: '#5b7ec9' },
+      { id: 152, name: '終焉の使者ウオ', rarity: 'Rare', baseLen: 134.9, baseWeight: 7.665, cost: 623, xp: 262, mapId: 19, preferBait: '甲殻エキス餌', desc: '終わりを告げる使者。', color: '#7a8a6a' },
+      { id: 153, name: '世界樹の番魚', rarity: 'Epic', baseLen: 152.1, baseWeight: 18.985, cost: 1398, xp: 629, mapId: 19, preferBait: '特殊エサ', desc: '世界樹を見守る番人。', color: '#c99a5b' },
+      { id: 154, name: '万物のかけら魚', rarity: 'Epic', baseLen: 142.7, baseWeight: 19.816, cost: 1444, xp: 650, mapId: 19, preferBait: '血合いエサ', desc: '万物の欠片を宿す魚。', color: '#5b8fa8' },
+      { id: 155, name: '創造神の使い', rarity: 'Legendary', baseLen: 188.3, baseWeight: 79.474, cost: 3449, xp: 1656, mapId: 19, preferBait: '深海プランクトン', desc: '創造神に仕えるという。', color: '#a85b7a' },
+      { id: 156, name: '破壊神の化身', rarity: 'Legendary', baseLen: 200.0, baseWeight: 62.724, cost: 3490, xp: 1675, mapId: 19, preferBait: '神エサ', desc: '破壊神の力を宿す。', color: '#8a6ac9' },
+      { id: 157, name: '時空を統べる者', rarity: 'Mythic', baseLen: 213.9, baseWeight: 202.54, cost: 8128, xp: 4064, mapId: 19, preferBait: '虹色エサ', desc: '時空すべてを統べる者。', color: '#5bc9a8' },
+      { id: 158, name: '万象の女神魚', rarity: 'Mythic', baseLen: 267.5, baseWeight: 229.594, cost: 8441, xp: 4220, mapId: 19, preferBait: '隕石の欠片エサ', desc: '万象を司る女神の化身。', color: '#c95b5b' },
+      { id: 159, name: '万物の根源・オリジンフィッシュ', rarity: 'Divine', baseLen: 307.7, baseWeight: 633.883, cost: 17504, xp: 8752, mapId: 19, preferBait: '龍のひげエサ', desc: 'すべての魚の起源とされる。', color: '#c9c15b' },
     ];
 
     const RODS = [
@@ -1410,7 +1591,9 @@
       { id: 12, name: '深海監視員の竿', cost: 18000, dist: 140, rare: 2.0, dur: 70, reelSpeed: 1.3, reqLvl: 20, desc: '深海調査隊が愛用する特注品。' },
       { id: 13, name: '皆伝の竿', cost: null, dist: 350, rare: 4.5, dur: 260, reelSpeed: 2.3, duplicateChance: 0.05, achievementOnly: true, unlockDesc: '図鑑を100%コンプリートすると自動で入手できる。', desc: '図鑑を極めた者だけが持つ竿。稀に魚を複製する。' },
       { id: 14, name: '竜の落とし子の竿', cost: 400000, dist: 400, rare: 6.0, dur: 400, reelSpeed: 2.8, reqLvl: 50, reqDivineCaught: true, desc: '神話級の魚を釣った者だけが扱える竿。' },
-      { id: 15, name: '百戦錬磨の竿', cost: null, dist: 200, rare: 3.0, dur: 150, reelSpeed: 2.0, achievementOnly: true, unlockDesc: '実績「海の覇者」(累計100匹)を達成すると自動で入手できる。', desc: '百の死闘を乗り越えた老練の竿。' }
+      { id: 15, name: '百戦錬磨の竿', cost: null, dist: 200, rare: 3.0, dur: 150, reelSpeed: 2.0, achievementOnly: true, unlockDesc: '実績「海の覇者」(累計100匹)を達成すると自動で入手できる。', desc: '百の死闘を乗り越えた老練の竿。' },
+      { id: 16, name: '深淵の竿', cost: null, dist: 350, rare: 6.5, dur: 350, reelSpeed: 2.5, craftOnly: true, desc: '深淵の遺物から鍛え上げた特別な竿。クラフトでのみ入手可能。' },
+      { id: 17, name: '万象の竿', cost: null, dist: 600, rare: 8.0, dur: 500, reelSpeed: 4.5, craftOnly: true, desc: '万象の紋章が宿る、すべてを超越した竿。クラフトでのみ入手可能。' }
     ];
 
     const BOATS = [
@@ -1639,10 +1822,18 @@
     }
 
     const CRAFT_RECIPES = [
-      { result: '神エサ', cost: 200, materials: [{ name: '魚のウロコ', qty: 10 }, { name: '深海の結晶', qty: 1 }], desc: '極上のエサ。' },
-      { result: '特殊ルアー', cost: 500, materials: [{ name: '魚のウロコ', qty: 25 }, { name: '虹色のヒレ', qty: 3 }], desc: '特殊エサ×5相当。' },
-      { result: '神話の竿', cost: 50000, materials: [{ name: '深海の結晶', qty: 10 }, { name: '古代の化石', qty: 5 }], desc: '神話の竿。' },
-      { result: '海神の竿', cost: 250000, materials: [{ name: '深海の結晶', qty: 30 }, { name: '古代の化石', qty: 15 }, { name: '海神の輝石', qty: 2 }], desc: '海神の竿。' }
+      { result: '神エサ', cost: 200, materials: [{ name: '魚のウロコ', qty: 10 }, { name: '深海の結晶', qty: 1 }], desc: '極上のエサ。', type: 'bait', giveBait: '神エサ', qty: 1 },
+      { result: '特殊ルアー', cost: 500, materials: [{ name: '魚のウロコ', qty: 25 }, { name: '虹色のヒレ', qty: 3 }], desc: '特殊エサ×5相当。', type: 'bait', giveBait: '特殊エサ', qty: 5 },
+      { result: 'ウロコの結晶化', cost: 300, materials: [{ name: '魚のウロコ', qty: 20 }], desc: 'ウロコを圧縮して虹色のヒレに変える。', type: 'material', giveMaterial: '虹色のヒレ', qty: 1 },
+      { result: '虹色エサ精製', cost: 800, materials: [{ name: '珊瑚石', qty: 8 }, { name: '虹色のヒレ', qty: 2 }], desc: '珊瑚の欠片から作る特別なエサ。', type: 'bait', giveBait: '虹色エサ', qty: 3 },
+      { result: '隕石エサ精製', cost: 1500, materials: [{ name: '深淵の遺物', qty: 5 }, { name: '深海の結晶', qty: 3 }], desc: '宇宙由来の鉱物から作るエサ。', type: 'bait', giveBait: '隕石の欠片エサ', qty: 2 },
+      { result: '龍のひげ抽出', cost: 3000, materials: [{ name: '龍脈の欠片', qty: 3 }, { name: '古代の化石', qty: 2 }], desc: '伝説の龍の力を抽出したエサ。', type: 'bait', giveBait: '龍のひげエサ', qty: 1 },
+      { result: '海神の雫精製', cost: 8000, materials: [{ name: '万象の紋章', qty: 1 }, { name: '海神の輝石', qty: 1 }], desc: '海神の加護を宿す一滴を精製。', type: 'bait', giveBait: '海神の雫', qty: 1 },
+      { result: '素材換金', cost: 0, materials: [{ name: '魚のウロコ', qty: 50 }], desc: '余った魚のウロコをゴールドに換える。', type: 'gold', goldAmount: 1000 },
+      { result: '神話の竿', cost: 50000, materials: [{ name: '深海の結晶', qty: 10 }, { name: '古代の化石', qty: 5 }], desc: '神話の竿。', type: 'rod', rodId: 8 },
+      { result: '海神の竿', cost: 250000, materials: [{ name: '深海の結晶', qty: 30 }, { name: '古代の化石', qty: 15 }, { name: '海神の輝石', qty: 2 }], desc: '海神の竿。', type: 'rod', rodId: 9 },
+      { result: '深淵の竿', cost: 600000, materials: [{ name: '深淵の遺物', qty: 20 }, { name: '龍脈の欠片', qty: 10 }], desc: '深淵の遺物から鍛え上げた特別な竿。', type: 'rod', rodId: 16 },
+      { result: '万象の竿', cost: 2000000, materials: [{ name: '万象の紋章', qty: 5 }, { name: '龍脈の欠片', qty: 20 }], desc: '万象の力を宿す、すべてを超越した竿。', type: 'rod', rodId: 17 }
     ];
 
     const COSMETICS = [
@@ -1682,7 +1873,7 @@
       ownedBoats: [0],
       equippedCosmetics: { hat: '', glass: '', cloth: '', wing: '', aura: '' },
       ownedCosmetics: [],
-      materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0 },
+      materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0, '珊瑚石': 0, '深淵の遺物': 0, '龍脈の欠片': 0, '万象の紋章': 0 },
       skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 },
       fishInventory: [],
       book: {},
@@ -2052,7 +2243,7 @@
       if (activeShopTab === 'shop-rods') {
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
-          if ((r.gachaOnly || r.achievementOnly) && !isOwned) return; // ルーレット/実績限定ロッドは入手するまでショップに表示しない
+          if ((r.gachaOnly || r.achievementOnly || r.craftOnly) && !isOwned) return; // ルーレット/実績/クラフト限定ロッドは入手するまでショップに表示しない
           const isEquipped = game.rodId === r.id;
           const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
           const meetsLevel = !r.reqLvl || game.level >= r.reqLvl;
@@ -2066,7 +2257,7 @@
           let actionHtml;
           if (isOwned) {
             actionHtml = isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`;
-          } else if (r.gachaOnly || r.achievementOnly) {
+          } else if (r.gachaOnly || r.achievementOnly || r.craftOnly) {
             actionHtml = '';
           } else if (isLocked) {
             actionHtml = `<button class="buy-btn" disabled>条件未達成</button>`;
@@ -2263,18 +2454,38 @@
     // ============================================================
     // スキルツリー
     // ============================================================
+    let skillTreePanX = 0, skillTreePanY = 0;
+    let skillTreeDragState = null;
+
     function renderSkills() {
       document.getElementById('skill-pts-val').innerText = game.skillPoints;
       const container = document.getElementById('skills-list');
       container.innerHTML = '';
 
+      const viewport = document.createElement('div');
+      viewport.id = 'skilltree-viewport';
+
+      const hint = document.createElement('div');
+      hint.id = 'skilltree-hint';
+      hint.innerText = '🖐️ ドラッグで全体を見渡せます';
+      viewport.appendChild(hint);
+
+      const resetBtn = document.createElement('button');
+      resetBtn.id = 'skilltree-reset-btn';
+      resetBtn.innerText = '⦿ 中央へ戻す';
+      resetBtn.onclick = () => {
+        skillTreePanX = 0; skillTreePanY = 0;
+        wrap.style.transform = `translate(${skillTreePanX}px, ${skillTreePanY}px)`;
+      };
+      viewport.appendChild(resetBtn);
+
       const wrap = document.createElement('div');
       wrap.id = 'skilltree-radial-wrap';
+      wrap.style.transform = `translate(${skillTreePanX}px, ${skillTreePanY}px)`;
 
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('id', 'skilltree-svg');
-      svg.setAttribute('viewBox', '0 0 100 100');
-      svg.setAttribute('preserveAspectRatio', 'none');
+      svg.setAttribute('viewBox', '0 0 900 900');
       wrap.appendChild(svg);
 
       const centerEl = document.createElement('div');
@@ -2282,37 +2493,29 @@
       centerEl.innerText = '🎣';
       wrap.appendChild(centerEl);
 
+      const CENTER = 450;
       const branchKeys = Object.keys(SKILL_TREE);
       const angleStep = 360 / branchKeys.length;
+      const twistPerNode = 16; // 段が進むごとに角度をずらして渦巻き状にする
 
       branchKeys.forEach((branchKey, bIdx) => {
         const branch = SKILL_TREE[branchKey];
         const unlockedCount = game.skillTree[branchKey] || 0;
-        const angleDeg = -90 + bIdx * angleStep; // 上を起点に等間隔で放射
-        const angleRad = angleDeg * Math.PI / 180;
-        const dx = Math.cos(angleRad), dy = Math.sin(angleRad);
+        const baseAngle = -90 + bIdx * angleStep; // 上を起点に等間隔で放射
 
-        // 系統ラベル（外周）
-        const labelR = 86;
-        const labelEl = document.createElement('div');
-        labelEl.className = 'skilltree-branch-label';
-        labelEl.style.left = (50 + dx * labelR) + '%';
-        labelEl.style.top = (50 + dy * labelR) + '%';
-        labelEl.style.color = branch.color;
-        labelEl.innerText = `${branch.label} (${unlockedCount}/${branch.nodes.length})`;
-        wrap.appendChild(labelEl);
-
-        let prevX = 50, prevY = 50;
+        let prevX = CENTER, prevY = CENTER;
         branch.nodes.forEach((node, i) => {
-          const r = 9 + i * 7.9; // 中心からの距離(%) — 段が進むほど外側へ広がる（9段でも枠内に収まる間隔）
-          const x = 50 + dx * r;
-          const y = 50 + dy * r;
+          const angleDeg = baseAngle + i * twistPerNode; // 外側に行くほど回転して渦を巻く
+          const angleRad = angleDeg * Math.PI / 180;
+          const r = 70 + i * 75; // 中心からの距離(px) — 段が進むほど外側へ広がる
+          const x = CENTER + Math.cos(angleRad) * r;
+          const y = CENTER + Math.sin(angleRad) * r;
 
           const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
           line.setAttribute('x1', prevX); line.setAttribute('y1', prevY);
           line.setAttribute('x2', x); line.setAttribute('y2', y);
           line.setAttribute('stroke', i < unlockedCount ? '#39ff14' : 'rgba(255,255,255,0.18)');
-          line.setAttribute('stroke-width', i < unlockedCount ? '0.9' : '0.5');
+          line.setAttribute('stroke-width', i < unlockedCount ? '3' : '1.5');
           svg.appendChild(line);
           prevX = x; prevY = y;
 
@@ -2320,8 +2523,8 @@
           const isAvailable = i === unlockedCount && game.skillPoints >= node.cost;
           const nodeEl = document.createElement('div');
           nodeEl.className = `skilltree-radial-node ${isUnlocked ? 'unlocked' : (isAvailable ? 'available' : 'locked')}`;
-          nodeEl.style.left = x + '%';
-          nodeEl.style.top = y + '%';
+          nodeEl.style.left = x + 'px';
+          nodeEl.style.top = y + 'px';
           nodeEl.innerHTML = `
             <div class="skilltree-radial-node-name">${node.name}</div>
             <div class="skilltree-radial-node-desc">${node.desc}</div>
@@ -2331,10 +2534,53 @@
             nodeEl.onclick = () => unlockSkillNode(branchKey, i);
           }
           wrap.appendChild(nodeEl);
+
+          // 系統ラベルは最終ノードのすぐ外側に配置
+          if (i === branch.nodes.length - 1) {
+            const labelAngleDeg = baseAngle + (i + 1) * twistPerNode;
+            const labelAngleRad = labelAngleDeg * Math.PI / 180;
+            const labelR = r + 55;
+            const labelEl = document.createElement('div');
+            labelEl.className = 'skilltree-branch-label';
+            labelEl.style.left = (CENTER + Math.cos(labelAngleRad) * labelR) + 'px';
+            labelEl.style.top = (CENTER + Math.sin(labelAngleRad) * labelR) + 'px';
+            labelEl.style.color = branch.color;
+            labelEl.innerText = `${branch.label} (${unlockedCount}/${branch.nodes.length})`;
+            wrap.appendChild(labelEl);
+          }
         });
       });
 
-      container.appendChild(wrap);
+      viewport.appendChild(wrap);
+      container.appendChild(viewport);
+      initSkillTreeDrag(viewport, wrap);
+    }
+
+    // スキルツリーをドラッグ（マウス/タッチ共通）で動かせるようにする
+    function initSkillTreeDrag(viewport, wrap) {
+      const onPointerDown = (e) => {
+        skillTreeDragState = {
+          startX: e.clientX, startY: e.clientY,
+          originX: skillTreePanX, originY: skillTreePanY
+        };
+        viewport.classList.add('dragging');
+        viewport.setPointerCapture(e.pointerId);
+      };
+      const onPointerMove = (e) => {
+        if (!skillTreeDragState) return;
+        skillTreePanX = skillTreeDragState.originX + (e.clientX - skillTreeDragState.startX);
+        skillTreePanY = skillTreeDragState.originY + (e.clientY - skillTreeDragState.startY);
+        wrap.style.transform = `translate(${skillTreePanX}px, ${skillTreePanY}px)`;
+      };
+      const onPointerUp = () => {
+        skillTreeDragState = null;
+        viewport.classList.remove('dragging');
+      };
+      viewport.addEventListener('pointerdown', onPointerDown);
+      viewport.addEventListener('pointermove', onPointerMove);
+      viewport.addEventListener('pointerup', onPointerUp);
+      viewport.addEventListener('pointercancel', onPointerUp);
+      viewport.addEventListener('pointerleave', onPointerUp);
     }
 
     function unlockSkillNode(branchKey, nodeIndex) {
@@ -2424,10 +2670,16 @@
       if (canCraft) {
         game.gold -= recipe.cost;
         recipe.materials.forEach(m => { game.materials[m.name] -= m.qty; });
-        if (name === '神エサ') game.baits['神エサ']++;
-        if (name === '特殊ルアー') game.baits['特殊エサ'] += 5;
-        if (name === '神話の竿') { if(!game.ownedRods.includes(8)) game.ownedRods.push(8); game.rodId = 8; }
-        if (name === '海神の竿') { if(!game.ownedRods.includes(9)) game.ownedRods.push(9); game.rodId = 9; }
+        if (recipe.type === 'bait') {
+          game.baits[recipe.giveBait] = (game.baits[recipe.giveBait] || 0) + recipe.qty;
+        } else if (recipe.type === 'material') {
+          game.materials[recipe.giveMaterial] = (game.materials[recipe.giveMaterial] || 0) + recipe.qty;
+        } else if (recipe.type === 'gold') {
+          game.gold += recipe.goldAmount;
+        } else if (recipe.type === 'rod') {
+          if (!game.ownedRods.includes(recipe.rodId)) game.ownedRods.push(recipe.rodId);
+          game.rodId = recipe.rodId;
+        }
         saveGame(); renderCraft(); updateHUD();
         addVisualSplashEffect("CRAFT!");
       }
@@ -2995,13 +3247,23 @@
 
       gainXP(targetFish.xp);
       let dropMat = '', dropQty = 0;
+      const isNewFrontier = targetFish.mapId >= 11; // 珊瑚礁の楽園以降は新素材がドロップする
       if (targetFish.rarity === 'Common') { if(Math.random()<0.5){dropMat='魚のウロコ'; dropQty=1+Math.floor(Math.random()*2);} }
       else if (targetFish.rarity === 'Uncommon') { if(Math.random()<0.6){dropMat='魚のウロコ'; dropQty=2+Math.floor(Math.random()*3);} }
-      else if (targetFish.rarity === 'Rare') { dropMat = Math.random()<0.5 ? '虹色のヒレ' : '魚のウロコ'; dropQty = dropMat==='虹色のヒレ'?1:4; }
-      else if (targetFish.rarity === 'Epic') { dropMat = Math.random()<0.4 ? '深海の結晶' : '虹色のヒレ'; dropQty = dropMat==='深海の結晶'?1:2; }
-      else if (targetFish.rarity === 'Legendary') { dropMat = Math.random()<0.5 ? '古代の化石' : '深海の結晶'; dropQty = dropMat==='古代の化石'?1:2; }
-      else if (targetFish.rarity === 'Mythic') { dropMat='古代の化石'; dropQty=2; }
-      else if (targetFish.rarity === 'Divine') { dropMat='海神の輝石'; dropQty=1; }
+      else if (targetFish.rarity === 'Rare') {
+        dropMat = Math.random()<0.5 ? (isNewFrontier ? '珊瑚石' : '虹色のヒレ') : '魚のウロコ';
+        dropQty = (dropMat==='虹色のヒレ' || dropMat==='珊瑚石') ? 1 : 4;
+      }
+      else if (targetFish.rarity === 'Epic') {
+        dropMat = Math.random()<0.4 ? (isNewFrontier ? '珊瑚石' : '深海の結晶') : (isNewFrontier ? '深海の結晶' : '虹色のヒレ');
+        dropQty = (dropMat==='深海の結晶' || dropMat==='珊瑚石') ? 1 : 2;
+      }
+      else if (targetFish.rarity === 'Legendary') {
+        dropMat = Math.random()<0.5 ? (isNewFrontier ? '深淵の遺物' : '古代の化石') : '深海の結晶';
+        dropQty = (dropMat==='古代の化石' || dropMat==='深淵の遺物') ? 1 : 2;
+      }
+      else if (targetFish.rarity === 'Mythic') { dropMat = isNewFrontier ? '龍脈の欠片' : '古代の化石'; dropQty=2; }
+      else if (targetFish.rarity === 'Divine') { dropMat = isNewFrontier ? '万象の紋章' : '海神の輝石'; dropQty=1; }
       if (dropMat) game.materials[dropMat] = (game.materials[dropMat] || 0) + dropQty;
 
       if (!game.book[targetFish.id]) game.book[targetFish.id] = { caught:1, maxLen:finalLen, maxWeight:finalWeight, firstDate:new Date().toISOString().split('T')[0] };
