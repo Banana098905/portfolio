@@ -1426,6 +1426,566 @@
 
   <script>
     // ============================================================
+    // Ocean Quest ロッド演出エンジン（キャンバス描画）
+    // ============================================================
+    const rand = (a, b) => a + Math.random() * (b - a);
+    const TAU = Math.PI * 2;
+
+    // 各テーマの背景フェード色（残像・雰囲気を作る）
+    const TRAIL = {
+      cosmic: 'rgba(6,4,20,0.30)', blackhole: 'rgba(3,2,8,0.28)',
+      oceanking: 'rgba(4,14,26,0.30)', dragon: 'rgba(14,4,4,0.26)',
+      abyss: 'rgba(4,2,4,0.30)', solar: 'rgba(20,12,2,0.28)',
+      luna: 'rgba(6,10,22,0.28)', storm: 'rgba(4,8,16,0.30)',
+      glacial: 'rgba(8,18,26,0.30)', emperor: 'rgba(14,10,2,0.28)',
+      infinity: 'rgba(4,8,16,0.26)', seasons: 'rgba(8,10,16,0.30)',
+      chrono: 'rgba(10,8,4,0.28)', phantom: 'rgba(4,10,14,0.30)',
+      celestial: 'rgba(4,3,16,0.24)',
+    };
+
+    function createRodState(key, w, h) {
+      const s = { t: 0, spawn: 0, particles: [], extra: {} };
+      const cx = w / 2, cy = h / 2;
+      if (key === 'cosmic') {
+        s.orbits = Array.from({ length: 22 }, () => ({
+          a: rand(0, TAU), r: rand(50, Math.min(w, h) * 0.42),
+          sp: rand(0.3, 0.9) * (Math.random() < 0.5 ? 1 : -1),
+          sz: rand(1, 3), tilt: rand(0.4, 0.85),
+        }));
+      }
+      if (key === 'chrono') {
+        s.gears = [
+          { x: cx, y: cy, r: Math.min(w, h) * 0.16, teeth: 12, sp: 0.5 },
+          { x: cx - w * 0.22, y: cy + h * 0.12, r: Math.min(w, h) * 0.1, teeth: 9, sp: -0.8 },
+          { x: cx + w * 0.24, y: cy - h * 0.1, r: Math.min(w, h) * 0.12, teeth: 10, sp: 0.7 },
+          { x: cx + w * 0.16, y: cy + h * 0.2, r: Math.min(w, h) * 0.07, teeth: 7, sp: -1.1 },
+        ];
+      }
+      return s;
+    }
+
+    function bg(ctx, w, h, key) {
+      ctx.fillStyle = TRAIL[key] || 'rgba(7,11,18,0.3)';
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    function drawRodFrame(ctx, w, h, key, s, dt, T) {
+      s.t += dt;
+      bg(ctx, w, h, key);
+      const cx = w / 2, cy = h / 2;
+      ctx.save();
+      (THEMES[key] || THEMES.cosmic)(ctx, w, h, cx, cy, s, dt, T);
+      ctx.restore();
+    }
+
+    const glow = (ctx, x, y, r, c1, c2) => {
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, c1); g.addColorStop(1, c2);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    };
+
+    const THEMES = {
+      cosmic(ctx, w, h, cx, cy, s, dt, T) {
+        glow(ctx, cx, cy, 90, 'rgba(140,106,255,0.28)', 'rgba(140,106,255,0)');
+        ctx.save(); ctx.translate(cx, cy);
+        s.orbits.forEach(o => {
+          o.a += o.sp * dt;
+          const x = Math.cos(o.a) * o.r, y = Math.sin(o.a) * o.r * o.tilt;
+          ctx.fillStyle = `hsla(${255 + Math.sin(o.a) * 30},90%,75%,0.9)`;
+          ctx.beginPath(); ctx.arc(x, y, o.sz, 0, TAU); ctx.fill();
+        });
+        ctx.restore();
+        s.spawn -= dt;
+        if (s.spawn <= 0) {
+          s.spawn = rand(0.4, 1.1);
+          s.particles.push({ x: rand(w * 0.1, w), y: rand(0, h * 0.3), vx: rand(-380, -520), vy: rand(160, 260), life: 1 });
+        }
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * 1.2; p.x += p.vx * dt; p.y += p.vy * dt;
+          ctx.strokeStyle = `rgba(200,220,255,${p.life})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.04, p.y - p.vy * 0.04); ctx.stroke();
+        });
+      },
+
+      blackhole(ctx, w, h, cx, cy, s, dt, T) {
+        const R = Math.min(w, h) * 0.13;
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeStyle = `rgba(176,106,255,${0.5 - i * 0.13})`; ctx.lineWidth = 6 - i * 1.5;
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(T * (1.4 - i * 0.3));
+          ctx.beginPath(); ctx.ellipse(0, 0, R + 14 + i * 12, (R + 14 + i * 12) * 0.4, 0, 0, TAU); ctx.stroke();
+          ctx.restore();
+        }
+        if (Math.random() < 0.9) {
+          const a = rand(0, TAU), r = rand(R + 40, Math.max(w, h) * 0.6);
+          s.particles.push({ a, r, x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r * 0.6, life: 1 });
+        }
+        s.particles = s.particles.filter(p => p.r > R * 0.4 && p.life > 0);
+        s.particles.forEach(p => {
+          p.a += dt * 2.2; p.r -= (p.r * 0.9 + 30) * dt; p.life -= dt * 0.4;
+          p.x = cx + Math.cos(p.a) * p.r; p.y = cy + Math.sin(p.a) * p.r * 0.6;
+          ctx.fillStyle = `hsla(${270 + p.r * 0.1},90%,70%,${p.life})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill();
+        });
+        glow(ctx, cx, cy, R * 1.3, 'rgba(0,0,0,1)', 'rgba(0,0,0,0)');
+        glow(ctx, cx, cy, R, '#000', '#000');
+      },
+
+      oceanking(ctx, w, h, cx, cy, s, dt, T) {
+        const split = Math.min(1, s.t / 1.2), gap = split * w * 0.28;
+        const drawSea = (dir) => {
+          ctx.fillStyle = 'rgba(0,120,160,0.35)';
+          ctx.beginPath(); ctx.moveTo(dir < 0 ? 0 : w, h);
+          ctx.lineTo(dir < 0 ? 0 : w, h * 0.55);
+          for (let x = 0; x <= w * 0.5; x += 20) {
+            const px = cx - dir * gap - dir * x;
+            ctx.lineTo(px, h * 0.55 + Math.sin(x * 0.05 + T * 3) * 8);
+          }
+          ctx.lineTo(cx - dir * gap, h); ctx.closePath(); ctx.fill();
+        };
+        drawSea(-1); drawSea(1);
+        // 光の柱
+        const lg = ctx.createLinearGradient(cx, h, cx, 0);
+        lg.addColorStop(0, 'rgba(255,215,0,0.4)'); lg.addColorStop(1, 'rgba(255,215,0,0)');
+        ctx.fillStyle = lg; ctx.fillRect(cx - gap * 0.6, 0, gap * 1.2 + 4, h);
+        // 王冠
+        const cw = Math.min(w, h) * 0.18, cyc = cy - split * 20 + Math.sin(T * 2) * 4;
+        glow(ctx, cx, cyc, cw * 1.6, 'rgba(255,215,0,0.35)', 'rgba(255,215,0,0)');
+        ctx.fillStyle = '#ffd700'; ctx.strokeStyle = '#a67c00'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx - cw, cyc + cw * 0.5); ctx.lineTo(cx - cw, cyc - cw * 0.4);
+        ctx.lineTo(cx - cw * 0.5, cyc + cw * 0.05); ctx.lineTo(cx, cyc - cw * 0.6);
+        ctx.lineTo(cx + cw * 0.5, cyc + cw * 0.05); ctx.lineTo(cx + cw, cyc - cw * 0.4);
+        ctx.lineTo(cx + cw, cyc + cw * 0.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+        [-1, 0, 1].forEach(i => { ctx.fillStyle = '#ff2f7a'; ctx.beginPath(); ctx.arc(cx + i * cw * 0.55, cyc - cw * 0.05, cw * 0.09, 0, TAU); ctx.fill(); });
+        if (Math.random() < 0.6) s.particles.push({ x: cx + rand(-cw, cw), y: cyc, vy: rand(-90, -180), life: 1 });
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => { p.life -= dt; p.y += p.vy * dt; ctx.fillStyle = `rgba(255,235,120,${p.life})`; ctx.beginPath(); ctx.arc(p.x, p.y, 2, 0, TAU); ctx.fill(); });
+      },
+
+      dragon(ctx, w, h, cx, cy, s, dt, T) {
+        // 龍の軌道（画面を蛇行して飛び回る）
+        const speed = 200;
+        const pathPos = (T * speed) % (w + 300);
+        const hx = pathPos - 150;
+        const hy = cy + Math.sin(T * 2.0) * h * 0.28;
+        const heading = Math.cos(T * 2.0) * 0.5;
+
+        // 龍の体（節）—頭から尾までの軌跡
+        const segs = 14;
+        for (let i = segs - 1; i >= 0; i--) {
+          const delay = i * 0.06;
+          const px = hx - i * 18 - Math.cos(T * 2.0 + delay) * 8;
+          const py = cy + Math.sin(T * 2.0 - delay) * h * 0.28;
+          const taper = 1 - i / segs;
+          const r = 12 * taper + 3;
+          glow(ctx, px, py, r * 3, `rgba(255,${100 + i * 8},30,${0.3 * taper})`, 'rgba(255,60,0,0)');
+          ctx.fillStyle = `hsla(${15 + i * 2},100%,${55 + taper * 20}%,${0.9 * taper + 0.1})`;
+          ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.fill();
+          // 鱗の縁取り
+          ctx.strokeStyle = `rgba(255,200,80,${0.4 * taper})`; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(px, py, r, 0, TAU); ctx.stroke();
+        }
+
+        // 火炎パーティクル（大量）
+        for (let burst = 0; burst < 3; burst++) {
+          s.particles.push({
+            x: hx + rand(-8, 8), y: hy + rand(-8, 8),
+            vx: -rand(80, 200) + heading * 100, vy: rand(-80, 120),
+            life: 1, r: rand(4, 12), hue: rand(5, 50),
+          });
+        }
+        // 火花（小粒で高速）
+        if (Math.random() < 0.8) s.particles.push({
+          x: hx, y: hy, vx: rand(-300, 300), vy: rand(-300, 100),
+          life: 1, r: rand(1, 3), hue: rand(30, 60), spark: true,
+        });
+
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * (p.spark ? 2.5 : 1.3);
+          p.x += p.vx * dt; p.y += p.vy * dt;
+          p.vy += 60 * dt; // 重力
+          if (p.spark) {
+            ctx.fillStyle = `hsla(${p.hue},100%,80%,${p.life})`;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, TAU); ctx.fill();
+          } else {
+            glow(ctx, p.x, p.y, p.r * 2 * p.life, `hsla(${p.hue},100%,60%,${p.life * 0.6})`, 'rgba(255,40,0,0)');
+            ctx.fillStyle = `hsla(${p.hue},100%,${55 + p.life * 25}%,${p.life * 0.8})`;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.life, 0, TAU); ctx.fill();
+          }
+        });
+
+        // 龍の頭（大きく・神々しく）
+        glow(ctx, hx, hy, 50, 'rgba(255,200,80,0.9)', 'rgba(255,60,10,0)');
+        glow(ctx, hx, hy, 30, 'rgba(255,240,150,1)', 'rgba(255,100,0,0)');
+        ctx.fillStyle = '#ffdd55';
+        ctx.beginPath(); ctx.arc(hx, hy, 16, 0, TAU); ctx.fill();
+        // 角
+        ctx.strokeStyle = '#ffaa33'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(hx - 4, hy - 12); ctx.lineTo(hx - 10, hy - 26);
+        ctx.moveTo(hx + 4, hy - 12); ctx.lineTo(hx + 10, hy - 26);
+        ctx.stroke();
+        // 目（鋭く光る）
+        glow(ctx, hx + 6, hy - 4, 6, 'rgba(255,255,200,1)', 'rgba(255,200,0,0)');
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(hx + 6, hy - 4, 3, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#cc0000'; ctx.beginPath(); ctx.arc(hx + 7, hy - 4, 1.5, 0, TAU); ctx.fill();
+
+        // 雷撃（頻繁に・複数本）
+        s.spawn -= dt;
+        if (s.spawn <= 0) {
+          s.spawn = rand(0.15, 0.5);
+          const bx = rand(0, w);
+          s.extra.bolts = s.extra.bolts || [];
+          s.extra.bolts.push({
+            x: bx, life: 0.25,
+            seg: Array.from({ length: 10 }, () => rand(-35, 35)),
+            segY: Array.from({ length: 10 }, () => rand(0.7, 1.3)),
+          });
+        }
+        (s.extra.bolts || []).forEach((b, i) => {
+          b.life -= dt;
+          if (b.life <= 0) { s.extra.bolts.splice(i, 1); return; }
+          const a = b.life / 0.25;
+          ctx.fillStyle = `rgba(180,220,255,${a * 0.15})`; ctx.fillRect(0, 0, w, h);
+          ctx.strokeStyle = `rgba(200,240,255,${a})`; ctx.lineWidth = 3; ctx.lineCap = 'round';
+          ctx.shadowColor = '#5ad0ff'; ctx.shadowBlur = 20;
+          ctx.beginPath(); ctx.moveTo(b.x, 0);
+          b.seg.forEach((o, j) => ctx.lineTo(b.x + o, (j + 1) * (h / 10) * b.segY[j])); ctx.stroke();
+          ctx.shadowBlur = 0;
+        });
+
+        // 全体の赤いオーラ
+        glow(ctx, hx, hy, 120, 'rgba(255,80,20,0.15)', 'rgba(255,40,0,0)');
+      },
+
+      abyss(ctx, w, h, cx, cy, s, dt, T) {
+        ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(0, 0, w, h);
+        if (Math.random() < 0.02 && s.particles.length < 7) {
+          s.particles.push({ x: rand(w * 0.1, w * 0.9), y: rand(h * 0.4, h * 0.9), life: 0, dir: 1, max: rand(0.5, 1) });
+        }
+        s.particles = s.particles.filter(p => !(p.dir < 0 && p.life <= 0));
+        s.particles.forEach(p => {
+          p.life += p.dir * dt * 0.4; if (p.life >= p.max) p.dir = -1;
+          const a = Math.max(0, p.life);
+          ctx.fillStyle = `rgba(255,30,50,${a})`;
+          [-9, 9].forEach(dx => {
+            glow(ctx, p.x + dx, p.y, 10, `rgba(255,40,60,${a * 0.7})`, 'rgba(255,0,0,0)');
+            ctx.fillStyle = `rgba(255,60,70,${a})`;
+            ctx.beginPath(); ctx.ellipse(p.x + dx, p.y, 6, 3.5, 0, 0, TAU); ctx.fill();
+            ctx.fillStyle = `rgba(20,0,0,${a})`; ctx.beginPath(); ctx.arc(p.x + dx, p.y, 2, 0, TAU); ctx.fill();
+          });
+        });
+      },
+
+      solar(ctx, w, h, cx, cy, s, dt, T) {
+        const sy = cy - h * 0.05, R = Math.min(w, h) * 0.16;
+        glow(ctx, cx, sy, R * 2.4, 'rgba(255,200,40,0.4)', 'rgba(255,140,0,0)');
+        ctx.save(); ctx.translate(cx, sy); ctx.rotate(T * 0.6);
+        for (let i = 0; i < 16; i++) {
+          ctx.rotate(TAU / 16); ctx.strokeStyle = 'rgba(255,215,80,0.8)'; ctx.lineWidth = 3;
+          const len = R * (1.35 + Math.sin(T * 3 + i) * 0.18);
+          ctx.beginPath(); ctx.moveTo(R * 1.05, 0); ctx.lineTo(len, 0); ctx.stroke();
+        }
+        ctx.restore();
+        ctx.fillStyle = '#ffdb4d'; ctx.beginPath(); ctx.arc(cx, sy, R, 0, TAU); ctx.fill();
+        if (Math.random() < 0.9) s.particles.push({ x: rand(0, w), y: h + 6, vy: rand(-70, -150), life: 1, sz: rand(1.5, 3.5) });
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => { p.life -= dt * 0.5; p.y += p.vy * dt; ctx.fillStyle = `rgba(255,220,90,${p.life})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, TAU); ctx.fill(); });
+      },
+
+      luna(ctx, w, h, cx, cy, s, dt, T) {
+        const R = Math.min(w, h) * 0.2;
+        glow(ctx, cx, cy - h * 0.04, R * 2, 'rgba(160,200,255,0.3)', 'rgba(120,160,255,0)');
+        ctx.fillStyle = '#dce8ff'; ctx.beginPath(); ctx.arc(cx, cy - h * 0.04, R, 0, TAU); ctx.fill();
+        ctx.fillStyle = 'rgba(150,180,230,0.5)';
+        [[0.3, -0.2, 0.18], [-0.35, 0.25, 0.12], [0.1, 0.4, 0.1]].forEach(c => {
+          ctx.beginPath(); ctx.arc(cx + c[0] * R, cy - h * 0.04 + c[1] * R, c[2] * R, 0, TAU); ctx.fill();
+        });
+        if (Math.random() < 0.85) s.particles.push({ x: rand(0, w), y: -6, vy: rand(70, 150), life: 1, sz: rand(1, 2.5), tw: rand(0, TAU) });
+        s.particles = s.particles.filter(p => p.life > 0 && p.y < h + 10);
+        s.particles.forEach(p => { p.life -= dt * 0.35; p.y += p.vy * dt; const a = p.life * (0.6 + 0.4 * Math.sin(T * 5 + p.tw)); ctx.fillStyle = `rgba(200,225,255,${a})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, TAU); ctx.fill(); });
+      },
+
+      storm(ctx, w, h, cx, cy, s, dt, T) {
+        ctx.fillStyle = 'rgba(4,10,22,0.35)'; ctx.fillRect(0, 0, w, h);
+        for (let i = 0; i < 22; i++) {
+          const x = (i * 53 + T * 260) % w, y = ((i * 89 + T * 620) % h);
+          ctx.strokeStyle = 'rgba(90,208,255,0.5)'; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - 4, y + 16); ctx.stroke();
+        }
+        s.spawn -= dt;
+        if (s.spawn <= 0) { s.spawn = rand(0.5, 1.3); s.extra.flash = 1; s.extra.bx = rand(w * 0.2, w * 0.8); s.extra.seg = Array.from({ length: 8 }, () => rand(-26, 26)); }
+        if (s.extra.flash > 0) {
+          ctx.fillStyle = `rgba(150,220,255,${s.extra.flash * 0.18})`; ctx.fillRect(0, 0, w, h);
+          ctx.strokeStyle = `rgba(200,240,255,${s.extra.flash})`; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(s.extra.bx, 0);
+          s.extra.seg.forEach((o, i) => ctx.lineTo(s.extra.bx + o, (i + 1) * (h / 8))); ctx.stroke();
+          s.extra.flash -= dt * 4;
+        }
+      },
+
+      glacial(ctx, w, h, cx, cy, s, dt, T) {
+        const v = ctx.createRadialGradient(cx, cy, Math.min(w, h) * 0.2, cx, cy, Math.max(w, h) * 0.7);
+        v.addColorStop(0, 'rgba(174,240,255,0)'); v.addColorStop(1, 'rgba(174,240,255,0.35)');
+        ctx.fillStyle = v; ctx.fillRect(0, 0, w, h);
+        if (s.particles.length < 40 && Math.random() < 0.8) s.particles.push({ x: rand(0, w), y: -6, vy: rand(30, 80), a: rand(0, TAU), sp: rand(-1, 1), sz: rand(4, 10), life: 1 });
+        s.particles = s.particles.filter(p => p.y < h + 10);
+        s.particles.forEach(p => {
+          p.y += p.vy * dt; p.a += p.sp * dt;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a);
+          ctx.strokeStyle = 'rgba(220,250,255,0.85)'; ctx.lineWidth = 1.3;
+          for (let i = 0; i < 6; i++) { ctx.rotate(TAU / 6); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, p.sz); ctx.moveTo(0, p.sz * 0.6); ctx.lineTo(p.sz * 0.25, p.sz * 0.8); ctx.moveTo(0, p.sz * 0.6); ctx.lineTo(-p.sz * 0.25, p.sz * 0.8); ctx.stroke(); }
+          ctx.restore();
+        });
+      },
+
+      emperor(ctx, w, h, cx, cy, s, dt, T) {
+        const cw = Math.min(w, h) * 0.16;
+        glow(ctx, cx, cy - h * 0.05, cw * 2, 'rgba(255,215,0,0.28)', 'rgba(255,215,0,0)');
+        ctx.fillStyle = '#ffd700'; ctx.strokeStyle = '#a67c00'; ctx.lineWidth = 2;
+        const cyc = cy - h * 0.05;
+        ctx.beginPath();
+        ctx.moveTo(cx - cw, cyc + cw * 0.5); ctx.lineTo(cx - cw, cyc - cw * 0.45);
+        ctx.lineTo(cx - cw * 0.5, cyc + cw * 0.05); ctx.lineTo(cx, cyc - cw * 0.65);
+        ctx.lineTo(cx + cw * 0.5, cyc + cw * 0.05); ctx.lineTo(cx + cw, cyc - cw * 0.45);
+        ctx.lineTo(cx + cw, cyc + cw * 0.5); ctx.closePath(); ctx.fill(); ctx.stroke();
+        if (Math.random() < 0.7) s.particles.push({ x: rand(w * 0.2, w * 0.8), y: cyc, vx: rand(-20, 20), vy: rand(30, 70), a: rand(0, TAU), life: 1 });
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * 0.4; p.x += p.vx * dt + Math.sin(T * 2 + p.a) * 12 * dt; p.y += p.vy * dt; p.a += dt;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a);
+          ctx.fillStyle = `rgba(255,225,120,${p.life})`;
+          ctx.beginPath(); ctx.ellipse(0, 0, 3, 9, 0, 0, TAU); ctx.fill(); ctx.restore();
+        });
+      },
+
+      infinity(ctx, w, h, cx, cy, s, dt, T) {
+        const A = w * 0.28, B = h * 0.2;
+
+        // 神々しい中心光核
+        glow(ctx, cx, cy, 80, 'rgba(255,255,255,0.3)', 'rgba(0,240,255,0)');
+        glow(ctx, cx, cy, 30, 'rgba(255,255,255,0.7)', 'rgba(255,255,255,0)');
+
+        // 3重の無限軌道（異なる角度・速度で重なり合う）
+        const layers = [
+          { rot: 0, sp: 0.6, segs: 70, scale: 1.0 },
+          { rot: Math.PI / 3, sp: -0.45, segs: 60, scale: 0.75 },
+          { rot: -Math.PI / 3, sp: 0.8, segs: 50, scale: 0.55 },
+        ];
+        layers.forEach((L, li) => {
+          ctx.save(); ctx.translate(cx, cy); ctx.rotate(L.rot);
+          for (let seg = 0; seg < L.segs; seg++) {
+            const p = (T * L.sp + seg / L.segs) % 1, th = p * TAU;
+            const x = A * L.scale * Math.sin(th), y = B * L.scale * Math.sin(th) * Math.cos(th) * 2;
+            const sz = (3 + (seg / L.segs) * 4) * L.scale;
+            const hue = (T * 120 + seg * 6 + li * 120) % 360;
+            // パーティクルの光晕
+            glow(ctx, cx + x, cy + y, sz * 3, `hsla(${hue},100%,70%,${(0.2 + 0.5 * (seg / L.segs)) * L.scale})`, 'rgba(0,0,0,0)');
+            ctx.fillStyle = `hsla(${hue},100%,${68 + (seg / L.segs) * 20}%,${0.4 + 0.6 * (seg / L.segs)})`;
+            ctx.beginPath(); ctx.arc(cx + x, cy + y, sz, 0, TAU); ctx.fill();
+          }
+          ctx.restore();
+        });
+
+        // 神聖な光線（上から降り注ぐ）
+        ctx.save();
+        for (let i = 0; i < 6; i++) {
+          const ra = (T * 0.3 + i * TAU / 6) % TAU;
+          const rx = cx + Math.cos(ra) * w * 0.4, ry = -10;
+          ctx.strokeStyle = `rgba(255,255,255,${0.06 + 0.04 * Math.sin(T * 2 + i)})`;
+          ctx.lineWidth = 30;
+          ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.cos(ra + Math.PI / 2) * 60, h); ctx.stroke();
+        }
+        ctx.restore();
+
+        // 飛び散る虹色の火花（大量）
+        for (let burst = 0; burst < 3; burst++) {
+          if (Math.random() < 0.9) {
+            const L = layers[Math.floor(rand(0, 3))];
+            const th = rand(0, TAU);
+            s.particles.push({
+              x: cx + A * L.scale * Math.sin(th),
+              y: cy + B * L.scale * Math.sin(th) * Math.cos(th) * 2,
+              vx: rand(-80, 80), vy: rand(-80, 80),
+              hue: rand(0, 360), life: 1, sz: rand(2, 5),
+            });
+          }
+        }
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * 0.6; p.x += p.vx * dt; p.y += p.vy * dt;
+          p.vx *= 0.98; p.vy *= 0.98;
+          glow(ctx, p.x, p.y, p.sz * 2, `hsla(${p.hue},100%,70%,${p.life * 0.4})`, 'rgba(0,0,0,0)');
+          ctx.fillStyle = `hsla(${p.hue},100%,75%,${p.life})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.sz * p.life, 0, TAU); ctx.fill();
+        });
+
+        // 中心のキラッと点滅
+        const flash = Math.sin(T * 8) * 0.5 + 0.5;
+        glow(ctx, cx, cy, 15 + flash * 20, `rgba(255,255,255,${0.6 + flash * 0.4})`, 'rgba(0,240,255,0)');
+      },
+
+      seasons(ctx, w, h, cx, cy, s, dt, T) {
+        const seasons = ['spring', 'summer', 'autumn', 'winter'];
+        const idx = Math.floor(T / 2.5) % 4, ss = seasons[idx];
+        const conf = {
+          spring: { c: () => `rgba(255,150,200,${rand(0.6, 1)})`, tint: 'rgba(255,150,200,0.06)' },
+          summer: { c: () => `rgba(${rand(120, 255) | 0},220,60,0.9)`, tint: 'rgba(255,230,80,0.06)' },
+          autumn: { c: () => `hsla(${rand(20, 40)},90%,55%,0.95)`, tint: 'rgba(255,120,30,0.06)' },
+          winter: { c: () => 'rgba(220,245,255,0.95)', tint: 'rgba(180,220,255,0.07)' },
+        }[ss];
+        ctx.fillStyle = conf.tint; ctx.fillRect(0, 0, w, h);
+        if (Math.random() < 0.9) s.particles.push({ x: rand(0, w), y: -6, vy: rand(50, 120), vx: rand(-25, 25), a: rand(0, TAU), sp: rand(-2, 2), col: conf.c(), life: 1, sz: rand(3, 7) });
+        s.particles = s.particles.filter(p => p.y < h + 10);
+        s.particles.forEach(p => {
+          p.y += p.vy * dt; p.x += p.vx * dt + Math.sin(T * 2 + p.a) * 20 * dt; p.a += p.sp * dt;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.col;
+          ctx.beginPath(); ctx.ellipse(0, 0, p.sz, p.sz * 0.55, 0, 0, TAU); ctx.fill(); ctx.restore();
+        });
+        ctx.fillStyle = 'rgba(255,255,255,0.85)'; ctx.font = 'bold 20px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText({ spring: '🌸 春', summer: '☀ 夏', autumn: '🍁 秋', winter: '❄ 冬' }[ss], cx, h - 24);
+      },
+
+      chrono(ctx, w, h, cx, cy, s, dt, T) {
+        s.gears.forEach(g => {
+          ctx.save(); ctx.translate(g.x, g.y); ctx.rotate(T * g.sp);
+          ctx.strokeStyle = 'rgba(201,162,74,0.85)'; ctx.fillStyle = 'rgba(201,162,74,0.12)'; ctx.lineWidth = 3;
+          ctx.beginPath();
+          for (let i = 0; i <= g.teeth; i++) {
+            const a1 = (i / g.teeth) * TAU, a2 = ((i + 0.5) / g.teeth) * TAU;
+            ctx.lineTo(Math.cos(a1) * g.r * 1.15, Math.sin(a1) * g.r * 1.15);
+            ctx.lineTo(Math.cos(a2) * g.r, Math.sin(a2) * g.r);
+          }
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          ctx.beginPath(); ctx.arc(0, 0, g.r * 0.45, 0, TAU); ctx.stroke();
+          ctx.restore();
+        });
+        // 中央の時計の針
+        ctx.save(); ctx.translate(cx, cy); ctx.strokeStyle = 'rgba(255,230,160,0.95)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.rotate(T * 1.2); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -Math.min(w, h) * 0.11); ctx.stroke();
+        ctx.restore();
+        ctx.save(); ctx.translate(cx, cy); ctx.strokeStyle = 'rgba(255,230,160,0.7)'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
+        ctx.rotate(-T * 0.4); ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -Math.min(w, h) * 0.07); ctx.stroke();
+        ctx.restore();
+      },
+
+      phantom(ctx, w, h, cx, cy, s, dt, T) {
+        if (Math.random() < 0.9) s.particles.push({ x: cx + rand(-w * 0.3, w * 0.3), y: h * 0.7, vy: rand(-60, -120), r: rand(10, 26), wob: rand(0, TAU), life: 1 });
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * 0.5; p.y += p.vy * dt; const x = p.x + Math.sin(T * 3 + p.wob) * 16;
+          glow(ctx, x, p.y, p.r * (0.6 + p.life * 0.6), `rgba(106,255,234,${p.life * 0.5})`, 'rgba(106,255,234,0)');
+        });
+        // ゆらめく人魂
+        for (let i = 0; i < 3; i++) {
+          const x = cx + Math.sin(T * 0.8 + i * 2) * w * 0.28, y = cy + Math.cos(T * 1.1 + i * 2) * h * 0.2;
+          glow(ctx, x, y, 30, 'rgba(150,255,240,0.6)', 'rgba(80,200,255,0)');
+          ctx.fillStyle = 'rgba(220,255,250,0.8)'; ctx.beginPath(); ctx.arc(x, y, 5, 0, TAU); ctx.fill();
+        }
+      },
+
+      celestial(ctx, w, h, cx, cy, s, dt, T) {
+        const cycle = T % 7;
+
+        // 天空の背景オーラ（脈動）
+        const pulse = Math.sin(T * 1.5) * 0.2 + 0.8;
+        glow(ctx, cx, cy, Math.max(w, h) * 0.6 * pulse, 'rgba(255,250,220,0.08)', 'rgba(255,240,180,0)');
+        glow(ctx, cx, cy, 100, 'rgba(255,255,240,0.15)', 'rgba(255,230,150,0)');
+
+        // 星座（より多くの星・より明るく）
+        if (!s.extra.stars) s.extra.stars = Array.from({ length: 14 }, () => ({
+          x: rand(w * 0.1, w * 0.9), y: rand(h * 0.1, h * 0.75), tw: rand(0, TAU),
+        }));
+        const st = s.extra.stars;
+        // 星座の線
+        ctx.strokeStyle = 'rgba(255,242,160,0.4)'; ctx.lineWidth = 1.5; ctx.beginPath();
+        st.forEach((p, i) => (i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y))); ctx.stroke();
+        // 星本体（きらめき）
+        st.forEach(p => {
+          const tw = 0.6 + 0.4 * Math.sin(T * 4 + p.tw);
+          glow(ctx, p.x, p.y, 14 * tw, 'rgba(255,245,180,0.9)', 'rgba(255,215,0,0)');
+          glow(ctx, p.x, p.y, 5, 'rgba(255,255,255,1)', 'rgba(255,240,180,0)');
+          ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(p.x, p.y, 2.5 * tw, 0, TAU); ctx.fill();
+          // 十字光芒
+          ctx.strokeStyle = `rgba(255,250,200,${tw * 0.6})`; ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(p.x - 8 * tw, p.y); ctx.lineTo(p.x + 8 * tw, p.y);
+          ctx.moveTo(p.x, p.y - 8 * tw); ctx.lineTo(p.x, p.y + 8 * tw);
+          ctx.stroke();
+        });
+
+        // 神聖な光線（天から降り注ぐ）
+        for (let i = 0; i < 5; i++) {
+          const ra = (T * 0.2 + i * TAU / 5);
+          const rx = cx + Math.cos(ra) * w * 0.3;
+          const grad = ctx.createLinearGradient(rx, 0, rx, h);
+          grad.addColorStop(0, `rgba(255,250,220,${0.12 + 0.06 * Math.sin(T * 2 + i)})`);
+          grad.addColorStop(1, 'rgba(255,240,180,0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(rx - 25, 0); ctx.lineTo(rx + 25, 0);
+          ctx.lineTo(rx + 50, h); ctx.lineTo(rx - 50, h); ctx.closePath(); ctx.fill();
+        }
+
+        // 隕石シャワー（常に・大量）
+        if (Math.random() < 0.7) s.particles.push({
+          x: rand(0, w * 1.3), y: -10,
+          vx: rand(-300, -500), vy: rand(250, 400), life: 1, sz: rand(2, 4),
+        });
+        s.particles = s.particles.filter(p => p.life > 0);
+        s.particles.forEach(p => {
+          p.life -= dt * 0.7; p.x += p.vx * dt; p.y += p.vy * dt;
+          // 尾を引く
+          ctx.strokeStyle = `rgba(255,220,140,${p.life * 0.8})`; ctx.lineWidth = p.sz;
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.06, p.y - p.vy * 0.06); ctx.stroke();
+          // 隕石の先端
+          glow(ctx, p.x, p.y, p.sz * 3, `rgba(255,240,180,${p.life})`, 'rgba(255,180,40,0)');
+          ctx.fillStyle = `rgba(255,255,220,${p.life})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, p.sz, 0, TAU); ctx.fill();
+        });
+
+        // 天使の羽のような光の粒子（上昇）
+        if (Math.random() < 0.5) s.particles.push({
+          x: rand(0, w), y: h + 6, vx: rand(-10, 10), vy: rand(-50, -90),
+          life: 1, sz: rand(2, 5), angelic: true, wob: rand(0, TAU),
+        });
+        s.particles.forEach(p => {
+          if (!p.angelic) return;
+          p.life -= dt * 0.3; p.y += p.vy * dt;
+          p.x += p.vx * dt + Math.sin(T * 2 + p.wob) * 15 * dt;
+          glow(ctx, p.x, p.y, p.sz * 3, `rgba(255,250,230,${p.life * 0.5})`, 'rgba(255,240,180,0)');
+          ctx.fillStyle = `rgba(255,255,240,${p.life * 0.7})`;
+          ctx.beginPath(); ctx.ellipse(p.x, p.y, p.sz * 0.4, p.sz, 0, 0, TAU); ctx.fill();
+        });
+
+        // 光の大爆発（周期的に・より激しく）
+        if (cycle > 5.5) {
+          const f = (cycle - 5.5) / 1.5;
+          // 多段階の爆発リング
+          for (let ring = 0; ring < 3; ring++) {
+            const rf = Math.max(0, f - ring * 0.15);
+            if (rf > 0 && rf < 1) {
+              const rr = Math.max(w, h) * rf * (1 + ring * 0.3);
+              ctx.strokeStyle = `rgba(255,250,220,${(1 - rf) * 0.5})`; ctx.lineWidth = 8 - ring * 2;
+              ctx.beginPath(); ctx.arc(cx, cy, rr, 0, TAU); ctx.stroke();
+            }
+          }
+          // 中心の極大グロー
+          glow(ctx, cx, cy, Math.max(w, h) * f, `rgba(255,250,220,${(1 - f) * 0.95})`, 'rgba(255,240,180,0)');
+          glow(ctx, cx, cy, 80 * f, 'rgba(255,255,255,1)', 'rgba(255,250,220,0)');
+          // 爆発時の火花
+          if (Math.random() < 0.9) {
+            const a = rand(0, TAU), sp = rand(200, 500);
+            s.particles.push({ x: cx, y: cy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, life: 1, sz: rand(2, 5), hue: rand(40, 60) });
+          }
+        }
+      },
+    };
+
+    // ============================================================
     // ゲームデータベース
     // ============================================================
     const MAPS = [
@@ -1954,6 +2514,11 @@
     }
 
     // キャスト時に特殊ロッドの演出を表示する
+    let rodVfxState = null;
+    let rodVfxKey = null;
+    let rodVfxTimer = 0;
+    const rodVfxDuration = 4.0;
+
     function triggerRodCastVFX(rod) {
       if (!rod || !rod.vfxTheme) return;
       const vfxMessages = {
@@ -1978,6 +2543,14 @@
       if (['cosmic', 'blackhole', 'celestial'].includes(rod.vfxTheme)) {
         triggerRodWaterTint(rod.vfxTheme);
       }
+
+      // Canvas VFX 初期化
+      const canvas = document.getElementById('fx-canvas');
+      if (!canvas) return;
+      const w = canvas.width, h = canvas.height;
+      rodVfxKey = rod.vfxTheme;
+      rodVfxState = createRodState(rodVfxKey, w, h);
+      rodVfxTimer = 0;
     }
 
     // 一部の特殊ロッドはキャスト時に水面の色を一時的に変化させる
@@ -2062,7 +2635,7 @@
       { type: 'hat', name: '黄金の王冠', cost: 5000, owned: false, desc: '輝く金冠。', icon: '👑' },
       { type: 'glass', name: 'サングラス', cost: 200, owned: false, desc: 'クールな黒メガネ。', icon: '🕶️' },
       { type: 'glass', name: 'モノクル', cost: 800, owned: false, desc: 'インテリメガネ。', icon: '🧐' },
-      { type: 'cloth', name: '水兵の服', cost: 400, owned: false, desc: '水兵の服。', icon: '⛵' },
+      { type: 'cloth', name: 'セーラー服', cost: 400, owned: false, desc: '水兵の服。', icon: '⛵' },
       { type: 'cloth', name: 'タキシード', cost: 2500, owned: false, desc: '正装。', icon: '🎩' },
       { type: 'wing', name: '天使の羽', cost: 3000, owned: false, desc: '白い羽。', icon: '👼' },
       { type: 'wing', name: '悪魔の羽', cost: 3500, owned: false, desc: '漆黒の羽。', icon: '😈' },
@@ -3434,6 +4007,10 @@
     function triggerHit() {
       console.log('triggerHit');
       castState = 'hit';
+      // Clear VFX when fish hits
+      rodVfxState = null;
+      rodVfxKey = null;
+
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'HIT!';
       btn.disabled = false;
@@ -3459,6 +4036,9 @@
       console.log('triggerMiss');
       clearTimeout(castTimer);
       castState = 'idle';
+      // Clear VFX on miss
+      rodVfxState = null;
+      rodVfxKey = null;
       comboCount = 0; // 逃したのでコンボは途切れる
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'CAST';
@@ -3840,6 +4420,21 @@
     function drawFX() {
       if (!fxCtx) return;
       const w = fxCtx.canvas.width, h = fxCtx.canvas.height;
+      
+      // Check for active Rod VFX
+      if (rodVfxState && rodVfxKey) {
+        const dt = 1/60; // assuming 60fps for simplicity
+        const T = Date.now() / 1000;
+        drawRodFrame(fxCtx, w, h, rodVfxKey, rodVfxState, dt, T);
+        rodVfxTimer += dt;
+        if (rodVfxTimer > rodVfxDuration) {
+          rodVfxState = null;
+          rodVfxKey = null;
+        }
+        return;
+      }
+
+      // Original weather effects code below
       fxCtx.clearRect(0,0,w,h);
       const type = game.weather;
       if (type==='Rainy'||type==='Typhoon') {
