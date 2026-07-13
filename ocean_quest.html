@@ -35,7 +35,7 @@
       overflow: hidden;
       background: var(--bg-dark);
       font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-      touch-action: none;
+      touch-action: pan-y;
     }
 
     body {
@@ -700,7 +700,7 @@
       backdrop-filter: blur(12px);
       display: none;
       flex-direction: column;
-      padding: 12px;
+      padding: 12px 12px 60px 12px;
       overflow-y: auto;
     }
     .modal-header {
@@ -1148,7 +1148,7 @@
       .nav-btn svg { width: 12px; height: 12px; }
       .grid-container { grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); }
       .fish-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
-      .modal-overlay { padding: 6px; }
+      .modal-overlay { padding: 6px 6px 48px 6px; }
       #action-msg { font-size: 1.2rem; }
       .fight-panel { padding: 10px; }
       .result-panel { padding: 12px; }
@@ -1164,7 +1164,7 @@
       .nav-btn svg { width: 18px; height: 18px; }
       .grid-container { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
       .fish-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
-      .modal-overlay { padding: 14px; }
+      .modal-overlay { padding: 14px 14px 56px 14px; }
       footer-nav { min-height: 48px; padding: 4px 8px; }
       #control-panel { bottom: clamp(12px, 2.5vh, 20px); }
     }
@@ -1181,7 +1181,7 @@
       .nav-btn svg { width: 22px; height: 22px; }
       .grid-container { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
       .fish-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-      .modal-overlay { padding: 20px; }
+      .modal-overlay { padding: 20px 20px 64px 20px; }
       .fight-panel { max-width: 480px; padding: 20px; }
       footer-nav { min-height: 56px; padding: 6px 12px; }
       #control-panel { bottom: clamp(16px, 3vh, 28px); }
@@ -1369,6 +1369,14 @@
       <div class="modal-body"><div class="ranking-list" id="ranking-list-box"></div></div>
     </div>
 
+    <div class="modal-overlay" id="modal-changelog">
+      <div class="modal-header">
+        <h3>📋 変更ログ</h3>
+        <button class="close-btn" onclick="closeModal('modal-changelog')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body" id="changelog-content" style="overflow-y:auto; flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+
     <!-- リザルト -->
     <div id="catch-result-overlay">
       <div class="result-panel">
@@ -1421,6 +1429,10 @@
       <button class="nav-btn" data-modal="modal-ranking" onclick="openModal('modal-ranking')">
         <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 0 0-8h-1zM2 8h1V0H2a4 4 0 0 0 0 8zm19 11H3v2h18v-2zm-3-9v6H6v-6h12z"/></svg>
         <span>ランキング</span>
+      </button>
+      <button class="nav-btn" data-modal="modal-changelog" onclick="openModal('modal-changelog')">
+        <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="16 2 16 8 8 8 8 2"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        <span>更新情報</span>
       </button>
     </footer-nav>
   </div>
@@ -2010,6 +2022,7 @@
       { id: 17, name: '竜宮の門前海域', desc: '伝説の竜宮城へと続く海域。', reqLvl: 155, depth: '100m ~ 999m', colors: ['#0d3d5c', '#031420'] },
       { id: 18, name: '星屑の海', desc: '夜空がそのまま海に落ちたような場所。', reqLvl: 170, depth: '∞', colors: ['#1a1040', '#050318'] },
       { id: 19, name: '万象の終着点', desc: 'すべての魚が辿り着くという最果て。', reqLvl: 200, depth: '???m ~ ???m', colors: ['#000000', '#0a0a15'] },
+      { id: 20, name: 'ハードアイランド', desc: '生半可な覚悟では魚一匹上げられない修羅の孤島。専用の「ハードロッド」がなければまともに戦えない特別な海域。ゴミも紛れ込む。', reqLvl: 1, depth: '???m ~ ???m', colors: ['#2b0d0d', '#0d0303'] },
     ];
 
     const FISH_DATABASE = [
@@ -2173,6 +2186,13 @@
       { id: 157, name: '時空を統べる者', rarity: 'Mythic', baseLen: 213.9, baseWeight: 202.54, cost: 24384, xp: 4064, mapId: 19, preferBait: '虹色エサ', desc: '時空すべてを統べる者。', color: '#5bc9a8' },
       { id: 158, name: '万象の女神魚', rarity: 'Mythic', baseLen: 267.5, baseWeight: 229.594, cost: 25323, xp: 4220, mapId: 19, preferBait: '隕石の欠片エサ', desc: '万象を司る女神の化身。', color: '#c95b5b' },
       { id: 159, name: '万物の根源・オリジンフィッシュ', rarity: 'Divine', baseLen: 307.7, baseWeight: 633.883, cost: 52512, xp: 8752, mapId: 19, preferBait: '龍のひげエサ', desc: 'すべての魚の起源とされる。', color: '#c9c15b' },
+      // --- ハードアイランド専用魚（激重い抵抗、1匹で約1000XP） ---
+      { id: 160, name: '鋼鉄フグ', rarity: 'Epic', baseLen: 38.0, baseWeight: 6.5, cost: 1200, xp: 950, mapId: 20, preferBait: '特殊エサ', desc: '全身が鋼のように硬化したフグ。針のような抵抗で糸を切りにかかる。', color: '#5a5f66', hardIsland: true },
+      { id: 161, name: 'アイアンイール', rarity: 'Epic', baseLen: 135.0, baseWeight: 24.0, cost: 1300, xp: 1000, mapId: 20, preferBait: '特殊エサ', desc: '鋼鉄のような体表を持つ獰猛なウナギ。巻き上げるだけで一苦労。', color: '#3d4148', hardIsland: true },
+      { id: 162, name: 'グラナイトシャーク', rarity: 'Legendary', baseLen: 265.0, baseWeight: 210.0, cost: 1500, xp: 1050, mapId: 20, preferBait: '血合いエサ', desc: '花崗岩の鎧を纏うと言われる獰猛なサメ。並の竿では歯が立たない。', color: '#6b6f75', hardIsland: true },
+      { id: 163, name: 'タングステンレイ', rarity: 'Legendary', baseLen: 215.0, baseWeight: 165.0, cost: 1450, xp: 1000, mapId: 20, preferBait: '深海プランクトン', desc: '超高密度の体組織を持つエイ。信じられないほど重い。', color: '#828a94', hardIsland: true },
+      { id: 164, name: 'ヴォイドアーマーフィッシュ', rarity: 'Mythic', baseLen: 310.0, baseWeight: 360.0, cost: 1700, xp: 1100, mapId: 20, preferBait: '神エサ', desc: '漆黒の装甲で全身を覆った未知の魚。ハードアイランド最強格。', color: '#101114', hardIsland: true },
+      { id: 165, name: 'ハードアイランドの主', rarity: 'Mythic', baseLen: 420.0, baseWeight: 520.0, cost: 1800, xp: 1150, mapId: 20, preferBait: '太古の餌', desc: 'この島に古来より棲み着く、あらゆる抵抗を極めた怪魚。ハードロッドを持つ者だけが挑む資格を得る。', color: '#000000', hardIsland: true },
     ];
 
     const RODS = [
@@ -2209,7 +2229,8 @@
       { id: 30, name: 'クロノロッド', cost: null, dist: 390, rare: 5.3, dur: 390, reelSpeed: 2.7, barWidth: 24, craftOnly: true, specialEffect: 'chrono', vfxTheme: 'chrono', desc: '効果: バトル中、時折魚の動きを止める。投げると時計の歯車が周囲に浮かぶ。' },
       { id: 31, name: 'ファントムロッド', cost: null, dist: 380, rare: 5.2, dur: 380, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'phantom', vfxTheme: 'phantom', desc: '効果: シャイニー個体の出現率が大幅UP。投げると半透明になり、青い炎が漂う。' },
       { id: 32, name: 'セレスティアルロッド', cost: null, dist: 700, rare: 9.0, dur: 600, reelSpeed: 5.0, barWidth: 34, duplicateChance: 0.10, craftOnly: true, specialEffect: 'celestial', vfxTheme: 'celestial', desc: '超神話級。効果: あらゆる幸運が飛躍的に上昇し、神々の魚に出会いやすくなる。投げると星座が空に浮かび、隕石が降り、最後に光の大爆発が起きる。' },
-      { id: 33, name: 'シーズンの竿', cost: null, dist: 260, rare: 3.5, dur: 200, reelSpeed: 2.1, barWidth: 22, seasonOnly: true, desc: 'シーズンパスや宝箱でのみ手に入る限定竿。' }
+      { id: 33, name: 'シーズンの竿', cost: null, dist: 260, rare: 3.5, dur: 200, reelSpeed: 2.1, barWidth: 22, seasonOnly: true, desc: 'シーズンパスや宝箱でのみ手に入る限定竿。' },
+      { id: 34, name: 'ハードロッド', cost: 3000, dist: 140, rare: 2.0, dur: 150, reelSpeed: 1.3, barWidth: 16, hardIslandOnly: true, specialEffect: 'hardgear', desc: 'ハードアイランドでのみ販売される特別な竿。通常のロット(ショップ在庫)には並ばない。レベルを問わず購入・使用でき、島で拾える「ゴミ」素材で独自に強化できる。' }
     ];
 
     const BOATS = [
@@ -2467,10 +2488,54 @@
     let activeInfinityRoll = null; // インフィニティロッド用：キャストごとに変わる効果
     const ABYSS_MAPS = [5, 9, 15, 16]; // 深海・洞窟湖・極夜の海・異次元の狭間
 
+    // ============================================================
+    // ハードアイランド関連定数
+    // ============================================================
+    const HARD_ISLAND_ID = 20;
+    const HARD_ISLAND_ROD_ID = 34;
+    const HARD_ISLAND_JUNK_CHANCE = 0.35; // ハードアイランドでは35%の確率で魚の代わりにゴミが釣れる
+    const HARD_ISLAND_EXTRA_RESIST = 2.5; // レア度に関わらず追加される、えげつない巻き抵抗
+    const HARD_ISLAND_DIFF_MULT = 2.4;    // 魚の暴れ方(速度・振れ幅)の追加倍率
+    const HARD_ISLAND_GAUGE_MULT = 0.5;   // キャッチゲージ上昇量への追加減衰
+
+    // ハードアイランドで魚の代わりに釣れる「ゴミ」。そのままハードロッドの強化素材になる
+    const HARD_ISLAND_JUNK_ITEMS = [
+      { name: '錆びた空き缶',     icon: '🥫', weight: 30 },
+      { name: '壊れた漁具',       icon: '🪝', weight: 24 },
+      { name: '謎の金属片',       icon: '⚙️', weight: 20 },
+      { name: '朽ちた木箱の破片', icon: '📦', weight: 14 },
+      { name: '硬化した貝殻',     icon: '🐚', weight: 8 },
+      { name: '深淵の鉄芯',       icon: '🔩', weight: 4 }
+    ];
+
+    // ハードロッドの強化段階（レベル不問。ハードアイランドのゴミ=素材を集めて強化する）
+    const HARD_ROD_UPGRADES = [
+      { materials: [{ name: '錆びた空き缶', qty: 6 }, { name: '壊れた漁具', qty: 3 }],                  reelSpeedBonus: 0.12, barWidthBonus: 1.5 },
+      { materials: [{ name: '壊れた漁具', qty: 6 }, { name: '謎の金属片', qty: 4 }],                    reelSpeedBonus: 0.12, barWidthBonus: 1.5 },
+      { materials: [{ name: '謎の金属片', qty: 6 }, { name: '朽ちた木箱の破片', qty: 5 }],               reelSpeedBonus: 0.15, barWidthBonus: 2.0 },
+      { materials: [{ name: '朽ちた木箱の破片', qty: 8 }, { name: '硬化した貝殻', qty: 4 }],             reelSpeedBonus: 0.15, barWidthBonus: 2.0 },
+      { materials: [{ name: '硬化した貝殻', qty: 6 }, { name: '深淵の鉄芯', qty: 2 }],                   reelSpeedBonus: 0.18, barWidthBonus: 2.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 5 }, { name: '謎の金属片', qty: 10 }],                    reelSpeedBonus: 0.20, barWidthBonus: 2.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 10 }, { name: '硬化した貝殻', qty: 10 }],                 reelSpeedBonus: 0.25, barWidthBonus: 3.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 8 }, { name: '朽ちた木箱の破片', qty: 15 }],               reelSpeedBonus: 0.25, barWidthBonus: 3.0 },
+      { materials: [{ name: '謎の金属片', qty: 12 }, { name: '硬化した貝殻', qty: 12 }],                 reelSpeedBonus: 0.28, barWidthBonus: 3.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 6 }, { name: '壊れた漁具', qty: 20 }],                    reelSpeedBonus: 0.30, barWidthBonus: 3.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 15 }, { name: '朽ちた木箱の破片', qty: 20 }],              reelSpeedBonus: 0.32, barWidthBonus: 4.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 12 }, { name: '謎の金属片', qty: 30 }],                   reelSpeedBonus: 0.35, barWidthBonus: 4.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 20 }, { name: '硬化した貝殻', qty: 25 }],                 reelSpeedBonus: 0.38, barWidthBonus: 4.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 25 }, { name: '謎の金属片', qty: 40 }],                   reelSpeedBonus: 0.40, barWidthBonus: 4.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 18 }, { name: '朽ちた木箱の破片', qty: 35 }],              reelSpeedBonus: 0.42, barWidthBonus: 5.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 30 }, { name: '硬化した貝殻', qty: 40 }],                 reelSpeedBonus: 0.45, barWidthBonus: 5.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 25 }, { name: '謎の金属片', qty: 50 }],                   reelSpeedBonus: 0.48, barWidthBonus: 5.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 35 }, { name: '朽ちた木箱の破片', qty: 50 }],              reelSpeedBonus: 0.50, barWidthBonus: 5.5 },
+      { materials: [{ name: '深淵の鉄芯', qty: 40 }, { name: '硬化した貝殻', qty: 60 }],                 reelSpeedBonus: 0.55, barWidthBonus: 6.0 },
+      { materials: [{ name: '深淵の鉄芯', qty: 50 }, { name: '謎の金属片', qty: 70 }],                   reelSpeedBonus: 0.60, barWidthBonus: 6.5 }
+    ];
+
     function getRodSpecialBonus() {
       const bonus = {
         rareChanceBonus: 0, crownChanceBonus: 0, shinyChanceBonus: 0, mutationChanceBonus: 0,
-        goldMultBonus: 0, xpMultBonus: 0, reelSpeedBonus: 0,
+        goldMultBonus: 0, xpMultBonus: 0, reelSpeedBonus: 0, barWidthBonus: 0,
         fishSpeedMult: 1, freezeChance: 0, allMapPullChance: 0,
         nameFilterRegex: null, nameFilterMult: 1,
         label: ''
@@ -2549,6 +2614,21 @@
           bonus.mutationChanceBonus = 0.3; bonus.goldMultBonus = 0.3;
           bonus.label = '✨ セレスティアルの祝福';
           break;
+        case 'hardgear': {
+          // ハードロッド：ハードアイランドのゴミ素材で強化した段階分だけ巻き速度とバー幅が伸びる
+          const lvl = game.hardRodLevel || 0;
+          let rB = 0, bB = 0;
+          for (let i = 0; i < lvl; i++) {
+            const up = HARD_ROD_UPGRADES[i];
+            if (!up) break;
+            rB += up.reelSpeedBonus;
+            bB += up.barWidthBonus;
+          }
+          bonus.reelSpeedBonus = rB;
+          bonus.barWidthBonus = bB;
+          bonus.label = lvl > 0 ? `🔧 ハードロッド強化 Lv.${lvl}` : '🔧 ハードロッド(未強化)';
+          break;
+        }
       }
       return bonus;
     }
@@ -2666,6 +2746,34 @@
     ];
 
     // ============================================================
+    // 変更ログ
+    // ============================================================
+    const CHANGELOG = [
+      {
+        version: '1.2.0',
+        date: '2026年7月13日',
+        title: '⚙️ ハードアイランド調整 & ハードロッド強化拡張',
+        changes: [
+          '🔧 ハードアイランドの魚の難易度を下げました（巻き抵抗値: 3.5 → 2.5）',
+          '🚫 ハードアイランドではハードロッドのみでCastできるようにしました',
+          '📈 ハードロッドの強化段階を7段階から20段階に拡張しました',
+          '💪 最大強化時の性能が大幅に向上します'
+        ]
+      },
+      {
+        version: '1.1.0',
+        date: '2026年6月',
+        title: '✨ 新機能追加',
+        changes: [
+          '📖 初版リリース',
+          '🎣 Ocean Quest本体の実装'
+        ]
+      }
+    ];
+
+    const CHANGELOG_VERSION = 'v1.2.0';
+
+    // ============================================================
     // ゲーム状態
     // ============================================================
     let game = {
@@ -2678,6 +2786,7 @@
       boatId: 0,
       skillPoints: 0,
       selectedBait: 'ミミズ',
+      lastSeenChangelogVersion: null,
       baits: {
         'ミミズ': 10, 'エビ': 2, '貝虫': 0, 'パン粉エサ': 0, '小魚': 0, 'ミルワーム': 0,
         'イカ': 0, '発光エサ': 0, '甲殻エキス餌': 0, '特殊エサ': 0, '血合いエサ': 0, '深海プランクトン': 0,
@@ -2687,7 +2796,9 @@
       ownedBoats: [0],
       equippedCosmetics: { hat: '', glass: '', cloth: '', wing: '', aura: '' },
       ownedCosmetics: [],
-      materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0, '珊瑚石': 0, '深淵の遺物': 0, '龍脈の欠片': 0, '万象の紋章': 0 },
+      materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0, '珊瑚石': 0, '深淵の遺物': 0, '龍脈の欠片': 0, '万象の紋章': 0,
+        '錆びた空き缶': 0, '壊れた漁具': 0, '謎の金属片': 0, '朽ちた木箱の破片': 0, '硬化した貝殻': 0, '深淵の鉄芯': 0 },
+      hardRodLevel: 0,
       skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 },
       fishInventory: [],
       book: {},
@@ -2790,8 +2901,13 @@
           }
           if (!game.skillTree) game.skillTree = { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 };
           if (!game.seasonPassClaimed) game.seasonPassClaimed = {};
+          if (game.hardRodLevel === undefined) game.hardRodLevel = 0;
+          if (!game.materials) game.materials = {};
+          ['錆びた空き缶','壊れた漁具','謎の金属片','朽ちた木箱の破片','硬化した貝殻','深淵の鉄芯'].forEach(k => { if (game.materials[k] === undefined) game.materials[k] = 0; });
         } catch (e) { console.error("ロード失敗", e); }
       }
+      // 変更ログをチェックして必要に応じて表示
+      setTimeout(() => checkAndShowChangelog(), 500);
     }
 
     // ============================================================
@@ -2816,6 +2932,39 @@
     // ============================================================
     let audioCtx = null;
     let audioUnlocked = false;
+
+    function renderChangelog() {
+      const container = document.getElementById('changelog-content');
+      if (!container) return;
+      container.innerHTML = '';
+      CHANGELOG.forEach(log => {
+        const entry = document.createElement('div');
+        entry.style.cssText = 'background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:10px; flex-shrink:0;';
+        const title = document.createElement('div');
+        title.style.cssText = 'font-weight:700; color:#fff; font-size:0.9rem; margin-bottom:6px; display:flex; align-items:center; gap:6px; justify-content:space-between;';
+        title.innerHTML = `<span>${log.title}</span><span style="font-size:0.7rem; color:var(--neon-cyan);">${log.version} • ${log.date}</span>`;
+        entry.appendChild(title);
+        const list = document.createElement('ul');
+        list.style.cssText = 'margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px;';
+        log.changes.forEach(change => {
+          const li = document.createElement('li');
+          li.style.cssText = 'font-size:0.8rem; color:var(--text-sub); margin-left:0; padding-left:0;';
+          li.textContent = change;
+          list.appendChild(li);
+        });
+        entry.appendChild(list);
+        container.appendChild(entry);
+      });
+    }
+
+    function checkAndShowChangelog() {
+      const lastSeen = localStorage.getItem('oceanQuestLastChangelogVersion');
+      if (lastSeen !== CHANGELOG_VERSION) {
+        renderChangelog();
+        openModal('modal-changelog');
+        localStorage.setItem('oceanQuestLastChangelogVersion', CHANGELOG_VERSION);
+      }
+    }
 
     function initAudio() {
       const unlock = () => {
@@ -3107,6 +3256,7 @@
       if (activeShopTab === 'shop-rods') {
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
+          if (r.hardIslandOnly) return; // ハードロッドは通常ショップのロットには一切並ばない。専用UIでのみ購入可能
           if ((r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly) && !isOwned) return; // ルーレット/実績/クラフト/シーズン限定ロッドは入手するまでショップに表示しない
           const isEquipped = game.rodId === r.id;
           const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
@@ -3136,6 +3286,7 @@
           `;
           list.appendChild(card);
         });
+        renderHardRodShopCard(list);
       } else if (activeShopTab === 'shop-boats') {
         BOATS.forEach(b => {
           const isOwned = game.ownedBoats.includes(b.id);
@@ -3214,6 +3365,94 @@
     }
     function equipRod(id) {
       if (game.ownedRods.includes(id)) { game.rodId = id; saveGame(); renderShopItems(); }
+    }
+
+    // ============================================================
+    // ハードアイランド専用: ハードロッドの購入・強化UI
+    // 通常のロット(ショップ在庫)には並ばず、ハードアイランド滞在中のみ購入可能。
+    // レベル制限は一切なし。強化はハードアイランドで釣れる「ゴミ」素材のみを使う。
+    // ============================================================
+    function renderHardRodShopCard(list) {
+      const hardRod = RODS.find(r => r.id === HARD_ISLAND_ROD_ID);
+      if (!hardRod) return;
+      const isOwned = game.ownedRods.includes(hardRod.id);
+      const isEquipped = game.rodId === hardRod.id;
+      const onIsland = game.mapId === HARD_ISLAND_ID;
+
+      const card = document.createElement('div');
+      card.className = `item-card ${isEquipped ? 'equipped' : ''}`;
+      card.style.cssText = 'grid-column: 1 / -1; border-color: rgba(255,90,90,0.45); background: rgba(120,10,10,0.08);';
+      let actionHtml;
+      if (isOwned) {
+        actionHtml = isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${hardRod.id})">装備</button>`;
+      } else if (onIsland) {
+        actionHtml = `<div class="item-cost">${hardRod.cost} G</div><button class="buy-btn" onclick="buyHardRod()" ${game.gold < hardRod.cost ? 'disabled' : ''}>購入</button>`;
+      } else {
+        actionHtml = `<button class="buy-btn" disabled>ハードアイランド滞在中のみ購入可</button>`;
+      }
+      card.innerHTML = `
+        <div class="item-icon">🎣</div>
+        <div class="item-title">${hardRod.name} <span style="font-size:0.55rem; color:var(--neon-pink);">HARD ISLAND限定</span></div>
+        <div class="item-desc">${hardRod.desc}<br><span style="color:var(--neon-cyan)">飛距離+${hardRod.dist}m / レア率x${hardRod.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((hardRod.reelSpeed-1)*100)}% / バー幅${hardRod.barWidth}%</span>${isOwned ? `<br><span style="color:var(--neon-gold)">強化段階: Lv.${game.hardRodLevel||0} / ${HARD_ROD_UPGRADES.length}</span>` : ''}</div>
+        ${actionHtml}
+      `;
+      list.appendChild(card);
+
+      if (!isOwned) return;
+
+      const lvl = game.hardRodLevel || 0;
+      const nextUpgrade = HARD_ROD_UPGRADES[lvl];
+      const upgWrap = document.createElement('div');
+      upgWrap.style.cssText = 'grid-column: 1 / -1;';
+      if (nextUpgrade) {
+        let canUpgrade = true;
+        let matHtml = '';
+        nextUpgrade.materials.forEach(m => {
+          const has = game.materials[m.name] || 0;
+          const short = has < m.qty;
+          if (short) canUpgrade = false;
+          matHtml += `<div class="mat-badge ${short ? 'insufficient' : ''}">${m.name} ${has}/${m.qty}</div>`;
+        });
+        upgWrap.innerHTML = `
+          <div class="craft-item">
+            <div style="flex:1;">
+              <strong style="color:#fff; font-size:0.7rem;">🔧 ハードロッド強化 → Lv.${lvl + 1}</strong>
+              <div style="font-size:0.5rem; color:var(--text-sub);">巻き速度+${Math.round(nextUpgrade.reelSpeedBonus*100)}% / バー幅+${nextUpgrade.barWidthBonus}%（ハードアイランドの「ゴミ」素材で強化）</div>
+              <div class="craft-materials">${matHtml}</div>
+            </div>
+            <button class="buy-btn" onclick="upgradeHardRod()" ${!canUpgrade ? 'disabled' : ''} style="padding:3px 8px; width:auto;">強化する</button>
+          </div>
+        `;
+      } else {
+        upgWrap.innerHTML = `<div class="craft-item"><div style="flex:1; font-size:0.6rem; color:var(--neon-gold);">ハードロッドは最大強化(Lv.${lvl})に達しています。</div></div>`;
+      }
+      list.appendChild(upgWrap);
+    }
+
+    function buyHardRod() {
+      const hardRod = RODS.find(r => r.id === HARD_ISLAND_ROD_ID);
+      if (!hardRod) return;
+      if (game.mapId !== HARD_ISLAND_ID) return; // ハードアイランド滞在中でなければ購入できない
+      if (game.ownedRods.includes(hardRod.id)) return;
+      if (game.gold < hardRod.cost) return;
+      game.gold -= hardRod.cost;
+      game.ownedRods.push(hardRod.id);
+      game.rodId = hardRod.id;
+      saveGame(); updateHUD(); renderShopItems();
+      addVisualSplashEffect('🎣 ハードロッド購入！');
+    }
+
+    function upgradeHardRod() {
+      if (!game.ownedRods.includes(HARD_ISLAND_ROD_ID)) return;
+      const lvl = game.hardRodLevel || 0;
+      const upgrade = HARD_ROD_UPGRADES[lvl];
+      if (!upgrade) return; // 最大強化済み
+      const canUpgrade = upgrade.materials.every(m => (game.materials[m.name] || 0) >= m.qty);
+      if (!canUpgrade) return;
+      upgrade.materials.forEach(m => { game.materials[m.name] -= m.qty; });
+      game.hardRodLevel = lvl + 1;
+      saveGame(); updateHUD(); renderShopItems();
+      addVisualSplashEffect(`🔧 ハードロッド強化！ Lv.${game.hardRodLevel}`);
     }
     function buyBoat(id, cost) {
       if (game.gold >= cost && !game.ownedBoats.includes(id)) {
@@ -4009,6 +4248,11 @@
 
     function startCasting() {
       console.log('startCasting');
+      // ハードアイランド（mapId 20）ではハードロッド（id 34）のみでCast可能
+      if (game.mapId === 20 && game.rodId !== 34) {
+        alert('❌ ハードアイランドでは「ハードロッド」のみでCastできます！');
+        return;
+      }
       closeActiveModal();
       castState = 'casting';
       castPower = 0;
@@ -4074,6 +4318,12 @@
       // 魚の代わりに宝箱が出現することがある
       if (Math.random() < CHEST_HIT_CHANCE) {
         triggerChestHit();
+        return;
+      }
+
+      // ハードアイランドでは、魚の代わりにゴミが釣れることがある
+      if (game.mapId === HARD_ISLAND_ID && Math.random() < HARD_ISLAND_JUNK_CHANCE) {
+        triggerJunkHit();
         return;
       }
 
@@ -4146,6 +4396,42 @@
       drawWaterSurface();
     }
 
+    // ハードアイランドでゴミがヒットした時の演出と獲得処理（バトルなしで即座に回収される）
+    function triggerJunkHit() {
+      castState = 'junk';
+      const btn = document.getElementById('cast-btn');
+      btn.innerText = 'ゴミ...';
+      btn.disabled = true;
+      btn.classList.remove('casting');
+      const msg = document.getElementById('action-msg');
+      msg.innerText = '🗑 何か引っかかった…ただのゴミか';
+      msg.className = 'show miss';
+      sfxMiss();
+      setTimeout(() => { openHardIslandJunk(); }, 900);
+    }
+
+    function openHardIslandJunk() {
+      let totalWeight = 0;
+      HARD_ISLAND_JUNK_ITEMS.forEach(j => totalWeight += j.weight);
+      let rand = Math.random() * totalWeight;
+      let picked = HARD_ISLAND_JUNK_ITEMS[0];
+      for (const j of HARD_ISLAND_JUNK_ITEMS) {
+        rand -= j.weight;
+        if (rand <= 0) { picked = j; break; }
+      }
+      const qty = 1 + Math.floor(Math.random() * 2);
+      game.materials[picked.name] = (game.materials[picked.name] || 0) + qty;
+      addVisualSplashEffect(`🗑 ${picked.icon} ${picked.name} x${qty}（ハードロッドの強化素材）`);
+      saveGame(); updateHUD();
+      castState = 'idle';
+      const btn = document.getElementById('cast-btn');
+      btn.innerText = 'CAST';
+      btn.className = 'cast-btn';
+      btn.disabled = false;
+      bobberThrown = false;
+      drawWaterSurface();
+    }
+
     function triggerMiss() {
       console.log('triggerMiss');
       clearTimeout(castTimer);
@@ -4188,8 +4474,10 @@
       const rodPercent = Math.round((rod.reelSpeed - 1) * 100);
       const skillPercent = Math.round((eff.reelSpeed + rodBonus.reelSpeedBonus) * 100);
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
-      const resistPercent = Math.round(Math.max(0, rawResist - eff.rarityResist) * 100);
-      const netMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + Math.max(0, rawResist - eff.rarityResist));
+      const hardIslandResist = targetFish.hardIsland ? HARD_ISLAND_EXTRA_RESIST : 0;
+      const totalResist = Math.max(0, rawResist - eff.rarityResist) + hardIslandResist;
+      const resistPercent = Math.round(totalResist * 100);
+      const netMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + totalResist);
       const netPercent = Math.round((netMult - 1) * 100);
       const reelIndicator = document.getElementById('reel-speed-indicator');
       let indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
@@ -4209,7 +4497,7 @@
       let diff = rarityMultiplier[targetFish.rarity] || 1.0;
       // レア度が高いほどゲージの上昇そのものが遅くなり、格闘時間が本当に長くなる
       const gaugeGainRarityMult = { Common:1.0, Uncommon:1.0, Rare:0.85, Epic:0.6, Legendary:0.3, Mythic:0.18, Divine:0.11 };
-      const gaugeGainMult = gaugeGainRarityMult[targetFish.rarity] || 1.0;
+      let gaugeGainMult = gaugeGainRarityMult[targetFish.rarity] || 1.0;
       const eff = getSkillEffects();
       const rodBonus = getRodSpecialBonus();
       // 悪天候(台風・流星群)では魚が暴れやすいが、航海スキルで軽減できる
@@ -4217,9 +4505,15 @@
       const rod = RODS[game.rodId];
       // レア度が高いほど巻きが重くなる抵抗（powerツリーのrarityResistで軽減）。Legendary以上は400%超の激重抵抗
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
-      const resistance = Math.max(0, rawResist - eff.rarityResist);
+      let resistance = Math.max(0, rawResist - eff.rarityResist);
+      // ハードアイランドの魚：レア度に関係なく、えげつない追加抵抗と暴れ方が乗る
+      if (targetFish.hardIsland) {
+        diff *= HARD_ISLAND_DIFF_MULT;
+        gaugeGainMult *= HARD_ISLAND_GAUGE_MULT;
+        resistance += HARD_ISLAND_EXTRA_RESIST;
+      }
       const reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
-      const barWidth = (rod.barWidth || 20) + eff.barWidth;
+      const barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       playerBar.style.width = barWidth + '%';
       let lastTime = performance.now();
 
