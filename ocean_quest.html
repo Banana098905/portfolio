@@ -2814,6 +2814,20 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.3.1',
+        date: '2026年7月14日',
+        title: '🍲 料理レシピを8種類追加',
+        changes: [
+          '🥢 「修羅島の漁師丼」: ハードアイランドで釣った魚を使うとゴールド+25%・XP+25%の強力な効果',
+          '🌩️ 「変異の奇祭鍋」: 天候変異(ウェット/タービュランス/オーロラ/隕石)個体を使うと変異発生率+10%',
+          '✨ 「シャイニー姿造り」: シャイニー個体を使うとシャイニー確率+4%・ゴールド+15%',
+          '🐠 「珊瑚礁のカルパッチョ」「灼熱の溶岩焼き」「極寒の氷締め刺身」など、釣った海域に応じたご当地レシピを追加',
+          '🐋 「大物尽くしフルコース」: 合計50kg以上の大物2匹でクラウン確率+3%',
+          '⚙️ 料理バフに「変異発生率アップ」効果を新規追加し、対応するバフ表示も拡張',
+          '🔀 レシピの判定順序を調整し、特殊な組み合わせが汎用レシピに埋もれないよう整理'
+        ]
+      },
+      {
         version: '1.3.0',
         date: '2026年7月14日',
         title: '🔥 料理に「火加減ミニゲーム」を追加',
@@ -2859,22 +2873,38 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.3.0';
+    const CHANGELOG_VERSION = 'v1.3.1';
+
+    // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
+    // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
+    function getFishDefById(fishId) {
+      return FISH_DATABASE.find(f => f.id === fishId);
+    }
 
     const COOKING_RECIPES = [
+      // 条件が狭い(特殊な)レシピほど先に判定されるよう順番を並べている。
+      // 汎用的なレシピ(sashimi/salt-grilled/any-two)は最後に置き、
+      // 特殊な組み合わせを潰してしまわないようにする。
       {
-        id: 'salt-grilled',
-        name: '潮風の塩焼き',
-        desc: '生簀の定番素材を活かした一皿。次の3回の釣果で獲得ゴールド+15%。',
-        effect: { goldMult: 0.15, duration: 3 },
-        match: selected => selected.length === 2 && selected.every(f => ['Common', 'Uncommon'].includes(f.rarity))
+        id: 'hard-island-donburi',
+        name: '修羅島の漁師丼',
+        desc: 'ハードアイランドで釣り上げた魚を使った気合の一杯。次の3回の釣果でゴールド+25%、XP+25%。',
+        effect: { goldMult: 0.25, xpMult: 0.25, duration: 3 },
+        match: selected => selected.some(f => getFishDefById(f.fishId)?.hardIsland)
       },
       {
-        id: 'sashimi',
-        name: '豪華刺身盛り',
-        desc: '新鮮な大物を使った豪華料理。次の3回の釣果で獲得XP+20%。',
-        effect: { xpMult: 0.20, duration: 3 },
-        match: selected => selected.length === 2 && selected.some(f => ['Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity)) && selected.some(f => ['Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity))
+        id: 'mutation-festival',
+        name: '変異の奇祭鍋',
+        desc: '天候変異を受けた魚を使った奇妙な鍋。次の4回の釣果で変異発生率+10%、ゴールド+10%。',
+        effect: { mutationChanceBonus: 0.10, goldMult: 0.10, duration: 4 },
+        match: selected => selected.some(f => /^(ウェット|タービュランス|オーロラ|隕石)の/.test(f.name))
+      },
+      {
+        id: 'shiny-platter',
+        name: 'シャイニー姿造り',
+        desc: 'シャイニー個体を贅沢に使った一皿。次の4回の釣果でシャイニー確率+4%、ゴールド+15%。',
+        effect: { shinyChanceBonus: 0.04, goldMult: 0.15, duration: 4 },
+        match: selected => selected.some(f => f.name.startsWith('シャイニー'))
       },
       {
         id: 'dragon-stew',
@@ -2884,6 +2914,41 @@
         match: selected => selected.some(f => /竜|龍/.test(f.name))
       },
       {
+        id: 'rainbow-bowl',
+        name: '虹の炙り',
+        desc: '虹色の魚を使った一品。次の4回の釣果で巻き速度+12%、ゴールド+12%。',
+        effect: { reelSpeedBonus: 0.12, goldMult: 0.12, duration: 4 },
+        match: selected => selected.some(f => f.name.includes('虹'))
+      },
+      {
+        id: 'coral-carpaccio',
+        name: '珊瑚礁のカルパッチョ',
+        desc: '珊瑚礁の楽園で獲れた魚を使った爽やかな一皿。次の4回の釣果でシャイニー確率+2%、ゴールド+8%。',
+        effect: { shinyChanceBonus: 0.02, goldMult: 0.08, duration: 4 },
+        match: selected => selected.some(f => getFishDefById(f.fishId)?.mapId === 11)
+      },
+      {
+        id: 'lava-yaki',
+        name: '灼熱の溶岩焼き',
+        desc: '火山エリアや溶岩洞窟の魚を豪快に焼き上げた一品。次の3回の釣果で巻き速度+15%。',
+        effect: { reelSpeedBonus: 0.15, duration: 3 },
+        match: selected => selected.some(f => [6, 14].includes(getFishDefById(f.fishId)?.mapId))
+      },
+      {
+        id: 'frozen-sashimi',
+        name: '極寒の氷締め刺身',
+        desc: '氷の海や極夜の海で獲れた魚を氷締めにした一品。次の4回の釣果でキャッチゲージ+12%、XP+8%。',
+        effect: { gaugeGainBonus: 0.12, xpMult: 0.08, duration: 4 },
+        match: selected => selected.some(f => [7, 15].includes(getFishDefById(f.fishId)?.mapId))
+      },
+      {
+        id: 'big-catch-course',
+        name: '大物尽くしフルコース',
+        desc: '合計50kgを超える大物2匹を贅沢に使ったフルコース。次の4回の釣果でクラウン確率+3%、ゴールド+15%。',
+        effect: { crownChanceBonus: 0.03, goldMult: 0.15, duration: 4 },
+        match: selected => selected.length === 2 && selected.reduce((sum, f) => sum + f.weight, 0) >= 50
+      },
+      {
         id: 'abyss-hotpot',
         name: '深海の極み鍋',
         desc: '深海魚を合わせた鍋。次の5回の釣果で獲得ゴールド+20%とシャイニー確率+3%。',
@@ -2891,11 +2956,18 @@
         match: selected => selected.length === 2 && selected.some(f => ['Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity))
       },
       {
-        id: 'rainbow-bowl',
-        name: '虹の炙り',
-        desc: '虹色の魚を使った一品。次の4回の釣果で巻き速度+12%、ゴールド+12%。',
-        effect: { reelSpeedBonus: 0.12, goldMult: 0.12, duration: 4 },
-        match: selected => selected.some(f => f.name.includes('虹'))
+        id: 'sashimi',
+        name: '豪華刺身盛り',
+        desc: '新鮮な大物を使った豪華料理。次の3回の釣果で獲得XP+20%。',
+        effect: { xpMult: 0.20, duration: 3 },
+        match: selected => selected.length === 2 && selected.some(f => ['Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity)) && selected.some(f => ['Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity))
+      },
+      {
+        id: 'salt-grilled',
+        name: '潮風の塩焼き',
+        desc: '生簀の定番素材を活かした一皿。次の3回の釣果で獲得ゴールド+15%。',
+        effect: { goldMult: 0.15, duration: 3 },
+        match: selected => selected.length === 2 && selected.every(f => ['Common', 'Uncommon'].includes(f.rarity))
       },
       {
         id: 'any-two',
@@ -2944,7 +3016,8 @@
         gaugeGainBonus: 0,
         reelSpeedBonus: 0,
         shinyChanceBonus: 0,
-        crownChanceBonus: 0
+        crownChanceBonus: 0,
+        mutationChanceBonus: 0
       };
       buffs.forEach(buff => {
         merged.goldMult += buff.goldMult || 0;
@@ -2953,6 +3026,7 @@
         merged.reelSpeedBonus += buff.reelSpeedBonus || 0;
         merged.shinyChanceBonus += buff.shinyChanceBonus || 0;
         merged.crownChanceBonus += buff.crownChanceBonus || 0;
+        merged.mutationChanceBonus += buff.mutationChanceBonus || 0;
       });
       return merged;
     }
@@ -4461,6 +4535,8 @@
       if (buff.gaugeGainBonus) parts.push(`キャッチゲージ+${Math.round(buff.gaugeGainBonus * 100)}%`);
       if (buff.reelSpeedBonus) parts.push(`巻き速度+${Math.round(buff.reelSpeedBonus * 100)}%`);
       if (buff.shinyChanceBonus) parts.push(`シャイニー率+${Math.round(buff.shinyChanceBonus * 100)}%`);
+      if (buff.crownChanceBonus) parts.push(`クラウン率+${Math.round(buff.crownChanceBonus * 100)}%`);
+      if (buff.mutationChanceBonus) parts.push(`変異率+${Math.round(buff.mutationChanceBonus * 100)}%`);
       effectText.innerHTML = `<div style="font-weight:700; color:#fff; margin-bottom:4px;">${buff.name}</div><div>${parts.join(' / ')}</div><div style="margin-top:4px; color:var(--text-sub);">合計 ${getActiveCookingBuffs().length} 種 / 最長残り ${buff.duration} 回</div>`;
     }
 
@@ -4531,6 +4607,7 @@
       if (buff.reelSpeedBonus) parts.push(`巻き速度+${Math.round(buff.reelSpeedBonus * 100)}%`);
       if (buff.shinyChanceBonus) parts.push(`シャイニー率+${Math.round(buff.shinyChanceBonus * 100)}%`);
       if (buff.crownChanceBonus) parts.push(`クラウン率+${Math.round(buff.crownChanceBonus * 100)}%`);
+      if (buff.mutationChanceBonus) parts.push(`変異率+${Math.round(buff.mutationChanceBonus * 100)}%`);
       if (buff.duration) parts.push(`残り${buff.duration}回`);
       return parts.join(' / ') || '効果なし';
     }
@@ -4738,7 +4815,7 @@
 
     function scaleCookingEffect(effect, mult, durationDelta) {
       const out = {};
-      ['goldMult', 'xpMult', 'gaugeGainBonus', 'reelSpeedBonus', 'shinyChanceBonus', 'crownChanceBonus'].forEach(k => {
+      ['goldMult', 'xpMult', 'gaugeGainBonus', 'reelSpeedBonus', 'shinyChanceBonus', 'crownChanceBonus', 'mutationChanceBonus'].forEach(k => {
         if (effect[k]) out[k] = Math.round(effect[k] * mult * 1000) / 1000;
       });
       out.duration = Math.max(1, (effect.duration || 3) + durationDelta);
@@ -5168,7 +5245,7 @@
       // 天候による「変異」判定（幸運スキルや特殊ロッドで発生率アップ）
       let mutation = null;
       const weatherMutDef = WEATHER_MUTATIONS[game.weather];
-      if (weatherMutDef && Math.random() < (weatherMutDef.chance + eff.mutationChance + rodBonus.mutationChanceBonus)) {
+      if (weatherMutDef && Math.random() < (weatherMutDef.chance + eff.mutationChance + rodBonus.mutationChanceBonus + (cookingBuff?.mutationChanceBonus || 0))) {
         mutation = weatherMutDef;
       }
 
