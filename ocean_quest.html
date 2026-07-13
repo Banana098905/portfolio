@@ -955,6 +955,48 @@
       color: #fff;
       margin-bottom: 4px;
     }
+    .cook-gauge-wrap {
+      position: relative;
+      width: 100%;
+      height: 34px;
+      border-radius: 17px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      overflow: hidden;
+    }
+    .cook-gauge-zone-good {
+      position: absolute;
+      top: 0; height: 100%;
+      background: rgba(255,215,0,0.35);
+    }
+    .cook-gauge-zone-perfect {
+      position: absolute;
+      top: 0; height: 100%;
+      background: rgba(57,255,20,0.55);
+    }
+    .cook-gauge-marker {
+      position: absolute;
+      top: -3px;
+      width: 6px;
+      height: 40px;
+      margin-left: -3px;
+      background: #fff;
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.9), 0 0 4px rgba(0,240,255,0.8);
+    }
+    .cook-round-dot {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text-sub);
+    }
+    .cook-round-dot.active { border-color: var(--neon-cyan); color: #fff; box-shadow: 0 0 8px rgba(0,240,255,0.5); }
+    .cook-round-dot.perfect { border-color: var(--neon-green); color: var(--neon-green); background: rgba(57,255,20,0.12); }
+    .cook-round-dot.good { border-color: var(--neon-gold); color: var(--neon-gold); background: rgba(255,215,0,0.12); }
+    .cook-round-dot.miss { border-color: var(--neon-pink); color: var(--neon-pink); background: rgba(255,0,127,0.12); }
     #inventory-list { flex: 1; overflow-y: auto; padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
     .inv-fish-card {
       background: rgba(255,255,255,0.03);
@@ -2772,6 +2814,18 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.3.0',
+        date: '2026年7月14日',
+        title: '🔥 料理に「火加減ミニゲーム」を追加',
+        changes: [
+          '🎮 料理する際、動くバーを狙って止める3ラウンドのミニゲームが発生するようになりました',
+          '🌟 3ラウンドの精度に応じて「会心の一皿」「料理成功」「ちょっと焦げた」の3段階に結果が変化します',
+          '💪 会心の一皿は効果量1.5倍・持続+2回、逆に焦がすと効果量0.5倍・持続-1回になります',
+          '🐟 素材の魚はミニゲーム終了時に消費されるため、モーダルを閉じてもやり直し可能です',
+          '📊 生簀パネルの「料理効果」表示に、キャッチゲージ/巻き速度/シャイニー率/クラウン率のボーナスも表示されるようにしました'
+        ]
+      },
+      {
         version: '1.2.1',
         date: '2026年7月13日',
         title: '🍳 料理機能と釣り強化の拡張',
@@ -2805,7 +2859,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.2.1';
+    const CHANGELOG_VERSION = 'v1.3.0';
 
     const COOKING_RECIPES = [
       {
@@ -2853,6 +2907,7 @@
     ];
 
     let cookingSelection = [];
+    let cookingMinigame = null; // 料理ミニゲーム(火加減ゲーム)の進行状態
 
     const DAILY_QUEST_TEMPLATES = [
       { id: 'daily-catch-3', title: '朝の一投', desc: '魚を 3 匹釣る', type: 'catch', targetId: null, targetQty: 3, rewardGold: 180, rewardXp: 80, rewardGem: 1 },
@@ -3359,11 +3414,12 @@
       if (id === 'modal-skills') renderSkills();
       if (id === 'modal-craft') renderCraft();
       if (id === 'modal-quests') renderQuests();
-      if (id === 'modal-cooking') { cookingSelection = []; renderCooking(); }
+      if (id === 'modal-cooking') { cancelCookingMinigame(); cookingSelection = []; renderCooking(); }
     }
 
     function closeModal(id) {
       document.getElementById(id).style.display = 'none';
+      if (id === 'modal-cooking') cancelCookingMinigame();
       if (activeModal === id) {
         activeModal = null;
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -4471,6 +4527,10 @@
       const parts = [];
       if (buff.goldMult) parts.push(`ゴールド+${Math.round(buff.goldMult * 100)}%`);
       if (buff.xpMult) parts.push(`経験値+${Math.round(buff.xpMult * 100)}%`);
+      if (buff.gaugeGainBonus) parts.push(`キャッチゲージ+${Math.round(buff.gaugeGainBonus * 100)}%`);
+      if (buff.reelSpeedBonus) parts.push(`巻き速度+${Math.round(buff.reelSpeedBonus * 100)}%`);
+      if (buff.shinyChanceBonus) parts.push(`シャイニー率+${Math.round(buff.shinyChanceBonus * 100)}%`);
+      if (buff.crownChanceBonus) parts.push(`クラウン率+${Math.round(buff.crownChanceBonus * 100)}%`);
       if (buff.duration) parts.push(`残り${buff.duration}回`);
       return parts.join(' / ') || '効果なし';
     }
@@ -4483,6 +4543,7 @@
     }
 
     function renderCooking() {
+      if (cookingMinigame) return; // ミニゲーム進行中は通常の選択画面を描画しない
       const statusEl = document.getElementById('cooking-status');
       const selectionEl = document.getElementById('cooking-selection');
       if (!statusEl || !selectionEl) return;
@@ -4535,15 +4596,191 @@
         alert('この組み合わせでは調理できません。生簀から別の魚を選んでください。');
         return;
       }
-      const indices = [...cookingSelection].sort((a,b) => b-a);
-      indices.forEach(idx => game.fishInventory.splice(idx, 1));
-      addCookingBuff(recipe);
+      startCookingMinigame(recipe, [...cookingSelection]);
+    }
+
+    // ============================================================
+    // 🔥 料理ミニゲーム（火加減ゲーム）
+    // バーが伸縮しながら往復する中で、色ゾーンに入った瞬間にボタンを押して止める。
+    // 3ラウンドの精度(会心/成功/失敗)を合計し、料理の効果が変動する。
+    // ============================================================
+    function startCookingMinigame(recipe, indices) {
+      cookingMinigame = {
+        recipe, indices,
+        round: 0,
+        maxRounds: 3,
+        results: [],
+        pos: Math.random() * 100,
+        vel: 0,
+        target: 50,
+        rafId: null,
+        lastTime: null,
+        locked: false
+      };
+      setupCookRound();
+      renderCookMinigamePanel();
+      cookingMinigame.rafId = requestAnimationFrame(runCookRoundLoop);
+    }
+
+    function setupCookRound() {
+      const g = cookingMinigame;
+      if (!g) return;
+      g.target = 20 + Math.random() * 60; // 20〜80の間にランダムでゾーンを配置
+      g.pos = Math.random() * 100;
+      const speedFactor = 1 + g.round * 0.4; // ラウンドが進むほどバーが速くなる
+      g.vel = (55 + Math.random() * 20) * speedFactor * (Math.random() < 0.5 ? 1 : -1);
+      g.locked = false;
+      g.lastTime = null;
+    }
+
+    function renderCookMinigamePanel() {
+      const g = cookingMinigame;
+      const selectionEl = document.getElementById('cooking-selection');
+      if (!g || !selectionEl) return;
+      const roundDots = Array.from({ length: g.maxRounds }).map((_, i) => {
+        const res = g.results[i];
+        const cls = res ? res.type : (i === g.round ? 'active' : '');
+        const icon = res ? (res.type === 'perfect' ? '◎' : res.type === 'good' ? '○' : '×') : (i + 1);
+        return `<div class="cook-round-dot ${cls}">${icon}</div>`;
+      }).join('');
+      selectionEl.innerHTML = `
+        <div style="padding:10px; border:1px solid rgba(255,215,0,0.2); border-radius:10px; background:rgba(255,215,0,0.05);">
+          <div style="font-weight:700; color:#fff; margin-bottom:4px;">🔥 火加減ミニゲーム：${g.recipe.name}</div>
+          <div style="font-size:0.78rem; color:var(--text-sub);">バーが動く中で、色ゾーンに入った瞬間に下のボタンを押そう。ラウンド ${g.round + 1}/${g.maxRounds}</div>
+        </div>
+        <div style="display:flex; gap:6px; justify-content:center;">${roundDots}</div>
+        <div class="cook-gauge-wrap" id="cook-gauge-wrap">
+          <div class="cook-gauge-zone-good" id="cook-zone-good"></div>
+          <div class="cook-gauge-zone-perfect" id="cook-zone-perfect"></div>
+          <div class="cook-gauge-marker" id="cook-gauge-marker"></div>
+        </div>
+        <div id="cook-round-feedback" style="text-align:center; font-weight:700; min-height:1.4em;"></div>
+        <button class="buy-btn" id="cook-stop-btn" onclick="stopCookingRound()" style="width:100%; padding:14px; font-size:1rem;">🛑 ピタッと止める！</button>
+      `;
+      positionCookZones();
+      updateCookMarkerVisual();
+    }
+
+    function positionCookZones() {
+      const g = cookingMinigame;
+      const goodEl = document.getElementById('cook-zone-good');
+      const perfEl = document.getElementById('cook-zone-perfect');
+      if (!g || !goodEl || !perfEl) return;
+      const goodWidth = 32, perfWidth = 12;
+      goodEl.style.left = Math.max(0, g.target - goodWidth / 2) + '%';
+      goodEl.style.width = goodWidth + '%';
+      perfEl.style.left = Math.max(0, g.target - perfWidth / 2) + '%';
+      perfEl.style.width = perfWidth + '%';
+    }
+
+    function updateCookMarkerVisual() {
+      const g = cookingMinigame;
+      const markerEl = document.getElementById('cook-gauge-marker');
+      if (g && markerEl) markerEl.style.left = g.pos + '%';
+    }
+
+    function runCookRoundLoop(time) {
+      const g = cookingMinigame;
+      if (!g || g.locked) return;
+      if (g.lastTime == null) g.lastTime = time || performance.now();
+      const now = time || performance.now();
+      const dt = Math.min(0.05, (now - g.lastTime) / 1000);
+      g.lastTime = now;
+      g.pos += g.vel * dt;
+      if (g.pos <= 0) { g.pos = 0; g.vel = Math.abs(g.vel); }
+      if (g.pos >= 100) { g.pos = 100; g.vel = -Math.abs(g.vel); }
+      updateCookMarkerVisual();
+      g.rafId = requestAnimationFrame(runCookRoundLoop);
+    }
+
+    function judgeCookRound(pos, target) {
+      const diff = Math.abs(pos - target);
+      if (diff <= 6) return { type: 'perfect', point: 2, label: '🌟 会心の一撃！' };
+      if (diff <= 16) return { type: 'good', point: 1, label: '👍 いい感じ！' };
+      return { type: 'miss', point: 0, label: '💦 ……焦げた' };
+    }
+
+    function stopCookingRound() {
+      const g = cookingMinigame;
+      if (!g || g.locked) return;
+      g.locked = true;
+      if (g.rafId) cancelAnimationFrame(g.rafId);
+      const result = judgeCookRound(g.pos, g.target);
+      g.results.push(result);
+      const fb = document.getElementById('cook-round-feedback');
+      const btn = document.getElementById('cook-stop-btn');
+      if (fb) {
+        fb.textContent = result.label;
+        fb.style.color = result.type === 'perfect' ? 'var(--neon-green)' : result.type === 'good' ? 'var(--neon-gold)' : 'var(--neon-pink)';
+      }
+      if (btn) btn.disabled = true;
+      if (result.type === 'perfect') sfxHit();
+      else if (result.type === 'good') sfxClick();
+      else sfxMiss();
+      setTimeout(() => {
+        if (!cookingMinigame) return; // モーダルが閉じられていた場合は何もしない
+        cookingMinigame.round++;
+        if (cookingMinigame.round >= cookingMinigame.maxRounds) finishCookingMinigame();
+        else {
+          setupCookRound();
+          renderCookMinigamePanel();
+          cookingMinigame.rafId = requestAnimationFrame(runCookRoundLoop);
+        }
+      }, 700);
+    }
+
+    function getCookTier(score, maxScore) {
+      const ratio = score / maxScore;
+      if (ratio >= 0.9) return { label: '🌟 会心の一皿！', mult: 1.5, durationDelta: 2 };
+      if (ratio >= 0.45) return { label: '👍 料理成功', mult: 1.0, durationDelta: 0 };
+      return { label: '💦 ちょっと焦げてしまった…', mult: 0.5, durationDelta: -1 };
+    }
+
+    function scaleCookingEffect(effect, mult, durationDelta) {
+      const out = {};
+      ['goldMult', 'xpMult', 'gaugeGainBonus', 'reelSpeedBonus', 'shinyChanceBonus', 'crownChanceBonus'].forEach(k => {
+        if (effect[k]) out[k] = Math.round(effect[k] * mult * 1000) / 1000;
+      });
+      out.duration = Math.max(1, (effect.duration || 3) + durationDelta);
+      return out;
+    }
+
+    function finishCookingMinigame() {
+      const g = cookingMinigame;
+      if (!g) return;
+      const maxScore = g.maxRounds * 2;
+      const score = g.results.reduce((sum, r) => sum + r.point, 0);
+      const tier = getCookTier(score, maxScore);
+      const scaledEffect = scaleCookingEffect(g.recipe.effect, tier.mult, tier.durationDelta);
+      const scaledRecipe = { ...g.recipe, effect: scaledEffect };
+
+      g.indices.slice().sort((a, b) => b - a).forEach(idx => game.fishInventory.splice(idx, 1));
+      addCookingBuff(scaledRecipe);
       game.cookingCookedCount = (game.cookingCookedCount || 0) + 1;
       cookingSelection = [];
       saveGame();
       renderInventory();
-      renderCooking();
-      addVisualSplashEffect(`料理完成！${recipe.name}を作りました。`);
+      sfxCatch();
+      addVisualSplashEffect(`${tier.label} ${g.recipe.name} 完成！`);
+
+      const selectionEl = document.getElementById('cooking-selection');
+      if (selectionEl) {
+        selectionEl.innerHTML = `
+          <div style="padding:16px; border:1px solid rgba(255,215,0,0.3); border-radius:12px; background:rgba(255,215,0,0.06); text-align:center;">
+            <div style="font-size:1.05rem; font-weight:800; color:#fff; margin-bottom:6px;">${tier.label}</div>
+            <div style="font-weight:700; color:var(--neon-gold); margin-bottom:8px;">${g.recipe.name}</div>
+            <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:10px;">効果: ${formatCookingBuff(scaledEffect)}</div>
+            <button class="buy-btn" onclick="cookingMinigame = null; renderCooking();" style="width:100%; padding:12px;">OK</button>
+          </div>
+        `;
+      }
+      cookingMinigame = null;
+    }
+
+    // モーダルを閉じた時などにミニゲームを安全に中断する（素材は未消費なので魚は失われない）
+    function cancelCookingMinigame() {
+      if (cookingMinigame && cookingMinigame.rafId) cancelAnimationFrame(cookingMinigame.rafId);
+      cookingMinigame = null;
     }
 
     // ============================================================
