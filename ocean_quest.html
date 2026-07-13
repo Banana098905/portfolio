@@ -1355,6 +1355,7 @@
         <div style="display:flex; gap:6px; margin-bottom:10px; flex-shrink:0; flex-wrap:wrap;">
           <button class="buy-btn" onclick="switchQuestTab('quests')" style="padding:5px 12px; width:auto;">デイリー</button>
           <button class="buy-btn" onclick="switchQuestTab('achievements')" style="padding:5px 12px; width:auto;">実績</button>
+          <button class="buy-btn" onclick="switchQuestTab('seasonpass')" style="padding:5px 12px; width:auto; background:rgba(255,215,0,0.12); border-color:var(--neon-gold);">🎫 シーズンパス</button>
         </div>
         <div id="quest-tab-content" style="flex:1; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:6px;"></div>
       </div>
@@ -1465,8 +1466,8 @@
     }
 
     function bg(ctx, w, h, key) {
-      ctx.fillStyle = TRAIL[key] || 'rgba(7,11,18,0.3)';
-      ctx.fillRect(0, 0, w, h);
+      // 背景は塗りつぶさず毎フレームクリアするだけにして、水面(海)が見えるようにする
+      ctx.clearRect(0, 0, w, h);
     }
 
     function drawRodFrame(ctx, w, h, key, s, dt, T) {
@@ -2175,39 +2176,40 @@
     ];
 
     const RODS = [
-      { id: 0, name: '木の竿', cost: 0, dist: 15, rare: 1.0, dur: 10, reelSpeed: 1.0, desc: '簡単な竿。' },
-      { id: 1, name: '竹の竿', cost: 200, dist: 25, rare: 1.2, dur: 15, reelSpeed: 1.1, desc: 'しなやかな竹。' },
-      { id: 2, name: '鉄の竿', cost: 800, dist: 40, rare: 1.5, dur: 25, reelSpeed: 1.2, desc: '頑丈な鉄製。' },
-      { id: 3, name: '銀の竿', cost: 2500, dist: 60, rare: 1.8, dur: 40, reelSpeed: 1.4, desc: '美しい銀箔。' },
-      { id: 4, name: '金の竿', cost: 7500, dist: 90, rare: 2.2, dur: 60, reelSpeed: 1.6, desc: '純金コーティング。' },
-      { id: 5, name: 'プラチナ竿', cost: 20000, dist: 130, rare: 2.7, dur: 90, reelSpeed: 1.9, desc: '希少素材。' },
-      { id: 6, name: 'ダイヤの竿', cost: 50000, dist: 180, rare: 3.3, dur: 130, reelSpeed: 2.2, desc: 'ダイヤ散りばめ。' },
-      { id: 7, name: 'クリスタル竿', cost: 120000, dist: 240, rare: 4.0, dur: 180, reelSpeed: 2.6, desc: '魔力を帯びた竿。' },
-      { id: 8, name: '神話の竿', cost: 300000, dist: 320, rare: 5.0, dur: 250, reelSpeed: 3.1, desc: '神々の祝福。' },
-      { id: 9, name: '海神の竿', cost: 1000000, dist: 500, rare: 7.0, dur: 999, reelSpeed: 4.0, desc: '究極のロッド。' },
-      { id: 10, name: '鱗の竿', cost: null, dist: 300, rare: 5.0, dur: 300, reelSpeed: 2.0, duplicateChance: 0.18, gachaOnly: true, desc: '鱗ルーレット激レア景品。稀に同じ魚を複製する神秘の竿。' },
-      { id: 11, name: '見習い卒業の竿', cost: 1500, dist: 35, rare: 1.3, dur: 18, reelSpeed: 1.15, reqLvl: 10, desc: '港を巣立った証の竿。' },
-      { id: 12, name: '深海監視員の竿', cost: 18000, dist: 140, rare: 2.0, dur: 70, reelSpeed: 1.3, reqLvl: 20, desc: '深海調査隊が愛用する特注品。' },
-      { id: 13, name: '皆伝の竿', cost: null, dist: 350, rare: 4.5, dur: 260, reelSpeed: 2.3, duplicateChance: 0.05, achievementOnly: true, unlockDesc: '図鑑を100%コンプリートすると自動で入手できる。', desc: '図鑑を極めた者だけが持つ竿。稀に魚を複製する。' },
-      { id: 14, name: '竜の落とし子の竿', cost: 400000, dist: 400, rare: 6.0, dur: 400, reelSpeed: 2.8, reqLvl: 50, reqDivineCaught: true, desc: '神話級の魚を釣った者だけが扱える竿。' },
-      { id: 15, name: '百戦錬磨の竿', cost: null, dist: 200, rare: 3.0, dur: 150, reelSpeed: 2.0, achievementOnly: true, unlockDesc: '実績「海の覇者」(累計100匹)を達成すると自動で入手できる。', desc: '百の死闘を乗り越えた老練の竿。' },
-      { id: 16, name: '深淵の竿', cost: null, dist: 350, rare: 6.5, dur: 350, reelSpeed: 2.5, craftOnly: true, desc: '深淵の遺物から鍛え上げた特別な竿。クラフトでのみ入手可能。' },
-      { id: 17, name: '万象の竿', cost: null, dist: 600, rare: 8.0, dur: 500, reelSpeed: 4.5, craftOnly: true, desc: '万象の紋章が宿る、すべてを超越した竿。クラフトでのみ入手可能。' },
-      { id: 18, name: 'コズミックロッド', cost: null, dist: 450, rare: 6.0, dur: 400, reelSpeed: 3.0, craftOnly: true, specialEffect: 'cosmic', vfxTheme: 'cosmic', desc: '効果: 宇宙由来の魚に出会いやすくなる。投げると星が周囲を回り、流れ星が奔る。' },
-      { id: 19, name: 'ブラックホールロッド', cost: null, dist: 400, rare: 5.5, dur: 400, reelSpeed: 2.8, craftOnly: true, specialEffect: 'blackhole', vfxTheme: 'blackhole', desc: '効果: 超低確率で全マップの魚を引き寄せる。投げると水面にブラックホールが現れ、光が吸い込まれる。' },
-      { id: 20, name: 'オーシャンキングロッド', cost: null, dist: 380, rare: 5.0, dur: 380, reelSpeed: 2.5, craftOnly: true, specialEffect: 'oceanking', vfxTheme: 'oceanking', desc: '効果: 巨大魚(クラウン)出現率が大幅UP。投げると海が割れ、王冠のエフェクトが輝く。' },
-      { id: 21, name: 'ドラゴンロッド', cost: null, dist: 400, rare: 5.5, dur: 380, reelSpeed: 2.7, craftOnly: true, specialEffect: 'dragon', vfxTheme: 'dragon', desc: '効果: 龍にまつわる魚が出現しやすくなる。投げると炎と雷を纏った龍が空を飛ぶ。' },
-      { id: 22, name: 'アビスロッド', cost: null, dist: 350, rare: 5.0, dur: 350, reelSpeed: 2.4, craftOnly: true, specialEffect: 'abyss', vfxTheme: 'abyss', desc: '効果: 深海・極夜・異次元など暗い海域限定の魚に出会いやすくなる。投げると周囲が暗くなり赤い目が海中に浮かぶ。' },
-      { id: 23, name: 'ソーラーロッド', cost: null, dist: 360, rare: 4.8, dur: 350, reelSpeed: 2.6, craftOnly: true, specialEffect: 'solar', vfxTheme: 'solar', desc: '効果: 昼間限定で全能力が大幅強化される。投げると太陽の輪と金色の粒子が舞う。' },
-      { id: 24, name: 'ルナロッド', cost: null, dist: 360, rare: 4.8, dur: 350, reelSpeed: 2.6, craftOnly: true, specialEffect: 'luna', vfxTheme: 'luna', desc: '効果: 夜限定で全能力が大幅強化される。投げると月が大きくなり、青白い霧と星が降る。' },
-      { id: 25, name: 'ストームロッド', cost: null, dist: 340, rare: 4.5, dur: 340, reelSpeed: 2.5, craftOnly: true, specialEffect: 'storm', vfxTheme: 'storm', desc: '効果: 台風の日限定で能力が大幅強化される。投げると雷鳴が轟き、雨粒が青く光る。' },
-      { id: 26, name: 'グレイシャルロッド', cost: null, dist: 340, rare: 4.5, dur: 340, reelSpeed: 2.3, craftOnly: true, specialEffect: 'glacial', vfxTheme: 'glacial', desc: '効果: 魚の動く速度が半減する。投げると海が凍りつき、氷の結晶と白い息が舞う。' },
-      { id: 27, name: 'エンペラーロッド', cost: null, dist: 420, rare: 5.8, dur: 420, reelSpeed: 2.9, craftOnly: true, specialEffect: 'emperor', vfxTheme: 'emperor', desc: '効果: 全能力がまんべんなく少しずつ強化される。投げると王冠と金の羽が舞い散る。' },
-      { id: 28, name: 'インフィニティロッド', cost: null, dist: 430, rare: 6.0, dur: 430, reelSpeed: 2.9, craftOnly: true, specialEffect: 'infinity', vfxTheme: 'infinity', desc: '効果: キャストするたびに違う能力がランダムで発動する。投げるたびに色とエフェクトが変わり、虹の軌跡を描く。' },
-      { id: 29, name: '四季ロッド', cost: null, dist: 370, rare: 5.0, dur: 370, reelSpeed: 2.6, craftOnly: true, specialEffect: 'seasons', vfxTheme: 'seasons', desc: '効果: 現在の季節に応じて異なる恩恵を受ける。春夏秋冬のエフェクトが数秒ごとに切り替わる。' },
-      { id: 30, name: 'クロノロッド', cost: null, dist: 390, rare: 5.3, dur: 390, reelSpeed: 2.7, craftOnly: true, specialEffect: 'chrono', vfxTheme: 'chrono', desc: '効果: バトル中、時折魚の動きを止める。投げると時計の歯車が周囲に浮かぶ。' },
-      { id: 31, name: 'ファントムロッド', cost: null, dist: 380, rare: 5.2, dur: 380, reelSpeed: 2.6, craftOnly: true, specialEffect: 'phantom', vfxTheme: 'phantom', desc: '効果: シャイニー個体の出現率が大幅UP。投げると半透明になり、青い炎が漂う。' },
-      { id: 32, name: 'セレスティアルロッド', cost: null, dist: 700, rare: 9.0, dur: 600, reelSpeed: 5.0, duplicateChance: 0.10, craftOnly: true, specialEffect: 'celestial', vfxTheme: 'celestial', desc: '超神話級。効果: あらゆる幸運が飛躍的に上昇し、神々の魚に出会いやすくなる。投げると星座が空に浮かび、隕石が降り、最後に光の大爆発が起きる。' }
+      { id: 0, name: '木の竿', cost: 0, dist: 15, rare: 1.0, dur: 10, reelSpeed: 1.0, barWidth: 16, desc: '簡単な竿。' },
+      { id: 1, name: '竹の竿', cost: 200, dist: 25, rare: 1.2, dur: 15, reelSpeed: 1.1, barWidth: 16, desc: 'しなやかな竹。' },
+      { id: 2, name: '鉄の竿', cost: 800, dist: 40, rare: 1.5, dur: 25, reelSpeed: 1.2, barWidth: 17, desc: '頑丈な鉄製。' },
+      { id: 3, name: '銀の竿', cost: 2500, dist: 60, rare: 1.8, dur: 40, reelSpeed: 1.4, barWidth: 18, desc: '美しい銀箔。' },
+      { id: 4, name: '金の竿', cost: 7500, dist: 90, rare: 2.2, dur: 60, reelSpeed: 1.6, barWidth: 19, desc: '純金コーティング。' },
+      { id: 5, name: 'プラチナ竿', cost: 20000, dist: 130, rare: 2.7, dur: 90, reelSpeed: 1.9, barWidth: 20, desc: '希少素材。' },
+      { id: 6, name: 'ダイヤの竿', cost: 50000, dist: 180, rare: 3.3, dur: 130, reelSpeed: 2.2, barWidth: 21, desc: 'ダイヤ散りばめ。' },
+      { id: 7, name: 'クリスタル竿', cost: 120000, dist: 240, rare: 4.0, dur: 180, reelSpeed: 2.6, barWidth: 23, desc: '魔力を帯びた竿。' },
+      { id: 8, name: '神話の竿', cost: 300000, dist: 320, rare: 5.0, dur: 250, reelSpeed: 3.1, barWidth: 25, desc: '神々の祝福。' },
+      { id: 9, name: '海神の竿', cost: 1000000, dist: 500, rare: 7.0, dur: 999, reelSpeed: 4.0, barWidth: 30, desc: '究極のロッド。' },
+      { id: 10, name: '鱗の竿', cost: null, dist: 300, rare: 5.0, dur: 300, reelSpeed: 2.0, barWidth: 20, duplicateChance: 0.18, gachaOnly: true, desc: '鱗ルーレット激レア景品。稀に同じ魚を複製する神秘の竿。' },
+      { id: 11, name: '見習い卒業の竿', cost: 1500, dist: 35, rare: 1.3, dur: 18, reelSpeed: 1.15, barWidth: 17, reqLvl: 10, desc: '港を巣立った証の竿。' },
+      { id: 12, name: '深海監視員の竿', cost: 18000, dist: 140, rare: 2.0, dur: 70, reelSpeed: 1.3, barWidth: 17, reqLvl: 20, desc: '深海調査隊が愛用する特注品。' },
+      { id: 13, name: '皆伝の竿', cost: null, dist: 350, rare: 4.5, dur: 260, reelSpeed: 2.3, barWidth: 22, duplicateChance: 0.05, achievementOnly: true, unlockDesc: '図鑑を100%コンプリートすると自動で入手できる。', desc: '図鑑を極めた者だけが持つ竿。稀に魚を複製する。' },
+      { id: 14, name: '竜の落とし子の竿', cost: 400000, dist: 400, rare: 6.0, dur: 400, reelSpeed: 2.8, barWidth: 24, reqLvl: 50, reqDivineCaught: true, desc: '神話級の魚を釣った者だけが扱える竿。' },
+      { id: 15, name: '百戦錬磨の竿', cost: null, dist: 200, rare: 3.0, dur: 150, reelSpeed: 2.0, barWidth: 20, achievementOnly: true, unlockDesc: '実績「海の覇者」(累計100匹)を達成すると自動で入手できる。', desc: '百の死闘を乗り越えた老練の竿。' },
+      { id: 16, name: '深淵の竿', cost: null, dist: 350, rare: 6.5, dur: 350, reelSpeed: 2.5, barWidth: 23, craftOnly: true, desc: '深淵の遺物から鍛え上げた特別な竿。クラフトでのみ入手可能。' },
+      { id: 17, name: '万象の竿', cost: null, dist: 600, rare: 8.0, dur: 500, reelSpeed: 4.5, barWidth: 32, craftOnly: true, desc: '万象の紋章が宿る、すべてを超越した竿。クラフトでのみ入手可能。' },
+      { id: 18, name: 'コズミックロッド', cost: null, dist: 450, rare: 6.0, dur: 400, reelSpeed: 3.0, barWidth: 25, craftOnly: true, specialEffect: 'cosmic', vfxTheme: 'cosmic', desc: '効果: 宇宙由来の魚に出会いやすくなる。投げると星が周囲を回り、流れ星が奔る。' },
+      { id: 19, name: 'ブラックホールロッド', cost: null, dist: 400, rare: 5.5, dur: 400, reelSpeed: 2.8, barWidth: 24, craftOnly: true, specialEffect: 'blackhole', vfxTheme: 'blackhole', desc: '効果: 超低確率で全マップの魚を引き寄せる。投げると水面にブラックホールが現れ、光が吸い込まれる。' },
+      { id: 20, name: 'オーシャンキングロッド', cost: null, dist: 380, rare: 5.0, dur: 380, reelSpeed: 2.5, barWidth: 23, craftOnly: true, specialEffect: 'oceanking', vfxTheme: 'oceanking', desc: '効果: 巨大魚(クラウン)出現率が大幅UP。投げると海が割れ、王冠のエフェクトが輝く。' },
+      { id: 21, name: 'ドラゴンロッド', cost: null, dist: 400, rare: 5.5, dur: 380, reelSpeed: 2.7, barWidth: 24, craftOnly: true, specialEffect: 'dragon', vfxTheme: 'dragon', desc: '効果: 龍にまつわる魚が出現しやすくなる。投げると炎と雷を纏った龍が空を飛ぶ。' },
+      { id: 22, name: 'アビスロッド', cost: null, dist: 350, rare: 5.0, dur: 350, reelSpeed: 2.4, barWidth: 22, craftOnly: true, specialEffect: 'abyss', vfxTheme: 'abyss', desc: '効果: 深海・極夜・異次元など暗い海域限定の魚に出会いやすくなる。投げると周囲が暗くなり赤い目が海中に浮かぶ。' },
+      { id: 23, name: 'ソーラーロッド', cost: null, dist: 360, rare: 4.8, dur: 350, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'solar', vfxTheme: 'solar', desc: '効果: 昼間限定で全能力が大幅強化される。投げると太陽の輪と金色の粒子が舞う。' },
+      { id: 24, name: 'ルナロッド', cost: null, dist: 360, rare: 4.8, dur: 350, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'luna', vfxTheme: 'luna', desc: '効果: 夜限定で全能力が大幅強化される。投げると月が大きくなり、青白い霧と星が降る。' },
+      { id: 25, name: 'ストームロッド', cost: null, dist: 340, rare: 4.5, dur: 340, reelSpeed: 2.5, barWidth: 23, craftOnly: true, specialEffect: 'storm', vfxTheme: 'storm', desc: '効果: 台風の日限定で能力が大幅強化される。投げると雷鳴が轟き、雨粒が青く光る。' },
+      { id: 26, name: 'グレイシャルロッド', cost: null, dist: 340, rare: 4.5, dur: 340, reelSpeed: 2.3, barWidth: 22, craftOnly: true, specialEffect: 'glacial', vfxTheme: 'glacial', desc: '効果: 魚の動く速度が半減する。投げると海が凍りつき、氷の結晶と白い息が舞う。' },
+      { id: 27, name: 'エンペラーロッド', cost: null, dist: 420, rare: 5.8, dur: 420, reelSpeed: 2.9, barWidth: 25, craftOnly: true, specialEffect: 'emperor', vfxTheme: 'emperor', desc: '効果: 全能力がまんべんなく少しずつ強化される。投げると王冠と金の羽が舞い散る。' },
+      { id: 28, name: 'インフィニティロッド', cost: null, dist: 430, rare: 6.0, dur: 430, reelSpeed: 2.9, barWidth: 25, craftOnly: true, specialEffect: 'infinity', vfxTheme: 'infinity', desc: '効果: キャストするたびに違う能力がランダムで発動する。投げるたびに色とエフェクトが変わり、虹の軌跡を描く。' },
+      { id: 29, name: '四季ロッド', cost: null, dist: 370, rare: 5.0, dur: 370, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'seasons', vfxTheme: 'seasons', desc: '効果: 現在の季節に応じて異なる恩恵を受ける。春夏秋冬のエフェクトが数秒ごとに切り替わる。' },
+      { id: 30, name: 'クロノロッド', cost: null, dist: 390, rare: 5.3, dur: 390, reelSpeed: 2.7, barWidth: 24, craftOnly: true, specialEffect: 'chrono', vfxTheme: 'chrono', desc: '効果: バトル中、時折魚の動きを止める。投げると時計の歯車が周囲に浮かぶ。' },
+      { id: 31, name: 'ファントムロッド', cost: null, dist: 380, rare: 5.2, dur: 380, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'phantom', vfxTheme: 'phantom', desc: '効果: シャイニー個体の出現率が大幅UP。投げると半透明になり、青い炎が漂う。' },
+      { id: 32, name: 'セレスティアルロッド', cost: null, dist: 700, rare: 9.0, dur: 600, reelSpeed: 5.0, barWidth: 34, duplicateChance: 0.10, craftOnly: true, specialEffect: 'celestial', vfxTheme: 'celestial', desc: '超神話級。効果: あらゆる幸運が飛躍的に上昇し、神々の魚に出会いやすくなる。投げると星座が空に浮かび、隕石が降り、最後に光の大爆発が起きる。' },
+      { id: 33, name: 'シーズンの竿', cost: null, dist: 260, rare: 3.5, dur: 200, reelSpeed: 2.1, barWidth: 22, seasonOnly: true, desc: 'シーズンパスや宝箱でのみ手に入る限定竿。' }
     ];
 
     const BOATS = [
@@ -2310,6 +2312,44 @@
       { label: '隕石の欠片エサ', icon: '☄️', type: 'bait', name: '隕石の欠片エサ', amount: 1, weight: 1, rare: true },
       { label: '万象の紋章×1', icon: '🌠', type: 'material', name: '万象の紋章', amount: 1, weight: 0.1, rare: true },
       { label: '🎣鱗の竿', icon: '🎣', type: 'rod', rodId: 10, weight: 0.05, rare: true }
+    ];
+
+    // ============================================================
+    // 宝箱システム（魚の代わりにヒットすることがある）
+    // ============================================================
+    const CHEST_HIT_CHANCE = 0.08; // キャストのヒット時、8%の確率で魚の代わりに宝箱が出現
+    const CHEST_REWARDS = [
+      { label: '200G', icon: '💰', type: 'gold', amount: 200, weight: 26 },
+      { label: '500G', icon: '💰', type: 'gold', amount: 500, weight: 18 },
+      { label: '魚のウロコ×10', icon: '🎣', type: 'material', name: '魚のウロコ', amount: 10, weight: 16 },
+      { label: '虹色のヒレ×3', icon: '🌈', type: 'material', name: '虹色のヒレ', amount: 3, weight: 12 },
+      { label: '珊瑚石×5', icon: '🪸', type: 'material', name: '珊瑚石', amount: 5, weight: 9 },
+      { label: '1 GEM', icon: '💎', type: 'gem', amount: 1, weight: 8 },
+      { label: '深淵の遺物×2', icon: '🌑', type: 'material', name: '深淵の遺物', amount: 2, weight: 5 },
+      { label: '3 GEM', icon: '💎', type: 'gem', amount: 3, weight: 3 },
+      { label: '龍脈の欠片×1', icon: '🐲', type: 'material', name: '龍脈の欠片', amount: 1, weight: 2 },
+      { label: '🎣シーズンの竿', icon: '🎣', type: 'rod', rodId: 33, weight: 0.5 }
+    ];
+
+    // ============================================================
+    // シーズンパス（無料トラック） レベルを上げるだけで貰える報酬
+    // ============================================================
+    const SEASON_PASS_REWARDS = [
+      { level: 2,  type: 'gem', amount: 2 },
+      { level: 4,  type: 'material', name: '魚のウロコ', amount: 15 },
+      { level: 6,  type: 'gem', amount: 3 },
+      { level: 8,  type: 'material', name: '虹色のヒレ', amount: 3 },
+      { level: 10, type: 'rod', rodId: 11 },
+      { level: 12, type: 'gem', amount: 4 },
+      { level: 14, type: 'cosmetic', name: '麦わら帽子' },
+      { level: 16, type: 'gem', amount: 5 },
+      { level: 18, type: 'material', name: '深海の結晶', amount: 5 },
+      { level: 20, type: 'rod', rodId: 12 },
+      { level: 22, type: 'gem', amount: 6 },
+      { level: 24, type: 'cosmetic', name: 'サングラス' },
+      { level: 26, type: 'gem', amount: 8 },
+      { level: 28, type: 'material', name: '古代の化石', amount: 5 },
+      { level: 30, type: 'rod', rodId: 33 }
     ];
 
     const FISH_FIGHT_PROFILES = {
@@ -2521,25 +2561,6 @@
 
     function triggerRodCastVFX(rod) {
       if (!rod || !rod.vfxTheme) return;
-      const vfxMessages = {
-        cosmic: '🌌 星々が周囲を巡り、流れ星が奔る…',
-        blackhole: '⚫ 水面にブラックホールが現れる…',
-        oceanking: '🌊 海が割れ、王冠が輝く…',
-        dragon: '🐉 炎と雷を纏った龍が空を舞う…',
-        abyss: '👁 周囲が暗くなり、赤い目が海中に浮かぶ…',
-        solar: '☀ 太陽の輪と金色の粒子が舞う…',
-        luna: '🌙 月が大きくなり、星が降り注ぐ…',
-        storm: '⚡ 雷鳴が轟き、雨粒が青く光る…',
-        glacial: '❄ 海が凍りつき、白い息が舞う…',
-        emperor: '👑 王冠と金の羽が舞い散る…',
-        infinity: '🌈 虹の軌跡が水面を走る…',
-        seasons: '🌸☀🍁❄ 季節のエフェクトが移ろう…',
-        chrono: '⚙ 時計の歯車が周囲に浮かぶ…',
-        phantom: '👻 半透明の青い炎が漂う…',
-        celestial: '✨ 星座が空に浮かび、隕石が降り注ぐ…'
-      };
-      const msg = vfxMessages[rod.vfxTheme];
-      if (msg) addVisualSplashEffect(msg);
       if (['cosmic', 'blackhole', 'celestial'].includes(rod.vfxTheme)) {
         triggerRodWaterTint(rod.vfxTheme);
       }
@@ -2688,6 +2709,7 @@
       weather: 'Sunny',
       season: 'Spring',
       weatherTicksLeft: 20,
+      seasonPassClaimed: {},
     };
 
     const LEADERBOARD_NPCS = [
@@ -2767,6 +2789,7 @@
             delete game.skills;
           }
           if (!game.skillTree) game.skillTree = { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 };
+          if (!game.seasonPassClaimed) game.seasonPassClaimed = {};
         } catch (e) { console.error("ロード失敗", e); }
       }
     }
@@ -3084,7 +3107,7 @@
       if (activeShopTab === 'shop-rods') {
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
-          if ((r.gachaOnly || r.achievementOnly || r.craftOnly) && !isOwned) return; // ルーレット/実績/クラフト限定ロッドは入手するまでショップに表示しない
+          if ((r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly) && !isOwned) return; // ルーレット/実績/クラフト/シーズン限定ロッドは入手するまでショップに表示しない
           const isEquipped = game.rodId === r.id;
           const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
           const meetsLevel = !r.reqLvl || game.level >= r.reqLvl;
@@ -3098,7 +3121,7 @@
           let actionHtml;
           if (isOwned) {
             actionHtml = isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`;
-          } else if (r.gachaOnly || r.achievementOnly || r.craftOnly) {
+          } else if (r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly) {
             actionHtml = '';
           } else if (isLocked) {
             actionHtml = `<button class="buy-btn" disabled>条件未達成</button>`;
@@ -3108,7 +3131,7 @@
           card.innerHTML = `
             <div class="item-icon">🎣</div>
             <div class="item-title">${r.name}</div>
-            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((r.reelSpeed-1)*100)}%</span>${r.duplicateChance ? `<br><span style="color:var(--neon-pink)">✨魚複製率 ${Math.round(r.duplicateChance*100)}%</span>` : ''}${reqText}</div>
+            <div class="item-desc">${r.desc}<br><span style="color:var(--neon-cyan)">飛距離+${r.dist}m / レア率x${r.rare}</span><br><span style="color:var(--neon-green)">巻き速度+${Math.round((r.reelSpeed-1)*100)}% / バー幅${r.barWidth || 20}%</span>${r.duplicateChance ? `<br><span style="color:var(--neon-pink)">✨魚複製率 ${Math.round(r.duplicateChance*100)}%</span>` : ''}${reqText}</div>
             ${actionHtml}
           `;
           list.appendChild(card);
@@ -3487,7 +3510,7 @@
         container.appendChild(list);
       } else if (activeCraftTab === 'roulette') {
         renderRouletteUI(container);
-      } else {
+      } else if (activeQuestTab === 'achievements') {
         const categories = [
           { key: 'hat', label: '👒 帽子' },
           { key: 'glass', label: '🕶️ メガネ' },
@@ -3567,7 +3590,7 @@
       if (lockedCosmetics.length === 0) {
         game.gold += 300;
         alert("コスメコンプリート！ 300G返還");
-      } else {
+      } else if (activeQuestTab === 'achievements') {
         const prize = lockedCosmetics[Math.floor(Math.random() * lockedCosmetics.length)];
         game.ownedCosmetics.push(prize.name);
         alert(`🎉 獲得: ${prize.name}`);
@@ -3730,7 +3753,7 @@
           `;
           container.appendChild(card);
         });
-      } else {
+      } else if (activeQuestTab === 'achievements') {
         game.achievements.forEach((a, idx) => {
           const card = document.createElement('div');
           card.className = 'quest-card';
@@ -3759,6 +3782,30 @@
           `;
           container.appendChild(card);
         });
+      } else if (activeQuestTab === 'seasonpass') {
+        const note = document.createElement('div');
+        note.style.cssText = 'font-size:0.55rem; color:var(--text-sub); padding:4px 2px;';
+        note.innerText = '🎫 無料シーズンパス：レベルを上げるだけで受け取れる報酬一覧。';
+        container.appendChild(note);
+        SEASON_PASS_REWARDS.forEach(r => {
+          const reached = game.level >= r.level;
+          const claimed = !!game.seasonPassClaimed[r.level];
+          let rewardLabel = '';
+          if (r.type === 'gem') rewardLabel = `💎 GEM ×${r.amount}`;
+          else if (r.type === 'material') rewardLabel = `${r.name} ×${r.amount}`;
+          else if (r.type === 'rod') rewardLabel = `🎣 ${RODS[r.rodId].name}`;
+          else if (r.type === 'cosmetic') rewardLabel = `👔 ${r.name}`;
+          const card = document.createElement('div');
+          card.className = 'quest-card';
+          card.innerHTML = `
+            <div>
+              <strong style="color:#fff; font-size:0.65rem;">Lv.${r.level} 到達報酬</strong>
+              <div class="quest-reward">${rewardLabel}</div>
+            </div>
+            <div>${claimed ? `<button class="buy-btn" disabled style="padding:2px 6px;">受取済</button>` : `<button class="buy-btn" onclick="claimSeasonPassReward(${r.level})" ${!reached ? 'disabled' : ''} style="padding:2px 6px; background:rgba(255,215,0,0.15); border-color:var(--neon-gold);">${reached ? '受取' : `Lv.${r.level}`}</button>`}</div>
+          `;
+          container.appendChild(card);
+        });
       }
     }
 
@@ -3773,6 +3820,19 @@
         saveGame(); renderQuests(); updateHUD();
         addVisualSplashEffect("QUEST CLEAR!");
       }
+    }
+
+    function claimSeasonPassReward(level) {
+      if (game.level < level || game.seasonPassClaimed[level]) return;
+      const reward = SEASON_PASS_REWARDS.find(r => r.level === level);
+      if (!reward) return;
+      game.seasonPassClaimed[level] = true;
+      if (reward.type === 'gem') { game.gems += reward.amount; }
+      else if (reward.type === 'material') { game.materials[reward.name] = (game.materials[reward.name] || 0) + reward.amount; }
+      else if (reward.type === 'rod') { if (!game.ownedRods.includes(reward.rodId)) game.ownedRods.push(reward.rodId); }
+      else if (reward.type === 'cosmetic') { if (!game.ownedCosmetics.includes(reward.name)) game.ownedCosmetics.push(reward.name); }
+      saveGame(); renderQuests(); updateHUD();
+      addVisualSplashEffect(`🎫 シーズンパス Lv.${level} 報酬獲得！`);
     }
 
     function claimAchievementReward(idx) {
@@ -4011,6 +4071,12 @@
       rodVfxState = null;
       rodVfxKey = null;
 
+      // 魚の代わりに宝箱が出現することがある
+      if (Math.random() < CHEST_HIT_CHANCE) {
+        triggerChestHit();
+        return;
+      }
+
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'HIT!';
       btn.disabled = false;
@@ -4030,6 +4096,54 @@
       setTimeout(() => {
         if (castState === 'hit') triggerFight();
       }, 400);
+    }
+
+    // 宝箱がヒットした時の演出と報酬付与（バトルなしで即座に開封される）
+    function triggerChestHit() {
+      castState = 'chest';
+      const btn = document.getElementById('cast-btn');
+      btn.innerText = '宝箱!';
+      btn.disabled = true;
+      btn.classList.remove('casting');
+      const msg = document.getElementById('action-msg');
+      msg.innerText = '🎁 宝箱を発見！';
+      msg.className = 'show catch';
+      sfxRouletteWin();
+      shakeScreen('Epic');
+      setTimeout(() => { openTreasureChest(); }, 900);
+    }
+
+    function openTreasureChest() {
+      let totalWeight = 0;
+      CHEST_REWARDS.forEach(r => totalWeight += r.weight);
+      let rand = Math.random() * totalWeight;
+      let picked = CHEST_REWARDS[0];
+      for (const r of CHEST_REWARDS) {
+        rand -= r.weight;
+        if (rand <= 0) { picked = r; break; }
+      }
+      let resultText = '';
+      if (picked.type === 'gold') { game.gold += picked.amount; resultText = `💰 +${picked.amount}G`; }
+      else if (picked.type === 'gem') { game.gems += picked.amount; resultText = `💎 +${picked.amount} GEM`; }
+      else if (picked.type === 'material') { game.materials[picked.name] = (game.materials[picked.name] || 0) + picked.amount; resultText = `${picked.name} x${picked.amount}`; }
+      else if (picked.type === 'rod') {
+        if (!game.ownedRods.includes(picked.rodId)) {
+          game.ownedRods.push(picked.rodId);
+          resultText = `🎣激レア【${RODS[picked.rodId].name}】`;
+        } else {
+          game.gold += 3000;
+          resultText = '🎣所持済み→代わりに+3000G';
+        }
+      }
+      addVisualSplashEffect(`🎁 宝箱: ${resultText}`);
+      saveGame(); updateHUD();
+      castState = 'idle';
+      const btn = document.getElementById('cast-btn');
+      btn.innerText = 'CAST';
+      btn.className = 'cast-btn';
+      btn.disabled = false;
+      bobberThrown = false;
+      drawWaterSurface();
     }
 
     function triggerMiss() {
@@ -4093,6 +4207,9 @@
       // レジェンダリー以上は抵抗が桁違いな代わりに動き自体は穏やかで、じっくり大物とやり合う感覚に
       const rarityMultiplier = { Common:1.0, Uncommon:1.2, Rare:1.5, Epic:2.0, Legendary:1.4, Mythic:1.6, Divine:1.8 };
       let diff = rarityMultiplier[targetFish.rarity] || 1.0;
+      // レア度が高いほどゲージの上昇そのものが遅くなり、格闘時間が本当に長くなる
+      const gaugeGainRarityMult = { Common:1.0, Uncommon:1.0, Rare:0.85, Epic:0.6, Legendary:0.3, Mythic:0.18, Divine:0.11 };
+      const gaugeGainMult = gaugeGainRarityMult[targetFish.rarity] || 1.0;
       const eff = getSkillEffects();
       const rodBonus = getRodSpecialBonus();
       // 悪天候(台風・流星群)では魚が暴れやすいが、航海スキルで軽減できる
@@ -4102,7 +4219,7 @@
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
       const resistance = Math.max(0, rawResist - eff.rarityResist);
       const reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
-      const barWidth = 25 + eff.barWidth;
+      const barWidth = (rod.barWidth || 20) + eff.barWidth;
       playerBar.style.width = barWidth + '%';
       let lastTime = performance.now();
 
@@ -4117,7 +4234,7 @@
         if (fishPos < 0) { fishPos = 0; fishVel = -fishVel * 0.5; }
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
         // ロッド+スキルの巻き速度が高いほど反応が速くなるが、レアな魚ほど抵抗で相殺される
-        if (isReeling) { playerVel += 150 * dt * reelSpeedMult; sfxFightReel(); }
+        if (isReeling) { playerVel += 90 * dt * reelSpeedMult; sfxFightReel(); }
         else playerVel -= 120 * dt;
         playerVel *= 0.95;
         playerPos += playerVel * dt;
@@ -4127,7 +4244,7 @@
         const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + barWidth);
         if (isMatched) {
           playerBar.classList.add('matching');
-          catchGauge += (16 + eff.barWidth) * dt * (1 + (reelSpeedMult - 1) * 0.5);
+          catchGauge += (16 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5);
         } else {
           playerBar.classList.remove('matching');
           catchGauge -= (18 + diff * 2) * dt;
