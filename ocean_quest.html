@@ -941,6 +941,20 @@
     }
     #inventory-title { font-size: clamp(0.5rem, 0.75vw, 0.62rem); font-weight: 800; color: var(--neon-cyan); text-shadow: var(--glow-cyan); text-align: center; }
     #inventory-cap { font-size: clamp(0.42rem, 0.6vw, 0.52rem); color: var(--text-sub); text-align: center; font-family: monospace; }
+    #inventory-cooking-effect {
+      padding: 8px 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0,255,255,0.06);
+      color: var(--text-sub);
+      font-size: clamp(0.38rem, 0.55vw, 0.52rem);
+      line-height: 1.4;
+    }
+    .cooking-effect-title {
+      font-size: clamp(0.46rem, 0.65vw, 0.58rem);
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
     #inventory-list { flex: 1; overflow-y: auto; padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
     .inv-fish-card {
       background: rgba(255,255,255,0.03);
@@ -1227,6 +1241,10 @@
           <div id="inventory-title">🐟 生簀</div>
           <div id="inventory-cap"><span id="inventory-cap-val">0/10</span></div>
         </div>
+        <div id="inventory-cooking-effect">
+          <div class="cooking-effect-title">🍳 料理効果</div>
+          <div id="cooking-effect-text">現在、料理の効果はありません。</div>
+        </div>
         <div id="inventory-list"></div>
         <div id="inventory-footer">
           <div id="inventory-total">合計: 0 G</div>
@@ -1361,12 +1379,15 @@
       </div>
     </div>
 
-    <div class="modal-overlay" id="modal-ranking">
+    <div class="modal-overlay" id="modal-cooking">
       <div class="modal-header">
-        <h3>🥇 ランキング</h3>
-        <button class="close-btn" onclick="closeModal('modal-ranking')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <h3>🍳 料理</h3>
+        <button class="close-btn" onclick="closeModal('modal-cooking')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="modal-body"><div class="ranking-list" id="ranking-list-box"></div></div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:10px; min-height:0;">
+        <div id="cooking-status" style="display:flex; flex-direction:column; gap:8px;"></div>
+        <div id="cooking-selection" style="display:flex; flex-direction:column; gap:10px; min-height:240px;"></div>
+      </div>
     </div>
 
     <div class="modal-overlay" id="modal-changelog">
@@ -1392,6 +1413,7 @@
           <div class="result-row" id="result-gold-row"><span id="result-gold-label">査定額:</span> <span id="result-gold">+0 G</span></div>
           <div class="result-row"><span>獲得経験値:</span> <span id="result-xp">+0 XP</span></div>
           <div class="result-row" id="result-bonus-row" style="color:var(--neon-cyan)"><span>個体ボーナス:</span> <span id="result-bonus-txt">-</span></div>
+          <div class="result-row" id="result-cooking-row" style="color:var(--neon-cyan); display:none;"><span>料理効果:</span> <span id="result-cooking-txt">-</span></div>
           <div class="result-row" id="result-combo-row" style="color:var(--neon-pink); display:none;"><span>🔥 コンボ:</span> <span id="result-combo-txt">-</span></div>
           <div class="result-row" id="result-mat-row" style="color:var(--neon-green)"><span>素材:</span> <span id="result-mat-txt">-</span></div>
         </div>
@@ -1426,9 +1448,9 @@
         <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         <span>クエスト</span>
       </button>
-      <button class="nav-btn" data-modal="modal-ranking" onclick="openModal('modal-ranking')">
-        <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 0 0-8h-1zM2 8h1V0H2a4 4 0 0 0 0 8zm19 11H3v2h18v-2zm-3-9v6H6v-6h12z"/></svg>
-        <span>ランキング</span>
+      <button class="nav-btn" data-modal="modal-cooking" onclick="openModal('modal-cooking')">
+        <svg viewBox="0 0 24 24"><path d="M4 2h16v4H4V2z"/><path d="M5 6h14l-1 14H6L5 6z"/><path d="M8 12h8M8 16h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <span>料理</span>
       </button>
       <button class="nav-btn" data-modal="modal-changelog" onclick="openModal('modal-changelog')">
         <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="16 2 16 8 8 8 8 2"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
@@ -2750,6 +2772,18 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.2.1',
+        date: '2026年7月13日',
+        title: '🍳 料理機能と釣り強化の拡張',
+        changes: [
+          '🍽️ 生簀の魚を組み合わせて料理を作成できるようになりました',
+          '⚡ 料理効果を左側の生簀パネルに表示し、釣果に反映します',
+          '🧪 料理効果にゴールド/XPボーナス、釣り戦闘バフ、レア率UPなどを追加',
+          '📜 「更新情報」ボタンでこれまでの変更内容を確認できるようにしました',
+          '🔄 更新時・初回に自動表示する変更ログ機能を維持しました'
+        ]
+      },
+      {
         version: '1.2.0',
         date: '2026年7月13日',
         title: '⚙️ ハードアイランド調整 & ハードロッド強化拡張',
@@ -2771,7 +2805,168 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.2.0';
+    const CHANGELOG_VERSION = 'v1.2.1';
+
+    const COOKING_RECIPES = [
+      {
+        id: 'salt-grilled',
+        name: '潮風の塩焼き',
+        desc: '生簀の定番素材を活かした一皿。次の3回の釣果で獲得ゴールド+15%。',
+        effect: { goldMult: 0.15, duration: 3 },
+        match: selected => selected.length === 2 && selected.every(f => ['Common', 'Uncommon'].includes(f.rarity))
+      },
+      {
+        id: 'sashimi',
+        name: '豪華刺身盛り',
+        desc: '新鮮な大物を使った豪華料理。次の3回の釣果で獲得XP+20%。',
+        effect: { xpMult: 0.20, duration: 3 },
+        match: selected => selected.length === 2 && selected.some(f => ['Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity)) && selected.some(f => ['Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity))
+      },
+      {
+        id: 'dragon-stew',
+        name: '竜神の煮付け',
+        desc: '龍の名を持つ魚を使った特別料理。次の4回の釣果でゴールド+10%、XP+10%、キャッチゲージ+15%。',
+        effect: { goldMult: 0.10, xpMult: 0.10, gaugeGainBonus: 0.15, duration: 4 },
+        match: selected => selected.some(f => /竜|龍/.test(f.name))
+      },
+      {
+        id: 'abyss-hotpot',
+        name: '深海の極み鍋',
+        desc: '深海魚を合わせた鍋。次の5回の釣果で獲得ゴールド+20%とシャイニー確率+3%。',
+        effect: { goldMult: 0.20, shinyChanceBonus: 0.03, duration: 5 },
+        match: selected => selected.length === 2 && selected.some(f => ['Epic', 'Legendary', 'Mythic', 'Divine'].includes(f.rarity))
+      },
+      {
+        id: 'rainbow-bowl',
+        name: '虹の炙り',
+        desc: '虹色の魚を使った一品。次の4回の釣果で巻き速度+12%、ゴールド+12%。',
+        effect: { reelSpeedBonus: 0.12, goldMult: 0.12, duration: 4 },
+        match: selected => selected.some(f => f.name.includes('虹'))
+      },
+      {
+        id: 'any-two',
+        name: 'おまかせ盛り合わせ',
+        desc: '生簀の魚2匹を合わせたおまかせ料理。次の3回の釣果でゴールド+10%、XP+10%。',
+        effect: { goldMult: 0.10, xpMult: 0.10, duration: 3 },
+        match: selected => selected.length === 2
+      }
+    ];
+
+    let cookingSelection = [];
+
+    const DAILY_QUEST_TEMPLATES = [
+      { id: 'daily-catch-3', title: '朝の一投', desc: '魚を 3 匹釣る', type: 'catch', targetId: null, targetQty: 3, rewardGold: 180, rewardXp: 80, rewardGem: 1 },
+      { id: 'daily-weight-12', title: '大物狙い', desc: '合計 12kg の魚を釣る', type: 'weight', targetWeight: 12, rewardGold: 220, rewardXp: 90, rewardGem: 1 },
+      { id: 'daily-cast-6', title: '港を巡る', desc: '6 回キャストする', type: 'cast', targetMap: null, targetQty: 6, rewardGold: 160, rewardXp: 70, rewardGem: 0 }
+    ];
+
+    const DEFAULT_ACHIEVEMENTS = [
+      { id: 0, name: '大漁の兆し', desc: '累計 10匹', type: 'total_caught', target: 10, progress: 0, done: false, rewardGem: 5 },
+      { id: 1, name: '海の覇者', desc: '累計 100匹', type: 'total_caught', target: 100, progress: 0, done: false, rewardGem: 25 },
+      { id: 2, name: '伝説の一歩', desc: 'Legendary以上を釣る', type: 'rarity_legendary', target: 1, progress: 0, done: false, rewardGem: 15 },
+      { id: 3, name: 'コレクター', desc: '図鑑 10種', type: 'book_count', target: 10, progress: 0, done: false, rewardGem: 20 },
+      { id: 4, name: '大富豪', desc: '所持金 50,000G', type: 'gold_rich', target: 50000, progress: 0, done: false, rewardGem: 15 },
+      { id: 5, name: 'コスチュームマスター', desc: 'コスメを 3 種取得する', type: 'cosmetic_count', target: 3, progress: 0, done: false, rewardGem: 10 },
+      { id: 6, name: '料理の達人', desc: '料理を 5 回作る', type: 'cooking_count', target: 5, progress: 0, done: false, rewardGem: 12 },
+      { id: 7, name: '連続釣り王', desc: '最大コンボ 8 連続', type: 'catch_streak', target: 8, progress: 0, done: false, rewardGem: 18 },
+      { id: 8, name: '潮騒の冒険者', desc: 'レベル 20 到達', type: 'season_level', target: 20, progress: 0, done: false, rewardGem: 20 },
+      { id: 9, name: 'ハードロッドの覇者', desc: 'ハードロッドを Lv.10 まで強化', type: 'hard_rod_level', target: 10, progress: 0, done: false, rewardGem: 25 }
+    ];
+
+    function getActiveCookingBuffs() {
+      const list = Array.isArray(game.cookingBuffs) ? game.cookingBuffs : [];
+      return list.filter(buff => buff && buff.duration > 0);
+    }
+
+    function getMergedCookingBuff() {
+      const buffs = getActiveCookingBuffs();
+      if (!buffs.length) return null;
+      const merged = {
+        name: buffs.map(buff => buff.name).join(' + '),
+        duration: Math.max(...buffs.map(buff => buff.duration || 0)),
+        goldMult: 0,
+        xpMult: 0,
+        gaugeGainBonus: 0,
+        reelSpeedBonus: 0,
+        shinyChanceBonus: 0,
+        crownChanceBonus: 0
+      };
+      buffs.forEach(buff => {
+        merged.goldMult += buff.goldMult || 0;
+        merged.xpMult += buff.xpMult || 0;
+        merged.gaugeGainBonus += buff.gaugeGainBonus || 0;
+        merged.reelSpeedBonus += buff.reelSpeedBonus || 0;
+        merged.shinyChanceBonus += buff.shinyChanceBonus || 0;
+        merged.crownChanceBonus += buff.crownChanceBonus || 0;
+      });
+      return merged;
+    }
+
+    function addCookingBuff(recipe) {
+      const effect = recipe && recipe.effect ? recipe.effect : {};
+      const stack = { ...effect, name: recipe.name, duration: effect.duration || 3, id: recipe.id };
+      const buffs = getActiveCookingBuffs();
+      buffs.push(stack);
+      game.cookingBuffs = buffs;
+      game.cookingBuff = getMergedCookingBuff();
+    }
+
+    function consumeCookingBuffs() {
+      const remaining = [];
+      const buffs = Array.isArray(game.cookingBuffs) ? game.cookingBuffs : [];
+      buffs.forEach(buff => {
+        if (!buff) return;
+        buff.duration--;
+        if (buff.duration > 0) remaining.push(buff);
+      });
+      game.cookingBuffs = remaining;
+      game.cookingBuff = getMergedCookingBuff();
+      return game.cookingBuff;
+    }
+
+    function resetDailyQuestsIfNeeded() {
+      const today = new Date().toISOString().slice(0, 10);
+      if (game.dailyQuestDate === today && Array.isArray(game.dailyQuests) && game.dailyQuests.length) return;
+      game.dailyQuestDate = today;
+      game.dailyQuests = DAILY_QUEST_TEMPLATES.map(q => ({ ...q, progress: 0, done: false }));
+    }
+
+    function progressDailyQuests(type, data) {
+      if (!Array.isArray(game.dailyQuests)) return;
+      game.dailyQuests.forEach(q => {
+        if (q.done) return;
+        if (q.type === 'catch' && type === 'catch' && q.targetId === null && data && data.fishId !== undefined) {
+          q.progress += data.qty || 1;
+        } else if (q.type === 'weight' && type === 'weight') {
+          q.progress += data.weight || 0;
+        } else if (q.type === 'cast' && type === 'cast' && q.targetMap === null) {
+          q.progress += 1;
+        }
+        q.done = q.progress >= (q.targetQty || q.targetWeight || 1);
+      });
+    }
+
+    function refreshAchievementProgress() {
+      if (!Array.isArray(game.achievements)) return;
+      const bookCount = Object.keys(game.book || {}).length;
+      const hasLegendary = Object.keys(game.book || {}).some(fid => {
+        const fish = FISH_DATABASE.find(fd => fd.id == fid);
+        return fish && ['Legendary', 'Mythic', 'Divine'].includes(fish.rarity);
+      });
+      game.achievements.forEach(a => {
+        const wasDone = !!a.done;
+        if (a.type === 'total_caught') a.progress = Math.min(a.target, game.totalCaught || 0);
+        else if (a.type === 'rarity_legendary') a.progress = hasLegendary ? 1 : 0;
+        else if (a.type === 'book_count') a.progress = Math.min(a.target, bookCount);
+        else if (a.type === 'gold_rich') a.progress = Math.min(a.target, game.gold || 0);
+        else if (a.type === 'cosmetic_count') a.progress = Math.min(a.target, (game.ownedCosmetics || []).length);
+        else if (a.type === 'cooking_count') a.progress = Math.min(a.target, game.cookingCookedCount || 0);
+        else if (a.type === 'catch_streak') a.progress = Math.min(a.target, game.bestCombo || 0);
+        else if (a.type === 'season_level') a.progress = Math.min(a.target, game.level || 1);
+        else if (a.type === 'hard_rod_level') a.progress = Math.min(a.target, game.hardRodLevel || 0);
+        a.done = wasDone || a.progress >= a.target;
+      });
+    }
 
     // ============================================================
     // ゲーム状態
@@ -2787,6 +2982,12 @@
       skillPoints: 0,
       selectedBait: 'ミミズ',
       lastSeenChangelogVersion: null,
+      cookingBuff: null,
+      cookingBuffs: [],
+      dailyQuests: [],
+      dailyQuestDate: null,
+      bestCombo: 0,
+      cookingCookedCount: 0,
       baits: {
         'ミミズ': 10, 'エビ': 2, '貝虫': 0, 'パン粉エサ': 0, '小魚': 0, 'ミルワーム': 0,
         'イカ': 0, '発光エサ': 0, '甲殻エキス餌': 0, '特殊エサ': 0, '血合いエサ': 0, '深海プランクトン': 0,
@@ -2807,13 +3008,7 @@
         { desc: '合計 10kg の魚を釣る', type: 'weight', targetWeight: 10.0, progress: 0, rewardGold: 150, rewardXp: 80, rewardGem: 1, done: false },
         { desc: '小さな港で 5 回キャスト', type: 'cast', targetMap: 0, targetQty: 5, progress: 0, rewardGold: 80, rewardXp: 40, rewardGem: 0, done: false }
       ],
-      achievements: [
-        { id: 0, name: '大漁の兆し', desc: '累計 10匹', type: 'total_caught', target: 10, progress: 0, done: false, rewardGem: 5 },
-        { id: 1, name: '海の覇者', desc: '累計 100匹', type: 'total_caught', target: 100, progress: 0, done: false, rewardGem: 25 },
-        { id: 2, name: '伝説の一歩', desc: 'Legendary以上を釣る', type: 'rarity_legendary', target: 1, progress: 0, done: false, rewardGem: 15 },
-        { id: 3, name: 'コレクター', desc: '図鑑 10種', type: 'book_count', target: 10, progress: 0, done: false, rewardGem: 20 },
-        { id: 4, name: '大富豪', desc: '所持金 50,000G', type: 'gold_rich', target: 50000, progress: 0, done: false, rewardGem: 15 }
-      ],
+      achievements: DEFAULT_ACHIEVEMENTS.map(a => ({ ...a })),
       totalCaught: 0,
       daysPassed: 1,
       clock: 12.0,
@@ -2904,6 +3099,15 @@
           if (game.hardRodLevel === undefined) game.hardRodLevel = 0;
           if (!game.materials) game.materials = {};
           ['錆びた空き缶','壊れた漁具','謎の金属片','朽ちた木箱の破片','硬化した貝殻','深淵の鉄芯'].forEach(k => { if (game.materials[k] === undefined) game.materials[k] = 0; });
+          if (game.cookingBuff === undefined) game.cookingBuff = null;
+          if (!Array.isArray(game.cookingBuffs)) game.cookingBuffs = [];
+          if (game.bestCombo === undefined) game.bestCombo = 0;
+          if (game.cookingCookedCount === undefined) game.cookingCookedCount = 0;
+          if (!Array.isArray(game.achievements) || game.achievements.length < DEFAULT_ACHIEVEMENTS.length) {
+            game.achievements = DEFAULT_ACHIEVEMENTS.map((a, idx) => ({ ...a, ...(game.achievements && game.achievements[idx] ? game.achievements[idx] : {}) }));
+          }
+          resetDailyQuestsIfNeeded();
+          refreshAchievementProgress();
         } catch (e) { console.error("ロード失敗", e); }
       }
       // 変更ログをチェックして必要に応じて表示
@@ -3155,7 +3359,7 @@
       if (id === 'modal-skills') renderSkills();
       if (id === 'modal-craft') renderCraft();
       if (id === 'modal-quests') renderQuests();
-      if (id === 'modal-ranking') renderLeaderboard();
+      if (id === 'modal-cooking') { cookingSelection = []; renderCooking(); }
     }
 
     function closeModal(id) {
@@ -3969,9 +4173,41 @@
     function switchQuestTab(tab) { activeQuestTab = tab; renderQuests(); }
 
     function renderQuests() {
+      refreshAchievementProgress();
+      resetDailyQuestsIfNeeded();
       const container = document.getElementById('quest-tab-content');
       container.innerHTML = '';
       if (activeQuestTab === 'quests') {
+        const dailyWrap = document.createElement('div');
+        dailyWrap.style.cssText = 'display:flex; flex-direction:column; gap:8px; margin-bottom:10px;';
+        dailyWrap.innerHTML = `
+          <div style="padding:8px 10px; border-radius:10px; background:linear-gradient(135deg, rgba(0,255,194,0.15), rgba(255,0,127,0.15)); border:1px solid rgba(255,255,255,0.08);">
+            <div style="font-weight:700; color:#fff; font-size:0.7rem;">📅 デイリークエスト</div>
+            <div style="font-size:0.5rem; color:var(--text-sub); margin-top:2px;">今日の釣りをこなして報酬を貯めよう。</div>
+          </div>
+        `;
+        game.dailyQuests.forEach((q, idx) => {
+          const progressPct = Math.min(100, ((q.progress || 0) / (q.targetQty || q.targetWeight || 1)) * 100);
+          const card = document.createElement('div');
+          card.className = 'quest-card';
+          card.innerHTML = `
+            <div>
+              <strong style="color:#fff; font-size:0.65rem;">${q.title}</strong>
+              <div style="font-size:0.5rem; color:var(--text-sub);">${q.desc}</div>
+              <div class="quest-reward">💰 ${q.rewardGold}G / ✨ ${q.rewardXp}XP / 💎 ${q.rewardGem}</div>
+              <div style="display:flex; align-items:center; gap:6px; margin-top:3px;">
+                <div class="quest-bar"><div class="quest-bar-fill" style="width:${progressPct}%; background:linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));"></div></div>
+                <span style="font-size:0.5rem; color:var(--text-sub); font-family:monospace;">${q.progress || 0}/${q.targetQty || q.targetWeight || 1}</span>
+              </div>
+            </div>
+            <div>${q.done ? `<button class="buy-btn" disabled style="padding:2px 6px;">達成済</button>` : `<button class="buy-btn" onclick="claimDailyQuestReward(${idx})" ${progressPct < 100 ? 'disabled' : ''} style="padding:2px 6px; background:rgba(0,255,194,0.15); border-color:var(--neon-cyan);">${progressPct >= 100 ? '報酬' : '進行中'}</button>`}</div>
+          `;
+          dailyWrap.appendChild(card);
+        });
+        container.appendChild(dailyWrap);
+
+        const mainWrap = document.createElement('div');
+        mainWrap.style.cssText = 'display:flex; flex-direction:column; gap:8px;';
         game.quests.forEach((q, idx) => {
           const card = document.createElement('div');
           card.className = 'quest-card';
@@ -3990,9 +4226,14 @@
             </div>
             <div>${q.done ? `<button class="buy-btn" disabled style="padding:2px 6px;">済</button>` : `<button class="buy-btn" onclick="claimQuestReward(${idx})" ${progPercent < 100 ? 'disabled' : ''} style="padding:2px 6px;">受取</button>`}</div>
           `;
-          container.appendChild(card);
+          mainWrap.appendChild(card);
         });
+        container.appendChild(mainWrap);
       } else if (activeQuestTab === 'achievements') {
+        const header = document.createElement('div');
+        header.style.cssText = 'padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); margin-bottom:8px;';
+        header.innerHTML = '<div style="font-weight:700; color:#fff; font-size:0.7rem;">🏅 実績</div><div style="font-size:0.5rem; color:var(--text-sub); margin-top:2px;">進捗を進めると新しい見た目と報酬が開放されます。</div>';
+        container.appendChild(header);
         game.achievements.forEach((a, idx) => {
           const card = document.createElement('div');
           card.className = 'quest-card';
@@ -4006,6 +4247,16 @@
             progPercent = Math.min(100, (cnt / a.target) * 100); progressTxt = `${cnt}/${a.target}種`;
           } else if (a.type === 'gold_rich') {
             progPercent = Math.min(100, (game.gold / a.target) * 100); progressTxt = `${game.gold.toLocaleString()}/${a.target.toLocaleString()}G`;
+          } else if (a.type === 'cosmetic_count') {
+            progPercent = Math.min(100, ((game.ownedCosmetics || []).length / a.target) * 100); progressTxt = `${(game.ownedCosmetics || []).length}/${a.target}種`;
+          } else if (a.type === 'cooking_count') {
+            progPercent = Math.min(100, ((game.cookingCookedCount || 0) / a.target) * 100); progressTxt = `${game.cookingCookedCount || 0}/${a.target}回`;
+          } else if (a.type === 'catch_streak') {
+            progPercent = Math.min(100, ((game.bestCombo || 0) / a.target) * 100); progressTxt = `${game.bestCombo || 0}/${a.target}連続`;
+          } else if (a.type === 'season_level') {
+            progPercent = Math.min(100, ((game.level || 1) / a.target) * 100); progressTxt = `${game.level || 1}/${a.target}`;
+          } else if (a.type === 'hard_rod_level') {
+            progPercent = Math.min(100, ((game.hardRodLevel || 0) / a.target) * 100); progressTxt = `${game.hardRodLevel || 0}/${a.target}`;
           }
           card.innerHTML = `
             <div>
@@ -4022,10 +4273,10 @@
           container.appendChild(card);
         });
       } else if (activeQuestTab === 'seasonpass') {
-        const note = document.createElement('div');
-        note.style.cssText = 'font-size:0.55rem; color:var(--text-sub); padding:4px 2px;';
-        note.innerText = '🎫 無料シーズンパス：レベルを上げるだけで受け取れる報酬一覧。';
-        container.appendChild(note);
+        const hero = document.createElement('div');
+        hero.style.cssText = 'padding:10px; border-radius:12px; background:linear-gradient(135deg, rgba(255,215,0,0.16), rgba(255,0,127,0.12)); border:1px solid rgba(255,255,255,0.08); margin-bottom:8px;';
+        hero.innerHTML = `<div style="font-weight:700; color:#fff; font-size:0.72rem;">🎫 シーズンパス</div><div style="font-size:0.55rem; color:var(--text-sub); margin-top:2px;">Lv.${game.level} で次の報酬に進めます。見た目のコスメと竿がどんどん増えます。</div>`;
+        container.appendChild(hero);
         SEASON_PASS_REWARDS.forEach(r => {
           const reached = game.level >= r.level;
           const claimed = !!game.seasonPassClaimed[r.level];
@@ -4046,6 +4297,19 @@
           container.appendChild(card);
         });
       }
+    }
+
+    function claimDailyQuestReward(idx) {
+      const q = game.dailyQuests[idx];
+      if (!q || q.done) return;
+      const progressPct = ((q.progress || 0) / (q.targetQty || q.targetWeight || 1)) * 100;
+      if (progressPct < 100) return;
+      q.done = true;
+      game.gold += q.rewardGold;
+      gainXP(q.rewardXp, true);
+      game.gems += q.rewardGem;
+      saveGame(); renderQuests(); updateHUD();
+      addVisualSplashEffect('DAILY QUEST CLEAR!');
     }
 
     function claimQuestReward(idx) {
@@ -4127,6 +4391,23 @@
     // ============================================================
     // 魚インベントリ（生簀）
     // ============================================================
+    function renderCookingEffect() {
+      const effectText = document.getElementById('cooking-effect-text');
+      if (!effectText) return;
+      const buff = getMergedCookingBuff();
+      if (!buff) {
+        effectText.innerHTML = '現在、料理の効果はありません。生簀の魚を2匹選んで料理を作ろう。';
+        return;
+      }
+      const parts = [];
+      if (buff.goldMult) parts.push(`ゴールド+${Math.round(buff.goldMult * 100)}%`);
+      if (buff.xpMult) parts.push(`経験値+${Math.round(buff.xpMult * 100)}%`);
+      if (buff.gaugeGainBonus) parts.push(`キャッチゲージ+${Math.round(buff.gaugeGainBonus * 100)}%`);
+      if (buff.reelSpeedBonus) parts.push(`巻き速度+${Math.round(buff.reelSpeedBonus * 100)}%`);
+      if (buff.shinyChanceBonus) parts.push(`シャイニー率+${Math.round(buff.shinyChanceBonus * 100)}%`);
+      effectText.innerHTML = `<div style="font-weight:700; color:#fff; margin-bottom:4px;">${buff.name}</div><div>${parts.join(' / ')}</div><div style="margin-top:4px; color:var(--text-sub);">合計 ${getActiveCookingBuffs().length} 種 / 最長残り ${buff.duration} 回</div>`;
+    }
+
     function renderInventory() {
       const listEl = document.getElementById('inventory-list');
       const capEl = document.getElementById('inventory-cap-val');
@@ -4155,6 +4436,7 @@
       const total = game.fishInventory.reduce((sum, f) => sum + f.gold, 0);
       totalEl.innerText = `合計: ${total.toLocaleString()} G`;
       sellBtn.disabled = game.fishInventory.length === 0;
+      renderCookingEffect();
     }
 
     function sellFish(idx) {
@@ -4177,24 +4459,91 @@
     }
 
     // ============================================================
-    // ランキング
+    // 料理
     // ============================================================
-    function renderLeaderboard() {
-      const box = document.getElementById('ranking-list-box');
-      box.innerHTML = '';
-      let playerWeight = 0;
-      let playerBookCount = Object.keys(game.book).length;
-      Object.keys(game.book).forEach(fid => { playerWeight += game.book[fid].maxWeight; });
-      const list = LEADERBOARD_NPCS.map(npc => ({ name: npc.name, weight: npc.baseWeight, bookRate: npc.bookRate, isPlayer: false }));
-      const bookRate = Math.round((playerBookCount / FISH_DATABASE.length) * 100);
-      list.push({ name: 'FM (あなた)', weight: Math.round(playerWeight), bookRate: bookRate, isPlayer: true });
-      list.sort((a, b) => b.weight - a.weight);
-      list.forEach((item, index) => {
-        const row = document.createElement('div');
-        row.className = `ranking-row ${item.isPlayer ? 'player' : ''}`;
-        row.innerHTML = `<div class="rank-num">#${index + 1}</div><div class="rank-name">${item.name}</div><div style="font-size:0.5rem; color:var(--text-sub); margin-right:8px;">図鑑:${item.bookRate}%</div><div class="rank-score">${item.weight.toLocaleString()}kg</div>`;
-        box.appendChild(row);
-      });
+    function getCookingRecipeForSelection(selectedFish) {
+      if (selectedFish.length === 0) return null;
+      return COOKING_RECIPES.find(recipe => recipe.match(selectedFish)) || null;
+    }
+
+    function formatCookingBuff(buff) {
+      if (!buff) return '効果なし';
+      const parts = [];
+      if (buff.goldMult) parts.push(`ゴールド+${Math.round(buff.goldMult * 100)}%`);
+      if (buff.xpMult) parts.push(`経験値+${Math.round(buff.xpMult * 100)}%`);
+      if (buff.duration) parts.push(`残り${buff.duration}回`);
+      return parts.join(' / ') || '効果なし';
+    }
+
+    function toggleCookingFish(index) {
+      const slot = cookingSelection.indexOf(index);
+      if (slot >= 0) cookingSelection.splice(slot, 1);
+      else if (cookingSelection.length < 2) cookingSelection.push(index);
+      renderCooking();
+    }
+
+    function renderCooking() {
+      const statusEl = document.getElementById('cooking-status');
+      const selectionEl = document.getElementById('cooking-selection');
+      if (!statusEl || !selectionEl) return;
+      cookingSelection = cookingSelection.filter(idx => idx >= 0 && idx < game.fishInventory.length);
+      const currentBuff = getMergedCookingBuff();
+      statusEl.innerHTML = `
+        <div style="padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03);">
+          <div style="font-weight:700; color:#fff; margin-bottom:6px;">現在の料理効果</div>
+          <div style="color:var(--text-sub); font-size:0.85rem;">${currentBuff ? `${currentBuff.name} - ${formatCookingBuff(currentBuff)}` : '現在、料理の効果はありません。生簀から魚を2匹選んで料理しましょう。'}</div>
+        </div>
+      `;
+      const fishCards = game.fishInventory.map((fish, idx) => {
+        const selected = cookingSelection.includes(idx);
+        return `
+          <div onclick="toggleCookingFish(${idx})" style="cursor:pointer; border:1px solid ${selected ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.08)'}; background:${selected ? 'rgba(0,255,255,0.08)' : 'rgba(255,255,255,0.02)'}; border-radius:10px; padding:10px; min-width:120px; flex:1; display:flex; flex-direction:column; gap:4px;">
+            <div style="font-weight:700; color:#fff;">${fish.name}</div>
+            <div style="font-size:0.8rem; color:var(--text-sub);">${fish.rarity}</div>
+            <div style="font-size:0.75rem; color:var(--text-sub);">${fish.weight.toFixed(1)}kg / ${fish.length.toFixed(1)}cm</div>
+            <div style="font-size:0.85rem; color:var(--neon-gold);">${selected ? '選択中' : 'タップで選択'}</div>
+          </div>
+        `;
+      }).join('');
+      const selectedFish = cookingSelection.map(idx => game.fishInventory[idx]).filter(Boolean);
+      const recipe = getCookingRecipeForSelection(selectedFish);
+      const recipeInfo = recipe ? `
+        <div style="padding:10px; border:1px solid rgba(57,255,20,0.12); border-radius:10px; background:rgba(57,255,20,0.05);">
+          <div style="font-weight:700; color:#fff; margin-bottom:6px;">料理候補：${recipe.name}</div>
+          <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:8px;">${recipe.desc}</div>
+          <div style="font-size:0.8rem; color:var(--text-sub);">効果: ${formatCookingBuff(recipe.effect)}</div>
+        </div>
+      ` : `
+        <div style="padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03); color:var(--text-sub);">
+          2匹の魚を選択すると、組み合わせに応じた料理が表示されます。選択した組み合わせが条件を満たさない場合は調理できません。
+        </div>
+      `;
+      const cookButtonDisabled = !recipe || selectedFish.length !== 2;
+      selectionEl.innerHTML = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">${fishCards || '<div style="color:var(--text-sub);">生簀に魚がいません。</div>'}</div>
+          ${recipeInfo}
+          <button class="buy-btn" onclick="cookSelectedRecipe()" style="width:100%; padding:12px;" ${cookButtonDisabled ? 'disabled' : ''}>料理する</button>
+        </div>
+      `;
+    }
+
+    function cookSelectedRecipe() {
+      const selectedFish = cookingSelection.map(idx => game.fishInventory[idx]).filter(Boolean);
+      const recipe = getCookingRecipeForSelection(selectedFish);
+      if (!recipe || selectedFish.length !== 2) {
+        alert('この組み合わせでは調理できません。生簀から別の魚を選んでください。');
+        return;
+      }
+      const indices = [...cookingSelection].sort((a,b) => b-a);
+      indices.forEach(idx => game.fishInventory.splice(idx, 1));
+      addCookingBuff(recipe);
+      game.cookingCookedCount = (game.cookingCookedCount || 0) + 1;
+      cookingSelection = [];
+      saveGame();
+      renderInventory();
+      renderCooking();
+      addVisualSplashEffect(`料理完成！${recipe.name}を作りました。`);
     }
 
     // ============================================================
@@ -4500,8 +4849,11 @@
       let gaugeGainMult = gaugeGainRarityMult[targetFish.rarity] || 1.0;
       const eff = getSkillEffects();
       const rodBonus = getRodSpecialBonus();
+      const cookingBuff = getMergedCookingBuff();
       // 悪天候(台風・流星群)では魚が暴れやすいが、航海スキルで軽減できる
       if (game.weather === 'Typhoon' || game.weather === 'Meteor') diff *= Math.max(0.5, 1 - eff.stormResist);
+      if (cookingBuff && cookingBuff.reelSpeedBonus) gaugeGainMult *= 1 + cookingBuff.reelSpeedBonus;
+      if (cookingBuff && cookingBuff.gaugeGainBonus) gaugeGainMult *= 1 + cookingBuff.gaugeGainBonus;
       const rod = RODS[game.rodId];
       // レア度が高いほど巻きが重くなる抵抗（powerツリーのrarityResistで軽減）。Legendary以上は400%超の激重抵抗
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
@@ -4567,13 +4919,14 @@
       document.getElementById('fight-overlay').style.display = 'none';
       const eff = getSkillEffects();
       const rodBonus = getRodSpecialBonus();
+      const cookingBuff = getMergedCookingBuff();
       const lenFactor = 0.8 + Math.random() * 0.5;
       const weightFactor = lenFactor * lenFactor * (0.9 + Math.random() * 0.2);
       let finalLen = targetFish.baseLen * lenFactor;
       let finalWeight = targetFish.baseWeight * weightFactor;
       let isCrown = false, isShiny = false;
-      if (Math.random() < (0.03 + eff.crownChance + rodBonus.crownChanceBonus)) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
-      if (Math.random() < (0.02 + eff.shinyChance + rodBonus.shinyChanceBonus)) { isShiny = true; }
+      if (Math.random() < (0.03 + eff.crownChance + rodBonus.crownChanceBonus + (cookingBuff?.crownChanceBonus || 0))) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
+      if (Math.random() < (0.02 + eff.shinyChance + rodBonus.shinyChanceBonus + (cookingBuff?.shinyChanceBonus || 0))) { isShiny = true; }
 
       // 天候による「変異」判定（幸運スキルや特殊ロッドで発生率アップ）
       let mutation = null;
@@ -4586,9 +4939,13 @@
       if (isCrown) finalGold = Math.round(finalGold * 2.0);
       if (isShiny) finalGold = Math.round(finalGold * 3.0);
       if (mutation) finalGold = Math.round(finalGold * mutation.mult);
+      if (cookingBuff && cookingBuff.goldMult) {
+        finalGold = Math.round(finalGold * (1 + cookingBuff.goldMult));
+      }
 
       // コンボ（連続釣りボーナス）：ミスせず釣り続けるほどゴールド・経験値が伸びる
       comboCount++;
+      game.bestCombo = Math.max(game.bestCombo || 0, comboCount);
       const comboBonusMult = Math.min((comboCount - 1) * 0.05, 1.0); // 1コンボごとに+5%、最大+100%
       finalGold = Math.round(finalGold * (1 + comboBonusMult));
 
@@ -4598,7 +4955,10 @@
         shakeScreen(targetFish.rarity);
       }
 
-      gainXP(Math.round(targetFish.xp * (1 + comboBonusMult)), false, rodBonus.xpMultBonus);
+      let xpGainBase = Math.round(targetFish.xp * (1 + comboBonusMult));
+      if (cookingBuff && cookingBuff.xpMult) xpGainBase = Math.round(xpGainBase * (1 + cookingBuff.xpMult));
+      gainXP(xpGainBase, false, rodBonus.xpMultBonus);
+      consumeCookingBuffs();
       let dropMat = '', dropQty = 0;
       const isNewFrontier = targetFish.mapId >= 11; // 珊瑚礁の楽園以降は新素材がドロップする
       if (targetFish.rarity === 'Common') { if(Math.random()<0.5){dropMat='魚のウロコ'; dropQty=1+Math.floor(Math.random()*2);} }
@@ -4664,9 +5024,13 @@
       document.getElementById('result-fish-length').innerText = finalLen.toFixed(1);
       document.getElementById('result-fish-weight').innerText = finalWeight.toFixed(1);
       document.getElementById('result-gold').innerText = `+${finalGold} G`;
-      document.getElementById('result-xp').innerText = `+${targetFish.xp} XP`;
+      const cookingRow = document.getElementById('result-cooking-row');
+      const cookingText = cookingBuff ? `${cookingBuff.name} (${formatCookingBuff(cookingBuff)})` : '';
+      const xpValue = Math.round(targetFish.xp * (1 + (cookingBuff && cookingBuff.xpMult ? cookingBuff.xpMult : 0)));
+      document.getElementById('result-xp').innerText = `+${xpValue} XP`;
       const bonusRow = document.getElementById('result-bonus-row');
       if (isCrown || isShiny || mutation) { bonusRow.style.display='flex'; let t=''; if(isCrown) t+='巨大冠(x2) '; if(isShiny) t+='シャイニー(x3) '; if(mutation) t+=`${mutation.name}変異(x${mutation.mult}) `; document.getElementById('result-bonus-txt').innerText=t; } else bonusRow.style.display='none';
+      if (cookingText) { cookingRow.style.display='flex'; document.getElementById('result-cooking-txt').innerText = cookingText; } else { cookingRow.style.display='none'; }
       const comboRow = document.getElementById('result-combo-row');
       if (comboCount >= 2) { comboRow.style.display='flex'; document.getElementById('result-combo-txt').innerText = `${comboCount}連続！ 報酬+${Math.round(comboBonusMult*100)}%`; }
       else comboRow.style.display='none';
