@@ -1550,8 +1550,9 @@
         <button class="close-btn" onclick="closeModal('modal-cooking')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body" style="display:flex; flex-direction:column; gap:10px; min-height:0;">
-        <div id="cooking-status" style="display:flex; flex-direction:column; gap:8px;"></div>
-        <div id="cooking-selection" style="display:flex; flex-direction:column; gap:10px; min-height:240px;"></div>
+        <div id="cooking-status" style="display:flex; flex-direction:column; gap:8px; flex-shrink:0;"></div>
+        <div id="cooking-fish-grid" style="flex:1; min-height:0; overflow-y:auto;"></div>
+        <div id="cooking-selection" style="display:flex; flex-direction:column; gap:10px; flex-shrink:0;"></div>
       </div>
     </div>
 
@@ -2947,6 +2948,16 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.4.2',
+        date: '2026年7月15日',
+        title: '🐛 不具合修正：料理モーダルのスクロール & デイリークエスト',
+        changes: [
+          '🍳 料理モーダルで魚をたくさん釣ると魚一覧が伸びて「料理する」ボタンが押せなくなる不具合を修正。魚一覧だけが独立してスクロールするようになり、料理候補とボタンは常に画面下部に固定表示されるようにした',
+          '📅 デイリークエストの進捗が全く反映されない不具合を修正。進捗更新処理(progressDailyQuests)が呼び出されておらず、実質機能していなかったのが原因',
+          '🔥 上記に伴い、キャスト・釣果・重量に応じたデイリークエスト「朝の一投」「大物狙い」「港を巡る」が正しく進行するようになった'
+        ]
+      },
+      {
         version: '1.4.1',
         date: '2026年7月15日',
         title: '⚖️ ギミック竿シリーズの価格改定 & 四季ロッド拡張',
@@ -3034,7 +3045,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.4.1';
+    const CHANGELOG_VERSION = 'v1.4.2';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -4694,6 +4705,8 @@
         else if (q.type === 'weight' && type === 'weight') q.progress += data.weight;
         else if (q.type === 'cast' && type === 'cast' && q.targetMap === data.mapId) q.progress++;
       });
+      // デイリークエストは別配列(game.dailyQuests)で管理されているため、こちらも忘れずに進行させる
+      progressDailyQuests(type, data);
     }
 
     function gainXP(amt, isQuest, rodXpMultBonus) {
@@ -4817,8 +4830,10 @@
     function renderCooking() {
       if (cookingMinigame) return; // ミニゲーム進行中は通常の選択画面を描画しない
       const statusEl = document.getElementById('cooking-status');
+      const fishGridEl = document.getElementById('cooking-fish-grid');
       const selectionEl = document.getElementById('cooking-selection');
-      if (!statusEl || !selectionEl) return;
+      if (!statusEl || !fishGridEl || !selectionEl) return;
+      fishGridEl.style.display = ''; // ミニゲーム終了後などに魚グリッドを再表示
       cookingSelection = cookingSelection.filter(idx => idx >= 0 && idx < game.fishInventory.length);
       const currentBuff = getMergedCookingBuff();
       statusEl.innerHTML = `
@@ -4838,6 +4853,7 @@
           </div>
         `;
       }).join('');
+      fishGridEl.innerHTML = `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">${fishCards || '<div style="color:var(--text-sub);">生簀に魚がいません。</div>'}</div>`;
       const selectedFish = cookingSelection.map(idx => game.fishInventory[idx]).filter(Boolean);
       const recipe = getCookingRecipeForSelection(selectedFish);
       const recipeInfo = recipe ? `
@@ -4854,7 +4870,6 @@
       const cookButtonDisabled = !recipe || selectedFish.length !== 2;
       selectionEl.innerHTML = `
         <div style="display:flex; flex-direction:column; gap:10px;">
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px;">${fishCards || '<div style="color:var(--text-sub);">生簀に魚がいません。</div>'}</div>
           ${recipeInfo}
           <button class="buy-btn" onclick="cookSelectedRecipe()" style="width:100%; padding:12px;" ${cookButtonDisabled ? 'disabled' : ''}>料理する</button>
         </div>
@@ -4868,6 +4883,8 @@
         alert('この組み合わせでは調理できません。生簀から別の魚を選んでください。');
         return;
       }
+      const fishGridEl = document.getElementById('cooking-fish-grid');
+      if (fishGridEl) fishGridEl.style.display = 'none'; // ミニゲーム中は魚グリッドを隠す
       startCookingMinigame(recipe, [...cookingSelection]);
     }
 
