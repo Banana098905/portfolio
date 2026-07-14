@@ -997,6 +997,127 @@
     .cook-round-dot.perfect { border-color: var(--neon-green); color: var(--neon-green); background: rgba(57,255,20,0.12); }
     .cook-round-dot.good { border-color: var(--neon-gold); color: var(--neon-gold); background: rgba(255,215,0,0.12); }
     .cook-round-dot.miss { border-color: var(--neon-pink); color: var(--neon-pink); background: rgba(255,0,127,0.12); }
+
+    /* ============================================================
+       ギミック竿シリーズ：右側の専用UIパネル
+       ============================================================ */
+    #special-rod-panel {
+      position: absolute;
+      right: clamp(8px, 2.4vw, 18px);
+      top: clamp(84px, 13vh, 130px);
+      width: clamp(78px, 22vw, 140px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      z-index: 6;
+      background: rgba(8,12,22,0.68);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 18px;
+      padding: 12px 8px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.45);
+    }
+    #special-rod-panel .srp-label {
+      font-size: clamp(0.58rem, 1.7vw, 0.78rem);
+      color: #fff;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    #special-rod-panel .srp-sub {
+      font-size: clamp(0.5rem, 1.4vw, 0.66rem);
+      color: var(--text-sub);
+      text-align: center;
+      line-height: 1.3;
+    }
+    #special-rod-panel .srp-bar-wrap {
+      width: 26px;
+      height: clamp(100px, 20vh, 170px);
+      border-radius: 13px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    #special-rod-panel .srp-bar-fill {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%;
+      background: linear-gradient(0deg, var(--neon-cyan), var(--neon-green));
+      transition: height 0.05s linear;
+    }
+    #special-rod-panel .srp-bar-fill.danger { background: linear-gradient(0deg, #ff2f4c, #ffb800); }
+    #special-rod-panel .srp-bar-fill.gold { background: linear-gradient(0deg, #b8860b, #ffe066); }
+    #special-rod-panel .srp-hbar-wrap {
+      width: 100%;
+      height: 26px;
+      border-radius: 13px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    #special-rod-panel .srp-hbar-fill {
+      position: absolute;
+      top: 0; left: 0; height: 100%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+    }
+    #special-rod-panel .srp-hbar-marker {
+      position: absolute;
+      top: -3px;
+      width: 6px; height: 32px;
+      margin-left: -3px;
+      background: #fff;
+      border-radius: 3px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.9);
+    }
+    #special-rod-panel .srp-hbar-zone {
+      position: absolute;
+      top: 0; height: 100%;
+      background: rgba(57,255,20,0.5);
+    }
+    #special-rod-panel .srp-btn {
+      width: 100%;
+      padding: clamp(9px, 2.2vh, 14px) 4px;
+      font-size: clamp(0.56rem, 1.6vw, 0.78rem);
+      border-radius: 11px;
+      border: none;
+      background: var(--neon-pink);
+      color: #fff;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    #special-rod-panel .srp-btn:disabled { opacity: 0.4; cursor: default; }
+    #special-rod-panel .srp-btn.ready {
+      background: linear-gradient(135deg, #ffd700, #ff8c00);
+      animation: srp-pulse 1s infinite;
+    }
+    @keyframes srp-pulse {
+      0%, 100% { box-shadow: 0 0 6px rgba(255,215,0,0.6); }
+      50% { box-shadow: 0 0 16px rgba(255,215,0,1); }
+    }
+    #special-rod-panel .srp-pips { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+    #special-rod-panel .srp-pip {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+    #special-rod-panel .srp-pip.filled { background: var(--neon-cyan); border-color: var(--neon-cyan); box-shadow: 0 0 6px var(--neon-cyan); }
+    #special-rod-panel .srp-hunter-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    #special-rod-panel .srp-hunter-item {
+      font-size: clamp(0.5rem, 1.5vw, 0.68rem);
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 9px;
+      padding: 6px 4px;
+      text-align: center;
+      cursor: pointer;
+      color: #fff;
+      line-height: 1.35;
+    }
+    #special-rod-panel .srp-hunter-item:active { transform: scale(0.94); }
     #inventory-list { flex: 1; overflow-y: auto; padding: 4px; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
     .inv-fish-card {
       background: rgba(255,255,255,0.03);
@@ -1295,6 +1416,8 @@
       </div>
 
       <div id="action-msg">HIT!</div>
+
+      <div id="special-rod-panel"></div>
 
       <div id="fight-overlay">
         <div class="fight-panel">
@@ -2289,12 +2412,22 @@
       { id: 26, name: 'グレイシャルロッド', cost: null, dist: 340, rare: 4.5, dur: 340, reelSpeed: 2.3, barWidth: 22, craftOnly: true, specialEffect: 'glacial', vfxTheme: 'glacial', desc: '効果: 魚の動く速度が半減する。投げると海が凍りつき、氷の結晶と白い息が舞う。' },
       { id: 27, name: 'エンペラーロッド', cost: null, dist: 420, rare: 5.8, dur: 420, reelSpeed: 2.9, barWidth: 25, craftOnly: true, specialEffect: 'emperor', vfxTheme: 'emperor', desc: '効果: 全能力がまんべんなく少しずつ強化される。投げると王冠と金の羽が舞い散る。' },
       { id: 28, name: 'インフィニティロッド', cost: null, dist: 430, rare: 6.0, dur: 430, reelSpeed: 2.9, barWidth: 25, craftOnly: true, specialEffect: 'infinity', vfxTheme: 'infinity', desc: '効果: キャストするたびに違う能力がランダムで発動する。投げるたびに色とエフェクトが変わり、虹の軌跡を描く。' },
-      { id: 29, name: '四季ロッド', cost: null, dist: 370, rare: 5.0, dur: 370, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'seasons', vfxTheme: 'seasons', desc: '効果: 現在の季節に応じて異なる恩恵を受ける。春夏秋冬のエフェクトが数秒ごとに切り替わる。' },
+      { id: 29, name: '四季ロッド', cost: null, dist: 370, rare: 5.0, dur: 370, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'seasons', vfxTheme: 'seasons', desc: '効果: 現在の季節に応じて異なる恩恵を受ける。さらに、春はスピンロッド、夏はタイドロッド、秋はチャージロッド、冬はハンターロッドの能力も同時に使える。' },
       { id: 30, name: 'クロノロッド', cost: null, dist: 390, rare: 5.3, dur: 390, reelSpeed: 2.7, barWidth: 24, craftOnly: true, specialEffect: 'chrono', vfxTheme: 'chrono', desc: '効果: バトル中、時折魚の動きを止める。投げると時計の歯車が周囲に浮かぶ。' },
       { id: 31, name: 'ファントムロッド', cost: null, dist: 380, rare: 5.2, dur: 380, reelSpeed: 2.6, barWidth: 23, craftOnly: true, specialEffect: 'phantom', vfxTheme: 'phantom', desc: '効果: シャイニー個体の出現率が大幅UP。投げると半透明になり、青い炎が漂う。' },
       { id: 32, name: 'セレスティアルロッド', cost: null, dist: 700, rare: 9.0, dur: 600, reelSpeed: 5.0, barWidth: 34, duplicateChance: 0.10, craftOnly: true, specialEffect: 'celestial', vfxTheme: 'celestial', desc: '超神話級。効果: あらゆる幸運が飛躍的に上昇し、神々の魚に出会いやすくなる。投げると星座が空に浮かび、隕石が降り、最後に光の大爆発が起きる。' },
       { id: 33, name: 'シーズンの竿', cost: null, dist: 260, rare: 3.5, dur: 200, reelSpeed: 2.1, barWidth: 22, seasonOnly: true, desc: 'シーズンパスや宝箱でのみ手に入る限定竿。' },
-      { id: 34, name: 'ハードロッド', cost: 3000, dist: 140, rare: 2.0, dur: 150, reelSpeed: 1.3, barWidth: 16, hardIslandOnly: true, specialEffect: 'hardgear', desc: 'ハードアイランドでのみ販売される特別な竿。通常のロット(ショップ在庫)には並ばない。レベルを問わず購入・使用でき、島で拾える「ゴミ」素材で独自に強化できる。' }
+      { id: 34, name: 'ハードロッド', cost: 3000, dist: 140, rare: 2.0, dur: 150, reelSpeed: 1.3, barWidth: 16, hardIslandOnly: true, specialEffect: 'hardgear', desc: 'ハードアイランドでのみ販売される特別な竿。通常のロット(ショップ在庫)には並ばない。レベルを問わず購入・使用でき、島で拾える「ゴミ」素材で独自に強化できる。' },
+      // --- ギミック竿シリーズ：それぞれ専用の右側UI・ミニゲームを持つ特殊な竿 ---
+      { id: 35, name: 'チャージロッド', cost: 35000, dist: 250, rare: 3.0, dur: 220, reelSpeed: 1.8, barWidth: 20, specialEffect: 'charge', desc: '⚡ CASTボタンを長押しでチャージ。50%で飛距離UP、100%でレア率UP。溜めすぎるとオーバーチャージで失敗する諸刃の竿。' },
+      { id: 36, name: 'ハープーンロッド', cost: 30000, dist: 230, rare: 2.6, dur: 240, reelSpeed: 1.7, barWidth: 19, specialEffect: 'harpoon', desc: '🌀 魚が掛かった瞬間、照準を合わせて狙い撃つ。成功すると大ダメージ、失敗すると魚が逃げやすくなる。' },
+      { id: 37, name: 'タイドロッド', cost: 40000, dist: 240, rare: 2.7, dur: 230, reelSpeed: 1.9, barWidth: 20, specialEffect: 'tide', desc: '🌊 バトル中、上下する波ゲージが緑の瞬間にボタンを押すとテンションが減少し、余裕を持って戦える。' },
+      { id: 38, name: 'オーバーヒートロッド', cost: 55000, dist: 260, rare: 3.2, dur: 200, reelSpeed: 2.0, barWidth: 21, specialEffect: 'overheat', desc: '🔥 釣るほど竿が熱くなる。熱いほどレア率・サイズがUPするが、100%に達すると数秒間使用不能になる。' },
+      { id: 39, name: 'エネルギーロッド', cost: 65000, dist: 270, rare: 3.0, dur: 260, reelSpeed: 2.0, barWidth: 21, specialEffect: 'energy', desc: '⚡ 魚を釣るとバッテリーが充電される。100%になると必殺技ボタンが解放され、次の1匹に大きなボーナスを与える。' },
+      { id: 40, name: 'スピンロッド', cost: 75000, dist: 280, rare: 3.1, dur: 250, reelSpeed: 2.1, barWidth: 22, specialEffect: 'spin', desc: '🌪 バトル中、専用ボタンをタイミングよく連打して回転メーターを溜める。MAXになると数秒間、超高速リールが発動する。' },
+      { id: 41, name: 'ハンターロッド', cost: 85000, dist: 260, rare: 3.3, dur: 260, reelSpeed: 2.0, barWidth: 22, specialEffect: 'hunter', desc: '🦈 魚が掛かると候補が複数表示され、狙う魚を自分で選べる。欲しい魚をピンポイントで狙い撃とう。' },
+      { id: 42, name: 'クリスタルロッド', cost: 130000, dist: 300, rare: 3.5, dur: 280, reelSpeed: 2.2, barWidth: 23, specialEffect: 'crystal', desc: '💎 バトル中、リールを合わせ続けて「Perfect」を出すたびに結晶が育つ。結晶がMAXになると次の1匹がRare以上確定になる。' },
+      { id: 43, name: 'ディバインロッド', cost: 220000, dist: 350, rare: 4.0, dur: 320, reelSpeed: 2.4, barWidth: 25, specialEffect: 'divine', desc: '👑 何もしなくても時間経過で「運命ゲージ」が満ちていく。満タンで運命を解放すると、次の1匹がLegendary以上確定になる。' }
     ];
 
     const BOATS = [
@@ -2814,6 +2947,34 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.4.1',
+        date: '2026年7月15日',
+        title: '⚖️ ギミック竿シリーズの価格改定 & 四季ロッド拡張',
+        changes: [
+          '💰 チャージ/ハープーン/タイド/オーバーヒート/エネルギー/スピン/ハンター/クリスタル/ディバインの9竿が安すぎたため、性能に見合うよう価格を大幅引き上げ(5,000〜220,000G)',
+          '🌸 四季ロッドに新効果を追加：春はスピンロッド、夏はタイドロッド、秋はチャージロッド、冬はハンターロッドの能力を借りて使えるようになった(季節本来の恩恵はそのまま維持)',
+          '🔁 季節が変わると、四季ロッド装備中は右側UIパネルの内容も自動的に切り替わる',
+          '📐 右側の専用UIパネル(special-rod-panel)全体を拡大：文字サイズ・ゲージ・ボタン・ハンター候補リストをより見やすく大きく調整'
+        ]
+      },
+      {
+        version: '1.4.0',
+        date: '2026年7月15日',
+        title: '⚙️ ギミック竿シリーズ9種を追加',
+        changes: [
+          '⚡ チャージロッド：CASTボタン長押しでチャージ。50%で飛距離UP、100%でレア率UP、溜めすぎるとオーバーチャージで失敗',
+          '🌀 ハープーンロッド：HIT直後に照準ミニゲームが発生。成功で大ダメージ、失敗すると魚が逃げやすくなる',
+          '🌊 タイドロッド：バトル中の波ゲージが緑の瞬間にボタンを押すとテンションが減少し、有利に戦える',
+          '🔥 オーバーヒートロッド：釣るほど加熱し、熱いほどレア率・サイズがUP。100%で数秒間使用不能に',
+          '⚡ エネルギーロッド：釣るたびに充電。100%で必殺技ボタンが解放され、次の1匹に大ボーナス',
+          '🌪 スピンロッド：専用ボタンをリズムよく連打して回転メーターを溜め、MAXで数秒間の超高速リールが発動',
+          '🦈 ハンターロッド：HIT時に複数の魚候補が表示され、狙う魚を自分で選べる',
+          '💎 クリスタルロッド：リールを合わせ続けてPerfectを重ねると結晶が育ち、MAXで次の1匹がRare以上確定',
+          '👑 ディバインロッド：時間経過だけで運命ゲージが自然に満ち、満タンで次の1匹がLegendary以上確定',
+          '🖥️ それぞれの竿に対応した専用UIを画面右側に新設し、装備中の竿に応じて自動で切り替わるようにした'
+        ]
+      },
+      {
         version: '1.3.1',
         date: '2026年7月14日',
         title: '🍲 料理レシピを8種類追加',
@@ -2873,7 +3034,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.3.1';
+    const CHANGELOG_VERSION = 'v1.4.1';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3129,6 +3290,12 @@
       materials: { '魚のウロコ': 0, '虹色のヒレ': 0, '深海の結晶': 0, '古代の化石': 0, '海神の輝石': 0, '珊瑚石': 0, '深淵の遺物': 0, '龍脈の欠片': 0, '万象の紋章': 0,
         '錆びた空き缶': 0, '壊れた漁具': 0, '謎の金属片': 0, '朽ちた木箱の破片': 0, '硬化した貝殻': 0, '深淵の鉄芯': 0 },
       hardRodLevel: 0,
+      overheatLevel: 0,
+      overheatCooldownUntil: null,
+      energyLevel: 0,
+      crystalLevel: 0,
+      divineFateLevel: 0,
+      divineFateLastTick: null,
       skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 },
       fishInventory: [],
       book: {},
@@ -3186,6 +3353,27 @@
       fightOverlay.addEventListener('touchstart', (e) => { e.preventDefault(); isReeling = true; }, { passive: false });
       fightOverlay.addEventListener('touchend', (e) => { e.preventDefault(); isReeling = false; }, { passive: false });
 
+      // チャージロッド：CASTボタンの長押しでチャージ、離すと解放する
+      const castBtnEl = document.getElementById('cast-btn');
+      ['mousedown', 'touchstart'].forEach(evt => {
+        castBtnEl.addEventListener(evt, (e) => {
+          const rod = RODS[game.rodId];
+          if (getEffectiveSpecialUI(rod) === 'charge' && castState === 'idle') { e.preventDefault(); beginChargeCast(); }
+        }, { passive: false });
+      });
+      ['mouseup', 'touchend', 'mouseleave'].forEach(evt => {
+        castBtnEl.addEventListener(evt, (e) => {
+          if (chargeCastActive) { e.preventDefault(); releaseChargeCast(); }
+        }, { passive: false });
+      });
+
+      renderSpecialRodPanel();
+      // 時間経過で溜まるゲージ(ディバインロッドの運命/オーバーヒートの冷却表示)を定期更新
+      specialRodTickTimer = setInterval(() => {
+        const rod = RODS[game.rodId];
+        if (rod && (rod.specialEffect === 'divine' || rod.specialEffect === 'overheat')) renderSpecialRodPanel();
+      }, 1000);
+
       setInterval(saveGame, 10000);
       console.log('初期化完了。castState =', castState);
     });
@@ -3226,6 +3414,12 @@
           if (!game.skillTree) game.skillTree = { luck: 0, power: 0, trade: 0, study: 0, sailing: 0 };
           if (!game.seasonPassClaimed) game.seasonPassClaimed = {};
           if (game.hardRodLevel === undefined) game.hardRodLevel = 0;
+          if (game.overheatLevel === undefined) game.overheatLevel = 0;
+          if (game.overheatCooldownUntil === undefined) game.overheatCooldownUntil = null;
+          if (game.energyLevel === undefined) game.energyLevel = 0;
+          if (game.crystalLevel === undefined) game.crystalLevel = 0;
+          if (game.divineFateLevel === undefined) game.divineFateLevel = 0;
+          if (game.divineFateLastTick === undefined) game.divineFateLastTick = null;
           if (!game.materials) game.materials = {};
           ['錆びた空き缶','壊れた漁具','謎の金属片','朽ちた木箱の破片','硬化した貝殻','深淵の鉄芯'].forEach(k => { if (game.materials[k] === undefined) game.materials[k] = 0; });
           if (game.cookingBuff === undefined) game.cookingBuff = null;
@@ -3524,6 +3718,7 @@
         const seasons = ['Spring', 'Summer', 'Autumn', 'Winter'];
         const currentIdx = seasons.indexOf(game.season);
         game.season = seasons[(currentIdx + 1) % 4];
+        renderSpecialRodPanel(); // 四季ロッド装備時、季節が変わると借りる能力(スピン/タイド/チャージ/ハンター)も切り替わる
       }
       // 天候はティックカウント方式で、じっくり長めに持続する
       if (game.weatherTicksLeft === undefined) game.weatherTicksLeft = 20;
@@ -3698,7 +3893,7 @@
       }
     }
     function equipRod(id) {
-      if (game.ownedRods.includes(id)) { game.rodId = id; saveGame(); renderShopItems(); }
+      if (game.ownedRods.includes(id)) { game.rodId = id; saveGame(); renderShopItems(); renderSpecialRodPanel(); }
     }
 
     // ============================================================
@@ -4870,6 +5065,50 @@
     let timingLoop = null;
     let targetFish = null;
     let lineDistance = 0;
+
+    // ============================================================
+    // ギミック竿シリーズ：共通トランジェント状態
+    // ============================================================
+    const RARITY_ORDER = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legendary', 'Mythic', 'Divine'];
+
+    // 四季ロッド装備時は、季節に応じて他のギミック竿の能力を借りて使えるようにする
+    // 春→スピンロッド、夏→タイドロッド、秋→チャージロッド、冬→ハンターロッド
+    const SEASON_BORROWED_UI = { Spring: 'spin', Summer: 'tide', Autumn: 'charge', Winter: 'hunter' };
+    function getEffectiveSpecialUI(rod) {
+      if (!rod) return null;
+      if (rod.specialEffect === 'seasons') return SEASON_BORROWED_UI[game.season] || null;
+      return rod.specialEffect;
+    }
+    let forcedMinRarity = null;   // 次の1匹の最低レア度を保証する（消費型：クリスタルロッド/ディバインロッド/エネルギーロッド）
+    let transientRareBoost = 0;   // 次の1匹だけレア率を底上げする（消費型：チャージロッド/オーバーヒートロッド）
+    let transientGaugeHeadStart = 0; // 次のバトル開始時のキャッチゲージ底上げ（消費型：ハープーンロッド成功/エネルギーロッド必殺技）
+    let transientResistancePenalty = 0; // 次のバトルの追加抵抗（消費型：ハープーンロッド失敗）
+
+    // チャージロッド
+    let chargeCastActive = false;
+    let chargePower = 0;
+    let chargeInterval = null;
+    const CHARGE_OVERCHARGE_LINE = 130;
+
+    // ハープーンロッド（HIT後の照準ミニゲーム）
+    let harpoonAim = null; // { pos, vel, target, rafId, lastTime, locked }
+
+    // タイドロッド（バトル中の波タイミング）
+    let tideState = null; // { tension, wavePos, waveVel, zoneStart, zoneWidth, lastZoneShiftAt }
+
+    // スピンロッド（バトル中の連打メーター）
+    let spinState = null; // { meter, lastTapAt, turboUntil }
+
+    // クリスタルロッド（バトル中のPerfect連続判定）
+    let crystalMatchStreak = 0;
+    let crystalStreakAwarded = false;
+    let crystalAwardedLevel = 0;
+
+    // ハンターロッド（HIT時の候補選択）
+    let hunterCandidates = null;
+
+    // 特殊竿の右側UIを定期更新するタイマー（時間経過系のゲージ用）
+    let specialRodTickTimer = null;
     let fishPos = 50, fishVel = 0, playerPos = 40, playerVel = 0;
     let isReeling = false;
     let catchGauge = 30;
@@ -4880,8 +5119,20 @@
 
     function handleCastClick() {
       console.log('=== handleCastClick 実行 === castState:', castState);
-      
+      const rod = RODS[game.rodId];
+
       if (castState === 'idle') {
+        if (getEffectiveSpecialUI(rod) === 'charge') return; // チャージロッドは長押し専用。タップでは反応しない
+        if (rod.specialEffect === 'overheat' && game.overheatCooldownUntil) {
+          if (Date.now() < game.overheatCooldownUntil) {
+            const remain = Math.ceil((game.overheatCooldownUntil - Date.now()) / 1000);
+            alert(`🔥 ロッドが加熱していて使えません！あと${remain}秒待ってください。`);
+            return;
+          }
+          game.overheatLevel = 0;
+          game.overheatCooldownUntil = null;
+          renderSpecialRodPanel();
+        }
         const bait = game.selectedBait;
         if (!game.baits[bait] || game.baits[bait] <= 0) {
           alert(`エサ【${bait}】がありません！`);
@@ -4893,6 +5144,7 @@
         }
         startCasting();
       } else if (castState === 'casting') {
+        if (getEffectiveSpecialUI(rod) === 'charge') return; // 長押しの解放はmouseup/touchendで処理する
         stopCasting();
       } else if (castState === 'waiting') {
         clearTimeout(castTimer);
@@ -4905,6 +5157,7 @@
         drawWaterSurface();
         addVisualSplashEffect("リセット");
       } else if (castState === 'hit') {
+        if (getEffectiveSpecialUI(rod) === 'hunter' || rod.specialEffect === 'harpoon') return; // 専用UIで操作する
         triggerFight();
       }
     }
@@ -4961,6 +5214,82 @@
       castTimer = setTimeout(triggerHit, waitTime);
     }
 
+    // ============================================================
+    // チャージロッド専用：長押しチャージキャスト
+    // ============================================================
+    function beginChargeCast() {
+      if (castState !== 'idle') return;
+      if (game.mapId === HARD_ISLAND_ID && game.rodId !== HARD_ISLAND_ROD_ID) {
+        alert('❌ ハードアイランドでは「ハードロッド」のみでCastできます！');
+        return;
+      }
+      const bait = game.selectedBait;
+      if (!game.baits[bait] || game.baits[bait] <= 0) { alert(`エサ【${bait}】がありません！`); return; }
+      if (game.fishInventory.length >= getInventoryCapacity()) { alert('生簀が満杯です！魚を売ってから釣りに出ましょう。'); return; }
+      closeActiveModal();
+      chargeCastActive = true;
+      castState = 'casting';
+      chargePower = 0;
+      const rod = RODS[game.rodId];
+      triggerRodCastVFX(rod);
+      sfxCast();
+      const btn = document.getElementById('cast-btn');
+      btn.innerText = '⚡';
+      btn.classList.add('casting');
+      renderSpecialRodPanel();
+      chargeInterval = setInterval(() => {
+        chargePower += 2.2;
+        renderSpecialRodPanel();
+        if (chargePower >= CHARGE_OVERCHARGE_LINE + 15) finalizeChargeCast(true);
+      }, 20);
+    }
+
+    function releaseChargeCast() {
+      if (!chargeCastActive) return;
+      finalizeChargeCast(false);
+    }
+
+    function finalizeChargeCast(forcedFail) {
+      clearInterval(chargeInterval);
+      chargeCastActive = false;
+      const btn = document.getElementById('cast-btn');
+
+      if (forcedFail || chargePower > CHARGE_OVERCHARGE_LINE) {
+        sfxMiss();
+        addVisualSplashEffect('💥 オーバーチャージ！竿が跳ねてキャスト失敗…');
+        castState = 'idle';
+        btn.innerText = 'CAST';
+        btn.classList.remove('casting');
+        btn.disabled = false;
+        chargePower = 0;
+        renderSpecialRodPanel();
+        return;
+      }
+
+      castState = 'waiting';
+      sfxStopCast();
+      const rod = RODS[game.rodId];
+      const eff = getSkillEffects();
+      let distMult = 0.55;
+      let tierMsg = '';
+      if (chargePower >= 100) { distMult = 1.0; transientRareBoost += 0.6; tierMsg = '🌟 100%チャージ！レア率UP'; }
+      else if (chargePower >= 50) { distMult = 0.8; tierMsg = '💪 50%チャージ！飛距離UP'; }
+      lineDistance = Math.round(rod.dist * distMult * (1 + eff.castDistBonus));
+      if (tierMsg) addVisualSplashEffect(tierMsg);
+      btn.innerText = '待機中';
+      btn.disabled = true;
+      game.baits[game.selectedBait]--;
+      saveGame();
+      updateHUD();
+      progressQuest('cast', { mapId: game.mapId });
+      throwBobber(lineDistance);
+      sfxSplash();
+      chargePower = 0;
+      renderSpecialRodPanel();
+      const waitTime = 2000 + Math.random() * 2500;
+      castTimer = setTimeout(triggerHit, waitTime);
+    }
+
     const RARE_HIT_PRESENTATION = {
       Common:    { msg: 'HIT!', cls: 'hit' },
       Uncommon:  { msg: 'HIT!', cls: 'hit' },
@@ -4996,6 +5325,14 @@
       btn.classList.remove('casting');
       btn.classList.add('hit');
       selectRandomFish();
+      const rod = RODS[game.rodId];
+
+      // ハンターロッド：複数の候補から狙う魚を選ばせる
+      if (getEffectiveSpecialUI(rod) === 'hunter') {
+        startHunterLockOn();
+        return;
+      }
+
       const presentation = RARE_HIT_PRESENTATION[targetFish.rarity] || RARE_HIT_PRESENTATION.Common;
       const msg = document.getElementById('action-msg');
       msg.innerText = presentation.msg;
@@ -5006,6 +5343,13 @@
       } else {
         sfxHit();
       }
+
+      // ハープーンロッド：照準を合わせてから戦闘に入る
+      if (rod.specialEffect === 'harpoon') {
+        setTimeout(() => { if (castState === 'hit') startHarpoonAim(); }, 400);
+        return;
+      }
+
       setTimeout(() => {
         if (castState === 'hit') triggerFight();
       }, 400);
@@ -5103,6 +5447,10 @@
       rodVfxState = null;
       rodVfxKey = null;
       comboCount = 0; // 逃したのでコンボは途切れる
+      tideState = null;
+      spinState = null;
+      crystalMatchStreak = 0;
+      crystalAwardedLevel = 0;
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'CAST';
       btn.className = 'cast-btn';
@@ -5114,6 +5462,7 @@
       setTimeout(() => { msg.className = ''; }, 1200);
       bobberThrown = false;
       drawWaterSurface();
+      renderSpecialRodPanel();
     }
 
     function triggerFight() {
@@ -5146,8 +5495,12 @@
       let indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
       if (rodBonus.label) indicatorText += ` ／ ${rodBonus.label}`;
       reelIndicator.innerText = indicatorText;
-      fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0; catchGauge = 40; isReeling = false;
+      fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0;
+      catchGauge = 40 + transientGaugeHeadStart;
+      transientGaugeHeadStart = 0;
+      isReeling = false;
       comboFlashShown = false;
+      initSpecialRodFightState(rod);
       startReelBattleLoop();
     }
 
@@ -5172,6 +5525,8 @@
       // レア度が高いほど巻きが重くなる抵抗（powerツリーのrarityResistで軽減）。Legendary以上は400%超の激重抵抗
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
       let resistance = Math.max(0, rawResist - eff.rarityResist);
+      // ハープーンロッド：照準に失敗すると、この1回だけ追加の抵抗を受ける
+      if (transientResistancePenalty > 0) { resistance += transientResistancePenalty; transientResistancePenalty = 0; }
       // ハードアイランドの魚：レア度に関係なく、えげつない追加抵抗と暴れ方が乗る
       if (targetFish.hardIsland) {
         diff *= HARD_ISLAND_DIFF_MULT;
@@ -5194,7 +5549,11 @@
         if (fishPos < 0) { fishPos = 0; fishVel = -fishVel * 0.5; }
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
         // ロッド+スキルの巻き速度が高いほど反応が速くなるが、レアな魚ほど抵抗で相殺される
-        if (isReeling) { playerVel += 90 * dt * reelSpeedMult; sfxFightReel(); }
+        // タイドロッド：テンションが振り切れると一時的にリールが重くなる
+        const tideDrag = (getEffectiveSpecialUI(rod) === 'tide' && tideState && tideState.tension >= 100) ? 0.4 : 1;
+        // スピンロッド：回転メーターMAXで一定時間、超高速リールになる
+        const spinTurbo = (getEffectiveSpecialUI(rod) === 'spin' && spinState && performance.now() < spinState.turboUntil) ? 2.5 : 1;
+        if (isReeling) { playerVel += 90 * dt * reelSpeedMult * tideDrag * spinTurbo; sfxFightReel(); }
         else playerVel -= 120 * dt;
         playerVel *= 0.95;
         playerPos += playerVel * dt;
@@ -5209,6 +5568,31 @@
           playerBar.classList.remove('matching');
           catchGauge -= (18 + diff * 2) * dt;
         }
+
+        // タイドロッド：波ゲージのテンションは戦闘中ずっと自然に上昇していく
+        if (getEffectiveSpecialUI(rod) === 'tide' && tideState) {
+          tideState.tension = Math.min(100, tideState.tension + 6 * dt);
+          tideState.wavePos += tideState.waveVel * dt;
+          if (tideState.wavePos <= 0) { tideState.wavePos = 0; tideState.waveVel = Math.abs(tideState.waveVel); }
+          if (tideState.wavePos >= 100) { tideState.wavePos = 100; tideState.waveVel = -Math.abs(tideState.waveVel); }
+          const tm = document.getElementById('tide-marker');
+          if (tm) tm.style.left = tideState.wavePos + '%';
+          const tf = document.getElementById('tide-tension-fill');
+          if (tf) tf.style.height = tideState.tension + '%';
+        }
+
+        // クリスタルロッド：リールを合わせ続けている時間で結晶が育つ
+        if (rod.specialEffect === 'crystal') {
+          if (isMatched) {
+            crystalMatchStreak += dt;
+            const streakLevel = Math.floor(crystalMatchStreak / 1.2);
+            if (streakLevel > crystalAwardedLevel) { crystalAwardedLevel = streakLevel; awardCrystal(); }
+          } else {
+            crystalMatchStreak = 0;
+            crystalAwardedLevel = 0;
+          }
+        }
+
         playerBar.style.left = playerPos + '%';
         fishIcon.style.left = fishPos + '%';
         fillBar.style.width = Math.max(0, Math.min(100, catchGauge)) + '%';
@@ -5233,11 +5617,18 @@
       document.getElementById('fight-overlay').style.display = 'none';
       const eff = getSkillEffects();
       const rodBonus = getRodSpecialBonus();
+      const rod = RODS[game.rodId];
       const cookingBuff = getMergedCookingBuff();
       const lenFactor = 0.8 + Math.random() * 0.5;
       const weightFactor = lenFactor * lenFactor * (0.9 + Math.random() * 0.2);
       let finalLen = targetFish.baseLen * lenFactor;
       let finalWeight = targetFish.baseWeight * weightFactor;
+      // オーバーヒートロッド：竿が熱いほどサイズが大きくなる
+      if (rod.specialEffect === 'overheat') {
+        const heatMult = 1 + (game.overheatLevel || 0) / 100 * 0.4;
+        finalLen *= heatMult;
+        finalWeight *= heatMult;
+      }
       let isCrown = false, isShiny = false;
       if (Math.random() < (0.03 + eff.crownChance + rodBonus.crownChanceBonus + (cookingBuff?.crownChanceBonus || 0))) { isCrown = true; finalLen *= 1.6; finalWeight *= 2.5; }
       if (Math.random() < (0.02 + eff.shinyChance + rodBonus.shinyChanceBonus + (cookingBuff?.shinyChanceBonus || 0))) { isShiny = true; }
@@ -5354,6 +5745,21 @@
       drawFishOnCanvas(resCanvas, isShiny?'gold':(mutation?mutation.color:targetFish.color));
       document.getElementById('catch-result-overlay').style.display = 'flex';
       saveGame(); updateHUD(); createSplashParticles(targetFish.rarity);
+
+      // ギミック竿：釣果に応じた永続ゲージの更新（オーバーヒート/エネルギー）
+      if (rod.specialEffect === 'overheat') {
+        game.overheatLevel = Math.min(100, (game.overheatLevel || 0) + 14);
+        if (game.overheatLevel >= 100 && !game.overheatCooldownUntil) {
+          game.overheatCooldownUntil = Date.now() + 8000;
+          addVisualSplashEffect('🔥 ロッドが加熱MAX！しばらく使用不能に…');
+        }
+        saveGame();
+      } else if (rod.specialEffect === 'energy') {
+        game.energyLevel = Math.min(100, (game.energyLevel || 0) + 18);
+        if (game.energyLevel >= 100) addVisualSplashEffect('⚡ 必殺技ゲージMAX！');
+        saveGame();
+      }
+      renderSpecialRodPanel();
     }
 
     function closeResult() {
@@ -5365,6 +5771,332 @@
       btn.disabled = false;
       bobberThrown = false;
       drawWaterSurface();
+    }
+
+    // ============================================================
+    // ギミック竿シリーズ：右側UIパネルのレンダリングと操作
+    // ============================================================
+    const SPECIAL_ROD_UI_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine'];
+
+    function renderSpecialRodPanel() {
+      const panel = document.getElementById('special-rod-panel');
+      if (!panel) return;
+      const rod = RODS[game.rodId];
+      const effectiveUi = getEffectiveSpecialUI(rod);
+      if (!rod || !SPECIAL_ROD_UI_TYPES.includes(effectiveUi)) { panel.style.display = 'none'; return; }
+      panel.style.display = 'flex';
+      switch (effectiveUi) {
+        case 'charge': renderChargePanel(panel); break;
+        case 'harpoon': renderHarpoonPanel(panel); break;
+        case 'tide': renderTidePanel(panel); break;
+        case 'overheat': renderOverheatPanel(panel); break;
+        case 'energy': renderEnergyPanel(panel); break;
+        case 'spin': renderSpinPanel(panel); break;
+        case 'hunter': renderHunterPanel(panel); break;
+        case 'crystal': renderCrystalPanel(panel); break;
+        case 'divine': renderDivinePanel(panel); break;
+        default: panel.style.display = 'none';
+      }
+    }
+
+    // バトル開始時に、ロッド固有の戦闘中ステートを初期化する
+    function initSpecialRodFightState(rod) {
+      tideState = null;
+      spinState = null;
+      crystalMatchStreak = 0;
+      crystalAwardedLevel = 0;
+      const effectiveUi = getEffectiveSpecialUI(rod);
+      if (effectiveUi === 'tide') {
+        tideState = { tension: 0, wavePos: Math.random() * 100, waveVel: 50, zoneStart: 10 + Math.random() * 70, zoneWidth: 20 };
+      } else if (effectiveUi === 'spin') {
+        spinState = { meter: 0, lastTapAt: 0, turboUntil: 0 };
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 1. チャージロッド ---
+    function renderChargePanel(panel) {
+      const pct = Math.min(100, (chargePower / CHARGE_OVERCHARGE_LINE) * 100);
+      const overchargeZone = chargePower > CHARGE_OVERCHARGE_LINE;
+      let tierLabel = 'CASTを長押し';
+      if (chargeCastActive) {
+        if (overchargeZone) tierLabel = '💥危険！';
+        else if (chargePower >= 100) tierLabel = '🌟レア率UP!';
+        else if (chargePower >= 50) tierLabel = '💪飛距離UP';
+        else tierLabel = 'チャージ中…';
+      }
+      panel.innerHTML = `
+        <div class="srp-label">⚡ チャージ</div>
+        <div class="srp-bar-wrap"><div class="srp-bar-fill ${overchargeZone ? 'danger' : ''}" style="height:${pct}%;"></div></div>
+        <div class="srp-sub">${tierLabel}</div>
+      `;
+    }
+
+    // --- 2. ハープーンロッド ---
+    function renderHarpoonPanel(panel) {
+      if (harpoonAim) return; // 照準中は専用UIを別関数が管理する
+      panel.innerHTML = `<div class="srp-label">🌀 ハープーン</div><div class="srp-sub">HIT後に照準を合わせよう</div>`;
+    }
+
+    function startHarpoonAim() {
+      const panel = document.getElementById('special-rod-panel');
+      harpoonAim = { pos: Math.random() * 100, vel: (Math.random() < 0.5 ? 1 : -1) * 70, target: 30 + Math.random() * 40, lastTime: null, locked: false, rafId: null };
+      panel.style.display = 'flex';
+      panel.innerHTML = `
+        <div class="srp-label">🌀 狙い撃て！</div>
+        <div class="srp-hbar-wrap" id="harpoon-hbar">
+          <div class="srp-hbar-zone" id="harpoon-zone"></div>
+          <div class="srp-hbar-marker" id="harpoon-marker"></div>
+        </div>
+        <button class="srp-btn" onclick="stopHarpoonAim()">🎯撃つ！</button>
+      `;
+      const zoneWidth = 22;
+      const zoneEl = document.getElementById('harpoon-zone');
+      zoneEl.style.left = Math.max(0, harpoonAim.target - zoneWidth / 2) + '%';
+      zoneEl.style.width = zoneWidth + '%';
+      harpoonAim.rafId = requestAnimationFrame(runHarpoonAimLoop);
+    }
+
+    function runHarpoonAimLoop(time) {
+      if (!harpoonAim || harpoonAim.locked) return;
+      if (harpoonAim.lastTime == null) harpoonAim.lastTime = time;
+      const dt = Math.min(0.05, (time - harpoonAim.lastTime) / 1000);
+      harpoonAim.lastTime = time;
+      harpoonAim.pos += harpoonAim.vel * dt;
+      if (harpoonAim.pos <= 0) { harpoonAim.pos = 0; harpoonAim.vel = Math.abs(harpoonAim.vel); }
+      if (harpoonAim.pos >= 100) { harpoonAim.pos = 100; harpoonAim.vel = -Math.abs(harpoonAim.vel); }
+      const marker = document.getElementById('harpoon-marker');
+      if (marker) marker.style.left = harpoonAim.pos + '%';
+      harpoonAim.rafId = requestAnimationFrame(runHarpoonAimLoop);
+    }
+
+    function stopHarpoonAim() {
+      if (!harpoonAim || harpoonAim.locked || castState !== 'hit') return;
+      harpoonAim.locked = true;
+      cancelAnimationFrame(harpoonAim.rafId);
+      const diff = Math.abs(harpoonAim.pos - harpoonAim.target);
+      const success = diff <= 11;
+      const panel = document.getElementById('special-rod-panel');
+      if (success) {
+        transientGaugeHeadStart = 35;
+        panel.innerHTML = `<div class="srp-label" style="color:var(--neon-green);">🎯命中！</div><div class="srp-sub">大ダメージ！</div>`;
+        sfxHit();
+      } else {
+        transientResistancePenalty = 1.2;
+        panel.innerHTML = `<div class="srp-label" style="color:var(--neon-pink);">💨外れた…</div><div class="srp-sub">魚が警戒中</div>`;
+        sfxMiss();
+      }
+      harpoonAim = null;
+      setTimeout(() => { if (castState === 'hit') triggerFight(); }, 600);
+    }
+
+    // --- 3. タイドロッド ---
+    function renderTidePanel(panel) {
+      if (castState === 'fight' && tideState) {
+        panel.innerHTML = `
+          <div class="srp-label">🌊 波タイミング</div>
+          <div class="srp-hbar-wrap" id="tide-hbar">
+            <div class="srp-hbar-zone" id="tide-zone"></div>
+            <div class="srp-hbar-marker" id="tide-marker"></div>
+          </div>
+          <button class="srp-btn" onclick="tapTideWave()">波に乗る！</button>
+          <div class="srp-bar-wrap" style="height:40px;"><div class="srp-bar-fill danger" id="tide-tension-fill" style="height:${tideState.tension}%;"></div></div>
+          <div class="srp-sub">テンション</div>
+        `;
+        positionTideZone();
+        const tm = document.getElementById('tide-marker');
+        if (tm) tm.style.left = tideState.wavePos + '%';
+      } else {
+        panel.innerHTML = `<div class="srp-label">🌊 タイド</div><div class="srp-sub">バトル中に波を捉えよう</div>`;
+      }
+    }
+
+    function positionTideZone() {
+      const zoneEl = document.getElementById('tide-zone');
+      if (!zoneEl || !tideState) return;
+      zoneEl.style.left = Math.max(0, tideState.zoneStart) + '%';
+      zoneEl.style.width = tideState.zoneWidth + '%';
+    }
+
+    function tapTideWave() {
+      if (!tideState || castState !== 'fight') return;
+      const inZone = tideState.wavePos >= tideState.zoneStart && tideState.wavePos <= tideState.zoneStart + tideState.zoneWidth;
+      if (inZone) {
+        tideState.tension = Math.max(0, tideState.tension - 35);
+        sfxHit();
+        addVisualSplashEffect('🌊 Perfect！テンション減少');
+      } else {
+        tideState.tension = Math.min(100, tideState.tension + 8);
+        sfxClick();
+      }
+      tideState.zoneStart = 10 + Math.random() * 70; // ゾーン位置をシャッフル(連打稼ぎ防止)
+      positionTideZone();
+    }
+
+    // --- 4. オーバーヒートロッド ---
+    function renderOverheatPanel(panel) {
+      const heat = game.overheatLevel || 0;
+      const cooling = !!game.overheatCooldownUntil && Date.now() < game.overheatCooldownUntil;
+      let sub = `レア率+${Math.round(heat / 100 * 50)}% / サイズ+${Math.round(heat / 100 * 40)}%`;
+      if (cooling) sub = `冷却中… あと${Math.ceil((game.overheatCooldownUntil - Date.now()) / 1000)}秒`;
+      panel.innerHTML = `
+        <div class="srp-label">🔥 オーバーヒート</div>
+        <div class="srp-bar-wrap"><div class="srp-bar-fill ${(heat >= 80 || cooling) ? 'danger' : ''}" style="height:${cooling ? 100 : heat}%;"></div></div>
+        <div class="srp-sub">${sub}</div>
+      `;
+    }
+
+    // --- 5. エネルギーロッド ---
+    function renderEnergyPanel(panel) {
+      const en = game.energyLevel || 0;
+      const ready = en >= 100;
+      panel.innerHTML = `
+        <div class="srp-label">⚡ エネルギー</div>
+        <div class="srp-bar-wrap"><div class="srp-bar-fill ${ready ? 'gold' : ''}" style="height:${en}%;"></div></div>
+        ${ready ? `<button class="srp-btn ready" onclick="useEnergyUltimate()">必殺技!</button>` : `<div class="srp-sub">釣るほど充電</div>`}
+      `;
+    }
+
+    function useEnergyUltimate() {
+      if ((game.energyLevel || 0) < 100) return;
+      game.energyLevel = 0;
+      forcedMinRarity = 'Epic';
+      transientGaugeHeadStart = 30;
+      saveGame();
+      addVisualSplashEffect('⚡ 必殺技発動！次の1匹はEpic以上確定＋有利スタート');
+      renderSpecialRodPanel();
+    }
+
+    // --- 6. スピンロッド ---
+    function renderSpinPanel(panel) {
+      if (castState === 'fight' && spinState) {
+        const turboActive = performance.now() < spinState.turboUntil;
+        panel.innerHTML = `
+          <div class="srp-label">🌪 回転メーター</div>
+          <div class="srp-bar-wrap"><div class="srp-bar-fill ${turboActive ? 'gold' : ''}" id="spin-meter-fill" style="height:${spinState.meter}%;"></div></div>
+          <button class="srp-btn ${turboActive ? 'ready' : ''}" onclick="tapSpinMeter()">連打！</button>
+          ${turboActive ? '<div class="srp-sub" style="color:var(--neon-gold);">🔥超高速リール中！</div>' : ''}
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">🌪 スピン</div><div class="srp-sub">バトル中に連打しよう</div>`;
+      }
+    }
+
+    function tapSpinMeter() {
+      if (!spinState || castState !== 'fight') return;
+      const now = performance.now();
+      const interval = now - (spinState.lastTapAt || 0);
+      spinState.lastTapAt = now;
+      // 200〜600msの間隔で連打するとよく貯まる。速すぎ/遅すぎは効率が落ちる
+      let gain = 6;
+      if (interval >= 200 && interval <= 600) gain = 14;
+      else if (interval < 150) gain = 2;
+      spinState.meter = Math.min(100, spinState.meter + gain);
+      sfxClick();
+      if (spinState.meter >= 100 && now >= spinState.turboUntil) {
+        spinState.turboUntil = now + 4000;
+        spinState.meter = 0;
+        addVisualSplashEffect('🌪 超高速リール発動！');
+        sfxHit();
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 7. ハンターロッド ---
+    function startHunterLockOn() {
+      const candidates = [targetFish];
+      for (let i = 0; i < 2; i++) {
+        selectRandomFish();
+        if (targetFish) candidates.push(targetFish);
+      }
+      hunterCandidates = candidates;
+      const panel = document.getElementById('special-rod-panel');
+      panel.style.display = 'flex';
+      const rarityIcon = { Divine: '✨', Mythic: '👑', Legendary: '🌟', Epic: '⚠️' };
+      const itemsHtml = candidates.map((f, i) => `<div class="srp-hunter-item" onclick="chooseHunterTarget(${i})">${rarityIcon[f.rarity] || '🐟'} ${f.name}<br>${f.rarity}</div>`).join('');
+      panel.innerHTML = `<div class="srp-label">🦈 狙う魚を選べ</div><div class="srp-hunter-list">${itemsHtml}</div>`;
+      const msg = document.getElementById('action-msg');
+      msg.innerText = '🦈 獲物をロックオン中…';
+      msg.className = 'show hit';
+    }
+
+    function chooseHunterTarget(idx) {
+      if (!hunterCandidates || !hunterCandidates[idx] || castState !== 'hit') return;
+      targetFish = hunterCandidates[idx];
+      hunterCandidates = null;
+      const presentation = RARE_HIT_PRESENTATION[targetFish.rarity] || RARE_HIT_PRESENTATION.Common;
+      const msg = document.getElementById('action-msg');
+      msg.innerText = presentation.msg;
+      msg.className = `show ${presentation.cls}`;
+      if (['Epic', 'Legendary', 'Mythic', 'Divine'].includes(targetFish.rarity)) { sfxRareHit(targetFish.rarity); shakeScreen(targetFish.rarity); } else sfxHit();
+      renderHunterPanel(document.getElementById('special-rod-panel'));
+      setTimeout(() => { if (castState === 'hit') triggerFight(); }, 400);
+    }
+
+    function renderHunterPanel(panel) {
+      if (hunterCandidates) return; // 選択中は専用UIを維持する
+      panel.innerHTML = `<div class="srp-label">🦈 ハンター</div><div class="srp-sub">HITすると候補から選べる</div>`;
+    }
+
+    // --- 8. クリスタルロッド ---
+    function renderCrystalPanel(panel) {
+      const lvl = game.crystalLevel || 0;
+      const pips = Array.from({ length: 5 }).map((_, i) => `<div class="srp-pip ${i < lvl ? 'filled' : ''}"></div>`).join('');
+      const actionHtml = lvl >= 5 ? `<button class="srp-btn ready" onclick="consumeCrystalGuarantee()">🔓解放</button>` : '';
+      panel.innerHTML = `
+        <div class="srp-label">💎 クリスタル</div>
+        <div class="srp-pips">${pips}</div>
+        <div class="srp-sub">${castState === 'fight' ? 'Perfectを維持！' : 'リールを合わせ続けよう'}</div>
+        ${actionHtml}
+      `;
+    }
+
+    function awardCrystal() {
+      game.crystalLevel = Math.min(5, (game.crystalLevel || 0) + 1);
+      saveGame();
+      renderSpecialRodPanel();
+      if (game.crystalLevel >= 5) addVisualSplashEffect('💎 結晶MAX！次の魚はRare以上確定にできる');
+    }
+
+    function consumeCrystalGuarantee() {
+      if ((game.crystalLevel || 0) < 5) return;
+      game.crystalLevel = 0;
+      forcedMinRarity = 'Rare';
+      saveGame();
+      addVisualSplashEffect('💎 結晶解放！次の1匹はRare以上確定');
+      renderSpecialRodPanel();
+    }
+
+    // --- 9. ディバインロッド ---
+    function tickDivineFate() {
+      const now = Date.now();
+      if (!game.divineFateLastTick) game.divineFateLastTick = now;
+      const elapsedSec = (now - game.divineFateLastTick) / 1000;
+      game.divineFateLastTick = now;
+      if ((game.divineFateLevel || 0) < 100) {
+        game.divineFateLevel = Math.min(100, (game.divineFateLevel || 0) + elapsedSec * (100 / 240)); // 約4分でMAX
+      }
+    }
+
+    function renderDivinePanel(panel) {
+      tickDivineFate();
+      const lvl = Math.floor(game.divineFateLevel || 0);
+      const ready = lvl >= 100;
+      panel.innerHTML = `
+        <div class="srp-label">👑 運命</div>
+        <div class="srp-bar-wrap"><div class="srp-bar-fill ${ready ? 'gold' : ''}" style="height:${Math.min(100, lvl)}%;"></div></div>
+        ${ready ? `<button class="srp-btn ready" onclick="useDivineFate()">運命解放!</button>` : `<div class="srp-sub">時間で自然に満ちる</div>`}
+      `;
+    }
+
+    function useDivineFate() {
+      if ((game.divineFateLevel || 0) < 100) return;
+      game.divineFateLevel = 0;
+      game.divineFateLastTick = Date.now();
+      forcedMinRarity = 'Legendary';
+      saveGame();
+      addVisualSplashEffect('👑 運命解放！次の1匹はLegendary以上確定');
+      renderSpecialRodPanel();
     }
 
     function selectRandomFish() {
@@ -5383,10 +6115,23 @@
         return true;
       });
       if (filtered.length === 0) filtered = candidates;
+
+      // クリスタルロッド/エネルギーロッド/ディバインロッドなど：次の1匹の最低レア度を保証する（消費型）
+      if (forcedMinRarity) {
+        const minIdx = RARITY_ORDER.indexOf(forcedMinRarity);
+        const boosted = filtered.filter(f => RARITY_ORDER.indexOf(f.rarity) >= minIdx);
+        if (boosted.length > 0) filtered = boosted;
+        forcedMinRarity = null;
+      }
+
       const rarityWeights = { Common:100, Uncommon:50, Rare:20, Epic:8, Legendary:3, Mythic:1, Divine:0.2 };
       const eff = getSkillEffects();
       const rod = RODS[game.rodId];
-      const luckMultiplier = 1 + eff.rareChance + rodBonus.rareChanceBonus + (rod.rare - 1.0);
+      // オーバーヒートロッド：竿が熱いほどレア度の高い魚を引き寄せやすくなる
+      let overheatBoost = 0;
+      if (rod.specialEffect === 'overheat') overheatBoost = (game.overheatLevel || 0) / 100 * 0.5;
+      const luckMultiplier = 1 + eff.rareChance + rodBonus.rareChanceBonus + transientRareBoost + overheatBoost + (rod.rare - 1.0);
+      transientRareBoost = 0; // チャージロッドの100%チャージ分は1匹使ったら消費
       let totalWeight = 0;
       const weights = filtered.map(f => {
         let w = rarityWeights[f.rarity] || 10;
