@@ -1561,12 +1561,12 @@
         <h3>🎟️ コード引き換え</h3>
         <button class="close-btn" onclick="closeModal('modal-redeem')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="modal-body" style="display:flex; flex-direction:column; gap:12px; min-height:0;">
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:12px; min-height:0; overflow-y:auto;">
         <div style="padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03); color:var(--text-sub); font-size:0.8rem;">
           特典コードをお持ちの場合は、下に入力して「引き換える」を押してください。1つのコードにつき1回だけ引き換えできます。
         </div>
-        <input id="redeem-code-input" type="text" placeholder="コードを入力" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:#fff; font-size:1rem; text-align:center; letter-spacing:0.05em;" autocomplete="off" autocapitalize="characters">
-        <button class="buy-btn" onclick="redeem()" style="width:100%; padding:12px;">引き換える</button>
+        <input id="redeem-code-input" type="text" placeholder="コードを入力" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:#fff; font-size:1rem; text-align:center; letter-spacing:0.05em;" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); redeemCode();}">
+        <button type="button" class="buy-btn" onclick="redeemCode()" style="width:100%; padding:14px; touch-action:manipulation;">引き換える</button>
         <div id="redeem-result-msg" style="text-align:center; font-weight:700; min-height:1.4em;"></div>
         <div style="font-size:0.7rem; color:var(--text-sub);">これまで引き換えたコード：<span id="redeem-history-text">なし</span></div>
       </div>
@@ -2468,7 +2468,14 @@
       { id: 42, name: 'クリスタルロッド', cost: 130000, dist: 300, rare: 3.5, dur: 280, reelSpeed: 2.2, barWidth: 23, specialEffect: 'crystal', desc: '💎 バトル中、リールを合わせ続けて「Perfect」を出すたびに結晶が育つ。結晶がMAXになると次の1匹がRare以上確定になる。' },
       { id: 43, name: 'ディバインロッド', cost: 220000, dist: 350, rare: 4.0, dur: 320, reelSpeed: 2.4, barWidth: 25, specialEffect: 'divine', desc: '👑 何もしなくても時間経過で「運命ゲージ」が満ちていく。満タンで運命を解放すると、次の1匹がLegendary以上確定になる。' },
       // --- コード引き換え専用：管理者用ロッド(ゲーム内最強) ---
-      { id: 44, name: 'アドミニストレーターロッド', cost: null, dist: 999, rare: 15.0, dur: 999, reelSpeed: 8.0, barWidth: 45, duplicateChance: 0.5, codeOnly: true, specialEffect: 'admin', desc: '🛠️ 特典コードでのみ入手できる、ゲーム内で最強の竿。あらゆる能力が桁違いに強化されている。' }
+      { id: 44, name: 'アドミニストレーターロッド', cost: null, dist: 999, rare: 15.0, dur: 999, reelSpeed: 8.0, barWidth: 45, duplicateChance: 0.5, codeOnly: true, specialEffect: 'admin', desc: '🛠️ 特典コードでのみ入手できる、ゲーム内で最強の竿。あらゆる能力が桁違いに強化されている。' },
+      // --- 戦闘ギミックロッド(上位互換シリーズ)：バトル中に直接介入する強力な特殊操作を持つ。いずれも超高額 ---
+      { id: 45, name: 'ブレードロッド', cost: 600000, dist: 420, rare: 5.0, dur: 400, reelSpeed: 3.0, barWidth: 28, specialEffect: 'blade', desc: '⚔️ 魚が暴れるタイミングで斬撃チャンスが発生。Perfectで大ダメージ、連続Perfectでコンボ倍率が上がっていく。' },
+      { id: 46, name: 'サンダーロッド', cost: 750000, dist: 450, rare: 5.5, dur: 420, reelSpeed: 3.2, barWidth: 29, specialEffect: 'thunder', desc: '⚡ 魚に雷マークが付いた瞬間にボタン。感電スタックが溜まり、10スタックで魚の動きを完全に止める。' },
+      { id: 47, name: 'フロストロッド', cost: 900000, dist: 470, rare: 6.0, dur: 440, reelSpeed: 3.4, barWidth: 30, specialEffect: 'frost', desc: '❄️ 攻撃を当てるほど凍結ゲージが溜まる。100%になると数秒間、魚が全く暴れなくなる。大型魚との戦いで真価を発揮。' },
+      { id: 48, name: 'インフェルノロッド', cost: 1100000, dist: 490, rare: 6.5, dur: 460, reelSpeed: 3.6, barWidth: 31, specialEffect: 'inferno', desc: '🔥 リールを合わせ続けるほどHeatが溜まる。MAXで「Burst」が発動し、数秒間ダメージが3倍になる。' },
+      { id: 49, name: 'サイクロンロッド', cost: 1300000, dist: 510, rare: 7.0, dur: 480, reelSpeed: 3.8, barWidth: 32, specialEffect: 'cyclone', desc: '🌪️ リングを回して渦を作り、満タンになると魚を中央へ吸い込む。何度でも発動できる。' },
+      { id: 50, name: 'グラビティロッド', cost: 1600000, dist: 530, rare: 7.5, dur: 500, reelSpeed: 4.0, barWidth: 33, specialEffect: 'gravity', desc: '🌑 重力場を発動すると一定時間、魚の移動速度が50%低下する。ゲージ管理が肝心の玄人向けロッド。' }
     ];
 
     // ============================================================
@@ -2863,7 +2870,7 @@
     // ハードロッド/管理者ロッド)を装備していなければ、著しく不利になる。
     // ============================================================
     const WORLD2_MAP_IDS = [21, 22, 23, 24];
-    const TRUE_GIMMICK_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine', 'hardgear', 'admin'];
+    const TRUE_GIMMICK_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine', 'hardgear', 'admin', 'blade', 'thunder', 'frost', 'inferno', 'cyclone', 'gravity'];
     const WORLD2_EXTRA_RESIST = 3.0;  // ギミック竿を持たない場合に追加される、通常の巻きが一切効かない抵抗
     const WORLD2_DIFF_MULT = 2.0;     // 魚の暴れ方の追加倍率(ギミック竿を持たない場合)
     const WORLD2_GAUGE_MULT = 0.45;   // キャッチゲージ上昇量への追加減衰(ギミック竿を持たない場合)
@@ -3107,6 +3114,34 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.6.0',
+        date: '2026年7月16日',
+        title: '⚔️ 戦闘ギミックロッド(上位互換)6種を追加',
+        changes: [
+          '⚔️ ブレードロッド：魚が暴れる瞬間の斬撃チャンスでPerfectを狙う。連続Perfectでコンボ倍率が上昇',
+          '⚡ サンダーロッド：雷マークのタイミングでボタンを押し感電スタックを蓄積。10スタックで魚を完全停止',
+          '❄️ フロストロッド：攻撃を当てるほど凍結ゲージが上昇。MAXで数秒間、魚の動きを完全に止める(大型魚向け)',
+          '🔥 インフェルノロッド：リールを合わせ続けるほどHeatが上昇。MAXで「Burst」発動、数秒間ダメージ3倍',
+          '🌪️ サイクロンロッド：連打で渦ゲージを溜め、満タンで魚を中央へ強制的に吸い込む。何度でも発動可能',
+          '🌑 グラビティロッド：重力場を発動すると魚の移動速度が50%低下。ゲージ管理が重要な玄人向け',
+          '💰 上記6種はいずれも既存のギミック竿シリーズの上位互換にあたるため、価格は60万〜160万Gと非常に高額に設定',
+          '🌊 ハードアイランド／第二世界との相性判定にもこの6種を追加し、通常のギミック竿と同様に「巻きが噛み合う」扱いになるようにした'
+        ]
+      },
+      {
+        version: '1.5.0',
+        date: '2026年7月16日',
+        title: '🎟️ コード引き換え・新スキル・第二世界を追加',
+        changes: [
+          '🎟️ 「コード」タブを新設。特典コードを入力するとアイテムやロッドと引き換えられる、1コードにつき1回限りの引き換えシステムを追加',
+          '🛠️ コード引き換え専用の「アドミニストレーターロッド」を追加。飛距離・レア率・巻き速度・バー幅すべてがゲーム内最強',
+          '🍳 新スキルツリー「調理の樹」を追加：料理バフの持続時間・効果量アップ、火加減ミニゲームの判定ゾーン拡大',
+          '🦈 新スキルツリー「怪魚の樹」を追加：ハードアイランドの追加抵抗軽減、ゴミの入手数アップ、ギミック竿のゲージ上昇速度アップ',
+          '🌌 「第二世界」を追加：裏側の渚・狂想の岩礁・歪んだ深淵・理を超えた最果ての4海域。ここの魚は通常のロッドの「巻き」がまったく噛み合わず、ギミック竿(またはハードロッド/アドミニストレーターロッド)を装備していないと極端に不利になる',
+          '🐟 第二世界専用の魚を12種追加。いずれもLegendary〜Divineの高難度・高報酬'
+        ]
+      },
+      {
         version: '1.4.2',
         date: '2026年7月15日',
         title: '🐛 不具合修正：料理モーダルのスクロール & デイリークエスト',
@@ -3204,7 +3239,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.4.2';
+    const CHANGELOG_VERSION = 'v1.6.0';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3537,6 +3572,18 @@
           if (chargeCastActive) { e.preventDefault(); releaseChargeCast(); }
         }, { passive: false });
       });
+
+      // コード引き換えボタン：タブレット等でタップ後のクリックイベントが正しく発火しない端末があるため、
+      // touchendで即座に処理し、その後のゴーストクリックをpreventDefaultで無効化する
+      const redeemBtnEl = document.querySelector('#modal-redeem .buy-btn');
+      if (redeemBtnEl) {
+        redeemBtnEl.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          const inputEl = document.getElementById('redeem-code-input');
+          if (inputEl) inputEl.blur();
+          redeemCode();
+        }, { passive: false });
+      }
 
       renderSpecialRodPanel();
       // 時間経過で溜まるゲージ(ディバインロッドの運命/オーバーヒートの冷却表示)を定期更新
@@ -5294,6 +5341,14 @@
     // タイドロッド（バトル中の波タイミング）
     let tideState = null; // { tension, wavePos, waveVel, zoneStart, zoneWidth, lastZoneShiftAt }
 
+    // 戦闘ギミックロッド(上位互換シリーズ)：バトル中専用のトランジェント状態
+    let bladeState = null;   // { nextEventAt, windowOpen, windowUntil, combo }
+    let thunderState = null; // { stacks, nextEventAt, windowOpen, windowUntil, paralyzedUntil }
+    let frostState = null;   // { gauge, nextEventAt, windowOpen, windowUntil, frozenUntil }
+    let infernoState = null; // { heat, burstUntil }
+    let cycloneState = null; // { gauge, pullUntil }
+    let gravityState = null; // { gauge, active }
+
     // スピンロッド（バトル中の連打メーター）
     let spinState = null; // { meter, lastTapAt, turboUntil }
 
@@ -5650,6 +5705,12 @@
       spinState = null;
       crystalMatchStreak = 0;
       crystalAwardedLevel = 0;
+      bladeState = null;
+      thunderState = null;
+      frostState = null;
+      infernoState = null;
+      cycloneState = null;
+      gravityState = null;
       const btn = document.getElementById('cast-btn');
       btn.innerText = 'CAST';
       btn.className = 'cast-btn';
@@ -5748,17 +5809,30 @@
         if (castState !== 'fight') return;
         const dt = (time - lastTime) / 1000;
         lastTime = time;
+        const now = performance.now();
+        const effUi = getEffectiveSpecialUI(rod);
+        // サンダーロッド/フロストロッド：スタック/ゲージが満タンになると魚を一時的に完全停止させる
+        const thunderFrozen = (effUi === 'thunder' && thunderState && now < thunderState.paralyzedUntil);
+        const frostFrozen = (effUi === 'frost' && frostState && now < frostState.frozenUntil);
         // クロノロッド：時折魚の動きを完全に止める
-        if (rodBonus.freezeChance > 0 && Math.random() < rodBonus.freezeChance) { fishVel = 0; }
+        if (thunderFrozen || frostFrozen) { fishVel = 0; }
+        else if (rodBonus.freezeChance > 0 && Math.random() < rodBonus.freezeChance) { fishVel = 0; }
         else if (Math.random() < 0.06) { fishVel = (Math.random() - 0.5) * 80 * diff * rodBonus.fishSpeedMult; }
-        fishPos += fishVel * dt;
+        // グラビティロッド：発動中は魚の移動速度を50%に低下させる
+        const gravitySlow = (effUi === 'gravity' && gravityState && gravityState.active) ? 0.5 : 1;
+        fishPos += fishVel * gravitySlow * dt;
         if (fishPos < 0) { fishPos = 0; fishVel = -fishVel * 0.5; }
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
+        // サイクロンロッド：吸い込み発動中は魚がプレイヤーの位置へ強制的に引き寄せられる
+        if (effUi === 'cyclone' && cycloneState && now < cycloneState.pullUntil) {
+          const pullTarget = Math.min(90, playerPos + barWidth / 2 - 5);
+          fishPos += (pullTarget - fishPos) * Math.min(1, dt * 4);
+        }
         // ロッド+スキルの巻き速度が高いほど反応が速くなるが、レアな魚ほど抵抗で相殺される
         // タイドロッド：テンションが振り切れると一時的にリールが重くなる
-        const tideDrag = (getEffectiveSpecialUI(rod) === 'tide' && tideState && tideState.tension >= 100) ? 0.4 : 1;
+        const tideDrag = (effUi === 'tide' && tideState && tideState.tension >= 100) ? 0.4 : 1;
         // スピンロッド：回転メーターMAXで一定時間、超高速リールになる
-        const spinTurbo = (getEffectiveSpecialUI(rod) === 'spin' && spinState && performance.now() < spinState.turboUntil) ? 2.5 : 1;
+        const spinTurbo = (effUi === 'spin' && spinState && now < spinState.turboUntil) ? 2.5 : 1;
         if (isReeling) { playerVel += 90 * dt * reelSpeedMult * tideDrag * spinTurbo; sfxFightReel(); }
         else playerVel -= 120 * dt;
         playerVel *= 0.95;
@@ -5767,16 +5841,30 @@
         if (playerPos > 100 - barWidth) { playerPos = 100 - barWidth; playerVel = 0; }
         const fishCenter = fishPos + 5;
         const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + barWidth);
+        // インフェルノロッド：合わせ続けるほど熱が溜まり、MAXでバーストして与ダメージが3倍になる
+        const infernoBurst = (effUi === 'inferno' && infernoState && now < infernoState.burstUntil) ? 3 : 1;
         if (isMatched) {
           playerBar.classList.add('matching');
-          catchGauge += (16 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5);
+          catchGauge += (16 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5) * infernoBurst;
+          if (effUi === 'inferno' && infernoState) {
+            infernoState.heat = Math.min(100, infernoState.heat + 22 * dt);
+            if (infernoState.heat >= 100 && now >= infernoState.burstUntil) {
+              infernoState.burstUntil = now + 5000;
+              infernoState.heat = 0;
+              addVisualSplashEffect('🔥 Burst！ダメージ3倍！');
+              sfxHit();
+            }
+          }
         } else {
           playerBar.classList.remove('matching');
           catchGauge -= (18 + diff * 2) * dt;
+          if (effUi === 'inferno' && infernoState) {
+            infernoState.heat = Math.max(0, infernoState.heat - 10 * dt);
+          }
         }
 
         // タイドロッド：波ゲージのテンションは戦闘中ずっと自然に上昇していく
-        if (getEffectiveSpecialUI(rod) === 'tide' && tideState) {
+        if (effUi === 'tide' && tideState) {
           tideState.tension = Math.min(100, tideState.tension + 6 * dt);
           tideState.wavePos += tideState.waveVel * dt;
           if (tideState.wavePos <= 0) { tideState.wavePos = 0; tideState.waveVel = Math.abs(tideState.waveVel); }
@@ -5796,6 +5884,57 @@
           } else {
             crystalMatchStreak = 0;
             crystalAwardedLevel = 0;
+          }
+        }
+
+        // ブレードロッド：一定間隔で「斬撃チャンス」が発生する
+        if (effUi === 'blade' && bladeState) {
+          if (!bladeState.windowOpen && now >= bladeState.nextEventAt) {
+            bladeState.windowOpen = true;
+            bladeState.windowUntil = now + 700;
+            renderSpecialRodPanel();
+          } else if (bladeState.windowOpen && now > bladeState.windowUntil) {
+            bladeState.windowOpen = false;
+            bladeState.combo = 1;
+            bladeState.nextEventAt = now + 1800 + Math.random() * 1400;
+            renderSpecialRodPanel();
+          }
+        }
+        // サンダーロッド：一定間隔で「感電チャンス」が発生する
+        if (effUi === 'thunder' && thunderState) {
+          if (!thunderState.windowOpen && now >= thunderState.paralyzedUntil && now >= thunderState.nextEventAt) {
+            thunderState.windowOpen = true;
+            thunderState.windowUntil = now + 700;
+            renderSpecialRodPanel();
+          } else if (thunderState.windowOpen && now > thunderState.windowUntil) {
+            thunderState.windowOpen = false;
+            thunderState.nextEventAt = now + 1600 + Math.random() * 1200;
+            renderSpecialRodPanel();
+          }
+        }
+        // フロストロッド：一定間隔で「凍結チャンス」が発生する
+        if (effUi === 'frost' && frostState) {
+          if (!frostState.windowOpen && now >= frostState.frozenUntil && now >= frostState.nextEventAt) {
+            frostState.windowOpen = true;
+            frostState.windowUntil = now + 700;
+            renderSpecialRodPanel();
+          } else if (frostState.windowOpen && now > frostState.windowUntil) {
+            frostState.windowOpen = false;
+            frostState.nextEventAt = now + 1800 + Math.random() * 1400;
+            renderSpecialRodPanel();
+          }
+        }
+        // サイクロンロッド：吸い込み中でなければゲージが少しずつ落ち着いていく
+        if (effUi === 'cyclone' && cycloneState && now >= cycloneState.pullUntil) {
+          cycloneState.gauge = Math.max(0, cycloneState.gauge - 3 * dt);
+        }
+        // グラビティロッド：発動中はゲージが減り続け、非発動中は回復する
+        if (effUi === 'gravity' && gravityState) {
+          if (gravityState.active) {
+            gravityState.gauge = Math.max(0, gravityState.gauge - 18 * dt);
+            if (gravityState.gauge <= 0) { gravityState.active = false; addVisualSplashEffect('🌑 重力場が切れた…'); renderSpecialRodPanel(); }
+          } else {
+            gravityState.gauge = Math.min(100, gravityState.gauge + 10 * dt);
           }
         }
 
@@ -5982,7 +6121,7 @@
     // ============================================================
     // ギミック竿シリーズ：右側UIパネルのレンダリングと操作
     // ============================================================
-    const SPECIAL_ROD_UI_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine'];
+    const SPECIAL_ROD_UI_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine', 'blade', 'thunder', 'frost', 'inferno', 'cyclone', 'gravity'];
 
     function renderSpecialRodPanel() {
       const panel = document.getElementById('special-rod-panel');
@@ -6001,6 +6140,12 @@
         case 'hunter': renderHunterPanel(panel); break;
         case 'crystal': renderCrystalPanel(panel); break;
         case 'divine': renderDivinePanel(panel); break;
+        case 'blade': renderBladePanel(panel); break;
+        case 'thunder': renderThunderPanel(panel); break;
+        case 'frost': renderFrostPanel(panel); break;
+        case 'inferno': renderInfernoPanel(panel); break;
+        case 'cyclone': renderCyclonePanel(panel); break;
+        case 'gravity': renderGravityPanel(panel); break;
         default: panel.style.display = 'none';
       }
     }
@@ -6011,11 +6156,30 @@
       spinState = null;
       crystalMatchStreak = 0;
       crystalAwardedLevel = 0;
+      bladeState = null;
+      thunderState = null;
+      frostState = null;
+      infernoState = null;
+      cycloneState = null;
+      gravityState = null;
       const effectiveUi = getEffectiveSpecialUI(rod);
+      const now = performance.now();
       if (effectiveUi === 'tide') {
         tideState = { tension: 0, wavePos: Math.random() * 100, waveVel: 50, zoneStart: 10 + Math.random() * 70, zoneWidth: 20 };
       } else if (effectiveUi === 'spin') {
         spinState = { meter: 0, lastTapAt: 0, turboUntil: 0 };
+      } else if (effectiveUi === 'blade') {
+        bladeState = { nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, combo: 1 };
+      } else if (effectiveUi === 'thunder') {
+        thunderState = { stacks: 0, nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, paralyzedUntil: 0 };
+      } else if (effectiveUi === 'frost') {
+        frostState = { gauge: 0, nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, frozenUntil: 0 };
+      } else if (effectiveUi === 'inferno') {
+        infernoState = { heat: 0, burstUntil: 0 };
+      } else if (effectiveUi === 'cyclone') {
+        cycloneState = { gauge: 0, pullUntil: 0 };
+      } else if (effectiveUi === 'gravity') {
+        gravityState = { gauge: 100, active: false };
       }
       renderSpecialRodPanel();
     }
@@ -6305,6 +6469,184 @@
       forcedMinRarity = 'Legendary';
       saveGame();
       addVisualSplashEffect('👑 運命解放！次の1匹はLegendary以上確定');
+      renderSpecialRodPanel();
+    }
+
+    // ============================================================
+    // 戦闘ギミックロッド(上位互換シリーズ)：右側UIパネルのレンダリングと操作
+    // ============================================================
+
+    // --- 10. ブレードロッド ---
+    function renderBladePanel(panel) {
+      if (castState === 'fight' && bladeState) {
+        const active = bladeState.windowOpen;
+        panel.innerHTML = `
+          <div class="srp-label">⚔️ ブレード</div>
+          <div class="srp-sub">コンボ x${bladeState.combo}</div>
+          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapBladeSlash()">斬る！</button>
+          <div class="srp-sub">${active ? '今だ！' : '魚が暴れる瞬間を狙え'}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">⚔️ ブレード</div><div class="srp-sub">バトル中に斬撃タイミングを狙おう</div>`;
+      }
+    }
+
+    function tapBladeSlash() {
+      if (!bladeState || castState !== 'fight') return;
+      const now = performance.now();
+      if (bladeState.windowOpen && now <= bladeState.windowUntil) {
+        catchGauge += 18 * bladeState.combo;
+        bladeState.combo = Math.min(5, bladeState.combo + 1);
+        bladeState.windowOpen = false;
+        bladeState.nextEventAt = now + 1800 + Math.random() * 1400;
+        addVisualSplashEffect(`⚔️ Perfect！ x${bladeState.combo}コンボ！`);
+        sfxHit();
+      } else {
+        bladeState.combo = 1;
+        sfxMiss();
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 11. サンダーロッド ---
+    function renderThunderPanel(panel) {
+      if (castState === 'fight' && thunderState) {
+        const active = thunderState.windowOpen;
+        const paralyzed = performance.now() < thunderState.paralyzedUntil;
+        const pips = Array.from({ length: 10 }).map((_, i) => `<div class="srp-pip ${i < thunderState.stacks ? 'filled' : ''}"></div>`).join('');
+        panel.innerHTML = `
+          <div class="srp-label">⚡ サンダー</div>
+          <div class="srp-pips">${pips}</div>
+          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapThunderShock()" ${paralyzed ? 'disabled' : ''}>感電！</button>
+          <div class="srp-sub">${paralyzed ? '🥶 魚は停止中！' : (active ? '今だ！' : '雷マークを狙え')}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">⚡ サンダー</div><div class="srp-sub">バトル中に感電タイミングを狙おう</div>`;
+      }
+    }
+
+    function tapThunderShock() {
+      if (!thunderState || castState !== 'fight') return;
+      const now = performance.now();
+      if (thunderState.windowOpen && now <= thunderState.windowUntil) {
+        thunderState.stacks = Math.min(10, thunderState.stacks + 1);
+        thunderState.windowOpen = false;
+        thunderState.nextEventAt = now + 1600 + Math.random() * 1200;
+        sfxHit();
+        if (thunderState.stacks >= 10) {
+          thunderState.paralyzedUntil = now + 3000;
+          thunderState.stacks = 0;
+          addVisualSplashEffect('⚡ 感電MAX！魚が完全に停止した！');
+        } else {
+          addVisualSplashEffect(`⚡ 感電スタック ${thunderState.stacks}/10`);
+        }
+      } else {
+        sfxMiss();
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 12. フロストロッド ---
+    function renderFrostPanel(panel) {
+      if (castState === 'fight' && frostState) {
+        const active = frostState.windowOpen;
+        const frozen = performance.now() < frostState.frozenUntil;
+        panel.innerHTML = `
+          <div class="srp-label">❄️ フロスト</div>
+          <div class="srp-bar-wrap"><div class="srp-bar-fill" style="height:${frostState.gauge}%;"></div></div>
+          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapFrostStrike()" ${frozen ? 'disabled' : ''}>攻撃！</button>
+          <div class="srp-sub">${frozen ? '🧊 完全凍結中！' : (active ? '今だ！' : 'チャンスを待て')}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">❄️ フロスト</div><div class="srp-sub">大型魚に効果的な凍結ロッド</div>`;
+      }
+    }
+
+    function tapFrostStrike() {
+      if (!frostState || castState !== 'fight') return;
+      const now = performance.now();
+      if (frostState.windowOpen && now <= frostState.windowUntil) {
+        frostState.gauge = Math.min(100, frostState.gauge + 13);
+        frostState.windowOpen = false;
+        frostState.nextEventAt = now + 1800 + Math.random() * 1400;
+        sfxHit();
+        if (frostState.gauge >= 100) {
+          frostState.frozenUntil = now + 4000;
+          frostState.gauge = 0;
+          addVisualSplashEffect('❄️ 完全凍結！魚が数秒動かなくなった！');
+        }
+      } else {
+        frostState.gauge = Math.max(0, frostState.gauge - 5);
+        sfxMiss();
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 13. インフェルノロッド ---
+    function renderInfernoPanel(panel) {
+      if (castState === 'fight' && infernoState) {
+        const burst = performance.now() < infernoState.burstUntil;
+        panel.innerHTML = `
+          <div class="srp-label">🔥 インフェルノ</div>
+          <div class="srp-bar-wrap"><div class="srp-bar-fill ${burst ? 'danger' : ''}" style="height:${burst ? 100 : infernoState.heat}%;"></div></div>
+          <div class="srp-sub">${burst ? '🔥 BURST中！ダメージx3' : 'リールを合わせ続けよう'}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">🔥 インフェルノ</div><div class="srp-sub">合わせ続けて熱を溜めよう</div>`;
+      }
+    }
+
+    // --- 14. サイクロンロッド ---
+    function renderCyclonePanel(panel) {
+      if (castState === 'fight' && cycloneState) {
+        const pulling = performance.now() < cycloneState.pullUntil;
+        panel.innerHTML = `
+          <div class="srp-label">🌪️ サイクロン</div>
+          <div class="srp-bar-wrap"><div class="srp-bar-fill ${pulling ? 'gold' : ''}" style="height:${cycloneState.gauge}%;"></div></div>
+          <button class="srp-btn" onclick="tapCycloneSpin()">回す！</button>
+          <div class="srp-sub">${pulling ? '🌪️ 吸い込み中！' : '連打して渦を作れ'}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">🌪️ サイクロン</div><div class="srp-sub">渦を作って魚を引き寄せよう</div>`;
+      }
+    }
+
+    function tapCycloneSpin() {
+      if (!cycloneState || castState !== 'fight') return;
+      cycloneState.gauge = Math.min(100, cycloneState.gauge + 9);
+      sfxClick();
+      if (cycloneState.gauge >= 100) {
+        cycloneState.gauge = 0;
+        cycloneState.pullUntil = performance.now() + 1500;
+        addVisualSplashEffect('🌪️ 吸い込み発動！魚が引き寄せられる！');
+        sfxHit();
+      }
+      renderSpecialRodPanel();
+    }
+
+    // --- 15. グラビティロッド ---
+    function renderGravityPanel(panel) {
+      if (castState === 'fight' && gravityState) {
+        panel.innerHTML = `
+          <div class="srp-label">🌑 グラビティ</div>
+          <div class="srp-bar-wrap"><div class="srp-bar-fill ${gravityState.active ? 'gold' : ''}" style="height:${gravityState.gauge}%;"></div></div>
+          <button class="srp-btn ${gravityState.active ? 'ready' : ''}" onclick="toggleGravityField()">${gravityState.active ? '解除' : '発動'}</button>
+          <div class="srp-sub">${gravityState.active ? '魚の速度-50%' : 'ゲージ管理が重要'}</div>
+        `;
+      } else {
+        panel.innerHTML = `<div class="srp-label">🌑 グラビティ</div><div class="srp-sub">重力場で魚を鈍らせよう</div>`;
+      }
+    }
+
+    function toggleGravityField() {
+      if (!gravityState || castState !== 'fight') return;
+      if (gravityState.active) {
+        gravityState.active = false;
+      } else {
+        if (gravityState.gauge < 15) return; // ゲージ不足では発動できない
+        gravityState.active = true;
+        addVisualSplashEffect('🌑 重力場発動！魚の動きが鈍くなる');
+      }
       renderSpecialRodPanel();
     }
 
