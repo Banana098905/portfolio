@@ -1556,22 +1556,6 @@
       </div>
     </div>
 
-    <div class="modal-overlay" id="modal-redeem">
-      <div class="modal-header">
-        <h3>🎟️ コード引き換え</h3>
-        <button class="close-btn" onclick="closeModal('modal-redeem')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div class="modal-body" style="display:flex; flex-direction:column; gap:12px; min-height:0; overflow-y:auto;">
-        <div style="padding:10px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.03); color:var(--text-sub); font-size:0.8rem;">
-          特典コードをお持ちの場合は、下に入力して「引き換える」を押してください。1つのコードにつき1回だけ引き換えできます。
-        </div>
-        <input id="redeem-code-input" type="text" placeholder="コードを入力" style="width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:#fff; font-size:1rem; text-align:center; letter-spacing:0.05em;" autocomplete="off" autocapitalize="characters" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur(); redeemCode();}">
-        <button type="button" class="buy-btn" onclick="redeemCode()" style="width:100%; padding:14px; touch-action:manipulation;">引き換える</button>
-        <div id="redeem-result-msg" style="text-align:center; font-weight:700; min-height:1.4em;"></div>
-        <div style="font-size:0.7rem; color:var(--text-sub);">これまで引き換えたコード：<span id="redeem-history-text">なし</span></div>
-      </div>
-    </div>
-
     <div class="modal-overlay" id="modal-changelog">
       <div class="modal-header">
         <h3>📋 変更ログ</h3>
@@ -1633,10 +1617,6 @@
       <button class="nav-btn" data-modal="modal-cooking" onclick="openModal('modal-cooking')">
         <svg viewBox="0 0 24 24"><path d="M4 2h16v4H4V2z"/><path d="M5 6h14l-1 14H6L5 6z"/><path d="M8 12h8M8 16h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
         <span>料理</span>
-      </button>
-      <button class="nav-btn" data-modal="modal-redeem" onclick="openModal('modal-redeem')">
-        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2H10a2 2 0 0 0-2 2v16"/></svg>
-        <span>コード</span>
       </button>
       <button class="nav-btn" data-modal="modal-changelog" onclick="openModal('modal-changelog')">
         <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="16 2 16 8 8 8 8 2"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
@@ -2234,8 +2214,11 @@
       // --- 第二世界：通常の「巻き」がまるで通用しない、理の外側にある海域群 ---
       { id: 21, name: '裏側の渚', desc: '見慣れた渚の裏側にある、ねじれた世界の入り口。ここの魚には、ただ竿を巻くだけの釣りは通じない。', reqLvl: 200, world: 2, depth: '???m (裏)', colors: ['#241238', '#0a0512'] },
       { id: 22, name: '狂想の岩礁', desc: '岩礁が渦を巻くように積み重なる異界。魚たちの動きは物理法則を無視している。', reqLvl: 210, world: 2, depth: '???m (歪)', colors: ['#3a0f3a', '#0d0410'] },
-      { id: 23, name: '歪んだ深淵', desc: '深さという概念そのものが歪んだ海域。ギミック竿でなければ、まともに手応えすら感じられない。', reqLvl: 220, world: 2, depth: '∞ (歪)', colors: ['#1a0530', '#05020c'] },
+      { id: 23, name: '歪んだ深淵', desc: '深さという概念そのものが歪んだ海域。どんな竿を持ってきても、まともな手応えは返ってこない。', reqLvl: 220, world: 2, depth: '∞ (歪)', colors: ['#1a0530', '#05020c'] },
       { id: 24, name: '理を超えた最果て', desc: '第二世界の最奥。この海域の魚は、あらゆる竿の「巻き」の理屈を受け付けない。', reqLvl: 230, world: 2, depth: '??? (理外)', colors: ['#000000', '#140028'] },
+      { id: 25, name: '境界のない渦潮', desc: '渦そのものに境界がなく、どこまでも渦が続く海域。竿の性能差は一切意味を持たない。', reqLvl: 240, world: 2, depth: '??? (無境界)', colors: ['#160030', '#03010a'] },
+      { id: 26, name: '崩れた羅針盤の海', desc: '方角も深さも壊れた羅針盤しか示さない海。頼れるのは己の腕(操作)だけ。', reqLvl: 250, world: 2, depth: '??? (方位不明)', colors: ['#1c0026', '#020008'] },
+      { id: 27, name: '第二世界・虚無点', desc: '第二世界のさらに奥、あらゆる理屈が意味を失う虚無の一点。ここに挑めるのは、竿の性能ではなく操作そのものを極めた者だけ。', reqLvl: 260, world: 2, depth: '∞ (虚無)', colors: ['#000000', '#000000'] },
     ];
 
     const FISH_DATABASE = [
@@ -2406,7 +2389,7 @@
       { id: 163, name: 'タングステンレイ', rarity: 'Legendary', baseLen: 215.0, baseWeight: 165.0, cost: 1450, xp: 1000, mapId: 20, preferBait: '深海プランクトン', desc: '超高密度の体組織を持つエイ。信じられないほど重い。', color: '#828a94', hardIsland: true },
       { id: 164, name: 'ヴォイドアーマーフィッシュ', rarity: 'Mythic', baseLen: 310.0, baseWeight: 360.0, cost: 1700, xp: 1100, mapId: 20, preferBait: '神エサ', desc: '漆黒の装甲で全身を覆った未知の魚。ハードアイランド最強格。', color: '#101114', hardIsland: true },
       { id: 165, name: 'ハードアイランドの主', rarity: 'Mythic', baseLen: 420.0, baseWeight: 520.0, cost: 1800, xp: 1150, mapId: 20, preferBait: '太古の餌', desc: 'この島に古来より棲み着く、あらゆる抵抗を極めた怪魚。ハードロッドを持つ者だけが挑む資格を得る。', color: '#000000', hardIsland: true },
-      // --- 第二世界の魚：通常の「巻き」の理屈が一切通じない(ギミック竿でなければ話にならない) ---
+      // --- 第二世界の魚：通常の「巻き」の理屈が一切通じない。竿の性能は無関係で、魚の抵抗だけが難易度を決める ---
       { id: 166, name: '裏返りのハゼ', rarity: 'Legendary', baseLen: 40.0, baseWeight: 3.0, cost: 46000, xp: 9200, mapId: 21, preferBait: '虹色エサ', desc: '体の表と裏が反転しているハゼ。巻く力の向きすら定まらない。', color: '#7a4fbf', reelMismatch: true },
       { id: 167, name: '逆さ潮のタイ', rarity: 'Legendary', baseLen: 90.0, baseWeight: 12.0, cost: 48000, xp: 9500, mapId: 21, preferBait: '龍のひげエサ', desc: '潮の流れに逆らって泳ぐという奇妙なタイ。普通の巻き取りでは追いつけない。', color: '#9a5fd0', reelMismatch: true },
       { id: 168, name: '不条理のクラゲ', rarity: 'Mythic', baseLen: 60.0, baseWeight: 8.0, cost: 58000, xp: 10500, mapId: 21, preferBait: '深海プランクトン', desc: '触れるだけで力の向きが分からなくなる、理屈の壊れたクラゲ。', color: '#c07bff', reelMismatch: true },
@@ -2418,7 +2401,15 @@
       { id: 174, name: '無重力のマンタ', rarity: 'Divine', baseLen: 280.0, baseWeight: 120.0, cost: 95000, xp: 15000, mapId: 23, preferBait: '龍のひげエサ', desc: '重力を無視して漂う、この海域の異常を体現するマンタ。', color: '#9040ff', reelMismatch: true },
       { id: 175, name: '理不尽の主', rarity: 'Divine', baseLen: 320.0, baseWeight: 200.0, cost: 120000, xp: 17000, mapId: 24, preferBait: '海神の雫', desc: '第二世界の理不尽さそのものが姿を持ったという怪魚。', color: '#c020ff', reelMismatch: true },
       { id: 176, name: '巻きを拒む者', rarity: 'Divine', baseLen: 350.0, baseWeight: 260.0, cost: 135000, xp: 18000, mapId: 24, preferBait: '太古の餌', desc: 'あらゆる竿の「巻き」の理屈そのものを拒絶する存在。', color: '#e040ff', reelMismatch: true },
-      { id: 177, name: '第二世界の番人', rarity: 'Divine', baseLen: 500.0, baseWeight: 400.0, cost: 160000, xp: 20000, mapId: 24, preferBait: '海神の雫', desc: '第二世界の最奥を守る番人。ギミック竿を極めた者だけが、その手応えを感じ取れる。', color: '#ffffff', reelMismatch: true },
+      { id: 177, name: '第二世界の番人', rarity: 'Divine', baseLen: 500.0, baseWeight: 400.0, cost: 160000, xp: 20000, mapId: 24, preferBait: '海神の雫', desc: '第二世界の最奥を守る番人。竿の性能は一切通用せず、腕そのものが試される。', color: '#ffffff', reelMismatch: true },
+      { id: 178, name: '渦流喰らいのウナギ', rarity: 'Legendary', baseLen: 160.0, baseWeight: 20.0, cost: 70000, xp: 14000, mapId: 25, preferBait: '虹色エサ', desc: '渦そのものを喰らって生きるという、際限のないウナギ。', color: '#4a10a0', reelMismatch: true },
+      { id: 179, name: '際限なきクラゲ', rarity: 'Mythic', baseLen: 80.0, baseWeight: 9.0, cost: 78000, xp: 15500, mapId: 25, preferBait: '深海プランクトン', desc: '広がり続けて境界を持たない、渦潮の化身のようなクラゲ。', color: '#7020d0', reelMismatch: true },
+      { id: 180, name: '渦中の支配者', rarity: 'Divine', baseLen: 340.0, baseWeight: 230.0, cost: 170000, xp: 21000, mapId: 25, preferBait: '龍のひげエサ', desc: '境界のない渦潮そのものを支配するという怪魚。', color: '#9040ff', reelMismatch: true },
+      { id: 181, name: '方位喪失魚', rarity: 'Mythic', baseLen: 55.0, baseWeight: 7.0, cost: 85000, xp: 16500, mapId: 26, preferBait: '特殊エサ', desc: '自分がどこにいるかも分からなくなるほど、方位感覚が壊れた魚。', color: '#602090', reelMismatch: true },
+      { id: 182, name: '羅針盤喰らいのカニ', rarity: 'Mythic', baseLen: 35.0, baseWeight: 6.0, cost: 92000, xp: 17500, mapId: 26, preferBait: '甲殻エキス餌', desc: '羅針盤ごと喰らってしまうという、方向感覚を狂わせるカニ。', color: '#8030a0', reelMismatch: true },
+      { id: 183, name: '彷徨える巨影', rarity: 'Divine', baseLen: 380.0, baseWeight: 280.0, cost: 185000, xp: 22500, mapId: 26, preferBait: '海神の雫', desc: '方角を失った海をどこまでも彷徨い続ける巨大な影。', color: '#a050ff', reelMismatch: true },
+      { id: 184, name: '虚無を纏う魚', rarity: 'Divine', baseLen: 400.0, baseWeight: 320.0, cost: 200000, xp: 24000, mapId: 27, preferBait: '隕石の欠片エサ', desc: '存在そのものが虚無に近い、輪郭の定まらない魚。', color: '#301050', reelMismatch: true },
+      { id: 185, name: '第二世界最後の番人', rarity: 'Divine', baseLen: 600.0, baseWeight: 500.0, cost: 220000, xp: 26000, mapId: 27, preferBait: '海神の雫', desc: '虚無点に鎮座する、第二世界そのものの終着点を守る存在。', color: '#000000', reelMismatch: true },
     ];
 
     const RODS = [
@@ -2467,75 +2458,19 @@
       { id: 41, name: 'ハンターロッド', cost: 85000, dist: 260, rare: 3.3, dur: 260, reelSpeed: 2.0, barWidth: 22, specialEffect: 'hunter', desc: '🦈 魚が掛かると候補が複数表示され、狙う魚を自分で選べる。欲しい魚をピンポイントで狙い撃とう。' },
       { id: 42, name: 'クリスタルロッド', cost: 130000, dist: 300, rare: 3.5, dur: 280, reelSpeed: 2.2, barWidth: 23, specialEffect: 'crystal', desc: '💎 バトル中、リールを合わせ続けて「Perfect」を出すたびに結晶が育つ。結晶がMAXになると次の1匹がRare以上確定になる。' },
       { id: 43, name: 'ディバインロッド', cost: 220000, dist: 350, rare: 4.0, dur: 320, reelSpeed: 2.4, barWidth: 25, specialEffect: 'divine', desc: '👑 何もしなくても時間経過で「運命ゲージ」が満ちていく。満タンで運命を解放すると、次の1匹がLegendary以上確定になる。' },
-      // --- コード引き換え専用：管理者用ロッド(ゲーム内最強) ---
-      { id: 44, name: 'アドミニストレーターロッド', cost: null, dist: 999, rare: 15.0, dur: 999, reelSpeed: 8.0, barWidth: 45, duplicateChance: 0.5, codeOnly: true, specialEffect: 'admin', desc: '🛠️ 特典コードでのみ入手できる、ゲーム内で最強の竿。あらゆる能力が桁違いに強化されている。' },
       // --- 戦闘ギミックロッド(上位互換シリーズ)：バトル中に直接介入する強力な特殊操作を持つ。いずれも超高額 ---
-      { id: 45, name: 'ブレードロッド', cost: 600000, dist: 420, rare: 5.0, dur: 400, reelSpeed: 3.0, barWidth: 28, specialEffect: 'blade', desc: '⚔️ 魚が暴れるタイミングで斬撃チャンスが発生。Perfectで大ダメージ、連続Perfectでコンボ倍率が上がっていく。' },
-      { id: 46, name: 'サンダーロッド', cost: 750000, dist: 450, rare: 5.5, dur: 420, reelSpeed: 3.2, barWidth: 29, specialEffect: 'thunder', desc: '⚡ 魚に雷マークが付いた瞬間にボタン。感電スタックが溜まり、10スタックで魚の動きを完全に止める。' },
-      { id: 47, name: 'フロストロッド', cost: 900000, dist: 470, rare: 6.0, dur: 440, reelSpeed: 3.4, barWidth: 30, specialEffect: 'frost', desc: '❄️ 攻撃を当てるほど凍結ゲージが溜まる。100%になると数秒間、魚が全く暴れなくなる。大型魚との戦いで真価を発揮。' },
-      { id: 48, name: 'インフェルノロッド', cost: 1100000, dist: 490, rare: 6.5, dur: 460, reelSpeed: 3.6, barWidth: 31, specialEffect: 'inferno', desc: '🔥 リールを合わせ続けるほどHeatが溜まる。MAXで「Burst」が発動し、数秒間ダメージが3倍になる。' },
-      { id: 49, name: 'サイクロンロッド', cost: 1300000, dist: 510, rare: 7.0, dur: 480, reelSpeed: 3.8, barWidth: 32, specialEffect: 'cyclone', desc: '🌪️ リングを回して渦を作り、満タンになると魚を中央へ吸い込む。何度でも発動できる。' },
-      { id: 50, name: 'グラビティロッド', cost: 1600000, dist: 530, rare: 7.5, dur: 500, reelSpeed: 4.0, barWidth: 33, specialEffect: 'gravity', desc: '🌑 重力場を発動すると一定時間、魚の移動速度が50%低下する。ゲージ管理が肝心の玄人向けロッド。' }
+      { id: 44, name: 'ブレードロッド', cost: 600000, dist: 420, rare: 5.0, dur: 400, reelSpeed: 3.0, barWidth: 28, specialEffect: 'blade', desc: '⚔️ 魚が暴れるタイミングで斬撃チャンスが発生。Perfectで大ダメージ、連続Perfectでコンボ倍率が上がっていく。' },
+      { id: 45, name: 'サンダーロッド', cost: 750000, dist: 450, rare: 5.5, dur: 420, reelSpeed: 3.2, barWidth: 29, specialEffect: 'thunder', desc: '⚡ 魚に雷マークが付いた瞬間にボタン。感電スタックが溜まり、10スタックで魚の動きを完全に止める。' },
+      { id: 46, name: 'フロストロッド', cost: 900000, dist: 470, rare: 6.0, dur: 440, reelSpeed: 3.4, barWidth: 30, specialEffect: 'frost', desc: '❄️ 攻撃を当てるほど凍結ゲージが溜まる。100%になると数秒間、魚が全く暴れなくなる。大型魚との戦いで真価を発揮。' },
+      { id: 47, name: 'インフェルノロッド', cost: 1100000, dist: 490, rare: 6.5, dur: 460, reelSpeed: 3.6, barWidth: 31, specialEffect: 'inferno', desc: '🔥 リールを合わせ続けるほどHeatが溜まる。MAXで「Burst」が発動し、数秒間ダメージが3倍になる。' },
+      { id: 48, name: 'サイクロンロッド', cost: 1300000, dist: 510, rare: 7.0, dur: 480, reelSpeed: 3.8, barWidth: 32, specialEffect: 'cyclone', desc: '🌪️ リングを回して渦を作り、満タンになると魚を中央へ吸い込む。何度でも発動できる。' },
+      { id: 49, name: 'グラビティロッド', cost: 1600000, dist: 530, rare: 7.5, dur: 500, reelSpeed: 4.0, barWidth: 33, specialEffect: 'gravity', desc: '🌑 重力場を発動すると一定時間、魚の移動速度が50%低下する。ゲージ管理が肝心の玄人向けロッド。' }
     ];
 
     // ============================================================
     // 🎟️ コード引き換えシステム
     // コードは大文字小文字を区別せず、1つにつき1回だけ引き換え可能。
     // ============================================================
-    const REDEEM_CODES = {
-      'ADMINROD': { rodId: 44, message: '🛠️ アドミニストレーターロッドを手に入れた！(ゲーム内最強の竿)' },
-      'WELCOME2026': { gold: 5000, gems: 20, message: '🎁 ウェルカムパックを受け取りました！(5,000G + 宝石20個)' },
-      'THANKYOU': { gold: 2000, gems: 10, message: '💝 応援ありがとうございます！(2,000G + 宝石10個)' }
-    };
-
-    function renderRedeemHistory() {
-      const el = document.getElementById('redeem-history-text');
-      if (!el) return;
-      const list = Array.isArray(game.redeemedCodes) ? game.redeemedCodes : [];
-      el.textContent = list.length ? list.join('、') : 'なし';
-    }
-
-    function redeemCode() {
-      const input = document.getElementById('redeem-code-input');
-      const msgEl = document.getElementById('redeem-result-msg');
-      if (!input || !msgEl) return;
-      const raw = (input.value || '').trim();
-      if (!raw) {
-        msgEl.textContent = 'コードを入力してください。';
-        msgEl.style.color = 'var(--neon-pink)';
-        return;
-      }
-      const code = raw.toUpperCase();
-      if (!Array.isArray(game.redeemedCodes)) game.redeemedCodes = [];
-      if (game.redeemedCodes.includes(code)) {
-        msgEl.textContent = 'このコードはすでに使用済みです。';
-        msgEl.style.color = 'var(--neon-pink)';
-        return;
-      }
-      const def = REDEEM_CODES[code];
-      if (!def) {
-        msgEl.textContent = '❌ 無効なコードです。';
-        msgEl.style.color = 'var(--neon-pink)';
-        return;
-      }
-      if (def.rodId !== undefined) {
-        if (!game.ownedRods.includes(def.rodId)) game.ownedRods.push(def.rodId);
-        game.rodId = def.rodId;
-      }
-      if (def.gold) game.gold += def.gold;
-      if (def.gems) game.gems += def.gems;
-      game.redeemedCodes.push(code);
-      saveGame();
-      updateHUD();
-      renderShopItems();
-      renderSpecialRodPanel();
-      input.value = '';
-      msgEl.textContent = `✅ ${def.message || '特典を受け取りました！'}`;
-      msgEl.style.color = 'var(--neon-green)';
-      renderRedeemHistory();
-      addVisualSplashEffect(def.message || '✅ 特典を受け取りました！');
-    }
-
     const BOATS = [
       { id: 0, name: 'ゴムボート', cost: 0, speed: 1.0, slots: 10, fuel: 100, desc: '膨らませるタイプ。' },
       { id: 1, name: '木の船', cost: 500, speed: 1.2, slots: 15, fuel: 120, desc: '手漕ぎの小舟。' },
@@ -2866,19 +2801,13 @@
     // ============================================================
     // 第二世界(World 2)関連定数
     // 通常の「巻き」の理屈が一切通じない魚たちの海域。
-    // ギミック竿(チャージ/ハープーン/タイド/オーバーヒート/エネルギー/スピン/ハンター/クリスタル/ディバイン/
-    // ハードロッド/管理者ロッド)を装備していなければ、著しく不利になる。
+    // 竿の性能・スキル・ギミックは一切関係なく、魚の抵抗だけで難易度が決まる。
+    // 「実質」の値がプラス(有利)になることは絶対にない。
     // ============================================================
-    const WORLD2_MAP_IDS = [21, 22, 23, 24];
-    const TRUE_GIMMICK_TYPES = ['charge', 'harpoon', 'tide', 'overheat', 'energy', 'spin', 'hunter', 'crystal', 'divine', 'hardgear', 'admin', 'blade', 'thunder', 'frost', 'inferno', 'cyclone', 'gravity'];
-    const WORLD2_EXTRA_RESIST = 3.0;  // ギミック竿を持たない場合に追加される、通常の巻きが一切効かない抵抗
-    const WORLD2_DIFF_MULT = 2.0;     // 魚の暴れ方の追加倍率(ギミック竿を持たない場合)
-    const WORLD2_GAUGE_MULT = 0.45;   // キャッチゲージ上昇量への追加減衰(ギミック竿を持たない場合)
-
-    // 装備中のロッドが第二世界の魚に対して「噛み合っている」かどうか
-    function hasGimmickMatch(rod) {
-      return TRUE_GIMMICK_TYPES.includes(getEffectiveSpecialUI(rod));
-    }
+    const WORLD2_MAP_IDS = [21, 22, 23, 24, 25, 26, 27];
+    const WORLD2_EXTRA_RESIST = 3.0;  // 第二世界の魚に一律で乗る、途方もない追加抵抗
+    const WORLD2_DIFF_MULT = 2.0;     // 魚の暴れ方の追加倍率
+    const WORLD2_GAUGE_MULT = 0.45;   // キャッチゲージ上昇量への追加減衰
 
     function getRodSpecialBonus() {
       const bonus = {
@@ -2977,20 +2906,6 @@
           bonus.label = lvl > 0 ? `🔧 ハードロッド強化 Lv.${lvl}` : '🔧 ハードロッド(未強化)';
           break;
         }
-        case 'admin':
-          // 管理者用ロッド：コード引き換え専用。あらゆる能力を桁違いに強化する
-          bonus.rareChanceBonus = 3.0;
-          bonus.crownChanceBonus = 0.6;
-          bonus.shinyChanceBonus = 0.6;
-          bonus.mutationChanceBonus = 0.6;
-          bonus.goldMultBonus = 2.0;
-          bonus.xpMultBonus = 2.0;
-          bonus.reelSpeedBonus = 2.0;
-          bonus.barWidthBonus = 20;
-          bonus.freezeChance = 0.3;
-          bonus.allMapPullChance = 0.6;
-          bonus.label = '🛠️ ADMINISTRATOR POWER';
-          break;
       }
       return bonus;
     }
@@ -3113,6 +3028,18 @@
     // 変更ログ
     // ============================================================
     const CHANGELOG = [
+      {
+        version: '1.7.0',
+        date: '2026年7月16日',
+        title: '🌀 第二世界を全面改修、コード引き換え/管理者ロッドを廃止',
+        changes: [
+          '🗑️ コード引き換えシステムと専用の「アドミニストレーターロッド」を廃止しました(ナビの「コード」タブも削除)',
+          '🌌 第二世界に3海域を追加し、全7海域に拡張：境界のない渦潮／崩れた羅針盤の海／第二世界・虚無点',
+          '🐟 上記3海域向けに専用の魚を8種追加(Legendary〜Divine)',
+          '⚖️ 第二世界の仕様を全面変更：竿の性能・スキル・ギミック竿は完全に無関係になり、魚の抵抗だけで「実質」が決まるようにした。ゲームで最強の装備・スキルを揃えても、この「実質」の値が0%を超えてプラス(有利)になることは絶対にない',
+          '📊 バトル中の表示も「🌀 第二世界：竿の性能・スキルは無関係」という専用表示に変更し、通常海域と区別できるようにした'
+        ]
+      },
       {
         version: '1.6.0',
         date: '2026年7月16日',
@@ -3239,7 +3166,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.6.0';
+    const CHANGELOG_VERSION = 'v1.7.0';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3501,7 +3428,6 @@
       crystalLevel: 0,
       divineFateLevel: 0,
       divineFateLastTick: null,
-      redeemedCodes: [],
       skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0, cooking: 0, beast: 0 },
       fishInventory: [],
       book: {},
@@ -3573,18 +3499,6 @@
         }, { passive: false });
       });
 
-      // コード引き換えボタン：タブレット等でタップ後のクリックイベントが正しく発火しない端末があるため、
-      // touchendで即座に処理し、その後のゴーストクリックをpreventDefaultで無効化する
-      const redeemBtnEl = document.querySelector('#modal-redeem .buy-btn');
-      if (redeemBtnEl) {
-        redeemBtnEl.addEventListener('touchend', (e) => {
-          e.preventDefault();
-          const inputEl = document.getElementById('redeem-code-input');
-          if (inputEl) inputEl.blur();
-          redeemCode();
-        }, { passive: false });
-      }
-
       renderSpecialRodPanel();
       // 時間経過で溜まるゲージ(ディバインロッドの運命/オーバーヒートの冷却表示)を定期更新
       specialRodTickTimer = setInterval(() => {
@@ -3638,7 +3552,6 @@
           if (game.crystalLevel === undefined) game.crystalLevel = 0;
           if (game.divineFateLevel === undefined) game.divineFateLevel = 0;
           if (game.divineFateLastTick === undefined) game.divineFateLastTick = null;
-          if (!Array.isArray(game.redeemedCodes)) game.redeemedCodes = [];
           if (!game.materials) game.materials = {};
           ['錆びた空き缶','壊れた漁具','謎の金属片','朽ちた木箱の破片','硬化した貝殻','深淵の鉄芯'].forEach(k => { if (game.materials[k] === undefined) game.materials[k] = 0; });
           if (game.cookingBuff === undefined) game.cookingBuff = null;
@@ -3902,13 +3815,6 @@
       if (id === 'modal-craft') renderCraft();
       if (id === 'modal-quests') renderQuests();
       if (id === 'modal-cooking') { cancelCookingMinigame(); cookingSelection = []; renderCooking(); }
-      if (id === 'modal-redeem') {
-        const inputEl = document.getElementById('redeem-code-input');
-        const msgEl = document.getElementById('redeem-result-msg');
-        if (inputEl) inputEl.value = '';
-        if (msgEl) msgEl.textContent = '';
-        renderRedeemHistory();
-      }
     }
 
     function closeModal(id) {
@@ -3978,7 +3884,7 @@
           world2HeaderShown = true;
           const header = document.createElement('div');
           header.style.cssText = 'margin:10px 0 4px; padding:8px 10px; border-radius:8px; background:linear-gradient(90deg, rgba(160,40,255,0.18), rgba(160,40,255,0.03)); border:1px solid rgba(160,40,255,0.35); color:#e0a0ff; font-weight:800; font-size:0.8rem;';
-          header.innerText = '🌌 第二世界 — 通常の「巻き」が通じない魚域。ギミック竿(またはハード/管理者ロッド)推奨';
+          header.innerText = '🌌 第二世界 — 竿の性能・スキルは一切関係ない。魚の抵抗だけがそのまま難易度になる特殊な海域';
           list.appendChild(header);
         }
         const isLocked = game.level < m.reqLvl;
@@ -4020,7 +3926,6 @@
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
           if (r.hardIslandOnly) return; // ハードロッドは通常ショップのロットには一切並ばない。専用UIでのみ購入可能
-          if (r.codeOnly && !isOwned) return; // コード引き換え専用ロッドは、引き換えて入手するまでショップに並ばない
           if ((r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly) && !isOwned) return; // ルーレット/実績/クラフト/シーズン限定ロッドは入手するまでショップに表示しない
           const isEquipped = game.rodId === r.id;
           const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
@@ -5747,14 +5652,25 @@
       const skillPercent = Math.round((eff.reelSpeed + rodBonus.reelSpeedBonus) * 100);
       const rawResist = RARITY_RESISTANCE[targetFish.rarity] || 0;
       const hardIslandResist = targetFish.hardIsland ? Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0)) : 0;
-      const world2Resist = (targetFish.reelMismatch && !hasGimmickMatch(rod)) ? WORLD2_EXTRA_RESIST : 0;
-      const totalResist = Math.max(0, rawResist - eff.rarityResist) + hardIslandResist + world2Resist;
+      let totalResist, netMult;
+      if (targetFish.reelMismatch) {
+        // 第二世界：竿の性能・スキルは一切関係ない。魚の抵抗だけがそのまま「実質」になり、プラスになることは絶対にない
+        totalResist = Math.max(0, rawResist) + WORLD2_EXTRA_RESIST;
+        netMult = Math.min(1, 1 / (1 + totalResist));
+      } else {
+        totalResist = Math.max(0, rawResist - eff.rarityResist) + hardIslandResist;
+        netMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + totalResist);
+      }
       const resistPercent = Math.round(totalResist * 100);
-      const netMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + totalResist);
       const netPercent = Math.round((netMult - 1) * 100);
       const reelIndicator = document.getElementById('reel-speed-indicator');
-      let indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
-      if (rodBonus.label) indicatorText += ` ／ ${rodBonus.label}`;
+      let indicatorText;
+      if (targetFish.reelMismatch) {
+        indicatorText = `🌀 第二世界：竿の性能・スキルは無関係 ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent}%`;
+      } else {
+        indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
+        if (rodBonus.label) indicatorText += ` ／ ${rodBonus.label}`;
+      }
       reelIndicator.innerText = indicatorText;
       fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0;
       catchGauge = 40 + transientGaugeHeadStart;
@@ -5794,14 +5710,18 @@
         gaugeGainMult *= HARD_ISLAND_GAUGE_MULT;
         resistance += Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0));
       }
-      // 第二世界の魚：ギミック竿(または管理者ロッド等)を装備していなければ、通常の「巻き」が一切噛み合わない
-      if (targetFish.reelMismatch && !hasGimmickMatch(rod)) {
+      // 第二世界の魚：竿の性能・スキル・ギミックは一切関係ない。魚の抵抗だけが「実質」を決め、それが1(±0%)を超えて有利になることは絶対にない
+      let reelSpeedMult, barWidth;
+      if (targetFish.reelMismatch) {
         diff *= WORLD2_DIFF_MULT;
         gaugeGainMult *= WORLD2_GAUGE_MULT;
-        resistance += WORLD2_EXTRA_RESIST;
+        const world2Resistance = Math.max(0, rawResist) + WORLD2_EXTRA_RESIST; // スキルによる抵抗軽減も含め、竿側の補正は一切反映しない
+        reelSpeedMult = Math.min(1, 1 / (1 + world2Resistance));
+        barWidth = 20; // バー幅も竿・スキルの影響を受けない固定値
+      } else {
+        reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
+        barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       }
-      const reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
-      const barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       playerBar.style.width = barWidth + '%';
       let lastTime = performance.now();
 
