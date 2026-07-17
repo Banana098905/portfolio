@@ -1556,6 +1556,17 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="modal-daily-login">
+      <div class="modal-header">
+        <h3>🎁 ログインボーナス</h3>
+        <button class="close-btn" onclick="closeModal('modal-daily-login')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; min-height:0;">
+        <div id="daily-login-content"></div>
+        <button class="buy-btn" onclick="closeModal('modal-daily-login')" style="width:100%; padding:12px; margin-top:14px;">受け取る！</button>
+      </div>
+    </div>
+
     <div class="modal-overlay" id="modal-changelog">
       <div class="modal-header">
         <h3>📋 変更ログ</h3>
@@ -2510,6 +2521,60 @@
     };
 
     // ============================================================
+    // 🎁 デイリーログイン報酬（7日周期、8日目以降は1日目に戻る）
+    // ============================================================
+    const DAILY_LOGIN_REWARDS = [
+      { day: 1, icon: '🪱', label: 'ミミズ ×15', give: () => { game.baits['ミミズ'] = (game.baits['ミミズ'] || 0) + 15; } },
+      { day: 2, icon: '💰', label: 'ゴールド ×500', give: () => { game.gold += 500; } },
+      { day: 3, icon: '🦐', label: 'エビ ×8', give: () => { game.baits['エビ'] = (game.baits['エビ'] || 0) + 8; } },
+      { day: 4, icon: '💎', label: '宝石 ×3', give: () => { game.gems += 3; } },
+      { day: 5, icon: '🐛', label: 'ミルワーム ×6 ＋ ゴールド ×800', give: () => { game.baits['ミルワーム'] = (game.baits['ミルワーム'] || 0) + 6; game.gold += 800; } },
+      { day: 6, icon: '🐚', label: '貝虫 ×10 ＋ 宝石 ×2', give: () => { game.baits['貝虫'] = (game.baits['貝虫'] || 0) + 10; game.gems += 2; } },
+      { day: 7, icon: '🌟', label: '宝石 ×10 ＋ ゴールド ×2000 ＋ ミミズ ×10（豪華ボーナス！）', give: () => { game.gems += 10; game.gold += 2000; game.baits['ミミズ'] = (game.baits['ミミズ'] || 0) + 10; } }
+    ];
+
+    function getTodayDateString(d) {
+      d = d || new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    // ページを開いた時に、前回ログイン日と比較して連続ログイン日数を更新し、報酬を付与する
+    function checkDailyLoginReward() {
+      const today = getTodayDateString();
+      if (game.lastLoginDate === today) return; // 今日は既に受け取り済み
+
+      const yesterday = getTodayDateString(new Date(Date.now() - 86400000));
+      if (game.lastLoginDate === yesterday) {
+        game.loginStreak = (game.loginStreak || 0) + 1; // 連続ログイン継続
+      } else {
+        game.loginStreak = 1; // 間が空いたのでリセット
+      }
+      game.lastLoginDate = today;
+
+      const rewardIdx = (game.loginStreak - 1) % DAILY_LOGIN_REWARDS.length;
+      const reward = DAILY_LOGIN_REWARDS[rewardIdx];
+      reward.give();
+      saveGame();
+      updateHUD();
+      showDailyLoginModal(reward, game.loginStreak);
+    }
+
+    function showDailyLoginModal(reward, streak) {
+      queueAutoModal(() => {
+        const content = document.getElementById('daily-login-content');
+        if (content) {
+          content.innerHTML = `
+            <div style="font-size:3.2rem; line-height:1;">${reward.icon}</div>
+            <div style="font-weight:800; font-size:1.1rem; color:#fff; margin-top:8px;">${streak}日連続ログイン！(Day ${reward.day})</div>
+            <div style="color:var(--neon-gold); font-weight:700; margin-top:6px;">${reward.label}</div>
+            <div style="font-size:0.72rem; color:var(--text-sub); margin-top:10px;">7日ごとに豪華ボーナスがあります。毎日ログインして受け取ろう！</div>
+          `;
+        }
+        openModal('modal-daily-login');
+      });
+    }
+
+    // ============================================================
     // 餌箱（エサはショップで直接買うのではなく、箱を開けて引き当てる）
     // ============================================================
     const BAIT_BOXES = [
@@ -3029,6 +3094,18 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.8.0',
+        date: '2026年7月16日',
+        title: '🎁 デイリーログイン報酬を追加 & 各種調整',
+        changes: [
+          '🎁 ログインボーナスを追加。ログインした日に応じて報酬がもらえる7日周期のシステムで、1日目は「ミミズ×15」、2〜6日目はゴールド・宝石・エサ類、7日目は豪華ボーナス(宝石×10＋ゴールド×2000＋ミミズ×10)。8日目以降は1日目の報酬に戻ってループする',
+          '📅 連続ログイン日数を記録し、1日でも空くと連続記録はリセットされる',
+          '🌀 第二世界の仕様を再修正：無関係になるのは「巻き」(竿の巻き速度)だけで、バー幅やレア度抵抗の軽減(スキル)は通常通り効くように変更。それでも「実質」が0%を超えて有利になることはない',
+          '⚙️ 戦闘ギミックロッド6種(ブレード/サンダー/フロスト/サイクロン/グラビティ/タイド/スピン)を全て自動発動方式に変更。バーを魚に合わせながら追加でボタン操作をする必要がなくなり、一定時間が経過すると自動的に効果が発動するようになった',
+          '🔧 ログインボーナスと変更ログが同時に開こうとして競合する不具合を修正し、順番に表示されるようにした'
+        ]
+      },
+      {
         version: '1.7.0',
         date: '2026年7月16日',
         title: '🌀 第二世界を全面改修、コード引き換え/管理者ロッドを廃止',
@@ -3166,7 +3243,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.7.0';
+    const CHANGELOG_VERSION = 'v1.8.0';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3428,6 +3505,8 @@
       crystalLevel: 0,
       divineFateLevel: 0,
       divineFateLastTick: null,
+      lastLoginDate: null,
+      loginStreak: 0,
       skillTree: { luck: 0, power: 0, trade: 0, study: 0, sailing: 0, cooking: 0, beast: 0 },
       fishInventory: [],
       book: {},
@@ -3467,6 +3546,7 @@
       console.log('=== Ocean Quest 起動 ===');
       loadGame();
       checkRodUnlocks();
+      checkDailyLoginReward();
       initAudio();
       initFXCanvas();
       initWaterCanvas();
@@ -3552,6 +3632,8 @@
           if (game.crystalLevel === undefined) game.crystalLevel = 0;
           if (game.divineFateLevel === undefined) game.divineFateLevel = 0;
           if (game.divineFateLastTick === undefined) game.divineFateLastTick = null;
+          if (game.lastLoginDate === undefined) game.lastLoginDate = null;
+          if (game.loginStreak === undefined) game.loginStreak = 0;
           if (!game.materials) game.materials = {};
           ['錆びた空き缶','壊れた漁具','謎の金属片','朽ちた木箱の破片','硬化した貝殻','深淵の鉄芯'].forEach(k => { if (game.materials[k] === undefined) game.materials[k] = 0; });
           if (game.cookingBuff === undefined) game.cookingBuff = null;
@@ -3619,9 +3701,11 @@
     function checkAndShowChangelog() {
       const lastSeen = localStorage.getItem('oceanQuestLastChangelogVersion');
       if (lastSeen !== CHANGELOG_VERSION) {
-        renderChangelog();
-        openModal('modal-changelog');
         localStorage.setItem('oceanQuestLastChangelogVersion', CHANGELOG_VERSION);
+        queueAutoModal(() => {
+          renderChangelog();
+          openModal('modal-changelog');
+        });
       }
     }
 
@@ -3824,6 +3908,20 @@
         activeModal = null;
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
       }
+      tryShowNextQueuedModal();
+    }
+
+    // 起動時に自動表示したいモーダル(デイリー報酬・変更ログなど)が重ならないようにするためのキュー
+    let pendingModalQueue = [];
+    function queueAutoModal(showFn) {
+      pendingModalQueue.push(showFn);
+      tryShowNextQueuedModal();
+    }
+    function tryShowNextQueuedModal() {
+      if (activeModal) return; // 何か開いている間は待つ
+      if (pendingModalQueue.length === 0) return;
+      const next = pendingModalQueue.shift();
+      next();
     }
 
     function closeActiveModal() {
@@ -3884,7 +3982,7 @@
           world2HeaderShown = true;
           const header = document.createElement('div');
           header.style.cssText = 'margin:10px 0 4px; padding:8px 10px; border-radius:8px; background:linear-gradient(90deg, rgba(160,40,255,0.18), rgba(160,40,255,0.03)); border:1px solid rgba(160,40,255,0.35); color:#e0a0ff; font-weight:800; font-size:0.8rem;';
-          header.innerText = '🌌 第二世界 — 竿の性能・スキルは一切関係ない。魚の抵抗だけがそのまま難易度になる特殊な海域';
+          header.innerText = '🌌 第二世界 — 「巻き」(竿の巻き速度)だけが一切関係ない特殊な海域。バー幅や抵抗軽減は通常通り効く';
           list.appendChild(header);
         }
         const isLocked = game.level < m.reqLvl;
@@ -5654,8 +5752,8 @@
       const hardIslandResist = targetFish.hardIsland ? Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0)) : 0;
       let totalResist, netMult;
       if (targetFish.reelMismatch) {
-        // 第二世界：竿の性能・スキルは一切関係ない。魚の抵抗だけがそのまま「実質」になり、プラスになることは絶対にない
-        totalResist = Math.max(0, rawResist) + WORLD2_EXTRA_RESIST;
+        // 第二世界：無関係になるのは「巻き」だけ。抵抗軽減(rarityResistスキル)は通常通り有効
+        totalResist = Math.max(0, rawResist - eff.rarityResist) + WORLD2_EXTRA_RESIST;
         netMult = Math.min(1, 1 / (1 + totalResist));
       } else {
         totalResist = Math.max(0, rawResist - eff.rarityResist) + hardIslandResist;
@@ -5666,7 +5764,7 @@
       const reelIndicator = document.getElementById('reel-speed-indicator');
       let indicatorText;
       if (targetFish.reelMismatch) {
-        indicatorText = `🌀 第二世界：竿の性能・スキルは無関係 ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent}%`;
+        indicatorText = `🌀 第二世界：「巻き」の性能は無関係 ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent}%`;
       } else {
         indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
         if (rodBonus.label) indicatorText += ` ／ ${rodBonus.label}`;
@@ -5710,17 +5808,17 @@
         gaugeGainMult *= HARD_ISLAND_GAUGE_MULT;
         resistance += Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0));
       }
-      // 第二世界の魚：竿の性能・スキル・ギミックは一切関係ない。魚の抵抗だけが「実質」を決め、それが1(±0%)を超えて有利になることは絶対にない
-      let reelSpeedMult, barWidth;
+      // 第二世界の魚：無関係になるのは「巻き」(竿のreelSpeed・スキルのreelSpeed・ギミックのreelSpeedBonus)だけ。
+      // バー幅やレア度抵抗の軽減(rarityResistスキル)は通常通り有効。それでも「実質」が1(±0%)を超えて有利になることは絶対にない
+      let reelSpeedMult;
+      const barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       if (targetFish.reelMismatch) {
         diff *= WORLD2_DIFF_MULT;
         gaugeGainMult *= WORLD2_GAUGE_MULT;
-        const world2Resistance = Math.max(0, rawResist) + WORLD2_EXTRA_RESIST; // スキルによる抵抗軽減も含め、竿側の補正は一切反映しない
-        reelSpeedMult = Math.min(1, 1 / (1 + world2Resistance));
-        barWidth = 20; // バー幅も竿・スキルの影響を受けない固定値
+        resistance += WORLD2_EXTRA_RESIST;
+        reelSpeedMult = Math.min(1, 1 / (1 + resistance)); // 巻きの補正(reelSpeed系)だけを無視する
       } else {
         reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
-        barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       }
       playerBar.style.width = barWidth + '%';
       let lastTime = performance.now();
@@ -5783,7 +5881,21 @@
           }
         }
 
-        // タイドロッド：波ゲージのテンションは戦闘中ずっと自然に上昇していく
+        // スピンロッド：回転メーターが自動で溜まり、MAXで一定時間、超高速リールになる
+        if (effUi === 'spin' && spinState) {
+          if (now >= spinState.turboUntil) {
+            spinState.meter = Math.min(100, spinState.meter + 16 * (1 + (eff.gimmickFillRateMult || 0)) * dt);
+            if (spinState.meter >= 100) {
+              spinState.turboUntil = now + 4000;
+              spinState.meter = 0;
+              addVisualSplashEffect('🌪 超高速リール発動！');
+              sfxHit();
+              renderSpecialRodPanel();
+            }
+          }
+        }
+
+        // タイドロッド：波ゲージのテンションは戦闘中ずっと自然に上昇していくが、一定時間ごとに自動で波に乗ってテンションを下げる
         if (effUi === 'tide' && tideState) {
           tideState.tension = Math.min(100, tideState.tension + 6 * dt);
           tideState.wavePos += tideState.waveVel * dt;
@@ -5793,6 +5905,13 @@
           if (tm) tm.style.left = tideState.wavePos + '%';
           const tf = document.getElementById('tide-tension-fill');
           if (tf) tf.style.height = tideState.tension + '%';
+          if (now >= tideState.nextTriggerAt) {
+            tideState.tension = Math.max(0, tideState.tension - 35);
+            tideState.nextTriggerAt = now + 2500 + Math.random() * 1000;
+            addVisualSplashEffect('🌊 自動で波に乗った！テンション減少');
+            sfxHit();
+            renderSpecialRodPanel();
+          }
         }
 
         // クリスタルロッド：リールを合わせ続けている時間で結晶が育つ
@@ -5807,54 +5926,68 @@
           }
         }
 
-        // ブレードロッド：一定間隔で「斬撃チャンス」が発生する
-        if (effUi === 'blade' && bladeState) {
-          if (!bladeState.windowOpen && now >= bladeState.nextEventAt) {
-            bladeState.windowOpen = true;
-            bladeState.windowUntil = now + 700;
-            renderSpecialRodPanel();
-          } else if (bladeState.windowOpen && now > bladeState.windowUntil) {
-            bladeState.windowOpen = false;
-            bladeState.combo = 1;
-            bladeState.nextEventAt = now + 1800 + Math.random() * 1400;
-            renderSpecialRodPanel();
+        // ブレードロッド：一定時間が経過すると自動的に斬撃が入る
+        if (effUi === 'blade' && bladeState && now >= bladeState.nextTriggerAt) {
+          catchGauge += 18 * bladeState.combo;
+          bladeState.combo = Math.min(5, bladeState.combo + 1);
+          bladeState.nextTriggerAt = now + 2200 + Math.random() * 900;
+          addVisualSplashEffect(`⚔️ 自動斬撃！ x${bladeState.combo}コンボ！`);
+          sfxHit();
+          renderSpecialRodPanel();
+        }
+        // サンダーロッド：一定時間が経過すると自動的に感電スタックが溜まる
+        if (effUi === 'thunder' && thunderState && now >= thunderState.paralyzedUntil && now >= thunderState.nextTriggerAt) {
+          thunderState.stacks = Math.min(10, thunderState.stacks + 1);
+          thunderState.nextTriggerAt = now + 1800 + Math.random() * 700;
+          sfxHit();
+          if (thunderState.stacks >= 10) {
+            thunderState.paralyzedUntil = now + 3000;
+            thunderState.stacks = 0;
+            addVisualSplashEffect('⚡ 感電MAX！魚が完全に停止した！');
+          }
+          renderSpecialRodPanel();
+        }
+        // フロストロッド：一定時間が経過すると自動的に凍結ゲージが溜まる
+        if (effUi === 'frost' && frostState && now >= frostState.frozenUntil && now >= frostState.nextTriggerAt) {
+          frostState.gauge = Math.min(100, frostState.gauge + 13);
+          frostState.nextTriggerAt = now + 2000 + Math.random() * 900;
+          sfxHit();
+          if (frostState.gauge >= 100) {
+            frostState.frozenUntil = now + 4000;
+            frostState.gauge = 0;
+            addVisualSplashEffect('❄️ 完全凍結！魚が数秒動かなくなった！');
+          }
+          renderSpecialRodPanel();
+        }
+        // サイクロンロッド：渦ゲージが自動で溜まり、満タンで自動的に吸い込みが発動する(何度でも繰り返す)
+        if (effUi === 'cyclone' && cycloneState) {
+          if (now >= cycloneState.pullUntil) {
+            cycloneState.gauge = Math.min(100, cycloneState.gauge + 14 * (1 + (eff.gimmickFillRateMult || 0)) * dt);
+            if (cycloneState.gauge >= 100) {
+              cycloneState.gauge = 0;
+              cycloneState.pullUntil = now + 1500;
+              addVisualSplashEffect('🌪️ 吸い込み発動！魚が引き寄せられる！');
+              sfxHit();
+              renderSpecialRodPanel();
+            }
           }
         }
-        // サンダーロッド：一定間隔で「感電チャンス」が発生する
-        if (effUi === 'thunder' && thunderState) {
-          if (!thunderState.windowOpen && now >= thunderState.paralyzedUntil && now >= thunderState.nextEventAt) {
-            thunderState.windowOpen = true;
-            thunderState.windowUntil = now + 700;
-            renderSpecialRodPanel();
-          } else if (thunderState.windowOpen && now > thunderState.windowUntil) {
-            thunderState.windowOpen = false;
-            thunderState.nextEventAt = now + 1600 + Math.random() * 1200;
-            renderSpecialRodPanel();
-          }
-        }
-        // フロストロッド：一定間隔で「凍結チャンス」が発生する
-        if (effUi === 'frost' && frostState) {
-          if (!frostState.windowOpen && now >= frostState.frozenUntil && now >= frostState.nextEventAt) {
-            frostState.windowOpen = true;
-            frostState.windowUntil = now + 700;
-            renderSpecialRodPanel();
-          } else if (frostState.windowOpen && now > frostState.windowUntil) {
-            frostState.windowOpen = false;
-            frostState.nextEventAt = now + 1800 + Math.random() * 1400;
-            renderSpecialRodPanel();
-          }
-        }
-        // サイクロンロッド：吸い込み中でなければゲージが少しずつ落ち着いていく
-        if (effUi === 'cyclone' && cycloneState && now >= cycloneState.pullUntil) {
-          cycloneState.gauge = Math.max(0, cycloneState.gauge - 3 * dt);
-        }
-        // グラビティロッド：発動中はゲージが減り続け、非発動中は回復する
+        // グラビティロッド：発動⇄チャージを自動で繰り返す
         if (effUi === 'gravity' && gravityState) {
           if (gravityState.active) {
             gravityState.gauge = Math.max(0, gravityState.gauge - 18 * dt);
-            if (gravityState.gauge <= 0) { gravityState.active = false; addVisualSplashEffect('🌑 重力場が切れた…'); renderSpecialRodPanel(); }
+            if (gravityState.gauge <= 0) {
+              gravityState.active = false;
+              addVisualSplashEffect('🌑 重力場が切れた…チャージ中');
+              renderSpecialRodPanel();
+            }
           } else {
-            gravityState.gauge = Math.min(100, gravityState.gauge + 10 * dt);
+            gravityState.gauge = Math.min(100, gravityState.gauge + 10 * (1 + (eff.gimmickFillRateMult || 0)) * dt);
+            if (gravityState.gauge >= 100) {
+              gravityState.active = true;
+              addVisualSplashEffect('🌑 重力場、自動発動！魚の動きが鈍くなる');
+              renderSpecialRodPanel();
+            }
           }
         }
 
@@ -6085,15 +6218,15 @@
       const effectiveUi = getEffectiveSpecialUI(rod);
       const now = performance.now();
       if (effectiveUi === 'tide') {
-        tideState = { tension: 0, wavePos: Math.random() * 100, waveVel: 50, zoneStart: 10 + Math.random() * 70, zoneWidth: 20 };
+        tideState = { tension: 0, wavePos: Math.random() * 100, waveVel: 50, nextTriggerAt: now + 2500 + Math.random() * 1000 };
       } else if (effectiveUi === 'spin') {
-        spinState = { meter: 0, lastTapAt: 0, turboUntil: 0 };
+        spinState = { meter: 0, turboUntil: 0 };
       } else if (effectiveUi === 'blade') {
-        bladeState = { nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, combo: 1 };
+        bladeState = { nextTriggerAt: now + 1500 + Math.random() * 800, combo: 1 };
       } else if (effectiveUi === 'thunder') {
-        thunderState = { stacks: 0, nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, paralyzedUntil: 0 };
+        thunderState = { stacks: 0, nextTriggerAt: now + 1500 + Math.random() * 800, paralyzedUntil: 0 };
       } else if (effectiveUi === 'frost') {
-        frostState = { gauge: 0, nextEventAt: now + 1200 + Math.random() * 1000, windowOpen: false, windowUntil: 0, frozenUntil: 0 };
+        frostState = { gauge: 0, nextTriggerAt: now + 1500 + Math.random() * 800, frozenUntil: 0 };
       } else if (effectiveUi === 'inferno') {
         infernoState = { heat: 0, burstUntil: 0 };
       } else if (effectiveUi === 'cyclone') {
@@ -6183,44 +6316,21 @@
     // --- 3. タイドロッド ---
     function renderTidePanel(panel) {
       if (castState === 'fight' && tideState) {
+        const remainSec = Math.max(0, ((tideState.nextTriggerAt || 0) - performance.now()) / 1000).toFixed(1);
         panel.innerHTML = `
           <div class="srp-label">🌊 波タイミング</div>
           <div class="srp-hbar-wrap" id="tide-hbar">
-            <div class="srp-hbar-zone" id="tide-zone"></div>
             <div class="srp-hbar-marker" id="tide-marker"></div>
           </div>
-          <button class="srp-btn" onclick="tapTideWave()">波に乗る！</button>
           <div class="srp-bar-wrap" style="height:40px;"><div class="srp-bar-fill danger" id="tide-tension-fill" style="height:${tideState.tension}%;"></div></div>
           <div class="srp-sub">テンション</div>
+          <div class="srp-sub">次の波まで ${remainSec}秒</div>
         `;
-        positionTideZone();
         const tm = document.getElementById('tide-marker');
         if (tm) tm.style.left = tideState.wavePos + '%';
       } else {
-        panel.innerHTML = `<div class="srp-label">🌊 タイド</div><div class="srp-sub">バトル中に波を捉えよう</div>`;
+        panel.innerHTML = `<div class="srp-label">🌊 タイド</div><div class="srp-sub">波が自動で乗ってくれる竿</div>`;
       }
-    }
-
-    function positionTideZone() {
-      const zoneEl = document.getElementById('tide-zone');
-      if (!zoneEl || !tideState) return;
-      zoneEl.style.left = Math.max(0, tideState.zoneStart) + '%';
-      zoneEl.style.width = tideState.zoneWidth + '%';
-    }
-
-    function tapTideWave() {
-      if (!tideState || castState !== 'fight') return;
-      const inZone = tideState.wavePos >= tideState.zoneStart && tideState.wavePos <= tideState.zoneStart + tideState.zoneWidth;
-      if (inZone) {
-        tideState.tension = Math.max(0, tideState.tension - 35);
-        sfxHit();
-        addVisualSplashEffect('🌊 Perfect！テンション減少');
-      } else {
-        tideState.tension = Math.min(100, tideState.tension + 8);
-        sfxClick();
-      }
-      tideState.zoneStart = 10 + Math.random() * 70; // ゾーン位置をシャッフル(連打稼ぎ防止)
-      positionTideZone();
     }
 
     // --- 4. オーバーヒートロッド ---
@@ -6264,34 +6374,11 @@
         panel.innerHTML = `
           <div class="srp-label">🌪 回転メーター</div>
           <div class="srp-bar-wrap"><div class="srp-bar-fill ${turboActive ? 'gold' : ''}" id="spin-meter-fill" style="height:${spinState.meter}%;"></div></div>
-          <button class="srp-btn ${turboActive ? 'ready' : ''}" onclick="tapSpinMeter()">連打！</button>
-          ${turboActive ? '<div class="srp-sub" style="color:var(--neon-gold);">🔥超高速リール中！</div>' : ''}
+          ${turboActive ? '<div class="srp-sub" style="color:var(--neon-gold);">🔥超高速リール中！</div>' : '<div class="srp-sub">自動で回転が溜まっていく</div>'}
         `;
       } else {
-        panel.innerHTML = `<div class="srp-label">🌪 スピン</div><div class="srp-sub">バトル中に連打しよう</div>`;
+        panel.innerHTML = `<div class="srp-label">🌪 スピン</div><div class="srp-sub">回転が自動で溜まる竿</div>`;
       }
-    }
-
-    function tapSpinMeter() {
-      if (!spinState || castState !== 'fight') return;
-      const eff = getSkillEffects();
-      const now = performance.now();
-      const interval = now - (spinState.lastTapAt || 0);
-      spinState.lastTapAt = now;
-      // 200〜600msの間隔で連打するとよく貯まる。速すぎ/遅すぎは効率が落ちる
-      let gain = 6;
-      if (interval >= 200 && interval <= 600) gain = 14;
-      else if (interval < 150) gain = 2;
-      gain *= (1 + (eff.gimmickFillRateMult || 0));
-      spinState.meter = Math.min(100, spinState.meter + gain);
-      sfxClick();
-      if (spinState.meter >= 100 && now >= spinState.turboUntil) {
-        spinState.turboUntil = now + 4000;
-        spinState.meter = 0;
-        addVisualSplashEffect('🌪 超高速リール発動！');
-        sfxHit();
-      }
-      renderSpecialRodPanel();
     }
 
     // --- 7. ハンターロッド ---
@@ -6396,110 +6483,49 @@
     // 戦闘ギミックロッド(上位互換シリーズ)：右側UIパネルのレンダリングと操作
     // ============================================================
 
-    // --- 10. ブレードロッド ---
+    // --- 10. ブレードロッド(自動発動：一定時間ごとに自動で斬撃が入る) ---
     function renderBladePanel(panel) {
       if (castState === 'fight' && bladeState) {
-        const active = bladeState.windowOpen;
+        const remainSec = Math.max(0, ((bladeState.nextTriggerAt || 0) - performance.now()) / 1000).toFixed(1);
         panel.innerHTML = `
           <div class="srp-label">⚔️ ブレード</div>
           <div class="srp-sub">コンボ x${bladeState.combo}</div>
-          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapBladeSlash()">斬る！</button>
-          <div class="srp-sub">${active ? '今だ！' : '魚が暴れる瞬間を狙え'}</div>
+          <div class="srp-sub">次の斬撃まで ${remainSec}秒</div>
         `;
       } else {
-        panel.innerHTML = `<div class="srp-label">⚔️ ブレード</div><div class="srp-sub">バトル中に斬撃タイミングを狙おう</div>`;
+        panel.innerHTML = `<div class="srp-label">⚔️ ブレード</div><div class="srp-sub">一定間隔で自動的に斬撃が入る</div>`;
       }
     }
 
-    function tapBladeSlash() {
-      if (!bladeState || castState !== 'fight') return;
-      const now = performance.now();
-      if (bladeState.windowOpen && now <= bladeState.windowUntil) {
-        catchGauge += 18 * bladeState.combo;
-        bladeState.combo = Math.min(5, bladeState.combo + 1);
-        bladeState.windowOpen = false;
-        bladeState.nextEventAt = now + 1800 + Math.random() * 1400;
-        addVisualSplashEffect(`⚔️ Perfect！ x${bladeState.combo}コンボ！`);
-        sfxHit();
-      } else {
-        bladeState.combo = 1;
-        sfxMiss();
-      }
-      renderSpecialRodPanel();
-    }
-
-    // --- 11. サンダーロッド ---
+    // --- 11. サンダーロッド(自動発動：一定時間ごとに自動で感電スタックが溜まる) ---
     function renderThunderPanel(panel) {
       if (castState === 'fight' && thunderState) {
-        const active = thunderState.windowOpen;
         const paralyzed = performance.now() < thunderState.paralyzedUntil;
         const pips = Array.from({ length: 10 }).map((_, i) => `<div class="srp-pip ${i < thunderState.stacks ? 'filled' : ''}"></div>`).join('');
+        const remainSec = Math.max(0, ((thunderState.nextTriggerAt || 0) - performance.now()) / 1000).toFixed(1);
         panel.innerHTML = `
           <div class="srp-label">⚡ サンダー</div>
           <div class="srp-pips">${pips}</div>
-          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapThunderShock()" ${paralyzed ? 'disabled' : ''}>感電！</button>
-          <div class="srp-sub">${paralyzed ? '🥶 魚は停止中！' : (active ? '今だ！' : '雷マークを狙え')}</div>
+          <div class="srp-sub">${paralyzed ? '🥶 魚は停止中！' : `次の感電まで ${remainSec}秒`}</div>
         `;
       } else {
-        panel.innerHTML = `<div class="srp-label">⚡ サンダー</div><div class="srp-sub">バトル中に感電タイミングを狙おう</div>`;
+        panel.innerHTML = `<div class="srp-label">⚡ サンダー</div><div class="srp-sub">一定間隔で自動的に感電が入る</div>`;
       }
     }
 
-    function tapThunderShock() {
-      if (!thunderState || castState !== 'fight') return;
-      const now = performance.now();
-      if (thunderState.windowOpen && now <= thunderState.windowUntil) {
-        thunderState.stacks = Math.min(10, thunderState.stacks + 1);
-        thunderState.windowOpen = false;
-        thunderState.nextEventAt = now + 1600 + Math.random() * 1200;
-        sfxHit();
-        if (thunderState.stacks >= 10) {
-          thunderState.paralyzedUntil = now + 3000;
-          thunderState.stacks = 0;
-          addVisualSplashEffect('⚡ 感電MAX！魚が完全に停止した！');
-        } else {
-          addVisualSplashEffect(`⚡ 感電スタック ${thunderState.stacks}/10`);
-        }
-      } else {
-        sfxMiss();
-      }
-      renderSpecialRodPanel();
-    }
-
-    // --- 12. フロストロッド ---
+    // --- 12. フロストロッド(自動発動：一定時間ごとに自動で凍結ゲージが溜まる) ---
     function renderFrostPanel(panel) {
       if (castState === 'fight' && frostState) {
-        const active = frostState.windowOpen;
         const frozen = performance.now() < frostState.frozenUntil;
+        const remainSec = Math.max(0, ((frostState.nextTriggerAt || 0) - performance.now()) / 1000).toFixed(1);
         panel.innerHTML = `
           <div class="srp-label">❄️ フロスト</div>
           <div class="srp-bar-wrap"><div class="srp-bar-fill" style="height:${frostState.gauge}%;"></div></div>
-          <button class="srp-btn ${active ? 'ready' : ''}" onclick="tapFrostStrike()" ${frozen ? 'disabled' : ''}>攻撃！</button>
-          <div class="srp-sub">${frozen ? '🧊 完全凍結中！' : (active ? '今だ！' : 'チャンスを待て')}</div>
+          <div class="srp-sub">${frozen ? '🧊 完全凍結中！' : `次の攻撃まで ${remainSec}秒`}</div>
         `;
       } else {
         panel.innerHTML = `<div class="srp-label">❄️ フロスト</div><div class="srp-sub">大型魚に効果的な凍結ロッド</div>`;
       }
-    }
-
-    function tapFrostStrike() {
-      if (!frostState || castState !== 'fight') return;
-      const now = performance.now();
-      if (frostState.windowOpen && now <= frostState.windowUntil) {
-        frostState.gauge = Math.min(100, frostState.gauge + 13);
-        frostState.windowOpen = false;
-        frostState.nextEventAt = now + 1800 + Math.random() * 1400;
-        sfxHit();
-        if (frostState.gauge >= 100) {
-          frostState.frozenUntil = now + 4000;
-          frostState.gauge = 0;
-          addVisualSplashEffect('❄️ 完全凍結！魚が数秒動かなくなった！');
-        }
-      } else {
-        frostState.gauge = Math.max(0, frostState.gauge - 5);
-        sfxMiss();
-      }
-      renderSpecialRodPanel();
     }
 
     // --- 13. インフェルノロッド ---
@@ -6516,58 +6542,31 @@
       }
     }
 
-    // --- 14. サイクロンロッド ---
+    // --- 14. サイクロンロッド(自動発動：渦ゲージが自動で溜まる) ---
     function renderCyclonePanel(panel) {
       if (castState === 'fight' && cycloneState) {
         const pulling = performance.now() < cycloneState.pullUntil;
         panel.innerHTML = `
           <div class="srp-label">🌪️ サイクロン</div>
           <div class="srp-bar-wrap"><div class="srp-bar-fill ${pulling ? 'gold' : ''}" style="height:${cycloneState.gauge}%;"></div></div>
-          <button class="srp-btn" onclick="tapCycloneSpin()">回す！</button>
-          <div class="srp-sub">${pulling ? '🌪️ 吸い込み中！' : '連打して渦を作れ'}</div>
+          <div class="srp-sub">${pulling ? '🌪️ 吸い込み中！' : '自動で渦が溜まっていく'}</div>
         `;
       } else {
-        panel.innerHTML = `<div class="srp-label">🌪️ サイクロン</div><div class="srp-sub">渦を作って魚を引き寄せよう</div>`;
+        panel.innerHTML = `<div class="srp-label">🌪️ サイクロン</div><div class="srp-sub">渦が自動で溜まる竿</div>`;
       }
     }
 
-    function tapCycloneSpin() {
-      if (!cycloneState || castState !== 'fight') return;
-      cycloneState.gauge = Math.min(100, cycloneState.gauge + 9);
-      sfxClick();
-      if (cycloneState.gauge >= 100) {
-        cycloneState.gauge = 0;
-        cycloneState.pullUntil = performance.now() + 1500;
-        addVisualSplashEffect('🌪️ 吸い込み発動！魚が引き寄せられる！');
-        sfxHit();
-      }
-      renderSpecialRodPanel();
-    }
-
-    // --- 15. グラビティロッド ---
+    // --- 15. グラビティロッド(自動発動：発動⇄回復を自動で繰り返す) ---
     function renderGravityPanel(panel) {
       if (castState === 'fight' && gravityState) {
         panel.innerHTML = `
           <div class="srp-label">🌑 グラビティ</div>
           <div class="srp-bar-wrap"><div class="srp-bar-fill ${gravityState.active ? 'gold' : ''}" style="height:${gravityState.gauge}%;"></div></div>
-          <button class="srp-btn ${gravityState.active ? 'ready' : ''}" onclick="toggleGravityField()">${gravityState.active ? '解除' : '発動'}</button>
-          <div class="srp-sub">${gravityState.active ? '魚の速度-50%' : 'ゲージ管理が重要'}</div>
+          <div class="srp-sub">${gravityState.active ? '魚の速度-50%発動中' : '自動でチャージ中'}</div>
         `;
       } else {
-        panel.innerHTML = `<div class="srp-label">🌑 グラビティ</div><div class="srp-sub">重力場で魚を鈍らせよう</div>`;
+        panel.innerHTML = `<div class="srp-label">🌑 グラビティ</div><div class="srp-sub">自動で重力場が発動する</div>`;
       }
-    }
-
-    function toggleGravityField() {
-      if (!gravityState || castState !== 'fight') return;
-      if (gravityState.active) {
-        gravityState.active = false;
-      } else {
-        if (gravityState.gauge < 15) return; // ゲージ不足では発動できない
-        gravityState.active = true;
-        addVisualSplashEffect('🌑 重力場発動！魚の動きが鈍くなる');
-      }
-      renderSpecialRodPanel();
     }
 
     function selectRandomFish() {
