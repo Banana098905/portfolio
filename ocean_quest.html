@@ -125,6 +125,8 @@
     .hud-gold { color: var(--neon-gold); text-shadow: var(--glow-gold); font-weight: bold; }
     .hud-gem { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5); font-weight: bold; }
     .hud-lvl { color: var(--neon-cyan); text-shadow: var(--glow-cyan); font-weight: bold; }
+    .hud-stat-pop { animation: hudStatPop 0.4s ease; display: inline-block; }
+    @keyframes hudStatPop { 0% { transform: scale(1.5); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
     .hud-xp-bar {
       width: clamp(50px, 8vw, 100px);
@@ -595,6 +597,11 @@
       flex-direction: column;
       align-items: center;
       gap: 10px;
+      animation: fightPanelIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes fightPanelIn {
+      0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
     }
     .fight-title { font-size: clamp(0.75rem, 1.3vw, 1rem); font-weight: 800; color: #fff; display: flex; align-items: center; gap: 6px; }
     .fight-title span { color: var(--neon-pink); text-shadow: 0 0 8px rgba(255,0,127,0.4); }
@@ -612,7 +619,25 @@
       border-radius: 5px;
       padding: 2px 6px;
       margin-top: -4px;
+      transition: color 0.2s, background 0.2s, border-color 0.2s;
     }
+    /* 第二世界の戦闘：竿の性能が無関係であることが一目で分かる専用の紫テーマ */
+    .reel-speed-indicator.world2-indicator {
+      color: #c98bff;
+      background: rgba(176, 38, 255, 0.1);
+      border: 1px solid rgba(176, 38, 255, 0.4);
+      text-shadow: 0 0 8px rgba(176, 38, 255, 0.6);
+      animation: world2Pulse 1.8s ease-in-out infinite;
+    }
+    @keyframes world2Pulse {
+      0%, 100% { box-shadow: 0 0 4px rgba(176,38,255,0.2); }
+      50% { box-shadow: 0 0 12px rgba(176,38,255,0.55); }
+    }
+    .fight-panel.world2-panel {
+      border-color: rgba(176, 38, 255, 0.5);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 24px rgba(176,38,255,0.25);
+    }
+    .fight-title.world2-title span { color: #c98bff; text-shadow: 0 0 10px rgba(176,38,255,0.6); }
     .reel-track {
       position: relative;
       width: 100%;
@@ -703,6 +728,10 @@
       padding: 12px 12px 60px 12px;
       overflow-y: auto;
     }
+    .modal-overlay.active { animation: modalFadeIn 0.22s ease-out; }
+    .modal-overlay.active .modal-header { animation: modalSlideIn 0.28s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    @keyframes modalFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+    @keyframes modalSlideIn { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -747,7 +776,12 @@
       text-align: center;
       gap: 3px;
       position: relative;
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
+    .item-card:hover { transform: translateY(-3px); border-color: rgba(0,240,255,0.3); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .item-card.locked-cosmetic { opacity: 0.55; }
+    .item-card.locked-cosmetic .item-icon { background: rgba(255,255,255,0.03); filter: grayscale(1); }
+    .item-card.locked-cosmetic:hover { opacity: 0.8; transform: none; }
     .item-card.equipped { border-color: var(--neon-cyan); background: rgba(0, 240, 255, 0.05); }
     .item-card.equipped::after {
       content: 'EQUIPPED';
@@ -780,6 +814,9 @@
       transition: background 0.2s;
     }
     .buy-btn:hover { background: var(--neon-cyan); color: #000; }
+    .buy-btn:active, .map-action-btn:active, .skill-btn:active, .inv-fish-sell-btn:active, .nav-btn:active { transform: scale(0.94); }
+    .buy-btn, .map-action-btn, .skill-btn { transition: background 0.15s, transform 0.1s; }
+    .bait-box-buy-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
     .buy-btn:disabled { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); color: var(--text-sub); cursor: not-allowed; }
 
     .map-grid { display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 0; }
@@ -804,6 +841,43 @@
     .fish-card-rarity { font-size: 0.45rem; padding: 1px 5px; border-radius: 4px; font-weight: 800; }
     .fish-card-stats { font-size: clamp(0.45rem, 0.6vw, 0.55rem); color: var(--text-sub); width: 100%; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 3px; text-align: left; display: flex; flex-direction: column; gap: 1px; }
     .fish-card.locked .fish-card-stats { visibility: hidden; }
+    .book-body-layout { display: flex; flex: 1; min-height: 0; gap: 8px; }
+    .book-map-sidebar {
+      width: clamp(88px, 22vw, 152px);
+      flex-shrink: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-right: 5px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .book-map-btn {
+      text-align: left;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.02);
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .book-map-btn:hover { background: rgba(255,255,255,0.07); transform: translateX(2px); }
+    .book-map-btn.active { border-color: var(--neon-cyan); background: rgba(0,240,255,0.09); box-shadow: 0 0 8px rgba(0,240,255,0.15); }
+    .book-map-btn-name { font-size: clamp(0.48rem, 0.68vw, 0.6rem); font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .book-map-btn-progress-row { display: flex; align-items: center; gap: 4px; }
+    .book-map-btn-progress-bar { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .book-map-btn-progress-fill { height: 100%; background: var(--neon-cyan); border-radius: 2px; }
+    .book-map-btn.complete .book-map-btn-progress-fill { background: var(--neon-green); }
+    .book-map-btn.empty .book-map-btn-progress-fill { background: var(--neon-pink); opacity: 0.5; }
+    .book-map-btn-progress-text { font-size: clamp(0.4rem, 0.55vw, 0.48rem); color: var(--text-sub); font-family: monospace; flex-shrink: 0; }
+    .book-map-btn.complete .book-map-btn-progress-text { color: var(--neon-green); }
+    .book-map-btn.empty .book-map-btn-progress-text { color: var(--neon-pink); }
 
     .skills-container { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; min-height: 0; }
     .skill-pts-remain { font-size: clamp(0.65rem, 1vw, 0.8rem); color: var(--neon-cyan); font-weight: bold; text-align: center; padding: 6px; background: rgba(0, 240, 255, 0.05); border: 1px solid rgba(0, 240, 255, 0.15); border-radius: 6px; flex-shrink: 0; }
@@ -1128,8 +1202,25 @@
       flex-direction: column;
       gap: 1px;
       position: relative;
+      transition: transform 0.15s, border-color 0.15s, background 0.15s;
     }
-    .inv-fish-name { font-size: clamp(0.42rem, 0.62vw, 0.55rem); font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .inv-fish-card:hover { transform: translateX(2px); background: rgba(255,255,255,0.06); }
+    .inv-fish-card.rarity-legendary, .inv-fish-card.rarity-mythic, .inv-fish-card.rarity-divine { animation: invRareGlow 2.4s ease-in-out infinite; }
+    @keyframes invRareGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(255,255,255,0); }
+      50% { box-shadow: 0 0 8px var(--inv-glow-color, rgba(255,215,0,0.35)); }
+    }
+    .inv-fish-toprow { display: flex; align-items: center; gap: 4px; }
+    .inv-fish-rarity-chip {
+      font-size: clamp(0.34rem, 0.5vw, 0.42rem);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      padding: 1px 4px;
+      border-radius: 4px;
+      border: 1px solid currentColor;
+      flex-shrink: 0;
+    }
+    .inv-fish-name { font-size: clamp(0.42rem, 0.62vw, 0.55rem); font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
     .inv-fish-gold { font-size: clamp(0.4rem, 0.58vw, 0.5rem); color: var(--neon-gold); font-weight: 700; font-family: monospace; }
     .inv-fish-sell-btn {
       position: absolute; top: 2px; right: 2px;
@@ -1142,9 +1233,11 @@
       line-height: 1;
       display: flex; align-items: center; justify-content: center;
       cursor: pointer;
+      transition: transform 0.12s, background 0.15s;
     }
-    .inv-fish-sell-btn:hover { background: var(--neon-pink); color: #fff; }
-    #inventory-empty { font-size: clamp(0.42rem, 0.6vw, 0.52rem); color: var(--text-sub); text-align: center; padding: 10px 4px; }
+    .inv-fish-sell-btn:hover { background: var(--neon-pink); color: #fff; transform: scale(1.15); }
+    #inventory-empty { font-size: clamp(0.42rem, 0.6vw, 0.52rem); color: var(--text-sub); text-align: center; padding: 10px 4px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    #inventory-empty::before { content: '🎣'; font-size: 1.4rem; opacity: 0.5; }
     #inventory-footer { flex-shrink: 0; padding: 5px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 3px; }
     #inventory-total { font-size: clamp(0.45rem, 0.65vw, 0.56rem); color: var(--neon-gold); text-align: center; font-weight: 700; font-family: monospace; }
     #inventory-sellall-btn {
@@ -1181,7 +1274,23 @@
       overflow: hidden;
       flex-shrink: 0;
       box-shadow: inset 0 0 20px rgba(0,240,255,0.08);
+      position: relative;
     }
+    .avatar-preview-box::before {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 13px;
+      padding: 2px;
+      background: conic-gradient(from var(--avatar-ring-angle, 0deg), var(--neon-cyan), var(--neon-pink), var(--neon-gold), var(--neon-cyan));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0.5;
+      animation: avatarRingSpin 6s linear infinite;
+      pointer-events: none;
+    }
+    @property --avatar-ring-angle { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+    @keyframes avatarRingSpin { to { --avatar-ring-angle: 360deg; } }
     .avatar-preview-box canvas { width: 100%; height: 100%; }
     .cosme-tabs-wrap { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
     .cosme-gacha-box { padding: 4px 8px; border: 1px dashed var(--panel-border); border-radius: 5px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; }
@@ -1194,8 +1303,12 @@
       padding: 2px 6px;
       border-radius: 999px;
       display: flex; align-items: center; gap: 3px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.12s;
     }
+    .avatar-loadout-badge:hover { background: rgba(0,240,255,0.15); transform: translateY(-1px); }
     .avatar-loadout-badge.empty { color: var(--text-sub); background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); }
+    .avatar-loadout-badge.empty:hover { background: rgba(255,255,255,0.07); }
     .cosme-category-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; flex-shrink: 0; }
     .cosme-category-tab {
       padding: 4px 10px;
@@ -1241,8 +1354,8 @@
       width: 100%;
       max-width: 380px;
       background: radial-gradient(circle at top, rgba(16, 28, 48, 0.92) 0%, rgba(6, 11, 20, 0.97) 100%);
-      border: 2px solid var(--neon-gold);
-      box-shadow: var(--glow-gold), inset 0 0 30px rgba(255, 215, 0, 0.1);
+      border: 2px solid var(--result-glow-color, var(--neon-gold));
+      box-shadow: 0 0 24px var(--result-glow-color, var(--neon-gold)), inset 0 0 30px rgba(255, 215, 0, 0.1);
       border-radius: 14px;
       padding: 16px;
       display: flex;
@@ -1250,6 +1363,19 @@
       align-items: center;
       text-align: center;
       gap: 8px;
+      animation: resultPanelIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes resultPanelIn {
+      0% { opacity: 0; transform: scale(0.7) rotate(-2deg); }
+      60% { opacity: 1; }
+      100% { opacity: 1; transform: scale(1) rotate(0); }
+    }
+    .result-panel.rarity-epic, .result-panel.rarity-legendary, .result-panel.rarity-mythic, .result-panel.rarity-divine {
+      animation: resultPanelIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), resultRarePulse 1.6s ease-in-out 0.4s infinite;
+    }
+    @keyframes resultRarePulse {
+      0%, 100% { box-shadow: 0 0 24px var(--result-glow-color), inset 0 0 30px rgba(255,215,0,0.1); }
+      50% { box-shadow: 0 0 44px var(--result-glow-color), inset 0 0 30px rgba(255,215,0,0.1); }
     }
     .result-badge { font-size: clamp(0.6rem, 1vw, 0.75rem); font-weight: 800; letter-spacing: 0.15em; color: var(--neon-gold); text-shadow: var(--glow-gold); text-transform: uppercase; }
     .result-fish-canvas-box { width: 120px; height: 60px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; }
@@ -1487,7 +1613,12 @@
         <h3>📖 図鑑 <span style="font-size:0.65em; color:var(--neon-cyan); font-weight:600;">(<span id="book-completion-ratio">0</span>%)</span></h3>
         <button class="close-btn" onclick="closeModal('modal-book')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
-      <div class="modal-body"><div class="fish-grid" id="fish-book-list"></div></div>
+      <div class="modal-body">
+        <div class="book-body-layout">
+          <div class="book-map-sidebar" id="book-map-sidebar"></div>
+          <div class="fish-grid" id="fish-book-list"></div>
+        </div>
+      </div>
     </div>
 
     <div class="modal-overlay" id="modal-skills">
@@ -2424,7 +2555,7 @@
     ];
 
     const RODS = [
-      { id: 0, name: '木の竿', cost: 0, dist: 15, rare: 1.0, dur: 10, reelSpeed: 1.0, barWidth: 16, desc: '簡単な竿。' },
+      { id: 0, name: '木の竿', cost: 0, dist: 15, rare: 1.0, dur: 10, reelSpeed: 1.0, barWidth: 20, desc: '簡単な竿。' },
       { id: 1, name: '竹の竿', cost: 200, dist: 25, rare: 1.2, dur: 15, reelSpeed: 1.1, barWidth: 16, desc: 'しなやかな竹。' },
       { id: 2, name: '鉄の竿', cost: 800, dist: 40, rare: 1.5, dur: 25, reelSpeed: 1.2, barWidth: 17, desc: '頑丈な鉄製。' },
       { id: 3, name: '銀の竿', cost: 2500, dist: 60, rare: 1.8, dur: 40, reelSpeed: 1.4, barWidth: 18, desc: '美しい銀箔。' },
@@ -2701,6 +2832,13 @@
       Meteor:  { name: '隕石',        mult: 2.5, chance: 0.28, color: '#ffaa33' }
     };
 
+    // レア度が高いほど発光が強くなる演出用カラー（.rarity-* のテーマカラーと対応）
+    const RARITY_GLOW_COLOR = {
+      Common: 'rgba(139,155,180,0.3)', Uncommon: 'rgba(0,240,255,0.35)', Rare: 'rgba(57,255,20,0.35)',
+      Epic: 'rgba(176,38,255,0.4)', Legendary: 'rgba(255,0,127,0.45)', Mythic: 'rgba(255,215,0,0.5)', Divine: 'rgba(255,255,255,0.6)'
+    };
+
+    // ============================================================
     // レア度が高いほど「巻き」の反応が重くなる抵抗係数（スキルツリーの power 系ノードで軽減できる）
     const RARITY_RESISTANCE = {
       Common: 0, Uncommon: 0.05, Rare: 0.16, Epic: 0.28,
@@ -2866,11 +3004,12 @@
     // ============================================================
     // 第二世界(World 2)関連定数
     // 通常の「巻き」の理屈が一切通じない魚たちの海域。
-    // 竿の性能・スキル・ギミックは一切関係なく、魚の抵抗だけで難易度が決まる。
+    // 竿の性能・スキル・ギミックの「巻き」補正は一切関係なく、魚自体のレア度抵抗だけで難易度が決まる
+    // (第二世界固有の追加抵抗は廃止。バー幅やレア度抵抗の軽減スキルは通常通り有効)。
     // 「実質」の値がプラス(有利)になることは絶対にない。
     // ============================================================
     const WORLD2_MAP_IDS = [21, 22, 23, 24, 25, 26, 27];
-    const WORLD2_EXTRA_RESIST = 0.8;  // 第二世界の魚に一律で乗る追加抵抗(以前は3.0で戦闘が長すぎたため緩和)
+    const WORLD2_EXTRA_RESIST = 0;    // 第二世界固有の追加抵抗は廃止。魚自体のレア度抵抗のみで難易度を決める(以前は0.8)
     const WORLD2_DIFF_MULT = 1.3;     // 魚の暴れ方の追加倍率(以前は2.0)
     const WORLD2_GAUGE_MULT = 1.0;    // キャッチゲージ上昇量への追加減衰(レア度側の減衰と二重にかかっていたため撤廃)
 
@@ -3094,6 +3233,85 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '1.8.8',
+        date: '2026年7月19日',
+        title: '📖 図鑑をマップごとに絞り込めるように',
+        changes: [
+          '🗺️ 図鑑の左側に「港」「川」「深海」など海域の一覧サイドバーを追加。タップすると、その海域の魚だけに絞り込んで表示',
+          '📊 各海域ボタンに「捕獲数/合計数」の進捗バーを表示。まだ0匹の海域はピンク、コンプリート済みの海域は緑色で一目でわかる',
+          '🌀 第二世界やハードアイランドの海域もサイドバーに表示され、専用アイコンで区別できる',
+          '🔝 画面上部の達成率(%)は、これまで通り図鑑全体の合計で表示'
+        ]
+      },
+      {
+        version: '1.8.7',
+        date: '2026年7月19日',
+        title: '📦 餌箱まとめ買い ＆ アバター周り・UIの改良',
+        changes: [
+          '📦 ショップの餌箱に「×5まとめ買い」「×10まとめ買い」ボタンを追加。1回のタップでまとめて開封できるように',
+          '👤 アバタープレビュー枠に、ゆっくり回るオーロラのような発光リングを追加',
+          '🏷️ 装備一覧バッジにアイコンを追加し、タップで該当カテゴリへ直接ジャンプできるように改良',
+          '🔒 未所持のコスメアイテムは鍵アイコン＆グレーアウト表示にして、所持/未所持がひと目で分かるように',
+          '🪟 図鑑・スキル・クラフトなどのモーダルにフェード＋スライドインの登場演出を追加'
+        ]
+      },
+      {
+        version: '1.8.6',
+        date: '2026年7月19日',
+        title: '🎨 UI・見た目をさらに改良',
+        changes: [
+          '🏆 釣果結果パネルの縁の発光色を、これまでの固定ゴールドから釣った魚の実際のレア度に応じた色に変更。Epic以上はゆっくり脈動する演出付き',
+          '💰 ゴールド・宝石が増減した瞬間、HUDの数字がポップして変化に気づきやすく',
+          '🛍️ ショップ・図鑑などのアイテムカードにホバー時の浮き上がり演出を追加',
+          '🎣 生簀が空の時の表示にアイコンを追加してわかりやすく',
+          '✨ 釣果結果パネルの登場演出もふわっとポップするアニメーションに変更'
+        ]
+      },
+      {
+        version: '1.8.5',
+        date: '2026年7月19日',
+        title: '🎨 UI・見た目を改良',
+        changes: [
+          '🐟 生簀(インベントリ)の魚カードにレア度カラーバッジを追加。Legendary以上は静かに発光するように',
+          '🍳 料理選択画面の魚カードにもレア度カラーを反映し、図鑑や釣果結果と表示を統一',
+          '✨ バトル画面の登場演出にふわっと現れるアニメーションを追加',
+          '👆 主要ボタンに押した時の手応え(軽い縮小)を追加し、操作感を向上',
+          '🖱️ インベントリカードにホバー時の軽いスライド演出を追加'
+        ]
+      },
+      {
+        version: '1.8.4',
+        date: '2026年7月19日',
+        title: '🔧 序盤の難易度を調整 ＆ お詫びにミミズ×30プレゼント',
+        changes: [
+          '🎣 初期装備「木の竿」のバー幅を拡大(16%→20%)。魚のアイコンを掴みやすくなった',
+          '⚖️ バトル中のゲージ増減バランスを調整。合わせている時の増加量を強化(+16→+20)、外れている時の減少量を緩和(-18→-14 基準値)し、特にCommon〜Uncommon帯の序盤戦がぐっと楽になった',
+          '💧 バトル開始時のゲージ初期値を40→45に引き上げ、開始直後のミスを軽減',
+          '🎁 序盤の難易度についてご迷惑をおかけしたお詫びとして、全プレイヤーに「ミミズ×30」を1回限りでプレゼント',
+          '📊 Legendary以上のレア度の難しさ自体は据え置き。歯応えのある大物とのやり取りはそのまま楽しめます'
+        ]
+      },
+      {
+        version: '1.8.3',
+        date: '2026年7月19日',
+        title: '🐌 第二世界のバー移動速度が遅すぎる問題を修正',
+        changes: [
+          '⚡ 第二世界の戦闘中、テンションバーの移動速度がLegendary〜Divine級の魚の高いレア度抵抗の影響で異常に遅くなっていた不具合を修正。バーは常に「通常速度」で動くようにした',
+          '🌀 第二世界の難易度は、暴れ方の激しさ(WORLD2_DIFF_MULT)とゲージ増減バランスのみで表現するように変更。竿・スキルの「巻き」が無関係なのは従来通り',
+          '📊 インジケーター表示も「巻きの性能は無関係(常に通常速度)」に更新し、実際の挙動と一致させた'
+        ]
+      },
+      {
+        version: '1.8.2',
+        date: '2026年7月19日',
+        title: '🌀 第二世界の追加抵抗を撤廃 & バトルUIを刷新',
+        changes: [
+          '⚖️ 第二世界固有の追加抵抗(WORLD2_EXTRA_RESIST)を撤廃(0.8→0)。難易度は魚自体のレア度抵抗のみで決まるようになり、レア度抵抗軽減スキルの効果がより実感しやすくなった',
+          '🌌 第二世界のバトル画面を専用の紫テーマに刷新。パネルの縁とインジケーターがほのかに脈動し、「竿の性能が無関係な特殊な戦い」であることを一目で判別できるように',
+          '📊 「実質」がプラス(有利)になることは絶対にない、という基本仕様に変更はなし'
+        ]
+      },
+      {
         version: '1.8.1',
         date: '2026年7月16日',
         title: '⚖️ 第二世界の戦闘が長すぎる問題を緩和',
@@ -3253,7 +3471,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.8.1';
+    const CHANGELOG_VERSION = 'v1.8.8';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3491,6 +3709,7 @@
       skillPoints: 0,
       selectedBait: 'ミミズ',
       lastSeenChangelogVersion: null,
+      receivedApologyGiftV1: false,
       cookingBuff: null,
       cookingBuffs: [],
       dailyQuests: [],
@@ -3657,6 +3876,14 @@
           refreshAchievementProgress();
         } catch (e) { console.error("ロード失敗", e); }
       }
+      if (game.receivedApologyGiftV1 === undefined) game.receivedApologyGiftV1 = false;
+      if (!game.receivedApologyGiftV1) {
+        game.receivedApologyGiftV1 = true;
+        if (!game.baits) game.baits = {};
+        game.baits['ミミズ'] = (game.baits['ミミズ'] || 0) + 30;
+        saveGame();
+        setTimeout(() => addVisualSplashEffect('🙏 序盤の難易度調整のお詫びに ミミズ×30 プレゼント！'), 1200);
+      }
       // 変更ログをチェックして必要に応じて表示
       setTimeout(() => checkAndShowChangelog(), 500);
     }
@@ -3664,18 +3891,30 @@
     // ============================================================
     // HUD更新
     // ============================================================
+    let lastHudGold = null, lastHudGems = null;
     function updateHUD() {
       document.getElementById('hud-lvl-val').innerText = game.level;
       const nextXp = game.level * 100;
       const xpPercent = Math.min(100, (game.xp / nextXp) * 100);
       document.getElementById('hud-xp-fill').style.width = xpPercent + '%';
-      document.getElementById('hud-gold-val').innerText = game.gold.toLocaleString();
-      document.getElementById('hud-gem-val').innerText = game.gems;
+      const goldEl = document.getElementById('hud-gold-val');
+      const gemEl = document.getElementById('hud-gem-val');
+      goldEl.innerText = game.gold.toLocaleString();
+      gemEl.innerText = game.gems;
+      if (lastHudGold !== null && game.gold !== lastHudGold) flashHudStat(goldEl);
+      if (lastHudGems !== null && game.gems !== lastHudGems) flashHudStat(gemEl);
+      lastHudGold = game.gold; lastHudGems = game.gems;
       document.getElementById('env-weather-val').innerText = translateWeather(game.weather);
       document.getElementById('env-time-val').innerText = translateTime(game.clock);
       document.getElementById('env-season-val').innerText = translateSeason(game.season);
       updateBaitPicker();
       renderInventory();
+    }
+    // HUDの数値(ゴールド/ジェム)が増減した瞬間にポップさせて変化を分かりやすくする
+    function flashHudStat(el) {
+      el.classList.remove('hud-stat-pop');
+      void el.offsetWidth;
+      el.classList.add('hud-stat-pop');
     }
 
     // ============================================================
@@ -3899,7 +4138,11 @@
     function openModal(id) {
       if (activeModal === id) { closeModal(id); return; }
       if (activeModal) closeModal(activeModal);
-      document.getElementById(id).style.display = 'flex';
+      const el = document.getElementById(id);
+      el.style.display = 'flex';
+      el.classList.remove('active');
+      void el.offsetWidth;
+      el.classList.add('active');
       activeModal = id;
       updateNavActive(id);
       if (id === 'modal-map') renderMapSelection();
@@ -3912,7 +4155,9 @@
     }
 
     function closeModal(id) {
-      document.getElementById(id).style.display = 'none';
+      const el = document.getElementById(id);
+      el.style.display = 'none';
+      el.classList.remove('active');
       if (id === 'modal-cooking') cancelCookingMinigame();
       if (activeModal === id) {
         activeModal = null;
@@ -4094,8 +4339,12 @@
               <div style="margin-top:4px; font-size:0.85rem;">${poolPreview}</div>
             </div>
             <div style="display:flex; flex-direction:column; align-items:flex-end; gap:3px;">
-              <span style="font-size:0.65rem; color:${box.currency==='gem' ? 'var(--neon-pink)' : 'var(--neon-gold)'}; font-weight:bold;">${box.cost} ${box.currency==='gem' ? 'GEM' : 'G'}</span>
-              <button class="buy-btn" onclick="openBaitBox('${box.id}')" ${!canAfford ? 'disabled' : ''} style="padding:4px 10px; width:auto;">開封する</button>
+              <span style="font-size:0.65rem; color:${box.currency==='gem' ? 'var(--neon-pink)' : 'var(--neon-gold)'}; font-weight:bold;">${box.cost} ${box.currency==='gem' ? 'GEM' : 'G'} / 個</span>
+              <div class="bait-box-buy-row">
+                <button class="buy-btn" onclick="openBaitBox('${box.id}', 1)" ${!canAfford ? 'disabled' : ''} style="padding:4px 8px; width:auto;">×1 開封</button>
+                <button class="buy-btn" onclick="openBaitBox('${box.id}', 5)" ${cur < box.cost * 5 ? 'disabled' : ''} style="padding:4px 8px; width:auto;">×5 まとめ買い</button>
+                <button class="buy-btn" onclick="openBaitBox('${box.id}', 10)" ${cur < box.cost * 10 ? 'disabled' : ''} style="padding:4px 8px; width:auto;">×10 まとめ買い</button>
+              </div>
             </div>
           `;
           boxWrap.appendChild(card);
@@ -4241,37 +4490,92 @@
     function equipBoat(id) {
       if (game.ownedBoats.includes(id)) { game.boatId = id; saveGame(); renderShopItems(); }
     }
-    function openBaitBox(boxId) {
+    function openBaitBox(boxId, qty) {
       const box = BAIT_BOXES.find(b => b.id === boxId);
       if (!box) return;
+      qty = Math.max(1, Math.floor(qty) || 1);
+      const totalCost = box.cost * qty;
       const cur = box.currency === 'gem' ? game.gems : game.gold;
-      if (cur < box.cost) return;
-      if (box.currency === 'gem') game.gems -= box.cost; else game.gold -= box.cost;
+      if (cur < totalCost) return;
+      if (box.currency === 'gem') game.gems -= totalCost; else game.gold -= totalCost;
 
       let totalWeight = 0;
       box.pool.forEach(p => totalWeight += p.weight);
-      let rand = Math.random() * totalWeight;
-      let picked = box.pool[0];
-      for (let i = 0; i < box.pool.length; i++) {
-        rand -= box.pool[i].weight;
-        if (rand <= 0) { picked = box.pool[i]; break; }
+      const gained = {};
+      for (let n = 0; n < qty; n++) {
+        let rand = Math.random() * totalWeight;
+        let picked = box.pool[0];
+        for (let i = 0; i < box.pool.length; i++) {
+          rand -= box.pool[i].weight;
+          if (rand <= 0) { picked = box.pool[i]; break; }
+        }
+        const q = picked.qtyMin + Math.floor(Math.random() * (picked.qtyMax - picked.qtyMin + 1));
+        game.baits[picked.name] = (game.baits[picked.name] || 0) + q;
+        gained[picked.name] = (gained[picked.name] || 0) + q;
       }
-      const qty = picked.qtyMin + Math.floor(Math.random() * (picked.qtyMax - picked.qtyMin + 1));
-      game.baits[picked.name] = (game.baits[picked.name] || 0) + qty;
 
       sfxRouletteWin();
-      addVisualSplashEffect(`${box.icon} ${BAIT_ICONS[picked.name] || '🪱'} ${picked.name} x${qty} 獲得！`);
+      if (qty === 1) {
+        const [name, q] = Object.entries(gained)[0];
+        addVisualSplashEffect(`${box.icon} ${BAIT_ICONS[name] || '🪱'} ${name} x${q} 獲得！`);
+      } else {
+        const summary = Object.entries(gained).map(([name, q]) => `${BAIT_ICONS[name] || '🪱'}${name}×${q}`).join(' ');
+        addVisualSplashEffect(`${box.icon} ${box.name}を${qty}個まとめて開封！ ${summary}`);
+      }
       saveGame(); updateHUD(); renderShopItems();
     }
 
     // ============================================================
     // 図鑑
     // ============================================================
+    let activeBookMapId = 'all'; // 図鑑で選択中のマップ('all'=すべて)
+    function renderBookMapSidebar() {
+      const sidebar = document.getElementById('book-map-sidebar');
+      if (!sidebar) return;
+      sidebar.innerHTML = '';
+
+      const totalCaught = FISH_DATABASE.filter(f => game.book[f.id]).length;
+      const allBtn = document.createElement('button');
+      allBtn.className = `book-map-btn ${activeBookMapId === 'all' ? 'active' : ''}`;
+      const allPercent = FISH_DATABASE.length ? Math.round((totalCaught / FISH_DATABASE.length) * 100) : 0;
+      allBtn.innerHTML = `
+        <span class="book-map-btn-name">🗺️ すべて</span>
+        <div class="book-map-btn-progress-row">
+          <div class="book-map-btn-progress-bar"><div class="book-map-btn-progress-fill" style="width:${allPercent}%"></div></div>
+          <span class="book-map-btn-progress-text">${totalCaught}/${FISH_DATABASE.length}</span>
+        </div>
+      `;
+      allBtn.onclick = () => { activeBookMapId = 'all'; renderFishBook(); };
+      sidebar.appendChild(allBtn);
+
+      MAPS.forEach(m => {
+        const fishHere = FISH_DATABASE.filter(f => f.mapId === m.id);
+        if (fishHere.length === 0) return; // このマップに紐づく魚がいなければ表示しない
+        const caught = fishHere.filter(f => game.book[f.id]).length;
+        const isComplete = caught === fishHere.length;
+        const isEmpty = caught === 0;
+        const percent = Math.round((caught / fishHere.length) * 100);
+        const btn = document.createElement('button');
+        btn.className = `book-map-btn ${activeBookMapId === m.id ? 'active' : ''} ${isComplete ? 'complete' : ''} ${isEmpty ? 'empty' : ''}`;
+        btn.title = m.desc || '';
+        btn.innerHTML = `
+          <span class="book-map-btn-name">${m.world === 2 ? '🌀' : (m.id === 20 ? '💀' : '📍')} ${m.name}</span>
+          <div class="book-map-btn-progress-row">
+            <div class="book-map-btn-progress-bar"><div class="book-map-btn-progress-fill" style="width:${percent}%"></div></div>
+            <span class="book-map-btn-progress-text">${caught}/${fishHere.length}</span>
+          </div>
+        `;
+        btn.onclick = () => { activeBookMapId = m.id; renderFishBook(); };
+        sidebar.appendChild(btn);
+      });
+    }
     function renderFishBook() {
+      renderBookMapSidebar();
       const list = document.getElementById('fish-book-list');
       list.innerHTML = '';
       let registered = 0;
-      FISH_DATABASE.forEach(f => {
+      const fishToShow = activeBookMapId === 'all' ? FISH_DATABASE : FISH_DATABASE.filter(f => f.mapId === activeBookMapId);
+      fishToShow.forEach(f => {
         const record = game.book[f.id];
         const isLocked = !record;
         const card = document.createElement('div');
@@ -4279,7 +4583,6 @@
         if (isLocked) {
           card.innerHTML = `<div class="fish-card-visual" style="font-size:1.5rem; color:rgba(255,255,255,0.05)">❓</div><div class="fish-card-name">未確認</div><div class="fish-card-rarity" style="background:#333; color:#aaa">???</div>`;
         } else {
-          registered++;
           const rarityClass = `rarity-${f.rarity.toLowerCase()}`;
           card.innerHTML = `
             <div class="fish-card-visual"><canvas id="book-canvas-${f.id}" width="120" height="50"></canvas></div>
@@ -4294,6 +4597,8 @@
         }
         list.appendChild(card);
       });
+      // ヘッダーの達成率は常に図鑑全体(全マップ合計)を表示する
+      FISH_DATABASE.forEach(f => { if (game.book[f.id]) registered++; });
       document.getElementById('book-completion-ratio').innerText = Math.round((registered / FISH_DATABASE.length) * 100);
     }
 
@@ -4551,12 +4856,12 @@
           const isOwned = game.ownedCosmetics.includes(c.name);
           const isEquipped = game.equippedCosmetics[c.type] === c.name;
           const card = document.createElement('div');
-          card.className = `item-card ${isEquipped ? 'equipped' : ''}`;
+          card.className = `item-card ${isEquipped ? 'equipped' : ''} ${!isOwned ? 'locked-cosmetic' : ''}`;
           card.innerHTML = `
-            <div class="item-icon">${c.icon}</div>
+            <div class="item-icon">${isOwned ? c.icon : '🔒'}</div>
             <div class="item-title">${c.name}</div>
             <div class="item-desc">${c.desc}</div>
-            ${isOwned ? (isEquipped ? `<button class="buy-btn" onclick="unequipCosmetic('${c.type}')" style="width:auto; padding:2px 8px;">外す</button>` : `<button class="buy-btn" onclick="equipCosmetic('${c.type}','${c.name}')" style="width:auto; padding:2px 8px;">装備</button>`) : `<div style="font-size:0.5rem; color:var(--text-sub);">ガチャ限定</div>`}
+            ${isOwned ? (isEquipped ? `<button class="buy-btn" onclick="unequipCosmetic('${c.type}')" style="width:auto; padding:2px 8px;">外す</button>` : `<button class="buy-btn" onclick="equipCosmetic('${c.type}','${c.name}')" style="width:auto; padding:2px 8px;">装備</button>`) : `<div style="font-size:0.5rem; color:var(--text-sub);">🎰 ガチャ限定</div>`}
           `;
           grid.appendChild(card);
         });
@@ -5000,10 +5305,15 @@
       } else {
         game.fishInventory.forEach((f, idx) => {
           const card = document.createElement('div');
-          card.className = 'inv-fish-card';
+          const rarityClass = `rarity-${(f.rarity || 'common').toLowerCase()}`;
+          card.className = `inv-fish-card ${rarityClass}`;
           card.style.borderLeft = `3px solid ${f.color || '#8b9bb4'}`;
+          card.style.setProperty('--inv-glow-color', RARITY_GLOW_COLOR[f.rarity] || 'rgba(255,255,255,0.25)');
           card.innerHTML = `
-            <div class="inv-fish-name" title="${f.name}">${f.name}</div>
+            <div class="inv-fish-toprow">
+              <span class="inv-fish-rarity-chip ${rarityClass}">${f.rarity}</span>
+              <div class="inv-fish-name" title="${f.name}">${f.name}</div>
+            </div>
             <div class="inv-fish-gold">💰${f.gold}G</div>
             <button class="inv-fish-sell-btn" onclick="sellFish(${idx})" title="売る">✕</button>
           `;
@@ -5081,10 +5391,11 @@
       `;
       const fishCards = game.fishInventory.map((fish, idx) => {
         const selected = cookingSelection.includes(idx);
+        const rarityClass = `rarity-${(fish.rarity || 'common').toLowerCase()}`;
         return `
-          <div onclick="toggleCookingFish(${idx})" style="cursor:pointer; border:1px solid ${selected ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.08)'}; background:${selected ? 'rgba(0,255,255,0.08)' : 'rgba(255,255,255,0.02)'}; border-radius:10px; padding:10px; min-width:120px; flex:1; display:flex; flex-direction:column; gap:4px;">
+          <div onclick="toggleCookingFish(${idx})" style="cursor:pointer; border:1px solid ${selected ? 'var(--neon-cyan)' : 'rgba(255,255,255,0.08)'}; background:${selected ? 'rgba(0,255,255,0.08)' : 'rgba(255,255,255,0.02)'}; border-radius:10px; padding:10px; min-width:120px; flex:1; display:flex; flex-direction:column; gap:4px; transition: border-color 0.15s, background 0.15s, transform 0.1s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
             <div style="font-weight:700; color:#fff;">${fish.name}</div>
-            <div style="font-size:0.8rem; color:var(--text-sub);">${fish.rarity}</div>
+            <span class="inv-fish-rarity-chip ${rarityClass}" style="width:fit-content;">${fish.rarity}</span>
             <div style="font-size:0.75rem; color:var(--text-sub);">${fish.weight.toFixed(1)}kg / ${fish.length.toFixed(1)}cm</div>
             <div style="font-size:0.85rem; color:var(--neon-gold);">${selected ? '選択中' : 'タップで選択'}</div>
           </div>
@@ -5762,9 +6073,10 @@
       const hardIslandResist = targetFish.hardIsland ? Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0)) : 0;
       let totalResist, netMult;
       if (targetFish.reelMismatch) {
-        // 第二世界：無関係になるのは「巻き」だけ。抵抗軽減(rarityResistスキル)は通常通り有効
+        // 第二世界：「巻き」の性能(竿・スキル・ギミック)は無関係で、バーは常に通常速度で動く。
+        // 魚の抵抗値はあくまで参考表示(暴れ方の激しさの指標)であり、バー移動速度そのものは低下させない
         totalResist = Math.max(0, rawResist - eff.rarityResist) + WORLD2_EXTRA_RESIST;
-        netMult = Math.min(1, 1 / (1 + totalResist));
+        netMult = 1;
       } else {
         totalResist = Math.max(0, rawResist - eff.rarityResist) + hardIslandResist;
         netMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + totalResist);
@@ -5772,16 +6084,22 @@
       const resistPercent = Math.round(totalResist * 100);
       const netPercent = Math.round((netMult - 1) * 100);
       const reelIndicator = document.getElementById('reel-speed-indicator');
+      const fightPanel = document.querySelector('#fight-overlay .fight-panel');
+      const fightTitle = document.querySelector('#fight-overlay .fight-title');
       let indicatorText;
       if (targetFish.reelMismatch) {
-        indicatorText = `🌀 第二世界：「巻き」の性能は無関係 ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent}%`;
+        indicatorText = `🌀 第二世界：「巻き」の性能は無関係(常に通常速度) ／ 魚の抵抗${resistPercent}%(暴れ方に反映)`;
       } else {
         indicatorText = `🎣 竿+スキル 巻き+${rodPercent + skillPercent}% ／ 魚の抵抗${resistPercent}% ／ 実質${netPercent >= 0 ? '+' : ''}${netPercent}%`;
         if (rodBonus.label) indicatorText += ` ／ ${rodBonus.label}`;
       }
       reelIndicator.innerText = indicatorText;
+      // 第二世界の戦闘は専用の紫テーマで、竿の性能が無関係であることを視覚的にも分かりやすくする
+      reelIndicator.classList.toggle('world2-indicator', !!targetFish.reelMismatch);
+      if (fightPanel) fightPanel.classList.toggle('world2-panel', !!targetFish.reelMismatch);
+      if (fightTitle) fightTitle.classList.toggle('world2-title', !!targetFish.reelMismatch);
       fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0;
-      catchGauge = 40 + transientGaugeHeadStart;
+      catchGauge = 45 + transientGaugeHeadStart;
       transientGaugeHeadStart = 0;
       isReeling = false;
       comboFlashShown = false;
@@ -5819,14 +6137,16 @@
         resistance += Math.max(0, HARD_ISLAND_EXTRA_RESIST - (eff.hardResistReduction || 0));
       }
       // 第二世界の魚：無関係になるのは「巻き」(竿のreelSpeed・スキルのreelSpeed・ギミックのreelSpeedBonus)だけ。
-      // バー幅やレア度抵抗の軽減(rarityResistスキル)は通常通り有効。それでも「実質」が1(±0%)を超えて有利になることは絶対にない
+      // バー幅やレア度抵抗の軽減(rarityResistスキル)は通常通り有効。第二世界固有の追加抵抗は廃止済み(WORLD2_EXTRA_RESIST=0)。
+      // バーの移動速度そのものは魚のレア度抵抗による影響を受けず、常に通常速度(1.0)で動く。
+      // 難易度は暴れ方の激しさ(diff)とゲージ増減の重さで表現する
       let reelSpeedMult;
       const barWidth = (rod.barWidth || 20) + eff.barWidth + (rodBonus.barWidthBonus || 0);
       if (targetFish.reelMismatch) {
         diff *= WORLD2_DIFF_MULT;
         gaugeGainMult *= WORLD2_GAUGE_MULT;
         resistance += WORLD2_EXTRA_RESIST;
-        reelSpeedMult = Math.min(1, 1 / (1 + resistance)); // 巻きの補正(reelSpeed系)だけを無視する
+        reelSpeedMult = 1; // 巻きの補正・抵抗のいずれも無視し、常に通常速度で動く
       } else {
         reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
       }
@@ -5873,7 +6193,7 @@
         const infernoBurst = (effUi === 'inferno' && infernoState && now < infernoState.burstUntil) ? 3 : 1;
         if (isMatched) {
           playerBar.classList.add('matching');
-          catchGauge += (16 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5) * infernoBurst;
+          catchGauge += (20 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5) * infernoBurst;
           if (effUi === 'inferno' && infernoState) {
             infernoState.heat = Math.min(100, infernoState.heat + 22 * dt);
             if (infernoState.heat >= 100 && now >= infernoState.burstUntil) {
@@ -5885,7 +6205,7 @@
           }
         } else {
           playerBar.classList.remove('matching');
-          catchGauge -= (18 + diff * 2) * dt;
+          catchGauge -= (14 + diff * 2) * dt;
           if (effUi === 'inferno' && infernoState) {
             infernoState.heat = Math.max(0, infernoState.heat - 10 * dt);
           }
@@ -6133,6 +6453,15 @@
 
       document.getElementById('result-rarity-badge').innerText = targetFish.rarity + (isShiny?' ✨SHINY':'') + (isCrown?' 👑CROWN':'') + (mutation?` 🌈${mutation.name}`:'') + (isDuplicated?' 🐟×2':'');
       document.getElementById('result-rarity-badge').className = `result-badge rarity-${targetFish.rarity.toLowerCase()}`;
+      const resultPanelEl = document.querySelector('#catch-result-overlay .result-panel');
+      if (resultPanelEl) {
+        resultPanelEl.className = `result-panel rarity-${targetFish.rarity.toLowerCase()}`;
+        resultPanelEl.style.setProperty('--result-glow-color', RARITY_GLOW_COLOR[targetFish.rarity] || 'rgba(255,215,0,0.5)');
+        // 表示のたびにアニメーションを最初から再生させる
+        resultPanelEl.style.animation = 'none';
+        void resultPanelEl.offsetWidth;
+        resultPanelEl.style.animation = '';
+      }
       document.getElementById('result-fish-name').innerText = displayName;
       document.getElementById('result-fish-length').innerText = finalLen.toFixed(1);
       document.getElementById('result-fish-weight').innerText = finalWeight.toFixed(1);
@@ -6972,17 +7301,20 @@
       if (!box) return;
       const eq = game.equippedCosmetics || {};
       const typeLabels = { hat: '帽子', glass: 'メガネ', cloth: '服', wing: '羽', aura: 'オーラ' };
+      const typeIcons = { hat: '👒', glass: '🕶️', cloth: '👕', wing: '👼', aura: '✨' };
       box.innerHTML = '';
       Object.keys(typeLabels).forEach(type => {
         const name = eq[type];
         const badge = document.createElement('div');
+        badge.title = 'タップで一覧を開く';
+        badge.onclick = () => { switchCraftTab('cosmetics'); switchCosmeCategory(type); };
         if (name) {
           const item = COSMETICS.find(c => c.type === type && c.name === name);
           badge.className = 'avatar-loadout-badge';
-          badge.innerText = `${item ? item.icon : ''} ${name}`;
+          badge.innerText = `${item ? item.icon : typeIcons[type]} ${name}`;
         } else {
           badge.className = 'avatar-loadout-badge empty';
-          badge.innerText = `${typeLabels[type]}: なし`;
+          badge.innerText = `${typeIcons[type]} ${typeLabels[type]}: なし`;
         }
         box.appendChild(badge);
       });
