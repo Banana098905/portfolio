@@ -138,14 +138,42 @@
     .ai   .msg-avatar { background: var(--accent-dim); border: 1px solid rgba(249,115,22,0.3); }
     .user .msg-avatar { background: var(--surface2);   border: 1px solid var(--border); }
 
-    .bubble {
+    .bubble-wrap {
+      display: flex; flex-direction: column; gap: 6px;
       max-width: 78%;
+    }
+    .ai   .bubble-wrap { align-items: flex-start; }
+    .user .bubble-wrap { align-items: flex-end; }
+
+    .bubble {
       padding: 10px 14px;
       font-size: 14px; line-height: 1.7;
       white-space: pre-wrap; word-break: break-word;
     }
     .ai   .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; }
     .user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); color: #f5c4a0; border-radius: 14px 4px 14px 14px; }
+
+    .bubble code {
+      background: var(--surface2);
+      padding: 1px 5px; border-radius: 4px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.9em;
+    }
+    .bubble a { color: var(--accent); text-decoration: underline; }
+    .bubble ul, .bubble ol { margin: 4px 0 4px 20px; }
+    .bubble li { margin-bottom: 2px; }
+
+    .msg-actions { display: flex; gap: 6px; }
+    .msg-actions button {
+      width: auto; height: auto;
+      padding: 4px 10px;
+      font-size: 11px; border-radius: 7px;
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text-muted); font-family: inherit;
+    }
+    .msg-actions button:hover {
+      color: var(--text); border-color: rgba(249,115,22,0.4); background: var(--accent-dim);
+    }
 
     .typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; }
     .typing span {
@@ -285,6 +313,35 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  // ===== 簡易Markdown表示 =====
+  // 太字・斜体・インラインコード・リンク・見出し・箇条書きだけ対応した最低限のレンダラー。
+  // 先にescHtmlしてからタグを差し込むので、任意のHTMLが混ざる心配はない。
+  function renderLists(html) {
+    html = html.replace(/(^|\n)((?:[-・] .*(?:\n|$))+)/g, (m, pre, block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^[-・]\s+/, '')}</li>`).join('');
+      return `${pre}<ul>${items}</ul>`;
+    });
+    html = html.replace(/(^|\n)((?:\d+\. .*(?:\n|$))+)/g, (m, pre, block) => {
+      const items = block.trim().split('\n').map(l => `<li>${l.replace(/^\d+\.\s+/, '')}</li>`).join('');
+      return `${pre}<ol>${items}</ol>`;
+    });
+    return html;
+  }
+
+  function renderMarkdown(raw) {
+    let text = escHtml(raw);
+    text = text.replace(/`([^`\n]+)`/g, '<code>$1</code>');
+    text = text.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+    text = text.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1<em>$2</em>');
+    text = text.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, '$1<em>$2</em>');
+    text = text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+    text = text.replace(/^### (.*)$/gm, '<strong>$1</strong>');
+    text = text.replace(/^## (.*)$/gm, '<strong>$1</strong>');
+    text = text.replace(/^# (.*)$/gm, '<strong>$1</strong>');
+    text = renderLists(text);
+    return text;
+  }
+
   // ===== 右パネル（コード・資料の表示） =====
   const artifactPanel = document.getElementById('artifact-panel');
   const artifactTitle  = document.getElementById('artifact-title');
@@ -341,25 +398,18 @@
     URL.revokeObjectURL(url);
   }
 
+  // 挨拶やユーザーの発言など、アクションボタンが不要なメッセージ用
   function addMessage(role, text) {
-    let displayText = text;
-
-    if (role === 'ai') {
-      const artifact = extractArtifact(text);
-      if (artifact) {
-        displayText = artifact.chatText;
-        openArtifact(artifact.lang, artifact.code);
-      }
-    }
-
     const div = document.createElement('div');
     div.className = 'message ' + role;
+    const bodyHtml = role === 'ai' ? renderMarkdown(text) : escHtml(text);
     div.innerHTML = `
       <div class="msg-avatar">${role === 'ai' ? '⚡' : '🧑'}</div>
-      <div class="bubble">${escHtml(displayText)}</div>
+      <div class="bubble-wrap"><div class="bubble">${bodyHtml}</div></div>
     `;
     chat.appendChild(div);
     chat.scrollTop = chat.scrollHeight;
+    return div;
   }
 
   function showTyping() {
@@ -372,10 +422,169 @@
 
   function removeTyping() { document.getElementById('typing')?.remove(); }
 
+  // ===== AIの返信バブル（コピー・再生成ボタン付き） =====
+  // 直近のAI返信にだけボタンを出す。新しい返信が来たら、前の返信のボタンだけ消す。
+  let lastAiActionsEl = null;
+  function stripPreviousAiActions() {
+    if (lastAiActionsEl) { lastAiActionsEl.remove(); lastAiActionsEl = null; }
+  }
+
+  function createStreamingBubble() {
+    const div = document.createElement('div');
+    div.className = 'message ai';
+    div.innerHTML = `<div class="msg-avatar">⚡</div><div class="bubble-wrap"><div class="bubble"></div></div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    return div;
+  }
+
+  function updateStreamingBubble(div, text) {
+    div.querySelector('.bubble').textContent = text;
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function finalizeAiBubble(div, fullText) {
+    const bubble = div.querySelector('.bubble');
+    const wrap = div.querySelector('.bubble-wrap');
+    const artifact = extractArtifact(fullText);
+    let rawForCopy = fullText;
+
+    if (artifact) {
+      rawForCopy = artifact.chatText;
+      bubble.innerHTML = renderMarkdown(artifact.chatText);
+      openArtifact(artifact.lang, artifact.code);
+    } else {
+      bubble.innerHTML = renderMarkdown(fullText);
+    }
+
+    stripPreviousAiActions();
+    const actions = document.createElement('div');
+    actions.className = 'msg-actions';
+    actions.innerHTML = `<button class="copy-btn">📋 コピー</button><button class="regen-btn">🔁 再生成</button>`;
+    wrap.appendChild(actions);
+    actions.querySelector('.copy-btn').onclick = () => {
+      navigator.clipboard?.writeText(rawForCopy).catch(() => {});
+    };
+    actions.querySelector('.regen-btn').onclick = () => regenerateLast();
+    lastAiActionsEl = actions;
+
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function showErrorBubble(msg) {
+    const div = document.createElement('div');
+    div.className = 'message ai';
+    div.innerHTML = `
+      <div class="msg-avatar">⚡</div>
+      <div class="bubble-wrap">
+        <div class="bubble">❌ ${escHtml(msg || '接続エラーが発生しました。WorkerのURLを確認してください。')}</div>
+        <div class="msg-actions"><button class="retry-btn">🔄 再送信</button></div>
+      </div>
+    `;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+    div.querySelector('.retry-btn').onclick = () => {
+      div.remove();
+      input.disabled = true; btn.disabled = true;
+      requestAssistantReply().finally(() => { input.disabled = false; btn.disabled = false; input.focus(); });
+    };
+  }
+
   // 会話履歴はメモリ上だけに置く（どこにも保存しない＝リロードで消える）。
   // 直近のやり取りだけ持たせて、長くなりすぎないようにする。
   const MAX_HISTORY = 20; // 直近20発言（10往復）まで
   let history = [];
+  function trimHistory() {
+    if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
+  }
+
+  // Workerに問い合わせて返信を受け取る。ストリーミング(SSE)なら少しずつ表示し、
+  // まだ古いWorkerでJSON一括応答が返ってきた場合もそのまま表示できるようにしてある。
+  async function requestAssistantReply() {
+    showTyping();
+
+    let res;
+    try {
+      res = await fetch(WORKER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history })
+      });
+    } catch (e) {
+      removeTyping();
+      showErrorBubble('接続エラーが発生しました。WorkerのURLを確認してください。');
+      return;
+    }
+
+    const ct = res.headers.get('content-type') || '';
+
+    if (!res.ok || ct.includes('application/json')) {
+      removeTyping();
+      let reply = null;
+      try { const data = await res.json(); reply = data.reply || null; } catch (e) {}
+
+      if (!res.ok) {
+        showErrorBubble(reply || 'エラーが発生しました。');
+        return;
+      }
+
+      const div = createStreamingBubble();
+      finalizeAiBubble(div, reply || 'エラーが発生しました。');
+      history.push({ role: 'assistant', content: reply || 'エラーが発生しました。' });
+      trimHistory();
+      return;
+    }
+
+    // ===== ストリーミング表示 =====
+    removeTyping();
+    const div = createStreamingBubble();
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '', fullText = '';
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed.startsWith('data:')) continue;
+          const dataStr = trimmed.slice(5).trim();
+          if (dataStr === '[DONE]' || !dataStr) continue;
+          try {
+            const json = JSON.parse(dataStr);
+            const delta = json.choices?.[0]?.delta?.content;
+            if (delta) {
+              fullText += delta;
+              updateStreamingBubble(div, fullText);
+            }
+          } catch (e) { /* 分割された不完全な行は無視 */ }
+        }
+      }
+    } catch (e) {
+      // ストリーミング中に切断された場合も、途中まで受け取った分は表示する
+    }
+
+    if (!fullText) fullText = 'うまく答えられませんでした。もう一度試してください。';
+    finalizeAiBubble(div, fullText);
+    history.push({ role: 'assistant', content: fullText });
+    trimHistory();
+  }
+
+  function regenerateLast() {
+    if (history.length && history[history.length - 1].role === 'assistant') {
+      history.pop();
+      const aiMessages = chat.querySelectorAll('.message.ai');
+      const last = aiMessages[aiMessages.length - 1];
+      if (last) last.remove();
+      lastAiActionsEl = null;
+    }
+    input.disabled = true; btn.disabled = true;
+    requestAssistantReply().finally(() => { input.disabled = false; btn.disabled = false; input.focus(); });
+  }
 
   async function sendMessage() {
     const text = input.value.trim();
@@ -386,26 +595,9 @@
 
     addMessage('user', text);
     history.push({ role: 'user', content: text });
-    if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
-    showTyping();
+    trimHistory();
 
-    try {
-      const res  = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history })
-      });
-      const data = await res.json();
-      removeTyping();
-      const reply = data.reply || 'エラーが発生しました。';
-      addMessage('ai', reply);
-      history.push({ role: 'assistant', content: reply });
-      if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
-    } catch (e) {
-      removeTyping();
-      addMessage('ai', '❌ 接続エラー。WorkerのURLを確認してください。');
-      history.pop(); // 送れなかった発言は履歴からも取り消す
-    }
+    await requestAssistantReply();
 
     input.disabled = false; btn.disabled = false; input.focus();
   }
