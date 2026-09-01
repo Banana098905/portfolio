@@ -481,9 +481,10 @@
     }
 
     .fish-icon.luring {
-      filter: drop-shadow(0 0 8px #ff6600);
-      animation: lurePulse 0.4s infinite alternate;
+      filter: drop-shadow(0 0 12px #ff6600) drop-shadow(0 0 20px #ffaa00);
+      animation: lurePulse 0.25s infinite alternate;
     }
+    .fish-icon.luring svg { fill: #ff8800; }
 
     @keyframes lurePulse {
       0% { opacity: 1; transform: translateY(-50%) scale(1); }
@@ -638,6 +639,7 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 24px rgba(176,38,255,0.25);
     }
     .fight-title.world2-title span { color: #c98bff; text-shadow: 0 0 10px rgba(176,38,255,0.6); }
+
     .reel-track {
       position: relative;
       width: 100%;
@@ -1706,6 +1708,28 @@
       <div class="modal-body" id="changelog-content" style="overflow-y:auto; flex:1; min-height:0; display:flex; flex-direction:column; gap:12px;"></div>
     </div>
 
+    <div class="modal-overlay" id="modal-settings">
+      <div class="modal-header">
+        <h3>⚙️ 設定</h3>
+        <button class="close-btn" onclick="closeModal('modal-settings')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+        <div>
+          <h4 style="font-size:0.85rem; margin-bottom:6px;">💾 セーブデータのバックアップ</h4>
+          <p style="font-size:0.75rem; color:var(--text-sub); line-height:1.8; margin-bottom:10px;">
+            進行状況はブラウザ内(localStorage)にのみ保存されています。ブラウザのデータを消去したり、別の端末で開いたりすると引き継がれません。
+            ファイルとして保存しておけば、後から読み込んで復元できます。
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="buy-btn" style="width:auto; padding:10px 20px;" onclick="exportSaveData()">⬇️ バックアップを保存</button>
+            <button class="buy-btn" style="width:auto; padding:10px 20px;" onclick="document.getElementById('import-save-input').click()">⬆️ バックアップを読み込む</button>
+            <input type="file" id="import-save-input" accept="application/json" style="display:none" onchange="importSaveData(event)">
+          </div>
+          <p id="settings-save-status" style="font-size:0.7rem; color:var(--text-sub); margin-top:8px;"></p>
+        </div>
+      </div>
+    </div>
+
     <!-- リザルト -->
     <div id="catch-result-overlay">
       <div class="result-panel">
@@ -1763,6 +1787,10 @@
       <button class="nav-btn" data-modal="modal-changelog" onclick="openModal('modal-changelog')">
         <svg viewBox="0 0 24 24"><path d="M4 3h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><polyline points="16 2 16 8 8 8 8 2"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
         <span>更新情報</span>
+      </button>
+      <button class="nav-btn" data-modal="modal-settings" onclick="openModal('modal-settings')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>設定</span>
       </button>
     </footer-nav>
   </div>
@@ -2776,7 +2804,7 @@
     const CHEST_REWARDS = [
       { label: '200G', icon: '💰', type: 'gold', amount: 200, weight: 26 },
       { label: '500G', icon: '💰', type: 'gold', amount: 500, weight: 18 },
-      { label: '魚のウロコ×10', icon: '🎣', type: 'material', name: '魚のウロコ', amount: 10, weight: 16 },
+      { label: '魚のウロコ×6', icon: '🎣', type: 'material', name: '魚のウロコ', amount: 6, weight: 12 },
       { label: '虹色のヒレ×3', icon: '🌈', type: 'material', name: '虹色のヒレ', amount: 3, weight: 12 },
       { label: '珊瑚石×5', icon: '🪸', type: 'material', name: '珊瑚石', amount: 5, weight: 9 },
       { label: '1 GEM', icon: '💎', type: 'gem', amount: 1, weight: 8 },
@@ -2809,16 +2837,19 @@
 
     const FISH_FIGHT_PROFILES = {
       17: {
-        diffOverride: 2.5,
-        velMult: 2.0,
-        changeRate: 0.18,
-        dashInterval: 1.4,
-        dashPower: 140,
+        diffOverride: 3.4,
+        velMult: 3.0,
+        changeRate: 0.24,
+        dashInterval: 0.75,
+        dashPower: 200,
         lureFlash: true,
-        drainMult: 1.45,
-        gainMult: 0.78,
-        startGauge: 25,
-        barShrink: 4
+        lureInterval: 2.0,
+        lureDuration: 1.4,
+        drainMult: 1.75,
+        gainMult: 0.55,
+        startGauge: 18,
+        barShrink: 8,
+        lureDrainMult: 2.5
       }
     };
 
@@ -3233,6 +3264,77 @@
     // ============================================================
     const CHANGELOG = [
       {
+        version: '2.0.0',
+        date: '2026年7月31日',
+        title: '🎣 バランス調整＆チョウチンアンコウ強化',
+        changes: [
+          '🚶 トップダウン移動モード(β)を削除し、釣りゲーム本体に集中できるように整理',
+          '🐟 チョウチンアンコウ専用の戦闘AIを実装：発光器の点滅(ルアー)・急ダッシュ・細いバー・ゲージ減少加速で本格的な深海バトルに',
+          '🎰 ウロコルーレットはクラフト画面から引き続き利用可能。魚のウロコのドロップ量を調整してルーレット消費先を強化',
+          '🔊 効果音・エサ選択UIはそのまま維持'
+        ]
+      },
+      {
+        version: '1.9.4',
+        date: '2026年7月19日',
+        title: '⛵ トップダウン移動モード(β) フェーズ5：舟で「川」にも行けるように',
+        changes: [
+          '🚣 港の岸辺に舟着き場を追加。近づいて(E)を押すと「川」エリアへ移動できる(Lv.3以上が必要)',
+          '🏞️ 新エリア「川」を追加。中央を流れる川に釣り場があり、Eキー/タップで今まで通りの川釣りに接続',
+          '⛵ 川側にも「港へ戻る」舟着き場を設置。エリア間を行き来できるように',
+          '🧩 内部的にはエリアを追加しやすい共通の仕組み(OVERWORLD_AREAS)に整理。地面・桟橋・水面などのドット絵はエリア間で使い回すので、追加の絵作りコストなしで新エリアを実装',
+          '🧭 これでフェーズ1〜5が完了：歩く→拠点で行動→舟で別の海域へ、という探索の骨格が一通りできあがりました'
+        ]
+      },
+      {
+        version: '1.9.3',
+        date: '2026年7月19日',
+        title: '🏠 トップダウン移動モード(β) フェーズ4：建物からショップ・図鑑を開けるように',
+        changes: [
+          '🛍️ 港の左手の建物に近づくと「ショップを開く」ボタンが出現。中に入るとそのままショップ画面へ',
+          '📖 右手の建物に近づくと同様に「図鑑を開く」で図鑑画面へ',
+          '🪧 建物の上にふわふわ浮く看板アイコンを追加し、何の建物か遠くからでも分かるように',
+          '🔁 釣り場・建物どちらにも対応できるよう、アクションボタン(E)の判定を共通の仕組みに整理',
+          '🧭 これで「歩く→釣り場で釣り→建物でショップ/図鑑」の一通りの拠点らしい動線が完成'
+        ]
+      },
+      {
+        version: '1.9.2',
+        date: '2026年7月19日',
+        title: '🎣 トップダウン移動モード(β) フェーズ3：釣り場と接続',
+        changes: [
+          '🚩 港の桟橋の先端(光る釣り場マーカー)にたどり着くと「🎣 ここで釣る (E)」ボタンが出現',
+          '⌨️ PCはEキー、スマホはボタンタップで発動。押すと港(小さな港)に切り替わり、今まで通りのCASTボタン〜バトル釣り画面に戻る',
+          '💬 釣り場を見つけた瞬間にヒントメッセージが出るように',
+          '🧭 これでフェーズ1〜3が完了：歩く→桟橋を渡る→釣り場に着くと今まで通りの釣りに合流、という一連の流れがつながりました'
+        ]
+      },
+      {
+        version: '1.9.1',
+        date: '2026年7月19日',
+        title: '🎨 トップダウン移動モード(β) フェーズ2：ドット絵化',
+        changes: [
+          '🧍 プレイヤーキャラを仮の丸形から、4方向(上下左右)のドット絵キャラに差し替え(歩行アニメはまだ無く静止絵)',
+          '🌱 地面・桟橋・建物の壁・水面のタイルもドット絵風の模様入りに変更',
+          '🌊 水面タイルはゆっくり波打つように簡易アニメーション',
+          '⚡ タイルとキャラはあらかじめ1回だけ描画したものを使い回す方式にして、動作を軽く保つよう最適化',
+          '🚧 まだ歩行アニメと、釣り場との接続(フェーズ3)は未実装です'
+        ]
+      },
+      {
+        version: '1.9.0',
+        date: '2026年7月19日',
+        title: '🚶 トップダウン移動モード(β) フェーズ1：移動の土台を追加',
+        changes: [
+          'フッターに「歩く β」ボタンを追加。「小さな港」を上から見た視点で自由に歩き回れる実験モードを実装',
+          '⌨️ PCはWASD/矢印キーで移動、スマホは画面左下の仮想スティックのドラッグ操作に対応',
+          '👆 スマホでは画面をタップした場所へ自動で歩いていく「タップ移動」にも対応',
+          '🧱 建物や海には入れないよう当たり判定を実装。桟橋の上は歩けるようにして先端まで行けるように',
+          '📷 プレイヤーを中心に追従するカメラを実装',
+          '🚧 今回は移動のみのフェーズ1です。桟橋の先の光る釣り場に着いても、まだ釣りには接続されていません（次のフェーズで対応予定）。キャラクターの見た目も仮の丸形で、ドット絵スプライトは次のフェーズで作り込みます'
+        ]
+      },
+      {
         version: '1.8.8',
         date: '2026年7月19日',
         title: '📖 図鑑をマップごとに絞り込めるように',
@@ -3471,7 +3573,7 @@
       }
     ];
 
-    const CHANGELOG_VERSION = 'v1.8.8';
+    const CHANGELOG_VERSION = 'v1.9.4';
 
     // 生簀の魚エントリ(fishInventory要素)から元のFISH_DATABASE定義を逆引きする
     // (mapId・hardIslandフラグなど、生簀エントリ自体には保存されていない情報を参照するため)
@@ -3809,13 +3911,20 @@
       });
 
       renderSpecialRodPanel();
-      // 時間経過で溜まるゲージ(ディバインロッドの運命/オーバーヒートの冷却表示)を定期更新
       specialRodTickTimer = setInterval(() => {
         const rod = RODS[game.rodId];
         if (rod && (rod.specialEffect === 'divine' || rod.specialEffect === 'overheat')) renderSpecialRodPanel();
       }, 1000);
 
       setInterval(saveGame, 10000);
+
+      // タブを閉じる/切り替える直前にも必ずセーブする
+      // （10秒間隔のオートセーブだけだと、その間の進行が消える場合があったため）
+      window.addEventListener('beforeunload', saveGame);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') saveGame();
+      });
+
       console.log('初期化完了。castState =', castState);
     });
 
@@ -3836,6 +3945,53 @@
     function saveGame() {
       localStorage.setItem('ocean_quest_save', JSON.stringify(game));
     }
+
+    // ============================================================
+    // セーブデータのバックアップ（エクスポート／インポート）
+    // ============================================================
+    function exportSaveData() {
+      saveGame(); // 直前の状態も確実に含める
+      const pad = n => String(n).padStart(2, '0');
+      const d = new Date();
+      const fname = `ocean_quest_backup_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+      const blob = new Blob([JSON.stringify(game, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = fname;
+      a.click();
+      URL.revokeObjectURL(url);
+      const status = document.getElementById('settings-save-status');
+      if (status) status.textContent = `✅ ${fname} を保存しました。`;
+    }
+
+    function importSaveData(event) {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = ''; // 同じファイルを連続選択できるようにリセット
+      if (!file) return;
+
+      const status = document.getElementById('settings-save-status');
+      const reader = new FileReader();
+      reader.onload = () => {
+        let parsed;
+        try {
+          parsed = JSON.parse(reader.result);
+        } catch (e) {
+          if (status) status.textContent = '❌ ファイルの読み込みに失敗しました（JSONとして不正です）。';
+          return;
+        }
+        const ok = confirm('現在のセーブデータを、読み込んだバックアップで上書きします。よろしいですか？（この操作は取り消せません）');
+        if (!ok) return;
+        // loadGame()内の既存の移行処理（旧スキルシステムの救済など）をそのまま活かすため、
+        // 生のデータを保存してからページを再読み込みする
+        localStorage.setItem('ocean_quest_save', JSON.stringify(parsed));
+        location.reload();
+      };
+      reader.onerror = () => {
+        if (status) status.textContent = '❌ ファイルの読み込みに失敗しました。';
+      };
+      reader.readAsText(file);
+    }
+
     function loadGame() {
       const saved = localStorage.getItem('ocean_quest_save');
       if (saved) {
@@ -4911,7 +5067,7 @@
       if (lockedCosmetics.length === 0) {
         game.gold += 300;
         alert("コスメコンプリート！ 300G返還");
-      } else if (activeQuestTab === 'achievements') {
+      } else {
         const prize = lockedCosmetics[Math.floor(Math.random() * lockedCosmetics.length)];
         game.ownedCosmetics.push(prize.name);
         alert(`🎉 獲得: ${prize.name}`);
@@ -6098,8 +6254,10 @@
       reelIndicator.classList.toggle('world2-indicator', !!targetFish.reelMismatch);
       if (fightPanel) fightPanel.classList.toggle('world2-panel', !!targetFish.reelMismatch);
       if (fightTitle) fightTitle.classList.toggle('world2-title', !!targetFish.reelMismatch);
+      const fightProfileStart = FISH_FIGHT_PROFILES[targetFish.id] || null;
+      if (fightTitle) fightTitle.classList.toggle('angler-warning', !!(fightProfileStart && fightProfileStart.lureFlash));
       fishPos = 50; fishVel = 0; playerPos = 40; playerVel = 0;
-      catchGauge = 45 + transientGaugeHeadStart;
+      catchGauge = (fightProfileStart?.startGauge ?? 45) + transientGaugeHeadStart;
       transientGaugeHeadStart = 0;
       isReeling = false;
       comboFlashShown = false;
@@ -6150,7 +6308,21 @@
       } else {
         reelSpeedMult = (rod.reelSpeed * (1 + eff.reelSpeed + rodBonus.reelSpeedBonus)) / (1 + resistance);
       }
-      playerBar.style.width = barWidth + '%';
+      const fightProfile = FISH_FIGHT_PROFILES[targetFish.id] || null;
+      if (fightProfile) {
+        if (fightProfile.diffOverride) diff = fightProfile.diffOverride;
+        if (fightProfile.gainMult) gaugeGainMult *= fightProfile.gainMult;
+      }
+      let effectiveBarWidth = barWidth;
+      if (fightProfile && fightProfile.barShrink) {
+        effectiveBarWidth = Math.max(8, barWidth - fightProfile.barShrink);
+      }
+      playerBar.style.width = effectiveBarWidth + '%';
+      fishIcon.classList.remove('luring');
+      let dashTimer = 0;
+      let lureTimer = 0;
+      let lureActive = false;
+      let lureElapsed = 0;
       let lastTime = performance.now();
 
       function updateFight(time) {
@@ -6159,13 +6331,44 @@
         lastTime = time;
         const now = performance.now();
         const effUi = getEffectiveSpecialUI(rod);
+        // チョウチンアンコウ等：専用プロファイルのダッシュ攻撃
+        if (fightProfile && fightProfile.dashInterval) {
+          dashTimer += dt;
+          if (dashTimer >= fightProfile.dashInterval) {
+            dashTimer = 0;
+            fishVel = (Math.random() < 0.5 ? -1 : 1) * fightProfile.dashPower * (fightProfile.velMult || 1);
+            if (fightProfile.lureFlash) sfxHit();
+          }
+        }
+        // 発光器(ルアー)点滅：魚が見えにくくなり、合わせても効果が薄い
+        if (fightProfile && fightProfile.lureFlash) {
+          lureTimer += dt;
+          if (!lureActive && lureTimer >= (fightProfile.lureInterval || 2.5)) {
+            lureActive = true;
+            lureElapsed = 0;
+            lureTimer = 0;
+            fishIcon.classList.add('luring');
+            addVisualSplashEffect('💡 発光器が点滅！本体を見失うな！');
+            sfxHit();
+          }
+          if (lureActive) {
+            lureElapsed += dt;
+            if (Math.random() < 0.18) fishVel = (Math.random() - 0.5) * 130 * (fightProfile.velMult || 1);
+            if (lureElapsed >= (fightProfile.lureDuration || 1.2)) {
+              lureActive = false;
+              fishIcon.classList.remove('luring');
+            }
+          }
+        }
         // サンダーロッド/フロストロッド：スタック/ゲージが満タンになると魚を一時的に完全停止させる
         const thunderFrozen = (effUi === 'thunder' && thunderState && now < thunderState.paralyzedUntil);
         const frostFrozen = (effUi === 'frost' && frostState && now < frostState.frozenUntil);
         // クロノロッド：時折魚の動きを完全に止める
         if (thunderFrozen || frostFrozen) { fishVel = 0; }
         else if (rodBonus.freezeChance > 0 && Math.random() < rodBonus.freezeChance) { fishVel = 0; }
-        else if (Math.random() < 0.06) { fishVel = (Math.random() - 0.5) * 80 * diff * rodBonus.fishSpeedMult; }
+        else if (Math.random() < (fightProfile?.changeRate ?? 0.06)) {
+          fishVel = (Math.random() - 0.5) * 80 * diff * rodBonus.fishSpeedMult * (fightProfile?.velMult ?? 1);
+        }
         // グラビティロッド：発動中は魚の移動速度を50%に低下させる
         const gravitySlow = (effUi === 'gravity' && gravityState && gravityState.active) ? 0.5 : 1;
         fishPos += fishVel * gravitySlow * dt;
@@ -6173,7 +6376,7 @@
         if (fishPos > 90) { fishPos = 90; fishVel = -fishVel * 0.5; }
         // サイクロンロッド：吸い込み発動中は魚がプレイヤーの位置へ強制的に引き寄せられる
         if (effUi === 'cyclone' && cycloneState && now < cycloneState.pullUntil) {
-          const pullTarget = Math.min(90, playerPos + barWidth / 2 - 5);
+          const pullTarget = Math.min(90, playerPos + effectiveBarWidth / 2 - 5);
           fishPos += (pullTarget - fishPos) * Math.min(1, dt * 4);
         }
         // ロッド+スキルの巻き速度が高いほど反応が速くなるが、レアな魚ほど抵抗で相殺される
@@ -6186,14 +6389,16 @@
         playerVel *= 0.95;
         playerPos += playerVel * dt;
         if (playerPos < 0) { playerPos = 0; playerVel = 0; }
-        if (playerPos > 100 - barWidth) { playerPos = 100 - barWidth; playerVel = 0; }
+        if (playerPos > 100 - effectiveBarWidth) { playerPos = 100 - effectiveBarWidth; playerVel = 0; }
         const fishCenter = fishPos + 5;
-        const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + barWidth);
+        const isMatched = (fishCenter >= playerPos) && (fishCenter <= playerPos + effectiveBarWidth);
+        const drainMult = (fightProfile?.drainMult ?? 1) * (lureActive ? (fightProfile?.lureDrainMult ?? 2) : 1);
+        const lureGainMult = lureActive ? 0.12 : 1;
         // インフェルノロッド：合わせ続けるほど熱が溜まり、MAXでバーストして与ダメージが3倍になる
         const infernoBurst = (effUi === 'inferno' && infernoState && now < infernoState.burstUntil) ? 3 : 1;
         if (isMatched) {
           playerBar.classList.add('matching');
-          catchGauge += (20 + eff.barWidth) * dt * gaugeGainMult * (1 + (reelSpeedMult - 1) * 0.5) * infernoBurst;
+          catchGauge += (20 + eff.barWidth) * dt * gaugeGainMult * lureGainMult * (1 + (reelSpeedMult - 1) * 0.5) * infernoBurst;
           if (effUi === 'inferno' && infernoState) {
             infernoState.heat = Math.min(100, infernoState.heat + 22 * dt);
             if (infernoState.heat >= 100 && now >= infernoState.burstUntil) {
@@ -6205,7 +6410,7 @@
           }
         } else {
           playerBar.classList.remove('matching');
-          catchGauge -= (14 + diff * 2) * dt;
+          catchGauge -= (14 + diff * 2) * dt * drainMult;
           if (effUi === 'inferno' && infernoState) {
             infernoState.heat = Math.max(0, infernoState.heat - 10 * dt);
           }
@@ -6394,11 +6599,11 @@
       consumeCookingBuffs();
       let dropMat = '', dropQty = 0;
       const isNewFrontier = targetFish.mapId >= 11; // 珊瑚礁の楽園以降は新素材がドロップする
-      if (targetFish.rarity === 'Common') { if(Math.random()<0.5){dropMat='魚のウロコ'; dropQty=1+Math.floor(Math.random()*2);} }
-      else if (targetFish.rarity === 'Uncommon') { if(Math.random()<0.6){dropMat='魚のウロコ'; dropQty=2+Math.floor(Math.random()*3);} }
+      if (targetFish.rarity === 'Common') { if(Math.random()<0.28){dropMat='魚のウロコ'; dropQty=1;} }
+      else if (targetFish.rarity === 'Uncommon') { if(Math.random()<0.38){dropMat='魚のウロコ'; dropQty=1+Math.floor(Math.random()*2);} }
       else if (targetFish.rarity === 'Rare') {
-        dropMat = Math.random()<0.5 ? (isNewFrontier ? '珊瑚石' : '虹色のヒレ') : '魚のウロコ';
-        dropQty = (dropMat==='虹色のヒレ' || dropMat==='珊瑚石') ? 1 : 4;
+        dropMat = Math.random()<0.55 ? (isNewFrontier ? '珊瑚石' : '虹色のヒレ') : '魚のウロコ';
+        dropQty = (dropMat==='虹色のヒレ' || dropMat==='珊瑚石') ? 1 : 2;
       }
       else if (targetFish.rarity === 'Epic') {
         dropMat = Math.random()<0.4 ? (isNewFrontier ? '珊瑚石' : '深海の結晶') : (isNewFrontier ? '深海の結晶' : '虹色のヒレ');
@@ -6972,7 +7177,12 @@
       canvas.width = stage.clientWidth;
       canvas.height = stage.clientHeight;
       waterCtx = canvas.getContext('2d');
-      function animate() { drawWaterSurface(); requestAnimationFrame(animate); }
+      // モーダルが開いている間は水面が画面に見えていないので、
+      // 描画をスキップして負荷を下げる（ループ自体は止めず、次のrAFだけ予約する）
+      function animate() {
+        if (!activeModal) drawWaterSurface();
+        requestAnimationFrame(animate);
+      }
       animate();
     }
 
@@ -7056,7 +7266,11 @@
       canvas.width = stage.clientWidth;
       canvas.height = stage.clientHeight;
       fxCtx = canvas.getContext('2d');
-      function animate() { drawFX(); requestAnimationFrame(animate); }
+      // 同様にモーダル表示中はエフェクト描画も止める
+      function animate() {
+        if (!activeModal) drawFX();
+        requestAnimationFrame(animate);
+      }
       animate();
     }
 
@@ -7331,6 +7545,8 @@
       msg.innerText = text; msg.className = 'show catch';
       setTimeout(() => { msg.className = ''; }, 2000);
     }
+
+
   </script>
 </body>
 </html>
