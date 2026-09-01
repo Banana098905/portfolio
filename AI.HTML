@@ -173,12 +173,7 @@
   Cloudflare WorkerをDeployしたあと、<code>config.js</code> の <code>WORKER_URL</code> を書き換えてGitHubにPushしてください。
 </div>
 
-<div id="chat">
-  <div class="message ai">
-    <div class="msg-avatar">⚡</div>
-    <div class="bubble">こんにちは！なんでも気軽に話しかけてください。Roblox開発のことでも、なんでも大丈夫ですよ😊</div>
-  </div>
-</div>
+<div id="chat"></div>
 
 <div id="input-area">
   <textarea id="input" rows="1" placeholder="メッセージを入力... (Enterで送信)"></textarea>
@@ -195,6 +190,18 @@
   if (typeof WORKER_URL !== 'undefined' && WORKER_URL !== 'YOUR_WORKER_URL_HERE') {
     banner.classList.add('hidden');
   }
+
+  // このAIはコード(このページ)だけで動いていて、会話は一切保存されません。
+  // ページを開くたびに、今日の日付を入れた挨拶をその場で生成するだけです。
+  // （リロードすれば会話は消えます＝毎回まっさらな状態です）
+  function todaysGreeting() {
+    const now = new Date();
+    const weekday = ['日','月','火','水','木','金','土'][now.getDay()];
+    const dateStr = `${now.getMonth() + 1}月${now.getDate()}日(${weekday})`;
+    return `こんにちは、${dateStr}です。`;
+  }
+
+  addMessage('ai', todaysGreeting());
 
   input.addEventListener('input', () => {
     input.style.height = 'auto';
