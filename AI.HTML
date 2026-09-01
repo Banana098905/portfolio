@@ -9,28 +9,21 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #0b1020;
-      --bg-2: #121a2b;
-      --surface: rgba(18, 25, 38, 0.9);
-      --surface-strong: rgba(22, 31, 48, 0.96);
-      --surface2: rgba(27, 37, 54, 0.9);
-      --border: rgba(148, 163, 184, 0.18);
+      --bg: #0f0f11;
+      --surface: #1a1a1f;
+      --surface2: #222228;
+      --border: rgba(255,255,255,0.08);
       --accent: #f97316;
-      --accent-2: #fb923c;
       --accent-dim: rgba(249,115,22,0.15);
-      --text: #edf2ff;
-      --text-muted: #9aa8bd;
-      --user-bg: linear-gradient(135deg, rgba(88, 53, 19, 0.9), rgba(52, 31, 15, 0.9));
-      --user-border: rgba(251,146,60,0.25);
-      --panel-shadow: 0 16px 40px rgba(15, 23, 42, 0.45);
+      --text: #e8e8ee;
+      --text-muted: #888896;
+      --user-bg: #271a0f;
+      --user-border: rgba(249,115,22,0.3);
     }
 
     body {
       font-family: 'Noto Sans JP', sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(249,115,22,0.16), transparent 30%),
-        radial-gradient(circle at bottom right, rgba(14,165,233,0.12), transparent 28%),
-        linear-gradient(180deg, var(--bg), var(--bg-2));
+      background: var(--bg);
       color: var(--text);
       height: 100dvh;
       display: flex;
@@ -39,90 +32,61 @@
     }
 
     header {
-      width: min(1500px, calc(100% - 28px));
-      margin: 16px auto 0;
-      padding: 14px 18px;
-      border: 1px solid var(--border);
-      border-radius: 18px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 10px;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(10px);
-      box-shadow: var(--panel-shadow);
+      background: var(--surface);
       flex-shrink: 0;
     }
 
     .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, rgba(249,115,22,0.3), rgba(249,115,22,0.12));
-      border: 1px solid rgba(249,115,22,0.38);
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid rgba(249,115,22,0.4);
       display: flex; align-items: center; justify-content: center;
       font-size: 16px;
-      box-shadow: inset 0 0 20px rgba(249,115,22,0.12);
     }
 
-    header h1 { font-size: 15px; font-weight: 600; }
+    header h1 { font-size: 15px; font-weight: 500; }
     header p  { font-size: 11px; color: var(--text-muted); }
 
     .status {
       margin-left: auto;
-      display: flex; align-items: center; gap: 6px;
+      display: flex; align-items: center; gap: 5px;
       font-size: 11px; color: var(--text-muted);
-      padding: 6px 10px; border-radius: 999px;
-      background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.18);
     }
-    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 12px rgba(74, 222, 128, 0.8); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
 
     #app {
       flex: 1; min-height: 0;
-      width: min(1500px, calc(100% - 28px));
-      margin: 14px auto 0;
       display: flex; flex-direction: row;
       overflow: hidden;
-      gap: 12px;
-      padding-bottom: 12px;
     }
 
     #main-col {
       flex: 1; min-width: 0;
       display: flex; flex-direction: column;
       overflow: hidden;
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: var(--panel-shadow);
     }
 
     #chat {
       flex: 1; overflow-y: auto;
-      padding: 18px 18px 12px;
-      display: flex; flex-direction: column; gap: 14px;
+      padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
       scroll-behavior: smooth;
-      background: linear-gradient(180deg, rgba(15,23,42,0.18), rgba(15,23,42,0.35));
     }
-    #chat::-webkit-scrollbar { width: 5px; }
-    #chat::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.28); border-radius: 999px; }
+    #chat::-webkit-scrollbar { width: 4px; }
+    #chat::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     #artifact-panel {
       width: 0; flex-shrink: 0;
       overflow: hidden;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      background: rgba(15, 23, 42, 0.75);
-      box-shadow: var(--panel-shadow);
+      border-left: 1px solid var(--border);
+      background: var(--surface);
       display: flex; flex-direction: column;
       transition: width 0.22s ease;
     }
     #artifact-panel.open { width: 46%; }
-
-    #artifact-panel-toggle {
-      position: fixed; right: 18px; bottom: 18px;
-      width: 54px; height: 54px; border-radius: 16px;
-      background: var(--accent); color: white; border: none;
-      box-shadow: 0 8px 24px rgba(249, 115, 22, 0.35);
-      display: none; z-index: 20; font-size: 20px;
-      cursor: pointer;
-    }
-    #artifact-panel-toggle.visible { display: flex; align-items: center; justify-content: center; }
 
     .artifact-header {
       display: flex; align-items: center; gap: 8px;
@@ -176,13 +140,12 @@
 
     .bubble {
       max-width: 78%;
-      padding: 11px 14px;
+      padding: 10px 14px;
       font-size: 14px; line-height: 1.7;
       white-space: pre-wrap; word-break: break-word;
-      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
     }
-    .ai   .bubble { background: rgba(17, 24, 39, 0.9); border: 1px solid var(--border); border-radius: 4px 16px 16px 16px; }
-    .user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); color: #f5c4a0; border-radius: 16px 4px 16px 16px; }
+    .ai   .bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 14px 14px 14px; }
+    .user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); color: #f5c4a0; border-radius: 14px 4px 14px 14px; }
 
     .typing { display: flex; gap: 5px; align-items: center; padding: 12px 14px; }
     .typing span {
@@ -198,8 +161,8 @@
     }
 
     #input-area {
-      padding: 12px 16px 14px;
-      background: rgba(12, 18, 30, 0.72);
+      padding: 14px 16px;
+      background: var(--surface);
       border-top: 1px solid var(--border);
       display: flex; gap: 8px; align-items: flex-end;
       flex-shrink: 0;
@@ -207,107 +170,41 @@
 
     textarea {
       flex: 1;
-      background: rgba(27, 37, 54, 0.9);
-      border: 1px solid rgba(148,163,184,0.2);
-      border-radius: 14px;
-      padding: 12px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
       font-family: 'Noto Sans JP', sans-serif;
       font-size: 14px; color: var(--text);
       resize: none; outline: none;
       line-height: 1.5; max-height: 120px;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      box-shadow: inset 0 1px 2px rgba(15,23,42,0.28);
+      transition: border-color 0.2s;
     }
-    textarea:focus { border-color: rgba(249,115,22,0.45); box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+    textarea:focus { border-color: rgba(249,115,22,0.5); }
     textarea::placeholder { color: var(--text-muted); }
 
     button {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: var(--accent);
       border: none; color: white;
       font-size: 18px; cursor: pointer; flex-shrink: 0;
-      transition: opacity 0.15s, transform 0.1s, box-shadow 0.15s;
+      transition: opacity 0.15s, transform 0.1s;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 8px 20px rgba(249,115,22,0.3);
     }
-    button:hover  { opacity: 0.92; }
-    button:active { transform: scale(0.97); }
+    button:hover  { opacity: 0.85; }
+    button:active { transform: scale(0.95); }
     button:disabled { opacity: 0.4; cursor: not-allowed; }
 
     #setup-banner {
-      width: min(1500px, calc(100% - 28px));
-      background: rgba(250,180,60,0.08);
-      border: 1px solid rgba(250,180,60,0.28);
-      border-radius: 14px;
+      background: rgba(250,180,60,0.1);
+      border: 1px solid rgba(250,180,60,0.3);
+      border-radius: 10px;
       padding: 12px 16px;
       font-size: 13px; color: #f5c842;
-      margin: 12px auto 0; line-height: 1.6;
-      box-shadow: 0 8px 22px rgba(250,180,60,0.08);
+      margin: 12px 20px 0; line-height: 1.6;
     }
     #setup-banner.hidden { display: none; }
-
-    .mode-bar {
-      width: min(1500px, calc(100% - 28px));
-      margin: 12px auto 0;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 10px 14px;
-      border: 1px solid var(--border); border-radius: 16px;
-      background: rgba(15, 23, 42, 0.6); font-size: 12px; color: var(--text-muted);
-      box-shadow: 0 8px 20px rgba(15,23,42,0.18);
-    }
-    .mode-bar strong { color: var(--text); }
-    .mode-toggle {
-      width: auto; height: auto; min-width: 52px; padding: 6px 10px; border-radius: 999px;
-      border: 1px solid rgba(249,115,22,0.3); background: rgba(249,115,22,0.12);
-      color: #f9c48b; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
-      box-shadow: inset 0 0 10px rgba(249,115,22,0.08);
-    }
-    .study-actions {
-      width: min(1500px, calc(100% - 28px));
-      display: flex; flex-wrap: wrap; gap: 8px; margin: 12px auto 0;
-    }
-    .study-chip {
-      padding: 7px 10px; border-radius: 999px; border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.5); color: var(--text-muted); font-size: 11px;
-      cursor: pointer; transition: 0.15s ease; box-shadow: inset 0 0 0 rgba(0,0,0,0);
-    }
-    .study-chip.active {
-      background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.35);
-      color: #f9c48b; box-shadow: inset 0 0 12px rgba(249,115,22,0.08);
-    }
-
-    .response-actions {
-      width: min(1500px, calc(100% - 28px));
-      display: flex; flex-wrap: wrap; gap: 8px; margin: 10px auto 0;
-    }
-    .response-chip {
-      padding: 7px 10px; border-radius: 999px; border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.45); color: var(--text-muted); font-size: 11px;
-      cursor: pointer;
-    }
-    .response-chip.active {
-      background: rgba(76, 201, 240, 0.12); border-color: rgba(76, 201, 240, 0.35);
-      color: #9fe8ff;
-    }
-
-    .prompt-row {
-      width: min(1500px, calc(100% - 28px));
-      display: flex; flex-wrap: wrap; gap: 8px; margin: 10px auto 0;
-    }
-    .prompt-btn {
-      padding: 8px 10px; border-radius: 10px; border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.5); color: var(--text); font-size: 11px; cursor: pointer;
-    }
-
-    .progress-box {
-      width: min(1500px, calc(100% - 28px));
-      margin: 12px auto 0; padding: 12px 14px; border-radius: 12px;
-      background: rgba(34, 197, 94, 0.08); border: 1px solid rgba(34, 197, 94, 0.22);
-      color: #d9fbe4; font-size: 12px; line-height: 1.6;
-      box-shadow: inset 0 0 16px rgba(34, 197, 94, 0.04);
-    }
-    .progress-box strong { color: white; }
   </style>
 </head>
 <body>
@@ -328,40 +225,6 @@
   ⚙️ <strong>初回設定が必要です。</strong>
   Cloudflare WorkerをDeployしたあと、<code>config.js</code> の <code>WORKER_URL</code> を書き換えてGitHubにPushしてください。
 </div>
-
-<div class="mode-bar">
-  <strong>学習モード</strong>
-  <button type="button" class="mode-toggle" id="mode-toggle">ON</button>
-</div>
-
-<div class="study-actions" aria-label="学習分野">
-  <button type="button" class="study-chip active" data-study="general">総合</button>
-  <button type="button" class="study-chip" data-study="coding">コード</button>
-  <button type="button" class="study-chip" data-study="essay">作文</button>
-  <button type="button" class="study-chip" data-study="geo">地理</button>
-  <button type="button" class="study-chip" data-study="social">社会</button>
-</div>
-
-<div class="response-actions" aria-label="出力形式">
-  <button type="button" class="response-chip active" data-mode="explain">解説</button>
-  <button type="button" class="response-chip" data-mode="summary">要点</button>
-  <button type="button" class="response-chip" data-mode="quiz">問題</button>
-  <button type="button" class="response-chip" data-mode="template">型</button>
-</div>
-
-<div class="prompt-row" aria-label="クイック入力">
-  <button type="button" class="prompt-btn" data-prompt="Pythonでfor文をわかりやすく教えて">Pythonの解説</button>
-  <button type="button" class="prompt-btn" data-prompt="作文の例文を作って">作文の例</button>
-  <button type="button" class="prompt-btn" data-prompt="日本の気候と産業の関係を3つでまとめて">地理要点</button>
-  <button type="button" class="prompt-btn" data-prompt="この単元の問題を3問作って">問題作成</button>
-</div>
-
-<div class="progress-box" id="study-progress">
-  <strong>学習進捗:</strong> まだ始めたばかりです。<br>
-  まずは1教科を決めて、今日の3ポイントだけを確認しましょう。
-</div>
-
-<button id="artifact-panel-toggle" type="button" title="資料を表示" onclick="showArtifactPanel()">📄</button>
 
 <div id="app">
   <div id="main-col">
@@ -392,21 +255,6 @@
   const input  = document.getElementById('input');
   const btn    = document.getElementById('send-btn');
   const banner = document.getElementById('setup-banner');
-  const modeToggle = document.getElementById('mode-toggle');
-  const studyButtons = Array.from(document.querySelectorAll('.study-chip'));
-  const responseButtons = Array.from(document.querySelectorAll('.response-chip'));
-  const promptButtons = Array.from(document.querySelectorAll('.prompt-btn'));
-  let lightweightMode = true;
-  let studyFocus = 'general';
-  let responseMode = 'explain';
-  let summary = '';
-  const studyProgress = {
-    coding: 0,
-    essay: 0,
-    geo: 0,
-    social: 0,
-    general: 0
-  };
 
   if (typeof WORKER_URL !== 'undefined' && WORKER_URL !== 'YOUR_WORKER_URL_HERE') {
     banner.classList.add('hidden');
@@ -441,7 +289,6 @@
   const artifactPanel = document.getElementById('artifact-panel');
   const artifactTitle  = document.getElementById('artifact-title');
   const artifactBody   = document.getElementById('artifact-body');
-  const artifactToggle = document.getElementById('artifact-panel-toggle');
   let currentArtifact = { lang: '', code: '' };
 
   const LANG_LABELS = {
@@ -474,20 +321,10 @@
     artifactTitle.textContent = LANG_LABELS[lang] || lang || 'コード';
     artifactBody.textContent = code;
     artifactPanel.classList.add('open');
-    artifactToggle.classList.remove('visible');
-  }
-
-  function showArtifactPanel() {
-    if (!currentArtifact.code) return;
-    artifactPanel.classList.add('open');
-    artifactToggle.classList.remove('visible');
   }
 
   function closeArtifact() {
     artifactPanel.classList.remove('open');
-    if (currentArtifact.code) {
-      artifactToggle.classList.add('visible');
-    }
   }
 
   function copyArtifact() {
@@ -537,322 +374,8 @@
 
   // 会話履歴はメモリ上だけに置く（どこにも保存しない＝リロードで消える）。
   // 直近のやり取りだけ持たせて、長くなりすぎないようにする。
-  const MAX_HISTORY = 8; // 直近8発言（4往復）だけを保持して軽くする
+  const MAX_HISTORY = 20; // 直近20発言（10往復）まで
   let history = [];
-
-  function compactText(text, maxLen = 180) {
-    const s = String(text || '').replace(/\s+/g, ' ').trim();
-    return s.length > maxLen ? s.slice(0, maxLen) + '…' : s;
-  }
-
-  function updateModeUI() {
-    modeToggle.textContent = lightweightMode ? 'ON' : 'OFF';
-    modeToggle.style.background = lightweightMode ? 'rgba(249,115,22,0.12)' : 'rgba(255,255,255,0.06)';
-    modeToggle.style.color = lightweightMode ? '#f9c48b' : 'var(--text-muted)';
-  }
-
-  modeToggle.addEventListener('click', () => {
-    lightweightMode = !lightweightMode;
-    updateModeUI();
-    addMessage('ai', lightweightMode ? '軽量モードをONにしました。よくある質問はローカルで即答し、データ使用を抑えます。' : '通常モードに切り替えました。詳しい文脈をもっと送ります。');
-  });
-
-  function detectStudySubject(text) {
-    const t = text.toLowerCase();
-    if (/(コード|コーディング|プログラム|javascript|python|html|css|java|c\+\+|typescript|関数|変数|if|for|while|配列|デバッグ|アルゴリズム)/.test(t)) return 'coding';
-    if (/(作文|作文の|文章|要約|英作文|感想文|説明文|論述|レポート|エッセイ|感想)/.test(t)) return 'essay';
-    if (/(地理|社会|歴史|時代|産業|人口|気候|地図|都道府県|世界地図|日本地理|地域|国際|自然環境)/.test(t)) return 'geo';
-    return 'general';
-  }
-
-  function detectQuestionType(text) {
-    const t = text.toLowerCase();
-    if (/(要点|まとめ|要約|ポイント|短く|3つで|3行で|大事なところ)/.test(t)) return 'summary';
-    if (/(問題|クイズ|テスト|練習|問|3問|5問|例題)/.test(t)) return 'quiz';
-    if (/(作文|文章|感想文|記述|英作文|レポート|説明文|論述)/.test(t)) return 'essay';
-    if (/(わかりやすく|説明|どうして|意味|理由|なぜ)/.test(t)) return 'explain';
-    if (/(型|テンプレ|書き方|構成|流れ|作り方)/.test(t)) return 'template';
-    if (/(コード|プログラム|python|javascript|html|css|関数|変数|for文|if文|配列|デバッグ)/.test(t)) return 'coding';
-    if (/(地理|社会|歴史|時代|産業|人口|気候|地図|都道府県|世界|地域|国際)/.test(t)) return 'geo';
-    return 'general';
-  }
-
-  function buildStudyAnswer(text) {
-    const subject = studyFocus === 'general' ? detectStudySubject(text) : studyFocus;
-    const intent = studyFocus === 'general' ? detectQuestionType(text) : responseMode;
-
-    if (intent === 'summary') {
-      return [
-        '要点をまとめるなら：',
-        '1. 結論を1文で書く',
-        '2. 重要な根拠を2つ挙げる',
-        '3. 最後に一言で締める',
-        '',
-        '例：',
-        '結論 → 理由1 → 理由2 → まとめ'
-      ].join('\n');
-    }
-
-    if (intent === 'quiz') {
-      return [
-        '問題演習の流れ：',
-        '① まずは自分で答える',
-        '② 解説を見てミスを確認する',
-        '③ よく間違える部分をノートに残す',
-        '④ もう一度同じタイプを解く',
-        '',
-        'この順でやると、復習がかなり効きます。'
-      ].join('\n');
-    }
-
-    if (intent === 'essay') {
-      return [
-        '作文の型：',
-        '導入：テーマを短く示す',
-        '中段：理由を2〜3つ書く',
-        '結論：自分の考えを1文でまとめる',
-        '',
-        'コツ：',
-        '・主張を1つに絞る',
-        '・具体例を入れる',
-        '・一文を短く、語順を自然にする',
-        '・最後に「なぜそう思うか」を書く',
-        '',
-        '例の形：',
-        '「私は〜と思う。理由は①〜②〜③だからだ。したがって〜。」'
-      ].join('\n');
-    }
-
-    if (intent === 'template') {
-      return [
-        '書き方の型：',
-        '導入 → 例 → 理由 → 結論',
-        '',
-        '使い方：',
-        '・最初に結論を書く',
-        '・理由を2つ示す',
-        '・具体例で説明する',
-        '・最後にまとまる',
-        '',
-        'これで文章が安定して書きやすくなります。'
-      ].join('\n');
-    }
-
-    if (intent === 'explain') {
-      return [
-        'わかりやすく説明するなら：',
-        '結論を先に言う',
-        '理由を2つに絞る',
-        '例を1つ出す',
-        '最後に一言でまとめる',
-        '',
-        'この順番が最も伝わりやすいです。'
-      ].join('\n');
-    }
-
-    if (subject === 'coding') {
-      return [
-        'コード学習のコツ：',
-        '1. 何をしたいかを1文で書く',
-        '2. 変数・条件分岐・繰り返しの順で考える',
-        '3. 例を最小単位で作る',
-        '4. エラーが出たら「入力 → 処理 → 出力」で確認する',
-        '5. 最後に1行で、どこが何をしているか説明する',
-        '',
-        '学習テンプレ：',
-        '「目的」→「必要なデータ」→「処理」→「出力」→「確認」',
-        '',
-        '必要なら、今の課題に合わせて、考え方→コード→説明をそのまま作れます。'
-      ].join('\n');
-    }
-
-    if (subject === 'geo' || subject === 'social') {
-      return [
-        '地理・社会の学習テンプレ：',
-        '1. どこにあるか（位置・地域）',
-        '2. なぜその特徴があるか（地形・気候・歴史）',
-        '3. どんな影響があるか（産業・生活・環境）',
-        '4. まとめ（重要ポイント3つ）',
-        '',
-        '覚え方：',
-        '・地図を見て場所をイメージする',
-        '・原因と結果をセットで覚える',
-        '・「地域→特徴→影響」の順で整理する'
-      ].join('\n');
-    }
-
-    return [
-      '質問の意図をもう少し具体化してくれたら、もっと丁寧に答えられます。',
-      '',
-      '例：',
-      '・わかりやすく説明して',
-      '・要点だけまとめて',
-      '・問題を3問作って',
-      '・作文の型を教えて'
-    ].join('\n');
-  }
-
-  function buildCompactHistory() {
-    const base = history.slice(-MAX_HISTORY);
-    const compact = base.map(msg => ({
-      role: msg.role,
-      content: compactText(msg.content, 180)
-    }));
-
-    if (summary) {
-      compact.push({
-        role: 'user',
-        content: `過去の要点: ${compactText(summary, 120)}`
-      });
-    }
-    return compact;
-  }
-
-  function updateProgressBox() {
-    const progressEl = document.getElementById('study-progress');
-    const total = Object.values(studyProgress).reduce((sum, v) => sum + v, 0);
-    const current = Math.min(100, Math.round((total / 12) * 100));
-    const subjectText = studyFocus === 'general' ? '総合' : {
-      coding: 'コード',
-      essay: '作文',
-      geo: '地理',
-      social: '社会'
-    }[studyFocus];
-    progressEl.innerHTML = `<strong>学習進捗:</strong> ${current}% 完了<br>今の分野: ${subjectText}<br>次は「1つの要点を3行でまとめる」練習をしてみましょう。`;
-  }
-
-  function setStudyFocus(target) {
-    studyFocus = target;
-    studyButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.study === target);
-    });
-    updateProgressBox();
-  }
-
-  function setResponseMode(target) {
-    responseMode = target;
-    responseButtons.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.mode === target);
-    });
-  }
-
-  studyButtons.forEach(btn => {
-    btn.addEventListener('click', () => setStudyFocus(btn.dataset.study));
-  });
-
-  responseButtons.forEach(btn => {
-    btn.addEventListener('click', () => setResponseMode(btn.dataset.mode));
-  });
-
-  promptButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      input.value = btn.dataset.prompt || '';
-      input.focus();
-      input.dispatchEvent(new Event('input'));
-    });
-  });
-
-  function buildStudyResponseByMode(subject, text) {
-    const mode = responseMode;
-    const subjectLabel = {
-      coding: 'コード',
-      essay: '作文',
-      geo: '地理',
-      social: '社会',
-      general: '総合'
-    }[subject] || '総合';
-
-    if (mode === 'summary') {
-      return [
-        `${subjectLabel}の要点を3つにまとめると：`,
-        '1. まず結論を一言で伝える',
-        '2. 大事な根拠や例を2つ書く',
-        '3. 最後に一行でまとめる',
-        '',
-        `質問: ${text}`,
-        '',
-        'この形にすると、短くて覚えやすくなります。'
-      ].join('\n');
-    }
-
-    if (mode === 'quiz') {
-      return [
-        `${subjectLabel}の練習問題を3問作ると：`,
-        '1. 基本問題',
-        '2. 応用問題',
-        '3. 説明問題',
-        '',
-        '例：',
-        '・このテーマの特徴は何か',
-        '・理由を一つ説明せよ',
-        '・自分の言葉でまとめよ',
-        '',
-        '必要ならすぐ3択や記述問題に変えられます。'
-      ].join('\n');
-    }
-
-    if (mode === 'template') {
-      return [
-        `${subjectLabel}の型を作ると：`,
-        '導入 → 例 → 理由 → 結論',
-        '',
-        '使い方：',
-        '・最初に結論を書く',
-        '・理由を2つ示す',
-        '・具体例で説明する',
-        '・最後にまとめる',
-        '',
-        'これで文章が安定して書きやすくなります。'
-      ].join('\n');
-    }
-
-    return buildStudyAnswer(text);
-  }
-
-  function quickLocalReply(text) {
-    const t = text.trim();
-    const lower = t.toLowerCase();
-
-    if (/テスト|定期テスト|試験|確認テスト|復習/.test(lower)) {
-      const target = studyFocus === 'general' ? '総合' : {
-        coding: 'コード',
-        essay: '作文',
-        geo: '地理',
-        social: '社会'
-      }[studyFocus];
-      const prep = [
-        '1. 重要語句を3つ書く',
-        '2. 例を1つ説明する',
-        '3. まとめを1行で書く',
-        '4. 間違えやすいポイントを確認する'
-      ].join('\n');
-      return `${target}の定期テスト対策なら、\n${prep}\n\nこの順番でやると効率がいいです。`;
-    }
-
-    if (!t) return '';
-    if (/^(こんにちは|こんばんは|おはよう|hi|hello)/.test(lower)) return `こんにちは！今日は${new Date().getMonth() + 1}月${new Date().getDate()}日です。今日は何を勉強しますか？`;
-    if (/今日|今.*時間|何時/.test(lower)) return `現在時刻は ${new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })} です。`;
-    if (/今日|明日|年月日|日付/.test(lower)) return `今日は ${new Date().getFullYear()}年${new Date().getMonth() + 1}月${new Date().getDate()}日 です。`;
-    if (/ありがとう|助かった|助かる|感謝/.test(lower)) return 'どういたしまして。必要なら、問題の解き方・作文の型・要点整理まで一緒に進めます。';
-    if (/簡単に|短く|要点だけ|まとめ/.test(lower)) return '要点だけなら、結論→理由→具体例→まとめの4段階で整理するとわかりやすくなります。';
-    if (/企画書|提案|アイデア|構成/.test(lower)) return '企画書なら、背景 → 課題 → 目的 → 提案 → 期待効果 → 実行計画の順でまとめるとわかりやすいです。';
-    const detected = studyFocus === 'general' ? detectStudySubject(t) : studyFocus;
-
-    if (/(コード|コーディング|python|javascript|java|html|css|プログラム|関数|変数|配列|デバッグ)/.test(lower) || detected === 'coding') {
-      return buildStudyResponseByMode('coding', t);
-    }
-    if (/(作文|作文の|文章|感想文|説明文|レポート|英作文|要約|論述)/.test(lower) || detected === 'essay') {
-      return buildStudyResponseByMode('essay', t);
-    }
-    if (/(地理|社会|歴史|時代|気候|産業|人口|都道府県|地域|国際)/.test(lower) || detected === 'geo' || detected === 'social') {
-      return buildStudyResponseByMode(detected === 'social' ? 'social' : 'geo', t);
-    }
-    if (/おはよう|こんばんは|さようなら/.test(lower)) return 'また話しましょう。';
-    if (studyFocus === 'general') {
-      return buildStudyAnswer(t);
-    }
-    return '';
-  }
 
   async function sendMessage() {
     const text = input.value.trim();
@@ -863,60 +386,29 @@
 
     addMessage('user', text);
     history.push({ role: 'user', content: text });
-    if (history.length > MAX_HISTORY * 2) history = history.slice(-MAX_HISTORY * 2);
-
-    const localReply = lightweightMode ? quickLocalReply(text) : '';
-    if (localReply) {
-      addMessage('ai', localReply);
-      history.push({ role: 'assistant', content: localReply });
-      if (history.length > MAX_HISTORY * 2) history = history.slice(-MAX_HISTORY * 2);
-      summary = summary ? `${summary} / ${text}` : text;
-      const growthKey = studyFocus === 'general' ? detectStudySubject(text) : studyFocus;
-      studyProgress[growthKey] = Math.min(3, (studyProgress[growthKey] || 0) + 1);
-      updateProgressBox();
-      input.disabled = false; btn.disabled = false; input.focus();
-      return;
-    }
-
+    if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
     showTyping();
 
     try {
-      const subject = studyFocus === 'general' ? detectStudySubject(text) : studyFocus;
-      const payload = {
-        mode: lightweightMode ? 'study-light' : 'normal',
-        subject,
-        studyFocus,
-        taskType: responseMode,
-        responseMode,
-        messages: buildCompactHistory()
-      };
-
       const res  = await fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ messages: history })
       });
       const data = await res.json();
       removeTyping();
       const reply = data.reply || 'エラーが発生しました。';
       addMessage('ai', reply);
       history.push({ role: 'assistant', content: reply });
-      if (history.length > MAX_HISTORY * 2) history = history.slice(-MAX_HISTORY * 2);
-      summary = summary ? `${summary} / ${reply.slice(0, 80)}` : reply.slice(0, 80);
-      const growthKey = studyFocus === 'general' ? detectStudySubject(text) : studyFocus;
-      studyProgress[growthKey] = Math.min(3, (studyProgress[growthKey] || 0) + 1);
-      updateProgressBox();
+      if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
     } catch (e) {
       removeTyping();
       addMessage('ai', '❌ 接続エラー。WorkerのURLを確認してください。');
-      history.pop();
+      history.pop(); // 送れなかった発言は履歴からも取り消す
     }
 
     input.disabled = false; btn.disabled = false; input.focus();
   }
-
-  updateModeUI();
-  updateProgressBox();
 </script>
 
 </body>
