@@ -1,1 +1,1 @@
-const WORKER_URL = "https://portfolio-flame-two-99.vercel.app/api/chat";
+const WORKER_URL = "https://vercel.com/mamo-s-projects1/portfolio/FLmmZwY1AaPqzpMYjtc4MQCHWHt2/api/chat";
