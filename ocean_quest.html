@@ -1456,6 +1456,94 @@
     .evo-req-short { color: var(--neon-pink); }
     .evo-card-mats { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
     .evo-card-unlock { font-size: 0.52rem; color: var(--text-sub); font-style: italic; margin-top: 2px; }
+
+    /* ===== 🔬 研究・ロッドフュージョン ===== */
+    .research-locked-msg { text-align: center; color: var(--text-sub); font-size: 0.72rem; padding: 24px 12px; line-height: 1.5; }
+    .fusion-chamber {
+      border-radius: 12px;
+      border: 1px solid rgba(0, 240, 255, 0.22);
+      background: radial-gradient(ellipse at 50% 0%, rgba(0, 120, 160, 0.18), rgba(0, 0, 0, 0.35));
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    .fusion-chamber-title { font-size: 0.68rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+    .fusion-slots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .fusion-slot {
+      width: 88px;
+      min-height: 92px;
+      border-radius: 10px;
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      text-align: center;
+    }
+    .fusion-slot-label { font-size: 0.5rem; color: var(--text-sub); }
+    .fusion-slot-name { font-size: 0.55rem; font-weight: 700; color: #fff; line-height: 1.2; }
+    .fusion-plus, .fusion-arrow { font-size: 1.1rem; color: var(--neon-cyan); font-weight: 800; }
+    .fusion-result-preview {
+      width: 100px;
+      min-height: 92px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 215, 0, 0.35);
+      background: rgba(255, 215, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      text-align: center;
+    }
+    .fusion-recipe-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+    .fusion-recipe-card {
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .fusion-recipe-card.done { opacity: 0.65; border-color: rgba(0, 240, 255, 0.25); }
+    .fusion-recipe-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .fusion-recipe-name { font-weight: 800; color: #fff; font-size: 0.72rem; }
+    .fusion-recipe-pair { font-size: 0.58rem; color: var(--neon-cyan); line-height: 1.35; }
+    .fusion-recipe-desc { font-size: 0.55rem; color: var(--text-sub); line-height: 1.4; }
+    .fusion-rod-pick-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+      gap: 6px;
+      max-height: 140px;
+      overflow-y: auto;
+      margin-top: 6px;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .fusion-rod-pick {
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.2);
+      padding: 6px 4px;
+      font-size: 0.48rem;
+      color: var(--text-main);
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .fusion-rod-pick.selected { border-color: var(--neon-cyan); box-shadow: var(--glow-cyan); }
+    .fusion-rod-pick.disabled { opacity: 0.35; pointer-events: none; }
     .craft-item { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; flex-shrink: 0; }
     .craft-materials { display: flex; gap: 4px; margin-top: 2px; flex-wrap: wrap; }
     .mat-badge { font-size: 0.45rem; color: var(--text-main); background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; display: flex; align-items: center; gap: 2px; }
@@ -1521,6 +1609,163 @@
     .cosme-category-tab.active { border-color: var(--neon-cyan); color: #fff; background: rgba(0,240,255,0.12); box-shadow: var(--glow-cyan); }
 
     .quest-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+
+    /* ===== 釣り基地：部屋マップ ===== */
+    .base-campus-intro {
+      font-size: 0.6rem;
+      color: var(--text-sub);
+      margin-top: 8px;
+      line-height: 1.45;
+      flex-shrink: 0;
+    }
+    .base-campus-canvas-wrap {
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(0, 240, 255, 0.18);
+      background: linear-gradient(180deg, #0a1a32 0%, #061018 55%, #041018 100%);
+      box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.06);
+      flex-shrink: 0;
+    }
+    #base-campus-canvas { display: block; width: 100%; height: auto; }
+    .base-campus-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 14px;
+      margin-top: 8px;
+      font-size: 0.52rem;
+      color: var(--text-sub);
+      flex-shrink: 0;
+    }
+    .base-campus-legend span { display: inline-flex; align-items: center; gap: 4px; }
+    .base-campus-legend i {
+      width: 10px; height: 10px; border-radius: 3px; display: inline-block;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .base-campus-legend i.built { background: rgba(0, 240, 255, 0.35); border-color: rgba(0, 240, 255, 0.5); }
+    .base-campus-legend i.avail { background: rgba(255, 215, 0, 0.15); border-style: dashed; border-color: rgba(255, 215, 0, 0.45); }
+    .base-campus-legend i.lock { background: rgba(255,255,255,0.04); opacity: 0.7; }
+    .base-campus-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 10px;
+    }
+    @media (min-width: 520px) {
+      .base-campus-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    .base-room {
+      position: relative;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.25);
+      min-height: 118px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .base-room--built {
+      border-color: rgba(0, 240, 255, 0.28);
+      box-shadow: inset 0 0 24px rgba(0, 240, 255, 0.06);
+    }
+    .base-room--available {
+      border-color: rgba(255, 215, 0, 0.35);
+      border-style: dashed;
+      cursor: pointer;
+    }
+    .base-room--available:hover { transform: translateY(-2px); border-color: rgba(255, 215, 0, 0.55); }
+    .base-room--locked { opacity: 0.55; filter: saturate(0.65); }
+    .base-room--main { grid-column: 1 / -1; min-height: 96px; }
+    .base-room--aquarium.base-room--built-tier-grand { grid-column: span 2; }
+    @media (max-width: 519px) {
+      .base-room--aquarium.base-room--built-tier-grand { grid-column: 1 / -1; }
+    }
+    .base-room__roof {
+      height: 14px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(0,240,255,0.12), rgba(255,255,255,0.04));
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .base-room__body {
+      flex: 1;
+      padding: 8px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(0,0,0,0.15) 100%);
+    }
+    .base-room--built .base-room__body { background: linear-gradient(180deg, rgba(0, 80, 100, 0.22) 0%, rgba(0, 20, 35, 0.35) 100%); }
+    .base-room--aquarium.base-room--built .base-room__body {
+      background: linear-gradient(180deg, rgba(0, 120, 180, 0.25) 0%, rgba(0, 30, 60, 0.45) 100%);
+    }
+    .base-room--deepSeaLab.base-room--built .base-room__body {
+      background: linear-gradient(180deg, rgba(40, 20, 80, 0.35) 0%, rgba(5, 5, 20, 0.5) 100%);
+    }
+    .base-room__title {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .base-room__status {
+      font-size: 0.52rem;
+      color: var(--text-sub);
+    }
+    .base-room--available .base-room__status { color: var(--neon-gold); }
+    .base-room__scene {
+      flex: 1;
+      min-height: 44px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .base-room__props {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-around;
+      padding: 6px 8px 8px;
+      font-size: 1.15rem;
+      line-height: 1;
+      pointer-events: none;
+    }
+    .base-room__window {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: 28%;
+      height: 38%;
+      border-radius: 4px;
+      border: 1px solid rgba(180, 220, 255, 0.25);
+      background: linear-gradient(135deg, rgba(120, 200, 255, 0.25), rgba(0, 40, 80, 0.15));
+      box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.15);
+    }
+    .base-room__tank-water {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 62%;
+      background: linear-gradient(180deg, rgba(0, 180, 255, 0.15), rgba(0, 90, 160, 0.45));
+    }
+    .base-room__tank-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.12) 50%, transparent 60%);
+      animation: baseTankShimmer 3.2s ease-in-out infinite;
+    }
+    @keyframes baseTankShimmer {
+      0%, 100% { transform: translateX(-30%); opacity: 0.3; }
+      50% { transform: translateX(30%); opacity: 0.7; }
+    }
+    .base-room__floor-line {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+    }
     .quest-bar { width: 60px; height: 4px; background: rgba(0,0,0,0.5); border-radius: 999px; overflow: hidden; margin-top: 2px; }
     .quest-bar-fill { height: 100%; background: var(--neon-cyan); }
     .quest-reward { font-size: clamp(0.45rem, 0.6vw, 0.6rem); color: var(--neon-gold); margin-top: 2px; }
@@ -1863,6 +2108,16 @@
       </div>
       <div class="modal-body">
         <div id="evolution-modal-body" style="flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-research">
+      <div class="modal-header">
+        <h3>🔬 魚研究室</h3>
+        <button class="close-btn" onclick="closeModal('modal-research')"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div id="research-modal-body" style="flex:1; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
       </div>
     </div>
 
@@ -3029,7 +3284,41 @@
       { id: 55, name: '黄金豊穣ロッド', cost: null, dist: 350, rare: 4.8, dur: 360, reelSpeed: 2.5, barWidth: 25, evolutionOnly: true, specialEffect: 'autumn2', vfxTheme: 'seasons', desc: '🌾 秋ルート最終進化。釣り上げるたびに「Harvestゲージ」が満ち、満タン時の1匹で素材が大豊作になる。' },
       { id: 56, name: '静寂の竿', cost: null, dist: 295, rare: 3.9, dur: 300, reelSpeed: 2.0, barWidth: 27, evolutionOnly: true, specialEffect: 'winter1', vfxTheme: 'seasons', desc: '❄️ 四季ロッドが冬の力に目覚めた第1進化。魚の動きが少し穏やかになり、安定して釣りやすくなる。' },
       { id: 57, name: '氷結神晶ロッド', cost: null, dist: 355, rare: 5.0, dur: 360, reelSpeed: 2.3, barWidth: 31, evolutionOnly: true, specialEffect: 'winter2', vfxTheme: 'seasons', desc: '🧊 冬ルート最終進化。テンションを合わせ続けると「Frostゲージ」が満ち、満タンで魚を数秒完全凍結させる。' },
-      { id: 58, name: '海月ロッド', cost: null, dist: 260, rare: 3.5, dur: 220, reelSpeed: 1.9, barWidth: 21, specialShopOnly: true, specialEffect: 'jellyfish', desc: '🎐 特別ショップ限定。クラゲの光を纏い、シャイニー個体を引き寄せやすくなる。' }
+      { id: 58, name: '海月ロッド', cost: null, dist: 260, rare: 3.5, dur: 220, reelSpeed: 1.9, barWidth: 21, specialShopOnly: true, specialEffect: 'jellyfish', desc: '🎐 特別ショップ限定。クラゲの光を纏い、シャイニー個体を引き寄せやすくなる。' },
+      // --- 研究室フュージョン専用ロッド ---
+      { id: 59, name: '暁月フュージョンロッド', cost: null, dist: 400, rare: 5.5, dur: 420, reelSpeed: 2.8, barWidth: 26, fusionOnly: true, specialEffect: 'fusion_twilight', vfxTheme: 'luna', desc: '🔬 ソーラーとルナを融合。昼も夜も穏やかな加護が宿る合成竿。' },
+      { id: 60, name: '深淵龍フュージョンロッド', cost: null, dist: 410, rare: 5.8, dur: 430, reelSpeed: 2.8, barWidth: 26, fusionOnly: true, specialEffect: 'fusion_abyssdragon', vfxTheme: 'dragon', desc: '🔬 ドラゴンとアビスを融合。龍・深海系の魚に強く反応する。' },
+      { id: 61, name: '極熱極寒フュージョンロッド', cost: null, dist: 480, rare: 6.2, dur: 450, reelSpeed: 3.2, barWidth: 29, fusionOnly: true, specialEffect: 'fusion_thermal', vfxTheme: 'frost', desc: '🔬 フロストとインフェルノを融合。魚を抑えつつレア率も上がる。' },
+      { id: 62, name: '星幽フュージョンロッド', cost: null, dist: 440, rare: 6.0, dur: 440, reelSpeed: 3.0, barWidth: 27, fusionOnly: true, specialEffect: 'fusion_stellar', vfxTheme: 'cosmic', desc: '🔬 コズミックとファントムを融合。レアとシャイニーを狙える。' },
+      { id: 63, name: '渦潮フュージョンロッド', cost: null, dist: 390, rare: 5.4, dur: 400, reelSpeed: 2.9, barWidth: 26, fusionOnly: true, specialEffect: 'fusion_vortex', vfxTheme: 'cyclone', desc: '🔬 タイドとスピンを融合。テンションが減りにくく巻きも速い。' },
+    ];
+
+    const ROD_FUSION_RECIPES = [
+      {
+        id: 'fuse_twilight', name: '暁月合成', rodA: 23, rodB: 24, resultRodId: 59, cost: 350000, requiredFacility: 'fishLab',
+        materials: [{ name: '深海の結晶', qty: 15 }, { name: '虹色のヒレ', qty: 8 }],
+        desc: 'ソーラーロッドとルナロッドを束ね、昼夜どちらでも戦える一本にする。',
+      },
+      {
+        id: 'fuse_abyssdragon', name: '深淵龍合成', rodA: 21, rodB: 22, resultRodId: 60, cost: 450000, requiredFacility: 'fishLab',
+        materials: [{ name: '深淵の遺物', qty: 12 }, { name: '龍脈の欠片', qty: 10 }],
+        desc: 'ドラゴンロッドとアビスロッドの力を融合し、特殊な魚種に反応する。',
+      },
+      {
+        id: 'fuse_vortex', name: '渦潮合成', rodA: 37, rodB: 40, resultRodId: 63, cost: 280000, requiredFacility: 'fishLab',
+        materials: [{ name: '珊瑚石', qty: 20 }, { name: '古代の化石', qty: 10 }],
+        desc: 'タイドロッドとスピンロッドの操作感を合体させたバランス型。',
+      },
+      {
+        id: 'fuse_stellar', name: '星幽合成', rodA: 18, rodB: 31, resultRodId: 62, cost: 600000, requiredFacility: 'fishLab',
+        materials: [{ name: '万象の紋章', qty: 2 }, { name: '深淵の遺物', qty: 10 }],
+        desc: '宇宙と幻影の加護を重ね、レア・シャイニー狙いの合成竿。',
+      },
+      {
+        id: 'fuse_thermal', name: '極熱極寒合成', rodA: 46, rodB: 47, resultRodId: 61, cost: 800000, requiredFacility: 'deepSeaLab',
+        materials: [{ name: '深淵の遺物', qty: 20 }, { name: '永久氷晶', qty: 15 }],
+        desc: 'フロストロッドとインフェルノロッドを融合。深海研究室が必要な上級合成。',
+      },
     ];
 
     const ROD_ICONS = {
@@ -3317,6 +3606,182 @@
       }).join('');
 
       container.innerHTML = header + `<div class="evo-card-grid">${cardsHtml}</div>`;
+    }
+
+    // ============================================================
+    // 🔬 魚研究室 — ロッドフュージョン
+    // ============================================================
+    let activeResearchTab = 'fusion';
+    let fusionHighlightRecipeId = null;
+
+    function hasFishLabBuilt() {
+      return (game.base && game.base.facilities || []).includes('fishLab');
+    }
+
+    function openResearchModal() {
+      if (!hasFishLabBuilt()) {
+        addVisualSplashEffect('🔬 先に基地で「魚研究室」を建設しよう');
+        return;
+      }
+      openModal('modal-research');
+    }
+
+    function switchResearchTab(tab) {
+      activeResearchTab = tab;
+      renderResearchModal();
+    }
+
+    function getRodNameById(id) {
+      const r = RODS.find(x => x.id === id);
+      return r ? r.name : `#${id}`;
+    }
+
+    function fusionRecipeFacilityOk(recipe) {
+      if (!recipe.requiredFacility || recipe.requiredFacility === 'fishLab') return hasFishLabBuilt();
+      return (game.base.facilities || []).includes(recipe.requiredFacility);
+    }
+
+    function meetsFusionRequirements(recipe) {
+      if (!fusionRecipeFacilityOk(recipe)) return false;
+      if (game.ownedRods.includes(recipe.resultRodId)) return false;
+      if (!game.ownedRods.includes(recipe.rodA) || !game.ownedRods.includes(recipe.rodB)) return false;
+      if (game.gold < recipe.cost) return false;
+      return recipe.materials.every(m => (game.materials[m.name] || 0) >= m.qty);
+    }
+
+    function attemptRodFusion(recipeId) {
+      const recipe = ROD_FUSION_RECIPES.find(r => r.id === recipeId);
+      if (!recipe || !meetsFusionRequirements(recipe)) return;
+
+      game.gold -= recipe.cost;
+      recipe.materials.forEach(m => { game.materials[m.name] = (game.materials[m.name] || 0) - m.qty; });
+      game.ownedRods = game.ownedRods.filter(id => id !== recipe.rodA && id !== recipe.rodB);
+      if (!game.ownedRods.includes(recipe.resultRodId)) game.ownedRods.push(recipe.resultRodId);
+      game.rodId = recipe.resultRodId;
+
+      saveGame(); updateHUD();
+      const resultRod = RODS[recipe.resultRodId];
+      addVisualSplashEffect(`⚗️ フュージョン成功！「${resultRod.name}」が誕生した！`);
+      renderShopItems();
+      renderSpecialRodPanel();
+      if (activeModal === 'modal-base') renderBaseModal();
+      renderResearchModal();
+    }
+
+    function renderFusionRecipeCard(recipe) {
+      const resultRod = RODS[recipe.resultRodId];
+      const ownedResult = game.ownedRods.includes(recipe.resultRodId);
+      const facilityOk = fusionRecipeFacilityOk(recipe);
+      const met = meetsFusionRequirements(recipe);
+      const matHtml = recipe.materials.map(m => {
+        const have = game.materials[m.name] || 0;
+        return `<div class="mat-badge ${have < m.qty ? 'insufficient' : ''}">${m.name} ${have}/${m.qty}</div>`;
+      }).join('');
+      const needFacLabel = recipe.requiredFacility === 'deepSeaLab'
+        ? '🌑 要: 深海研究室'
+        : '🔬 魚研究室';
+      const rodAOk = game.ownedRods.includes(recipe.rodA);
+      const rodBOk = game.ownedRods.includes(recipe.rodB);
+
+      return `
+        <div class="fusion-recipe-card ${ownedResult ? 'done' : ''}">
+          <div class="fusion-recipe-head">
+            <div>
+              <div class="fusion-recipe-name">${recipe.name}</div>
+              <div class="fusion-recipe-pair">${getRodNameById(recipe.rodA)} ＋ ${getRodNameById(recipe.rodB)} → ${resultRod.name}</div>
+            </div>
+            <div class="item-icon rod-icon" style="width:36px;height:36px;flex-shrink:0;">${getRodIconHtml(resultRod.name)}</div>
+          </div>
+          <div class="fusion-recipe-desc">${recipe.desc}<br><span style="color:var(--text-sub);">${needFacLabel}</span></div>
+          <div class="fusion-slots" style="margin-top:4px;">
+            <div class="fusion-slot"><div class="fusion-slot-label">素材A</div><div class="fusion-slot-name" style="color:${rodAOk ? 'var(--neon-green)' : 'var(--neon-pink)'}">${rodAOk ? '所持' : '未所持'}</div></div>
+            <div class="fusion-plus">＋</div>
+            <div class="fusion-slot"><div class="fusion-slot-label">素材B</div><div class="fusion-slot-name" style="color:${rodBOk ? 'var(--neon-green)' : 'var(--neon-pink)'}">${rodBOk ? '所持' : '未所持'}</div></div>
+            <div class="fusion-arrow">→</div>
+            <div class="fusion-result-preview"><div class="fusion-slot-label">合成</div><div class="fusion-slot-name">${ownedResult ? '完成済' : resultRod.name}</div></div>
+          </div>
+          <div class="craft-materials">${matHtml}</div>
+          <div style="font-size:0.55rem; color:${game.gold >= recipe.cost ? 'var(--neon-gold)' : 'var(--neon-pink)'};">💰 ${recipe.cost.toLocaleString()} G（所持 ${game.gold.toLocaleString()}）</div>
+          ${ownedResult
+            ? `<button class="buy-btn" disabled>合成済み</button>`
+            : `<button class="buy-btn" onclick="attemptRodFusion('${recipe.id}')" ${met && facilityOk ? '' : 'disabled'}>${!facilityOk ? '施設不足' : (met ? '⚗️ フュージョン実行' : '条件未達成')}</button>`}
+          <div style="font-size:0.5rem; color:var(--neon-pink);">※ 合成すると素材ロッド2本は消えます</div>
+        </div>
+      `;
+    }
+
+    function renderResearchFusionTab() {
+      const previewRecipe = fusionHighlightRecipeId
+        ? ROD_FUSION_RECIPES.find(r => r.id === fusionHighlightRecipeId)
+        : ROD_FUSION_RECIPES[0];
+      const previewRod = previewRecipe ? RODS[previewRecipe.resultRodId] : null;
+      const chamber = previewRecipe && previewRod ? `
+        <div class="fusion-chamber">
+          <div class="fusion-chamber-title">⚗️ 合成プレビュー</div>
+          <div class="fusion-slots">
+            <div class="fusion-slot">
+              <div class="item-icon rod-icon" style="width:40px;height:40px;">${getRodIconHtml(getRodNameById(previewRecipe.rodA))}</div>
+              <div class="fusion-slot-name">${getRodNameById(previewRecipe.rodA)}</div>
+            </div>
+            <div class="fusion-plus">＋</div>
+            <div class="fusion-slot">
+              <div class="item-icon rod-icon" style="width:40px;height:40px;">${getRodIconHtml(getRodNameById(previewRecipe.rodB))}</div>
+              <div class="fusion-slot-name">${getRodNameById(previewRecipe.rodB)}</div>
+            </div>
+            <div class="fusion-arrow">→</div>
+            <div class="fusion-result-preview">
+              <div class="item-icon rod-icon rod-icon-lit" style="width:44px;height:44px;--rod-glow:${getRodGlowColor(previewRod)};">${getRodIconHtml(previewRod.name)}</div>
+              <div class="fusion-slot-name">${previewRod.name}</div>
+            </div>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div style="font-size:0.6rem; color:var(--text-sub); line-height:1.45;">
+          所持している2本のロッドと素材・Gを消費して、<strong style="color:#fff;">合成ロッド</strong>を研究開発します。四季ロッドの「進化」とは別システムです。
+        </div>
+        ${chamber}
+        <div class="fusion-recipe-grid">${ROD_FUSION_RECIPES.map(r => renderFusionRecipeCard(r)).join('')}</div>
+      `;
+    }
+
+    function renderResearchEcologyTab() {
+      const bookCount = Object.keys(game.book || {}).length;
+      const totalFish = FISH_DATABASE.length;
+      const pct = totalFish ? Math.round((bookCount / totalFish) * 100) : 0;
+      return `
+        <div class="quest-card" style="flex-direction:column; align-items:flex-start; gap:6px;">
+          <strong style="color:#fff; font-size:0.75rem;">🐟 生態研究ボーナス</strong>
+          <div style="font-size:0.6rem; color:var(--text-sub);">図鑑に未登録の魚を初めて釣ると、獲得XPが<strong style="color:var(--neon-cyan);">+50%</strong>（魚研究室建設後ずっと有効）</div>
+          <div style="font-size:0.65rem; color:var(--neon-gold);">図鑑登録: ${bookCount} / ${totalFish} 種（${pct}%）</div>
+        </div>
+        <div class="quest-card" style="flex-direction:column; align-items:flex-start; gap:4px;">
+          <strong style="color:#fff; font-size:0.72rem;">🏝️ 連携施設</strong>
+          <div style="font-size:0.58rem; color:var(--text-sub);">・深海研究室を建設すると「極熱極寒合成」が解放されます</div>
+          <div style="font-size:0.58rem; color:var(--text-sub);">・基地MAPの魚研究室からいつでもこの画面を開けます</div>
+        </div>
+      `;
+    }
+
+    function renderResearchModal() {
+      const container = document.getElementById('research-modal-body');
+      if (!container) return;
+
+      if (!hasFishLabBuilt()) {
+        container.innerHTML = `<div class="research-locked-msg">🔬 魚研究室が未建設です。<br>釣り基地 → 施設 → 「魚研究室」を建てると研究が使えるようになります。</div>`;
+        return;
+      }
+
+      const tabs = `
+        <div style="display:flex; gap:6px; flex-wrap:wrap; flex-shrink:0;">
+          <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchResearchTab('fusion')">⚗️ ロッドフュージョン</button>
+          <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchResearchTab('ecology')">🐟 生態研究</button>
+        </div>
+      `;
+
+      const body = activeResearchTab === 'ecology' ? renderResearchEcologyTab() : renderResearchFusionTab();
+      container.innerHTML = tabs + body;
     }
 
     // ============================================================
@@ -3866,6 +4331,33 @@
           bonus.shinyChanceBonus = 0.03;
           bonus.label = '🎐 海月の加護';
           break;
+        case 'fusion_twilight':
+          if (isDay) { bonus.rareChanceBonus = 0.28; bonus.reelSpeedBonus = 0.18; }
+          else if (isNight) { bonus.rareChanceBonus = 0.28; bonus.reelSpeedBonus = 0.18; }
+          else { bonus.rareChanceBonus = 0.15; bonus.reelSpeedBonus = 0.1; }
+          bonus.label = '🌗 暁月フュージョン';
+          break;
+        case 'fusion_abyssdragon':
+          bonus.nameFilterRegex = /龍|竜|ドラゴン|深海|アビス|深淵/;
+          bonus.nameFilterMult = 5;
+          if (ABYSS_MAPS.includes(game.mapId)) bonus.rareChanceBonus = 0.35;
+          bonus.label = '🐉 深淵龍フュージョン';
+          break;
+        case 'fusion_thermal':
+          bonus.fishSpeedMult = 0.78;
+          bonus.rareChanceBonus = 0.22;
+          bonus.label = '🔥❄ 極熱極寒フュージョン';
+          break;
+        case 'fusion_stellar':
+          bonus.rareChanceBonus = 0.35;
+          bonus.shinyChanceBonus = 0.04;
+          bonus.label = '✨ 星幽フュージョン';
+          break;
+        case 'fusion_vortex':
+          bonus.tensionDrainMult = 0.88;
+          bonus.reelSpeedBonus = 0.15;
+          bonus.label = '🌀 渦潮フュージョン';
+          break;
       }
       return bonus;
     }
@@ -4128,6 +4620,305 @@
         game.base.displayedFish.push(fishId);
       }
       saveGame(); renderBaseModal();
+    }
+
+    const BASE_FURNITURE_ROOM_ICON = {
+      rodRack: '🎣', trophyCase: '🏆', boatDock: '🛥️', warehouse: '📦', sofaSet: '🪑',
+      garden: '🌴', lantern: '💡', deskLab: '📋', photoFrame: '🖼️', anchorMonument: '⚓',
+    };
+    const BASE_LOUNGE_FURNITURE = ['sofaSet', 'rodRack', 'trophyCase', 'photoFrame', 'deskLab', 'warehouse'];
+    const BASE_YARD_FURNITURE = ['boatDock', 'garden', 'anchorMonument', 'lantern'];
+
+    let baseCampusAnimId = null;
+    let baseCampusAnimT = 0;
+
+    function stopBaseCampusCanvas() {
+      if (baseCampusAnimId) {
+        cancelAnimationFrame(baseCampusAnimId);
+        baseCampusAnimId = null;
+      }
+    }
+
+    function resizeBaseCampusCanvas() {
+      const canvas = document.getElementById('base-campus-canvas');
+      const wrap = document.getElementById('base-campus-canvas-wrap');
+      if (!canvas || !wrap) return;
+      const w = Math.max(280, wrap.clientWidth);
+      const h = Math.min(240, Math.max(168, Math.round(w * 0.44)));
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      canvas.width = Math.floor(w * dpr);
+      canvas.height = Math.floor(h * dpr);
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function getBaseCampusRoomStates() {
+      const lvl = game.base.level || 0;
+      const fac = game.base.facilities || [];
+      const furn = game.base.furniture || [];
+
+      function facState(facilityId) {
+        const def = BASE_FACILITIES.find(f => f.id === facilityId);
+        if (!def) return { status: 'locked' };
+        if (fac.includes(facilityId)) return { status: 'built', def };
+        if (lvl >= def.requiredBaseLevel) return { status: 'available', def };
+        return { status: 'locked', def, needLevel: def.requiredBaseLevel };
+      }
+
+      const hasGrand = fac.includes('grandAquarium');
+      const hasTank = fac.includes('bigTank');
+      const tankDef = BASE_FACILITIES.find(f => f.id === 'bigTank');
+      const grandDef = BASE_FACILITIES.find(f => f.id === 'grandAquarium');
+      let aquarium;
+      if (hasGrand) aquarium = { status: 'built', tier: 'grand', def: grandDef, alsoHasTank: hasTank };
+      else if (hasTank) aquarium = { status: 'built', tier: 'big', def: tankDef };
+      else if (lvl >= (tankDef && tankDef.requiredBaseLevel || 1)) aquarium = { status: 'available', tier: 'big', def: tankDef };
+      else aquarium = { status: 'locked', tier: 'big', def: tankDef, needLevel: tankDef ? tankDef.requiredBaseLevel : 1 };
+
+      return {
+        main: { status: 'built', level: lvl, def: BASE_LEVELS[lvl] || BASE_LEVELS[0] },
+        lounge: {
+          status: 'built',
+          furniture: furn.filter(id => BASE_LOUNGE_FURNITURE.includes(id)),
+        },
+        yard: {
+          status: 'built',
+          furniture: furn.filter(id => BASE_YARD_FURNITURE.includes(id)),
+        },
+        fishLab: facState('fishLab'),
+        deepSeaLab: facState('deepSeaLab'),
+        aquarium,
+      };
+    }
+
+    function getDisplayedFishForAquarium(limit) {
+      const ids = (game.base.displayedFish || []).slice(0, limit);
+      return ids.map(id => FISH_DATABASE.find(f => f.id == id)).filter(Boolean);
+    }
+
+    function renderBaseRoomScene(key, state) {
+      if (key === 'main') {
+        const floors = Math.min(4, (state.level || 0) + 1);
+        const chips = ['🚪', '🛏️', '📦'].slice(0, floors);
+        return `<div class="base-room__scene"><div class="base-room__window"></div><div class="base-room__props">${chips.join('')}</div><div class="base-room__floor-line"></div></div>`;
+      }
+      if (key === 'lounge' || key === 'yard') {
+        const icons = (state.furniture || []).map(id => BASE_FURNITURE_ROOM_ICON[id] || '✨');
+        const placeholder = key === 'yard' ? '🌊' : '☕';
+        const props = icons.length ? icons.join('') : placeholder;
+        return `<div class="base-room__scene"><div class="base-room__props">${props}</div><div class="base-room__floor-line"></div></div>`;
+      }
+      if (key === 'fishLab') {
+        if (state.status !== 'built') return `<div class="base-room__scene"><div class="base-room__props" style="opacity:0.35;">🔬🧪</div></div>`;
+        return `<div class="base-room__scene"><div class="base-room__window"></div><div class="base-room__props">🔬🧫📊</div><div class="base-room__floor-line"></div></div>`;
+      }
+      if (key === 'deepSeaLab') {
+        if (state.status !== 'built') return `<div class="base-room__scene"><div class="base-room__props" style="opacity:0.35;">🌑</div></div>`;
+        return `<div class="base-room__scene"><div class="base-room__props">🌑🔦🐙</div><div class="base-room__floor-line"></div></div>`;
+      }
+      if (key === 'aquarium') {
+        if (state.status !== 'built') {
+          return `<div class="base-room__scene"><div class="base-room__props" style="opacity:0.35;">🐠</div></div>`;
+        }
+        const fish = getDisplayedFishForAquarium(state.tier === 'grand' ? 8 : 4);
+        const fishIcons = fish.length
+          ? fish.map(f => '🐟').join('')
+          : '🐠🐟';
+        return `<div class="base-room__scene"><div class="base-room__tank-water"><div class="base-room__tank-shimmer"></div></div><div class="base-room__props">${fishIcons}</div></div>`;
+      }
+      return `<div class="base-room__scene"></div>`;
+    }
+
+    function renderBaseRoomCard(key, state) {
+      const meta = {
+        main: { title: '🏠 メインロッジ', builtSub: (s) => s.def && s.def.name },
+        lounge: { title: '🪑 応接・倉庫', builtSub: () => '家具を設置すると室内に表示されます' },
+        yard: { title: '🌊 屋外・桟橋', builtSub: () => 'ボート係留や庭の装飾が見えます' },
+        fishLab: { title: '🔬 魚研究室', builtSub: (s) => s.def && s.def.name },
+        deepSeaLab: { title: '🌑 深海研究室', builtSub: (s) => s.def && s.def.name },
+        aquarium: {
+          title: (s) => (s.tier === 'grand' && s.status === 'built') ? '🏛️ 巨大水族館' : '🐠 大型水槽',
+          builtSub: (s) => s.def && s.def.name,
+        },
+      }[key];
+      if (!meta) return '';
+
+      const status = state.status || 'locked';
+      const title = typeof meta.title === 'function' ? meta.title(state) : meta.title;
+      let statusText = '';
+      if (status === 'built') statusText = meta.builtSub ? meta.builtSub(state) : '使用中';
+      else if (status === 'available') statusText = '未建設 — タップで施設タブへ';
+      else if (status === 'locked') {
+        const need = state.needLevel != null ? state.needLevel : (state.def && state.def.requiredBaseLevel);
+        statusText = need != null ? `解放: ${(BASE_LEVELS[need] && BASE_LEVELS[need].name) || ('基地Lv.' + need)}` : '未解放';
+      }
+
+      const extraClass = key === 'main' ? ' base-room--main' : '';
+      const aquarClass = key === 'aquarium' && state.tier === 'grand' && status === 'built' ? ' base-room--built-tier-grand' : '';
+      const click = status === 'available' ? ` onclick="switchBaseTab('facility')"` : '';
+      const role = status === 'available' ? ' role="button" tabindex="0"' : '';
+      const labBtn = (key === 'fishLab' && status === 'built')
+        ? `<button type="button" class="buy-btn" style="margin-top:4px;padding:4px 8px;font-size:0.55rem;width:100%;" onclick="event.stopPropagation(); openResearchModal();">⚗️ ロッドフュージョン</button>`
+        : '';
+
+      return `
+        <div class="base-room base-room--${status} base-room--${key}${extraClass}${aquarClass}"${click}${role}>
+          <div class="base-room__roof"></div>
+          <div class="base-room__body">
+            <div class="base-room__title">${title}</div>
+            <div class="base-room__status">${statusText}</div>
+            ${renderBaseRoomScene(key, state)}
+            ${labBtn}
+          </div>
+        </div>
+      `;
+    }
+
+    function drawBaseCampusCanvas(ctx, w, h, T) {
+      const states = getBaseCampusRoomStates();
+      ctx.clearRect(0, 0, w, h);
+
+      const sky = ctx.createLinearGradient(0, 0, 0, h * 0.55);
+      sky.addColorStop(0, '#0c2240');
+      sky.addColorStop(1, '#061018');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = 'rgba(0, 180, 255, 0.08)';
+      ctx.fillRect(0, h * 0.58, w, h * 0.42);
+
+      const groundY = h * 0.82;
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(8, groundY);
+      ctx.lineTo(w - 8, groundY);
+      ctx.stroke();
+
+      const segments = [];
+      const mainW = 72 + (states.main.level || 0) * 18;
+      segments.push({ key: 'main', w: mainW, state: states.main, color: '#1a3a52', accent: '#00f0ff' });
+      segments.push({ key: 'lounge', w: 54, state: states.lounge, color: '#243548', accent: '#8b9bb4' });
+      segments.push({ key: 'fishLab', w: 58, state: states.fishLab, color: '#1e3350', accent: '#7fdcff' });
+      const aquW = states.aquarium.status === 'built' && states.aquarium.tier === 'grand' ? 96 : 68;
+      segments.push({ key: 'aquarium', w: aquW, state: states.aquarium, color: '#123a55', accent: '#39c5ff' });
+      segments.push({ key: 'deepSeaLab', w: 62, state: states.deepSeaLab, color: '#1a1538', accent: '#a78bfa' });
+      segments.push({ key: 'yard', w: 52, state: states.yard, color: '#1a4038', accent: '#39ff14' });
+
+      const totalW = segments.reduce((s, seg) => s + seg.w, 0) + (segments.length - 1) * 4;
+      let x = (w - totalW) / 2;
+
+      segments.forEach(seg => {
+        const built = seg.state.status === 'built' || seg.key === 'main' || seg.key === 'lounge' || seg.key === 'yard';
+        const avail = seg.state.status === 'available';
+        const roomH = groundY - (h * 0.22) - (seg.key === 'main' ? (states.main.level || 0) * 6 : 0);
+        const top = groundY - roomH;
+
+        ctx.fillStyle = built ? seg.color : 'rgba(20, 28, 40, 0.85)';
+        ctx.fillRect(x, top, seg.w, roomH);
+        ctx.strokeStyle = built ? seg.accent + '88' : (avail ? 'rgba(255,215,0,0.45)' : 'rgba(255,255,255,0.12)');
+        ctx.lineWidth = built ? 1.5 : 1;
+        if (avail) ctx.setLineDash([4, 4]); else ctx.setLineDash([]);
+        ctx.strokeRect(x + 0.5, top + 0.5, seg.w - 1, roomH - 1);
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        ctx.fillRect(x + 4, top + 6, seg.w - 8, 8);
+
+        if (seg.key === 'aquarium' && seg.state.status === 'built') {
+          const waterTop = top + roomH * 0.35;
+          ctx.fillStyle = 'rgba(0, 160, 255, 0.35)';
+          ctx.fillRect(x + 3, waterTop, seg.w - 6, groundY - waterTop - 2);
+          const fishCount = seg.state.tier === 'grand' ? 6 : 3;
+          for (let i = 0; i < fishCount; i++) {
+            const phase = T * 1.2 + i * 1.7;
+            const fx = x + 10 + ((Math.sin(phase) * 0.5 + 0.5) * (seg.w - 22));
+            const fy = waterTop + 10 + Math.sin(phase * 1.3 + i) * 6;
+            ctx.fillStyle = 'rgba(255,255,255,0.55)';
+            ctx.beginPath();
+            ctx.ellipse(fx, fy, 5, 2.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        if (seg.key === 'fishLab' && seg.state.status === 'built') {
+          ctx.fillStyle = 'rgba(0, 240, 255, 0.35)';
+          ctx.fillRect(x + seg.w * 0.55, top + 14, seg.w * 0.35, roomH * 0.35);
+        }
+
+        if (seg.key === 'deepSeaLab' && seg.state.status === 'built') {
+          ctx.fillStyle = 'rgba(120, 80, 255, 0.25)';
+          ctx.fillRect(x + 6, top + 16, seg.w - 12, roomH * 0.45);
+        }
+
+        ctx.fillStyle = built ? '#eef6ff' : '#8b9bb4';
+        ctx.font = '600 9px Outfit, Noto Sans JP, sans-serif';
+        ctx.textAlign = 'center';
+        const labels = {
+          main: 'ロッジ',
+          lounge: '応接',
+          fishLab: '研究室',
+          aquarium: seg.state.tier === 'grand' && seg.state.status === 'built' ? '水族館' : '水槽',
+          deepSeaLab: '深海',
+          yard: '屋外',
+        };
+        ctx.fillText(labels[seg.key] || '', x + seg.w / 2, top + roomH - 8);
+
+        x += seg.w + 4;
+      });
+    }
+
+    function startBaseCampusCanvas() {
+      stopBaseCampusCanvas();
+      if (activeModal !== 'modal-base' || activeBaseTab !== 'campus') return;
+      resizeBaseCampusCanvas();
+      const canvas = document.getElementById('base-campus-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let last = performance.now();
+      function frame(now) {
+        if (activeModal !== 'modal-base' || activeBaseTab !== 'campus') {
+          stopBaseCampusCanvas();
+          return;
+        }
+        const dt = Math.min(0.05, (now - last) / 1000);
+        last = now;
+        baseCampusAnimT += dt;
+        const w = parseFloat(canvas.style.width) || canvas.clientWidth;
+        const h = parseFloat(canvas.style.height) || canvas.clientHeight;
+        drawBaseCampusCanvas(ctx, w, h, baseCampusAnimT);
+        baseCampusAnimId = requestAnimationFrame(frame);
+      }
+      baseCampusAnimId = requestAnimationFrame(frame);
+    }
+
+    function renderBaseCampusPanel() {
+      const states = getBaseCampusRoomStates();
+      const disp = getBaseEffects().displayCapacity || 0;
+      return `
+        <div class="base-campus-intro">
+          基地の見取り図です。建設した施設は<strong style="color:#fff;">部屋</strong>として並び、家具は応接・屋外に、展示中の魚は水槽ルームに反映されます。
+          ${disp ? `<span style="color:var(--neon-cyan);"> 展示 ${game.base.displayedFish.length}/${disp}匹</span>` : ''}
+        </div>
+        <div id="base-campus-canvas-wrap" class="base-campus-canvas-wrap">
+          <canvas id="base-campus-canvas" width="640" height="240"></canvas>
+        </div>
+        <div class="base-campus-legend">
+          <span><i class="built"></i> 建設済み</span>
+          <span><i class="avail"></i> 建設可能（タップ）</span>
+          <span><i class="lock"></i> 未解放</span>
+        </div>
+        <div class="base-campus-grid">
+          ${renderBaseRoomCard('main', states.main)}
+          ${renderBaseRoomCard('lounge', states.lounge)}
+          ${renderBaseRoomCard('yard', states.yard)}
+          ${renderBaseRoomCard('fishLab', states.fishLab)}
+          ${renderBaseRoomCard('aquarium', states.aquarium)}
+          ${renderBaseRoomCard('deepSeaLab', states.deepSeaLab)}
+        </div>
+      `;
     }
 
     // ---- 特別ショップ ----
@@ -5511,6 +6302,7 @@
       if (id === 'modal-skills') renderSkills();
       if (id === 'modal-craft') { renderCraft(); initAvatarCanvas(); }
       if (id === 'modal-evolution') renderEvolutionModal();
+      if (id === 'modal-research') renderResearchModal();
       if (id === 'modal-more') { const lbl = document.getElementById('more-version-label'); if (lbl) lbl.innerText = 'Ultimate Fishing — ' + CHANGELOG_VERSION; }
       if (id === 'modal-special-shop') renderSpecialShop();
       if (id === 'modal-base') renderBaseModal();
@@ -5523,6 +6315,7 @@
       el.style.display = 'none';
       el.classList.remove('active');
       if (id === 'modal-cooking') cancelCookingMinigame();
+      if (id === 'modal-base') stopBaseCampusCanvas();
       if (activeModal === id) {
         activeModal = null;
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
@@ -5643,7 +6436,7 @@
         RODS.forEach(r => {
           const isOwned = game.ownedRods.includes(r.id);
           if (r.hardIslandOnly) return; // ハードロッドは通常ショップのロットには一切並ばない。専用UIでのみ購入可能
-          if ((r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly || r.evolutionOnly || r.specialShopOnly) && !isOwned) return; // ルーレット/実績/クラフト/シーズン/進化限定ロッドは入手するまでショップに表示しない
+          if ((r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly || r.evolutionOnly || r.specialShopOnly || r.fusionOnly) && !isOwned) return;
           const isEquipped = game.rodId === r.id;
           const hasDivine = Object.keys(game.book).some(fid => { const f = FISH_DATABASE.find(fd => fd.id == fid); return f && f.rarity === 'Divine'; });
           const meetsLevel = !r.reqLvl || game.level >= r.reqLvl;
@@ -5657,7 +6450,7 @@
           let actionHtml;
           if (isOwned) {
             actionHtml = isEquipped ? `<button class="buy-btn" disabled>装備中</button>` : `<button class="buy-btn" onclick="equipRod(${r.id})">装備</button>`;
-          } else if (r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly || r.evolutionOnly || r.specialShopOnly) {
+          } else if (r.gachaOnly || r.achievementOnly || r.craftOnly || r.seasonOnly || r.evolutionOnly || r.specialShopOnly || r.fusionOnly) {
             actionHtml = '';
           } else if (isLocked) {
             actionHtml = `<button class="buy-btn" disabled>条件未達成</button>`;
@@ -6353,8 +7146,12 @@
     // ============================================================
     // 🏝️ 釣り基地：表示
     // ============================================================
-    let activeBaseTab = 'level';
-    function switchBaseTab(tab) { activeBaseTab = tab; renderBaseModal(); }
+    let activeBaseTab = 'campus';
+    function switchBaseTab(tab) {
+      activeBaseTab = tab;
+      if (tab !== 'campus') stopBaseCampusCanvas();
+      renderBaseModal();
+    }
 
     function renderBaseModal() {
       const container = document.getElementById('base-modal-body');
@@ -6365,6 +7162,7 @@
 
       let tabsHtml = `
         <div style="display:flex; gap:6px; flex-wrap:wrap; flex-shrink:0;">
+          <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchBaseTab('campus')">🏠 基地MAP</button>
           <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchBaseTab('level')">🏝️ 基地レベル</button>
           <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchBaseTab('facility')">🔬 施設</button>
           <button class="buy-btn" style="width:auto; padding:5px 12px;" onclick="switchBaseTab('furniture')">🪑 家具・装飾</button>
@@ -6373,7 +7171,9 @@
       `;
 
       let bodyHtml = '';
-      if (activeBaseTab === 'level') {
+      if (activeBaseTab === 'campus') {
+        bodyHtml = renderBaseCampusPanel();
+      } else if (activeBaseTab === 'level') {
         const bonusText = (lvlObj) => {
           const b = lvlObj.bonus || {};
           const parts = [];
@@ -6410,7 +7210,12 @@
           const levelOk = (game.base.level || 0) >= fac.requiredBaseLevel;
           const canBuild = !owned && levelOk && game.gold >= fac.cost;
           let actionHtml;
-          if (owned) actionHtml = `<button class="buy-btn" disabled>建設済み</button>`;
+          if (owned) {
+            actionHtml = `<button class="buy-btn" disabled>建設済み</button>`;
+            if (fac.id === 'fishLab') {
+              actionHtml += `<button class="buy-btn" onclick="openResearchModal()" style="margin-top:4px;background:rgba(0,240,255,0.12);">⚗️ 研究室を開く</button>`;
+            }
+          }
           else if (!levelOk) actionHtml = `<button class="buy-btn" disabled>要:${BASE_LEVELS[fac.requiredBaseLevel].name}</button>`;
           else actionHtml = `<div class="item-cost">${fac.cost.toLocaleString()} G</div><button class="buy-btn" onclick="buildFacility('${fac.id}')" ${canBuild ? '' : 'disabled'}>建設する</button>`;
           return `
@@ -6456,6 +7261,8 @@
       }
 
       container.innerHTML = tabsHtml + bodyHtml;
+      if (activeBaseTab === 'campus') startBaseCampusCanvas();
+      else stopBaseCampusCanvas();
     }
 
     // ============================================================
