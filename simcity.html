@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>MICRO CITY 3D - ミニ都市建設シミュレーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Noto+Sans+JP:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+body,html{width:100%;height:100%;overflow:hidden;background:#0a0e14;font-family:'Noto Sans JP',sans-serif;color:#e0e6ed;touch-action:none}
+#game-canvas{position:absolute;inset:0;display:block;touch-action:none;cursor:crosshair}
+.vignette{position:absolute;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 45%,rgba(0,0,0,.45) 100%)}
+#hud{position:absolute;top:0;left:0;width:100%;padding:12px 18px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:10;flex-wrap:wrap;gap:8px}
+.hud-box{background:rgba(10,15,24,.88);backdrop-filter:blur(10px);border:1px solid rgba(0,220,255,.25);border-radius:10px;padding:8px 16px;box-shadow:0 8px 24px rgba(0,0,0,.6);pointer-events:auto}
+.money{font-family:'Share Tech Mono',monospace;font-size:24px;color:#7dffb0;text-shadow:0 0 14px rgba(125,255,176,.5)}
+.hud-sub{font-size:9px;color:#7d90ad;letter-spacing:1.5px;margin-top:2px;text-transform:uppercase}
+.date-line{font-size:13px;color:#9fd8ff;font-family:'Share Tech Mono',monospace}
+.stat-line{font-size:11px;color:#8fa3bf;margin-top:3px}
+#speed-ctrl{display:flex;gap:6px;margin-top:6px}
+.sp-btn{background:rgba(0,150,200,.15);border:1px solid rgba(0,200,255,.3);color:#9fd8ff;padding:3px 9px;border-radius:6px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;font-size:10px;font-weight:700}
+.sp-btn.active{background:#00c8ff;color:#05131f;box-shadow:0 0 12px rgba(0,200,255,.6)}
+#rci{display:flex;gap:8px;align-items:flex-end;height:56px;justify-content:flex-end}
+.rci-col{display:flex;flex-direction:column;align-items:center;gap:3px}
+.rci-bar{width:15px;height:36px;background:rgba(255,255,255,.06);border-radius:4px;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.15)}
+.rci-fill{position:absolute;bottom:0;left:0;width:100%;border-radius:3px;transition:height .6s ease}
+.rci-r .rci-fill{background:linear-gradient(180deg,#6aff8f,#2fbf5a)}
+.rci-c .rci-fill{background:linear-gradient(180deg,#5aa8ff,#2f6fcf)}
+.rci-i .rci-fill{background:linear-gradient(180deg,#ffc95a,#c9a02f)}
+.rci-lbl{font-size:12px;font-weight:900}
+.rci-r .rci-lbl{color:#6aff8f}.rci-c .rci-lbl{color:#5aa8ff}.rci-i .rci-lbl{color:#ffc95a}
+#toolbar{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;pointer-events:auto;z-index:10;flex-wrap:wrap;justify-content:center;max-width:96vw;background:rgba(10,15,24,.92);backdrop-filter:blur(12px);border:1px solid rgba(0,220,255,.2);border-radius:14px;padding:8px}
+.tool{width:56px;height:64px;border:2px solid rgba(0,220,255,.2);border-radius:10px;background:rgba(0,0,0,.3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#8fa3bf;transition:all .15s;font-family:inherit;padding:2px}
+.tool:hover{border-color:rgba(0,220,255,.5);background:rgba(0,150,255,.1)}
+.tool.selected{border-color:#00c8ff;background:rgba(0,180,255,.2);color:#fff;box-shadow:0 0 14px rgba(0,180,255,.5)}
+.tool .ico{font-size:19px}
+.tool .nm{font-size:9px;font-weight:700;line-height:1.1;text-align:center}
+.tool .cost{font-size:8px;color:#ffd700}
+#log-panel{position:absolute;top:118px;left:16px;width:320px;max-width:55vw;z-index:9;pointer-events:none;display:flex;flex-direction:column;gap:6px}
+.log-item{background:rgba(10,16,26,.9);border-left:3px solid #00c8ff;padding:7px 11px;border-radius:4px;font-size:11px;color:#d1dbe6;animation:slideIn .25s ease;line-height:1.5}
+.log-item.warn{border-left-color:#ff5566;background:rgba(45,12,20,.95);color:#ffaab5}
+.log-item.good{border-left-color:#5aff8f}
+@keyframes slideIn{from{transform:translateX(-14px);opacity:0}to{transform:translateX(0);opacity:1}}
+#top-btns{position:absolute;top:12px;right:14px;z-index:12;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:40vw}
+.mini-btn{background:rgba(12,18,28,.9);border:1px solid rgba(0,220,255,.3);color:#9fd8ff;padding:6px 12px;border-radius:8px;cursor:pointer;font-size:10px;font-weight:700;font-family:inherit}
+.mini-btn:hover{background:rgba(0,180,255,.2);color:#fff}
+#overlay{position:absolute;inset:0;background:rgba(6,10,18,.94);backdrop-filter:blur(14px);z-index:100;display:flex;justify-content:center;align-items:center;opacity:1;transition:opacity .35s;padding:12px}
+#overlay.hidden{opacity:0;pointer-events:none}
+.panel{background:#0d1420;border:1px solid rgba(0,220,255,.35);border-radius:16px;max-width:620px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.9),0 0 40px rgba(0,200,255,.15);padding:32px;text-align:center}
+.logo{font-family:'Cinzel',serif;font-size:38px;font-weight:800;color:#fff;letter-spacing:5px;text-shadow:0 0 30px rgba(0,200,255,.8),0 0 60px rgba(0,200,255,.4)}
+.sublogo{font-size:11px;color:#00c8ff;letter-spacing:3px;margin:6px 0 18px}
+.desc{font-size:12px;color:#a0b4d0;line-height:2;margin-bottom:16px}
+.btn{background:linear-gradient(135deg,#00e0ff,#0080ff);color:#041626;border:none;padding:14px 40px;font-size:16px;font-weight:900;border-radius:30px;cursor:pointer;letter-spacing:2px;box-shadow:0 10px 30px rgba(0,180,255,.45);margin:6px;font-family:inherit}
+.btn:hover{transform:translateY(-2px) scale(1.03)}
+.tip{background:rgba(0,200,255,.05);border:1px solid rgba(0,200,255,.25);border-radius:10px;padding:12px 16px;font-size:11px;text-align:left;line-height:2;margin:16px 0}
+.tip b{color:#7de2ff}
+@media(max-width:560px){
+.logo{font-size:22px;letter-spacing:3px}.money{font-size:16px}.hud-box{padding:4px 8px}
+#toolbar{bottom:6px;gap:3px;padding:4px}.tool{width:44px;height:52px}.tool .ico{font-size:14px}
+.tool .nm{font-size:8px}.tool .cost{display:none}#hud{padding:4px}
+.panel{padding:16px}#top-btns{max-width:55vw}}
+</style>
+</head>
+<body>
+<canvas id="game-canvas"></canvas>
+<div class="vignette"></div>
+
+<div id="hud">
+<div class="hud-box">
+<div class="money" id="ui-money">§20,000</div>
+<div class="hud-sub">CITY BUDGET (都市予算)</div>
+<div id="speed-ctrl">
+<button class="sp-btn active" data-s="1" onclick="Game.setSpeed(1)">▶ x1</button>
+<button class="sp-btn" data-s="3" onclick="Game.setSpeed(3)">▶▶ x3</button>
+<button class="sp-btn" data-s="0" onclick="Game.setSpeed(0)">⏸ 停止</button>
+</div>
+</div>
+<div class="hud-box">
+<div class="date-line" id="ui-date">1900年 1月</div>
+<div class="stat-line">人口: <span id="ui-pop">0</span> 人</div>
+<div class="stat-line">都市評価: <span id="ui-rate">★☆☆☆☆</span></div>
+</div>
+<div class="hud-box" style="text-align:right;">
+<div class="hud-sub" style="margin-bottom:4px;">DEMAND - 需要度</div>
+<div id="rci">
+<div class="rci-col rci-r"><div class="rci-bar"><div class="rci-fill" id="bar-r" style="height:70%"></div></div><div class="rci-lbl">R</div></div>
+<div class="rci-col rci-c"><div class="rci-bar"><div class="rci-fill" id="bar-c" style="height:40%"></div></div><div class="rci-lbl">C</div></div>
+<div class="rci-col rci-i"><div class="rci-bar"><div class="rci-fill" id="bar-i" style="height:55%"></div></div><div class="rci-lbl">I</div></div>
+</div>
+</div>
+</div>
+
+<div id="top-btns">
+<button class="mini-btn" onclick="Game.toggleRot()">↻</button>
+<button class="mini-btn" onclick="Game.saveGame()">保存</button>
+<button class="mini-btn" onclick="Game.loadGame()">復元</button>
+<button class="mini-btn" onclick="Game.resetGame()">リセット</button>
+</div>
+
+<div id="log-panel"></div>
+
+<div id="toolbar">
+<button class="tool" data-t="road" onclick="Game.selectTool('road')"><span class="ico">🛣️</span><span class="nm">道路</span><span class="cost">§10</span></button>
+<button class="tool selected" data-t="res" onclick="Game.selectTool('res')"><span class="ico">🏠</span><span class="nm">住宅</span><span class="cost">§100</span></button>
+<button class="tool" data-t="com" onclick="Game.selectTool('com')"><span class="ico">🏬</span><span class="nm">商業</span><span class="cost">§200</span></button>
+<button class="tool" data-t="ind" onclick="Game.selectTool('ind')"><span class="ico">🏭</span><span class="nm">工業</span><span class="cost">§150</span></button>
+<button class="tool" data-t="power" onclick="Game.selectTool('power')"><span class="ico">⚡</span><span class="nm">発電所</span><span class="cost">§1500</span></button>
+<button class="tool" data-t="park" onclick="Game.selectTool('park')"><span class="ico">🌳</span><span class="nm">公園</span><span class="cost">§200</span></button>
+<button class="tool" data-t="water" onclick="Game.selectTool('water')"><span class="ico">💧</span><span class="nm">水道</span><span class="cost">§400</span></button>
+<button class="tool" data-t="doze" onclick="Game.selectTool('doze')"><span class="ico">🚜</span><span class="nm">解体</span><span class="cost">§0</span></button>
+</div>
+
+<div id="overlay">
+<div class="panel">
+<div class="logo">MICRO CITY 3D</div>
+<div class="sublogo">ミニ都市建設シミュレーター (Ver 2.0 / Three.js)</div>
+<p class="desc">
+君は新市長。荒れ地に大都市を建設しよう。<br>
+道路を引き、電気を通し、住宅・商業・工業を配置して<br>
+人口を伸ばしましょう。
+</p>
+<div class="tip">
+<b>▶ 市長就任マニュアル</b><br>
+1. まず<b>道路</b>を十字に敷く(建物は道路に隣接するまで成長しません)<br>
+2. <b>発電所</b>を建てる(電気の届かない建物には⚡✕が付きます)<br>
+3. 需要度バーを見ながら<b>住宅R / 商業R / 工業I</b>を敷く<br>
+4. <b>公園</b>は周辺の住宅の成長を助け、<b>水道</b>は人口上限を上げます<br>
+5. 毎月税収が入ります。工業は税収が高い代わりに周辺住宅を妨げます<br>
+6. 都市評価(★)が高いと税収が増えます
+</div>
+<div class="tip" style="text-align:center;">
+<b>操作:</b> クリック/ドラッグで建設 | <b>右ドラッグ or 左Shift+ドラッグ</b>で視点回転 | ホイールでズーム | <b>WASD/矢印</b>キーで移動
+</div>
+<button class="btn" onclick="Game.startGame()">市長に就任する</button>
+</div>
+</div>
+
+<script>
+/* ========== ENV ========== */
+const IS_MOBILE=('ontouchstart' in window)||(navigator.maxTouchPoints>0)&&/Android|iPad|iPhone|iPod|Mobile/i.test(navigator.userAgent);
+
+/* ========== CONFIG ========== */
+const GRID=24, CELL=2, POWER_R=7;
+const COST={road:10,res:100,com:200,ind:150,power:1500,park:200,water:400,doze:0};
+const MAINT={power:50,water:20};
+
+/* ========== STATE ========== */
+const Game={
+scene:null,camera:null,renderer:null,raycaster:null,
+grid:[],powered:[],meshes:[],demand:{r:.7,c:.4,i:.55},
+money:20000,pop:0,month:0,speed:1,
+tool:'res',_loop:null,
+camTheta:0.8,camPhi:0.95,camDist:46,
+camTarget:null,hoverMesh:null,groundPlane:null,
+mouseNdc:{x:0,y:0},mouseOnCanvas:false,
+keys:{},allowPaint:true,
+
+/* ---------- init ---------- */
+init(){
+  const canvas=document.getElementById('game-canvas');
+  this.renderer=new THREE.WebGLRenderer({canvas,antialias:!IS_MOBILE});
+  this.renderer.setSize(window.innerWidth,window.innerHeight);
+  this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,IS_MOBILE?1.5:2));
+  this.renderer.shadowMap.enabled=!IS_MOBILE;
+  this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  this.renderer.outputEncoding=THREE.sRGBEncoding;
+  this.renderer.toneMapping=THREE.ACESFilmicToneMapping;
+  this.renderer.toneMappingExposure=1.2;
+
+  this.scene=new THREE.Scene();
+  this.scene.background=new THREE.Color(0x0a0e18);
+  this.scene.fog=new THREE.FogExp2(0x0a0e18,0.006);
+
+  this.camera=new THREE.PerspectiveCamera(55,window.innerWidth/window.innerHeight,0.1,300);
+  this.camTarget=new THREE.Vector3(0,0,0);
+  this.updateCamera();
+
+  this.raycaster=new THREE.Raycaster();
+
+  this.buildWorld();
+  this.buildEvents();
+  this.evaluatePower();
+
+  window.addEventListener('resize',()=>{
+    this.camera.aspect=window.innerWidth/window.innerHeight;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(window.innerWidth,window.innerHeight);
+  });
+
+  this.animate();
+},
+buildWorld(){
+  const S=GRID*CELL;
+  this.grid=Array.from({length:GRID},()=>Array(GRID).fill(null));
+  // grid lines
+  // lights
+  this.scene.add(new THREE.AmbientLight(0x8899bb,.5));
+  this.scene.add(new THREE.HemisphereLight(0xbcc4d6,0x1a2233,.4));
+  const sun=new THREE.DirectionalLight(0xfffaee,.85);
+  sun.position.set(30,45,20);
+  if(!IS_MOBILE){
+    sun.castShadow=true;
+    sun.shadow.mapSize.set(2048,2048);
+    sun.shadow.camera.left=-30;sun.shadow.camera.right=30;
+    sun.shadow.camera.top=30;sun.shadow.camera.bottom=-30;
+  }
+  this.scene.add(sun);
+  // ground
+  const ground=new THREE.Mesh(new THREE.PlaneGeometry(S,S),
+    new THREE.MeshStandardMaterial({color:0x1c2a30,roughness:.9}));
+  ground.rotation.x=-Math.PI/2;
+  this.scene.add(ground);
+  this.groundPlane=ground;
+  // surrounding terrain (beyond city)
+  const outer=new THREE.Mesh(new THREE.PlaneGeometry(600,600),
+    new THREE.MeshStandardMaterial({color:0x141c22,roughness:.95}));
+  outer.rotation.x=-Math.PI/2;
+  outer.position.y=-0.05;
+  this.scene.add(outer);
+  // grid helper
+  const gh=new THREE.GridHelper(S,GRID,0x006688,0x0a3a4a);
+  gh.position.y=0.02;
+  this.scene.add(gh);
+  // border glow
+  const border=new THREE.Mesh(new THREE.RingGeometry(S/2-0.3,S/2,64),
+    new THREE.MeshBasicMaterial({color:0x00c8ff,transparent:true,opacity:.35,side:THREE.DoubleSide}));
+  border.rotation.x=-Math.PI/2;
+  border.position.y=0.04;
+  this.scene.add(border);
+  // hover marker
+  this.hoverMesh=new THREE.Mesh(new THREE.BoxGeometry(CELL*0.96,0.06,CELL*0.96),
+    new THREE.MeshBasicMaterial({color:0x00ffc8,transparent:true,opacity:.4}));
+  this.hoverMesh.visible=false;
+  this.scene.add(this.hoverMesh);
+  // mesh registry
+  this.meshes=Array.from({length:GRID},()=>Array(GRID).fill(null));
+},
+
+/* ---------- coordinate ---------- */
+pointToCell(point){
+  const S=GRID*CELL;
+  const cx=Math.floor((point.x+S/2)/CELL);
+  const cz=Math.floor((point.z+S/2)/CELL);
+  return {cx,cz,valid:cx>=0&&cz>=0&&cx<GRID&&cz<GRID};
+},
+cellCenter(cx,cz){
+  return {x:(cx-GRID/2+0.5)*CELL,z:(cz-GRID/2+0.5)*CELL};
+},
+
+/* ---------- events ---------- */
+buildEvents(){
+  const cv=this.renderer.domElement;
+  const ndc=e=>({x:(e.clientX/window.innerWidth)*2-1,y:-(e.clientY/window.innerHeight)*2+1});
+  this.pickFromEvent=e=>{
+    const n=ndc(e);
+    this.raycaster.setFromCamera(n,this.camera);
+    const hits=this.raycaster.intersectObject(this.groundPlane);
+    return hits.length?this.pointToCell(hits[0].point):null;
+  };
+  cv.addEventListener('contextmenu',e=>e.preventDefault());
+  cv.addEventListener('mousedown',e=>{
+    if(this.keys['ShiftLeft']||e.button===2||e.button===1){this.rotating={x:e.clientX,y:e.clientY};return;}
+    const c=this.pickFromEvent(e);
+    if(c&&c.valid)this.build(c.cx,c.cz);
+    this.painting=true;
+  });
+  window.addEventListener('mousemove',e=>{
+    this.mouseOnCanvas=true;
+    if(this.rotating){
+      this.camTheta+=(e.clientX-this.rotating.x)*0.006;
+      this.camPhi-=(e.clientY-this.rotating.y)*0.006;
+      this.camPhi=Math.max(0.2,Math.min(1.35,this.camPhi));
+      this.rotating={x:e.clientX,y:e.clientY};
+      return;
+    }
+    if(this.painting){
+      const c=this.pickFromEvent(e);
+      if(c&&c.valid)this.build(c.cx,c.cz);
+    }else{
+      const c=this.pickFromEvent(e);
+      if(c&&c.valid){
+        const p=this.cellCenter(c.cx,c.cz);
+        this.hoverMesh.position.set(p.x,0.06,p.z);
+        this.hoverMesh.visible=true;
+      }else this.hoverMesh.visible=false;
+    }
+  });
+  window.addEventListener('mouseup',()=>{this.painting=false;this.rotating=null;});
+  cv.addEventListener('wheel',e=>{
+    e.preventDefault();
+    this.camDist=Math.max(12,Math.min(120,this.camDist*(e.deltaY<0?0.9:1.11)));
+  },{passive:false});
+  window.addEventListener('keydown',e=>{this.keys[e.code]=true;});
+  window.addEventListener('keyup',e=>{this.keys[e.code]=false;});
+  // touch: 1 finger paint, 2 finger rotate, pinch zoom
+  let tRot=null,tPinch=0;
+  cv.addEventListener('touchstart',e=>{
+    e.preventDefault();
+    if(e.touches.length===2){
+      tRot={x:(e.touches[0].clientX+e.touches[1].clientX)/2,y:(e.touches[0].clientY+e.touches[1].clientY)/2};
+      tPinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    }else if(e.touches.length===1){
+      const rect=cv.getBoundingClientRect();
+      const fake={clientX:e.touches[0].clientX,clientY:e.touches[0].clientY};
+      const c=this.pickFromEvent(fake);
+      if(c&&c.valid)this.build(c.cx,c.cz);
+    }
+  },{passive:false});
+  cv.addEventListener('touchmove',e=>{
+    e.preventDefault();
+    if(e.touches.length===2&&tRot){
+      const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
+      const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
+      this.camTheta+=(cx-tRot.x)*0.006;
+      this.camPhi-=(cy-tRot.y)*0.006;
+      this.camPhi=Math.max(0.2,Math.min(1.35,this.camPhi));
+      tRot={x:cx,y:cy};
+      const pinch=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+      if(tPinch>0)this.camDist=Math.max(12,Math.min(120,this.camDist*(tPinch/pinch)));
+      tPinch=pinch;
+    }else if(e.touches.length===1){
+      const fake={clientX:e.touches[0].clientX,clientY:e.touches[0].clientY};
+      const c=this.pickFromEvent(fake);
+      if(c&&c.valid)this.build(c.cx,c.cz);
+    }
+  },{passive:false});
+  cv.addEventListener('touchend',e=>{e.preventDefault();tRot=null;tPinch=0;},{passive:false});
+},
+updateCamera(){
+  const d=this.camDist;
+  this.camera.position.set(
+    this.camTarget.x+d*Math.sin(this.camPhi)*Math.sin(this.camTheta),
+    this.camTarget.y+d*Math.cos(this.camPhi),
+    this.camTarget.z+d*Math.sin(this.camPhi)*Math.cos(this.camTheta)
+  );
+  this.camera.lookAt(this.camTarget);
+},
+
+/* ---------- build ---------- */
+selectTool(t){
+  this.tool=t;
+  document.querySelectorAll('.tool').forEach(b=>b.classList.toggle('selected',b.dataset.t===t));
+},
+build(cx,cz){
+  const cur=this.grid[cz]&&this.grid[cz][cx];
+  if(this.tool==='doze'){
+    if(!cur)return;
+    this.removeMesh(cx,cz);
+    this.grid[cz][cx]=null;
+    this.evaluatePower();
+    return;
+  }
+  if(cur===this.tool)return;
+  if(this.money<COST[this.tool]){this.log('予算不足です！','warn');return;}
+  this.money-=COST[this.tool];
+  if(cur)this.removeMesh(cx,cz);
+  this.grid[cz][cx]=this.tool;
+  this.placeMesh(cx,cz,this.tool);
+  this.evaluatePower();
+},
+removeMesh(cx,cz){
+  const g=this.meshes[cz][cx];
+  if(!g)return;
+  this.scene.remove(g);
+  g.traverse(o=>{if(o.geometry)o.geometry.dispose();});
+  this.meshes[cz][cx]=null;
+},
+placeMesh(cx,cz,type){
+  const g=this.buildMesh(type,cx,cz);
+  this.meshes[cz][cx]=g;
+  this.scene.add(g);
+  g.userData={type,cx,cz,wasPower:null};
+},
+buildMesh(type,cx,cz){
+  const g=new THREE.Group();
+  const {x,z}=this.cellCenter(cx,cz);
+  g.position.set(x,0,z);
+  const mat=c=>new THREE.MeshStandardMaterial({color:c,roughness:.7});
+  const add=(geo,m,x,y,z,ry)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);if(ry)o.rotation.y=ry;o.castShadow=!IS_MOBILE;o.receiveShadow=!IS_MOBILE;g.add(o);return o;};
+  if(type==='road'){
+    add(new THREE.BoxGeometry(CELL*0.96,0.08,CELL*0.96),mat(0x3a4450),0,0.04,0);
+    add(new THREE.BoxGeometry(CELL*0.3,0.02,CELL*0.06),new THREE.MeshBasicMaterial({color:0xd8e890}),0,0.09,0);
+  }
+  else if(type==='res'){
+    add(new THREE.BoxGeometry(1.1,0.75,1.1),mat(0x8fc9a8),0,0.37,0);
+    add(new THREE.ConeGeometry(0.9,0.6,4),mat(0xa8483f),0,1.05,0,Math.PI/4);
+    add(new THREE.BoxGeometry(0.25,0.4,0.05),mat(0x5a3a2a),0.3,0.2,0.56);
+  }
+  else if(type==='com'){
+    add(new THREE.BoxGeometry(1.2,1.9,1.2),mat(0x4a7dc8),0,0.95,0);
+    const sign=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.25,0.05),
+      new THREE.MeshStandardMaterial({color:0x00e0ff,emissive:0x00c8ff,emissiveIntensity:.8}));
+    sign.position.set(0,1.7,0.63);
+    g.add(sign);
+  }
+  else if(type==='ind'){
+    add(new THREE.BoxGeometry(1.35,1.0,1.35),mat(0x9a8a5f),0,0.5,0);
+    add(new THREE.CylinderGeometry(0.14,0.18,1.1,10),mat(0x666677),-0.4,1.05,-0.4);
+    add(new THREE.CylinderGeometry(0.12,0.15,0.85,10),mat(0x777788),0.3,0.9,-0.3);
+  }
+  else if(type==='power'){
+    add(new THREE.BoxGeometry(1.65,1.0,1.65),mat(0xc9642a),0,0.5,0);
+    add(new THREE.CylinderGeometry(0.2,0.26,1.5,12),mat(0x888899),-0.45,1.2,-0.45);
+    add(new THREE.CylinderGeometry(0.17,0.22,1.2,12),mat(0x9999aa),0.4,1.05,0.35);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(0.12,8,6),
+      new THREE.MeshBasicMaterial({color:0xffcc44}));
+    lamp.position.set(0,1.1,0);
+    g.add(lamp);
+  }
+  else if(type==='park'){
+    add(new THREE.BoxGeometry(CELL*0.94,0.06,CELL*0.94),mat(0x3f9f5f),0,0.03,0);
+    [[-0.4,-0.3],[0.35,-0.4],[0.1,0.4]].forEach(([tx,tz],i)=>{
+      add(new THREE.CylinderGeometry(0.05,0.07,0.3,6),mat(0x6a4a2a),tx,0.2,tz);
+      add(new THREE.ConeGeometry(0.26,0.6,6),mat(0x2f8f4f),tx,0.6,tz);
+    });
+  }
+  else if(type==='water'){
+    add(new THREE.CylinderGeometry(0.4,0.5,0.5,10),mat(0x8899aa),0,0.25,0);
+    add(new THREE.CylinderGeometry(0.3,0.3,1.0,10),mat(0x639fbf),0,0.95,0);
+    add(new THREE.SphereGeometry(0.42,12,8),mat(0x7fc0e8),0,1.55,0);
+  }
+  return g;
+},
+refreshTints(){
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    const g=this.meshes[z][x];
+    if(!g)continue;
+    if(g.userData.type!=='res'&&g.userData.type!=='com'&&g.userData.type!=='ind')continue;
+    const p=!!this.powered[z][x];
+    if(g.userData.wasPower===p)continue;
+    g.userData.wasPower=p;
+    g.traverse(o=>{
+      if(!o.isMesh||!o.material||!o.material.color)return;
+      if(o.material.emissive&&o.material.emissive.getHex()!==0)return;
+      if(!o.userData.base)o.userData.base=o.material.color.getHex();
+      o.material.color.setHex(p?o.userData.base:0x8a7a4a);
+    });
+  }
+},
+
+/* ---------- simulation ---------- */
+evaluatePower(){
+  this.powered=Array.from({length:GRID},()=>Array(GRID).fill(false));
+  const powers=[];
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++)
+    if(this.grid[z][x]==='power')powers.push([x,z]);
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    for(const [px,pz] of powers){
+      if(Math.max(Math.abs(px-x),Math.abs(pz-z))<=POWER_R){
+        this.powered[z][x]=true;break;
+      }
+    }
+  }
+},
+nearType(x,z,type,r){
+  for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
+    const nx=x+dx,nz=z+dz;
+    if(nx<0||nz<0||nx>=GRID||nz>=GRID)continue;
+    if(this.grid[nz][nx]===type)return true;
+  }
+  return false;
+},
+nearRoad(x,z){
+  return (x>0&&this.grid[z][x-1]==='road')||(x<GRID-1&&this.grid[z][x+1]==='road')||
+         (z>0&&this.grid[z-1][x]==='road')||(z<GRID-1&&this.grid[z+1][x]==='road');
+},
+countType(t){
+  let n=0;
+  for(const row of this.grid)for(const c of row)if(c===t)n++;
+  return n;
+},
+simStep(){
+  this.month++;
+  this.evaluatePower();
+  // zone development: dev status is shown by tints & population
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    const c=this.grid[z][x];
+    if(c!=='res'&&c!=='com'&&c!=='ind')continue;
+    if(!this.powered[z][x]||!this.nearRoad(x,z))continue;
+  }
+  // population
+  let host=0;
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    if(this.grid[z][x]==='res'&&this.powered[z][x]&&this.nearRoad(x,z))
+      host+=(this.nearType(x,z,'ind',2)?10:15);
+  }
+  const target=Math.round(host*(this.countType('water')>0?1.35:1));
+  this.pop+=Math.round((target-this.pop)*0.35);
+  if(this.pop<0)this.pop=0;
+  // budget
+  const rateMult=1+(this.rate-3)*0.1;
+  const taxes=Math.round((this.pop*1.2+this.countType('com')*18+this.countType('ind')*28)*rateMult);
+  const upkeep=this.countType('power')*MAINT.power+this.countType('water')*MAINT.water;
+  this.money+=taxes-upkeep;
+  if(this.money<0){this.money=0;this.log('財政破綻！税収が足りません…','warn');}
+  // demand
+  const nRes=this.countType('res'),nCom=this.countType('com'),nInd=this.countType('ind');
+  this.demand.r=Math.max(.05,Math.min(1,.4+(nCom+nInd)*.02-nRes*.01));
+  this.demand.c=Math.max(.05,Math.min(1,.2+nRes*.015-nCom*.02));
+  this.demand.i=Math.max(.05,Math.min(1,.3+nRes*.012-nInd*.015));
+  // milestones
+  if(this.pop>=50&&this._v1!==true){this._v1=true;this.log('集落が形成されました。人口 '+this.pop+' 人','good');}
+  if(this.pop>=200&&this._v2!==true){this._v2=true;this.log('村になりました。人口 '+this.pop+' 人','good');}
+  if(this.pop>=500&&this._v3!==true){this._v3=true;this.log('町になりました！人口 '+this.pop+' 人','good');}
+  if(this.pop>=2000&&this._v4!==true){this._v4=true;this.log('市制施行！大都市の誕生です！','good');}
+  this.refreshTints();
+  this.rebuildFromGrid();
+},
+rebuildFromGrid(){
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    if(this.grid[z][x]&&!this.meshes[z][x])this.placeMesh(x,z,this.grid[z][x]);
+  }
+},
+
+/* ---------- loop / UI ---------- */
+startGame(){
+  document.getElementById('overlay').classList.add('hidden');
+  if(this._loop)return;
+  this._loop=setInterval(()=>{
+    for(let i=0;i<Math.max(1,this.speed);i++)this.simStep();
+    this.drawUI();
+  },1000);
+},
+setSpeed(s){
+  this.speed=s;
+  document.querySelectorAll('.sp-btn').forEach(b=>b.classList.toggle('active',+b.dataset.s===s));
+},
+toggleRot(){this.allowPaint=!this.allowPaint;},
+log(text,type){
+  const p=document.getElementById('log-panel');
+  const d=document.createElement('div');
+  d.className='log-item '+(type||'');
+  d.innerText=text;
+  p.appendChild(d);
+  while(p.children.length>5)p.removeChild(p.firstChild);
+  setTimeout(()=>{if(d.parentNode)d.remove();},6000);
+},
+drawUI(){
+  document.getElementById('ui-money').textContent='§'+Math.round(this.money).toLocaleString();
+  document.getElementById('ui-pop').textContent=this.pop.toLocaleString();
+  const m=(this.month%12)+1;
+  document.getElementById('ui-date').textContent=(1900+Math.floor(this.month/12))+'年 '+m+'月';
+  const r=Math.min(5,Math.max(1,Math.round(1+this.pop/500)));
+  document.getElementById('ui-rate').textContent='★'.repeat(r)+'☆'.repeat(5-r);
+  document.getElementById('bar-r').style.height=Math.round(this.demand.r*100)+'%';
+  document.getElementById('bar-c').style.height=Math.round(this.demand.c*100)+'%';
+  document.getElementById('bar-i').style.height=Math.round(this.demand.i*100)+'%';
+},
+saveGame(){
+  try{
+    const data={money:this.money,pop:this.pop,month:this.month,grid:this.grid};
+    localStorage.setItem('microcity3d_save',JSON.stringify(data));
+    this.log('ゲームを保存しました','good');
+  }catch(e){this.log('保存に失敗しました','warn');}
+},
+loadGame(){
+  try{
+    const raw=localStorage.getItem('microcity3d_save');
+    if(!raw){this.log('保存データがありません','warn');return;}
+    const d=JSON.parse(raw);
+    this.money=d.money;this.pop=d.pop;this.month=d.month;
+    this.grid=d.grid;
+    for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++)this.removeMesh(x,z);
+    this.evaluatePower();
+    this.rebuildFromGrid();
+    this.drawUI();
+    this.log('ゲームを復元しました','good');
+  }catch(e){this.log('復元に失敗しました','warn');}
+},
+resetGame(){
+  if(!confirm('都市を完全にリセットしますか？'))return;
+  this.grid=Array.from({length:GRID},()=>Array(GRID).fill(null));
+  this.money=20000;this.month=0;this.pop=0;
+  this._v1=this._v2=this._v3=this._v4=false;
+  localStorage.removeItem('microcity3d_save');
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++)this.removeMesh(x,z);
+  this.evaluatePower();
+  this.drawUI();
+  this.log('新しい都市建設を開始しました','good');
+},
+
+/* ---------- render loop ---------- */
+animate(){
+  requestAnimationFrame(()=>this.animate());
+  // camera keys pan
+  const sp=0.6;
+  const fx=Math.sin(this.camTheta),fz=Math.cos(this.camTheta);
+  let moved=false;
+  if(this.keys['KeyW']){this.camTarget.x-=fx*sp;this.camTarget.z-=fz*sp;moved=true;}
+  if(this.keys['KeyS']){this.camTarget.x+=fx*sp;this.camTarget.z+=fz*sp;moved=true;}
+  if(this.keys['KeyA']){this.camTarget.x-=fz*sp;this.camTarget.z+=fx*sp;moved=true;}
+  if(this.keys['KeyD']){this.camTarget.x+=fz*sp;this.camTarget.z-=fx*sp;moved=true;}
+  void moved;
+  this.updateCamera();
+  this.refreshTints();
+  this.renderer.render(this.scene,this.camera);
+}
+};
+
+window.addEventListener('DOMContentLoaded',()=>Game.init());
+</script>
+</body>
+</html>
