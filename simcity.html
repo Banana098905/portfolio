@@ -62,6 +62,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#0a0e14;font-family:
 .tool .nm{font-size:8px}.tool .cost{display:none}#hud{padding:4px}
 .panel{padding:16px}#top-btns{max-width:55vw}}
 #cell-info{position:absolute;bottom:96px;left:50%;transform:translateX(-50%);z-index:9;pointer-events:none;font-size:11px;padding:4px 12px;background:rgba(10,15,24,.9);border:1px solid rgba(0,220,255,.25);border-radius:8px;color:#9fd8ff;opacity:0;transition:opacity .15s;white-space:nowrap}
+#toolbar{max-width:98vw;overflow-x:auto}
 </style>
 </head>
 <body>
@@ -82,6 +83,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#0a0e14;font-family:
 <div class="date-line" id="ui-date">1900年 1月</div>
 <div class="stat-line">人口: <span id="ui-pop">0</span> 人</div>
 <div class="stat-line">月収支: <span id="ui-net">0</span></div>
+<div class="stat-line" id="ui-prob">衛生 -- 治安 -- 環境 --</div>
 <div class="stat-line">都市評価: <span id="ui-rate">★☆☆☆☆</span></div>
 </div>
 <div class="hud-box" style="text-align:right;">
@@ -113,6 +115,10 @@ body,html{width:100%;height:100%;overflow:hidden;background:#0a0e14;font-family:
 <button class="tool" data-t="power" onclick="Game.selectTool('power')"><span class="ico">⚡</span><span class="nm">発電所</span><span class="cost">§1500</span></button>
 <button class="tool" data-t="park" onclick="Game.selectTool('park')"><span class="ico">🌳</span><span class="nm">公園</span><span class="cost">§200</span></button>
 <button class="tool" data-t="water" onclick="Game.selectTool('water')"><span class="ico">💧</span><span class="nm">水道</span><span class="cost">§400</span></button>
+<button class="tool" data-t="hospital" onclick="Game.selectTool('hospital')"><span class="ico">🏥</span><span class="nm">病院</span><span class="cost">§800</span></button>
+<button class="tool" data-t="police" onclick="Game.selectTool('police')"><span class="ico">🚓</span><span class="nm">警察署</span><span class="cost">§600</span></button>
+<button class="tool" data-t="fire" onclick="Game.selectTool('fire')"><span class="ico">🚒</span><span class="nm">消防署</span><span class="cost">§600</span></button>
+<button class="tool" data-t="waste" onclick="Game.selectTool('waste')"><span class="ico">♻️</span><span class="nm">浄化施設</span><span class="cost">§700</span></button>
 <button class="tool" data-t="doze" onclick="Game.selectTool('doze')"><span class="ico">🚜</span><span class="nm">解体</span><span class="cost">§0</span></button>
 </div>
 
@@ -132,7 +138,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#0a0e14;font-family:
 3. 需要度バーを見ながら<b>住宅R / 商業R / 工業I</b>を敷く<br>
 4. <b>公園</b>は周辺の住宅の成長を助け、<b>水道</b>は人口上限を上げます<br>
 5. 毎月税収が入ります。工業は税収が高い代わりに周辺住宅を妨げます<br>
-6. 都市評価(★)が高いと税収が増えます<br>7. 電気と道路が揃い需要があると建物は<b>Lv3まで成長</b>します。⚠が出たら電気か道路の不足です<br>8. 土地は右上の<b>土地購入</b>で外側へ広げられます(暗い部分は未購入)
+6. 都市評価(★)が高いと税収が増えます<br>7. 電気と道路が揃い需要があると建物は<b>Lv3まで成長</b>します。⚠が出たら電気か道路の不足です<br>8. 土地は右上の<b>土地購入</b>で外側へ広げられます(暗い部分は未購入)<br>9. 工業は公害を出し、人口が増えると病気・犯罪・火災が起きます。🏥病院 🚓警察 🚒消防 ♻️浄化施設で備えましょう(効果範囲は約6マス)
 </div>
 <div class="tip" style="text-align:center;">
 <b>操作:</b> クリック/ドラッグで建設 | <b>右ドラッグ or 左Shift+ドラッグ</b>で視点回転 | ホイールでズーム | <b>WASD/矢印</b>キーで移動 | <b>Q/E</b>で回転(↻ボタンは90°回転)
@@ -147,9 +153,9 @@ const IS_MOBILE=('ontouchstart' in window)||(navigator.maxTouchPoints>0)&&/Andro
 
 /* ========== CONFIG ========== */
 const GRID=48, CELL=2, POWER_R=7;
-const COST={road:10,res:100,com:200,ind:150,power:1500,park:200,water:400,doze:0};
-const MAINT={power:50,water:20};
-const NAMES={road:"道路",res:"住宅",com:"商業",ind:"工業",power:"発電所",park:"公園",water:"水道"};
+const COST={road:10,res:100,com:200,ind:150,power:1500,park:200,water:400,hospital:800,police:600,fire:600,waste:700,doze:0};
+const MAINT={power:50,water:20,hospital:40,police:30,fire:30,waste:30};
+const NAMES={road:"道路",res:"住宅",com:"商業",ind:"工業",power:"発電所",park:"公園",water:"水道",hospital:"病院",police:"警察署",fire:"消防署",waste:"浄化施設"};
 
 /* ========== STATE ========== */
 const Game={
@@ -421,6 +427,42 @@ placeMesh(cx,cz,type){
   g.userData={type,cx,cz,wasPower:null};
   this.applyLevel(cx,cz);
 },
+isRoad(x,z){return x>=0&&z>=0&&x<GRID&&z<GRID&&this.grid[z][x]==='road';},
+updateCars(){
+  if(!this.cars){this.cars=[];this.carGeo=new THREE.BoxGeometry(0.34,0.16,0.6);}
+  this.cars=this.cars.filter(c=>{if(this.isRoad(c.fx,c.fz))return true;this.scene.remove(c.m);return false;});
+  const roads=[];
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++)if(this.grid[z][x]==='road')roads.push([x,z]);
+  const want=Math.min(60,Math.floor(roads.length/2));
+  while(this.cars.length>want){this.scene.remove(this.cars.pop().m);}
+  const cols=[0xff6b6b,0xffd166,0x6bd6ff,0xffffff,0x9be36b];
+  while(this.cars.length<want){
+    const [x,z]=roads[Math.floor(Math.random()*roads.length)];
+    const m=new THREE.Mesh(this.carGeo,new THREE.MeshBasicMaterial({color:cols[Math.floor(Math.random()*cols.length)]}));
+    this.scene.add(m);
+    this.cars.push({m,fx:x,fz:z,tx:x,tz:z,t:1});
+  }
+},
+moveCars(){
+  if(!this.cars)return;
+  const D=[[1,0],[-1,0],[0,1],[0,-1]];
+  for(const c of this.cars){
+    c.t+=0.035;
+    if(c.t>=1){
+      const ox=c.fx,oz=c.fz;c.fx=c.tx;c.fz=c.tz;
+      const o=D.filter(([dx,dz])=>this.isRoad(c.fx+dx,c.fz+dz));
+      let q=o.filter(([dx,dz])=>!(c.fx+dx===ox&&c.fz+dz===oz));
+      if(!q.length)q=o;
+      if(!q.length||!this.isRoad(c.fx,c.fz)){c.tx=c.fx;c.tz=c.fz;c.m.visible=false;continue;}
+      const [dx,dz]=q[Math.floor(Math.random()*q.length)];
+      c.tx=c.fx+dx;c.tz=c.fz+dz;c.t=0;c.m.visible=true;
+    }
+    const A=this.cellCenter(c.fx,c.fz),B=this.cellCenter(c.tx,c.tz);
+    const dx=B.x-A.x,dz=B.z-A.z,l=Math.hypot(dx,dz)||1;
+    c.m.position.set(A.x+dx*c.t-dz/l*0.18,0.12,A.z+dz*c.t+dx/l*0.18);
+    if(l>0.01)c.m.rotation.y=Math.atan2(dx,dz);
+  }
+},
 facing(cx,cz){
   const r=(dx,dz)=>{const nx=cx+dx,nz=cz+dz;return nx>=0&&nz>=0&&nx<GRID&&nz<GRID&&this.grid[nz][nx]==='road';};
   if(r(0,1))return 0;if(r(1,0))return Math.PI/2;if(r(0,-1))return Math.PI;if(r(-1,0))return -Math.PI/2;
@@ -435,6 +477,7 @@ refreshAround(cx,cz){
     if(t==='road'){this.removeMesh(x,z);this.placeMesh(x,z,'road');}
     else if(t==='res'||t==='com'||t==='ind')g.rotation.y=this.facing(x,z);
   }
+  this.updateCars();
 },
 applyLevel(cx,cz){
   const g=this.meshes[cz][cx],l=this.lvl[cz][cx];
@@ -497,6 +540,24 @@ buildMesh(type,cx,cz){
     add(new THREE.CylinderGeometry(0.3,0.3,1.0,10),mat(0x639fbf),0,0.95,0);
     add(new THREE.SphereGeometry(0.42,12,8),mat(0x7fc0e8),0,1.55,0);
   }
+  else if(type==='hospital'){
+    add(new THREE.BoxGeometry(1.5,0.9,1.2),mat(0xe8eef2),0,0.45,0);
+    add(new THREE.BoxGeometry(0.5,0.1,0.15),mat(0xd33a3a),0,0.95,0);
+    add(new THREE.BoxGeometry(0.15,0.1,0.5),mat(0xd33a3a),0,0.95,0);
+  }
+  else if(type==='police'){
+    add(new THREE.BoxGeometry(1.3,0.8,1.3),mat(0x3c5aa6),0,0.4,0);
+    add(new THREE.BoxGeometry(0.3,0.2,0.3),mat(0x6fa8ff),0,0.9,0);
+  }
+  else if(type==='fire'){
+    add(new THREE.BoxGeometry(1.5,0.8,1.3),mat(0xc0392b),0,0.4,0);
+    add(new THREE.BoxGeometry(0.7,0.55,0.05),mat(0xf1c40f),0.1,0.3,0.66);
+    add(new THREE.BoxGeometry(0.3,1.3,0.3),mat(0x8a2a20),-0.5,0.65,-0.4);
+  }
+  else if(type==='waste'){
+    add(new THREE.BoxGeometry(1.5,0.7,1.5),mat(0x5b7a5b),0,0.35,0);
+    add(new THREE.CylinderGeometry(0.4,0.4,0.9,12),mat(0x88aa88),0.35,0.75,0.3);
+  }
   if(type==='res'||type==='com'||type==='ind'){
     g.rotation.y=this.facing(cx,cz);
     const w=new THREE.Mesh(new THREE.OctahedronGeometry(0.22),new THREE.MeshBasicMaterial({color:0xff4455}));
@@ -544,6 +605,15 @@ nearType(x,z,type,r){
   }
   return false;
 },
+sumNear(x,z,type,r){
+  let n=0;
+  for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
+    const nx=x+dx,nz=z+dz;
+    if(nx<0||nz<0||nx>=GRID||nz>=GRID)continue;
+    if(this.grid[nz][nx]===type)n+=this.lvl[nz][nx]||1;
+  }
+  return n;
+},
 nearRoad(x,z){
   return (x>0&&this.grid[z][x-1]==='road')||(x<GRID-1&&this.grid[z][x+1]==='road')||
          (z>0&&this.grid[z-1][x]==='road')||(z<GRID-1&&this.grid[z+1][x]==='road');
@@ -569,22 +639,52 @@ simStep(){
     const d=this.demand[c==='res'?'r':c==='com'?'c':'i'];
     if(this.lvl[z][x]<3&&Math.random()<d*0.35){this.lvl[z][x]++;this.applyLevel(x,z);}
   }
+  // city problems
+  let n=0,hs=0,sf=0,pl=0;
+  for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
+    if(this.grid[z][x]!=='res')continue;
+    n++;
+    if(this.nearType(x,z,'hospital',6))hs++;
+    if(this.nearType(x,z,'police',6))sf++;
+    let q=Math.min(1,this.sumNear(x,z,'ind',4)*0.1);
+    if(this.nearType(x,z,'waste',6))q*=0.3;
+    pl+=q;
+  }
+  const m=this.m=n?{health:hs/n,safe:sf/n,env:1-pl/n}:{health:1,safe:1,env:1};
   // population
   let host=0;
   for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++){
     if(this.grid[z][x]==='res'&&this.powered[z][x]&&this.nearRoad(x,z))
       host+=[0,8,16,26][this.lvl[z][x]||1]*(this.nearType(x,z,'ind',2)?0.65:1)*(this.nearType(x,z,'park',3)?1.2:1);
   }
-  const target=Math.round(host*(this.countType('water')>0?1.35:1));
+  const target=Math.round(host*(this.countType('water')>0?1.35:1)*(0.7+0.3*m.env));
   this.pop+=Math.round((target-this.pop)*0.35);
   if(this.pop<0)this.pop=0;
+  if(this.pop>100&&Math.random()<0.03+(1-m.health)*0.07+(1-m.env)*0.07){
+    const loss=Math.round(this.pop*0.08*(1.2-m.health));this.pop=Math.max(0,this.pop-loss);
+    this.log('感染症が流行！人口が'+loss+'人減少しました'+(m.health<0.5?'（病院が不足）':''),'warn');
+  }
   // budget
   this.rate=Math.min(5,Math.max(1,Math.round(1+this.pop/500)));
   const rateMult=1+(this.rate-3)*0.1;
-  const taxes=Math.round((this.pop*1.2+this.levelSum('com')*18+this.levelSum('ind')*28)*rateMult);
-  const upkeep=this.countType('power')*MAINT.power+this.countType('water')*MAINT.water;
+  const taxes=Math.round((this.pop*1.2+this.levelSum('com')*18+this.levelSum('ind')*28)*rateMult*(1-0.25*(1-m.safe)*Math.min(1,this.pop/800)));
+  const upkeep=Object.keys(MAINT).reduce((a,k)=>a+this.countType(k)*MAINT[k],0);
   this.net=taxes-upkeep;this.money+=this.net;
   if(this.money<0){this.money=0;this.log('財政破綻！税収が足りません…','warn');}
+  if(this.month>6&&Math.random()<0.03){
+    const cs=[];
+    for(let z=0;z<GRID;z++)for(let x=0;x<GRID;x++)if(['res','com','ind','power','water'].includes(this.grid[z][x]))cs.push([x,z]);
+    if(cs.length){
+      const [x,z]=cs[Math.floor(Math.random()*cs.length)];
+      if(this.nearType(x,z,'fire',6))this.log('火災発生！消防署が消し止めました','good');
+      else{this.removeMesh(x,z);this.grid[z][x]=null;this.lvl[z][x]=0;this.refreshAround(x,z);this.evaluatePower();this.log('火災発生！建物が焼失しました…消防署で備えましょう','warn');}
+    }
+  }
+  if(this.month%6===0){
+    if(m.env<0.6)this.log('公害が深刻です。浄化施設♻️を建てましょう','warn');
+    else if(m.safe<0.5&&this.pop>300)this.log('治安が悪化しています。警察署🚓が必要です','warn');
+    else if(m.health<0.5&&this.pop>200)this.log('衛生状態が悪化しています。病院🏥が必要です','warn');
+  }
   // demand
   const nRes=this.countType('res'),nCom=this.countType('com'),nInd=this.countType('ind');
   this.demand.r=Math.max(.05,Math.min(1,.4+(nCom+nInd)*.02-nRes*.01));
@@ -597,6 +697,7 @@ simStep(){
   if(this.pop>=2000&&this._v4!==true){this._v4=true;this.log('市制施行！大都市の誕生です！','good');}
   this.refreshTints();
   this.rebuildFromGrid();
+  this.updateCars();
   if(this.month%12===0)this.saveGame(true);
 },
 rebuildFromGrid(){
@@ -631,6 +732,9 @@ log(text,type){
 drawUI(){
   document.getElementById('ui-money').textContent='§'+Math.round(this.money).toLocaleString();
   document.getElementById('ui-pop').textContent=this.pop.toLocaleString();
+  const mm=this.m||{health:1,safe:1,env:1};
+  const pf=(t,v)=>t+' <span style="color:'+(v>=.7?'#7dffb0':v>=.4?'#ffd166':'#ff7788')+'">'+Math.round(v*100)+'%</span>';
+  document.getElementById('ui-prob').innerHTML=pf('衛生',mm.health)+' '+pf('治安',mm.safe)+' '+pf('環境',mm.env);
   document.getElementById('buy-land').textContent=(this.own.x1-this.own.x0+1>=GRID)?'土地:最大':'土地購入 §'+this.landCost().toLocaleString();
   const nt=this.net||0,ne=document.getElementById('ui-net');
   ne.textContent=(nt>=0?'+§':'-§')+Math.abs(nt).toLocaleString();ne.style.color=nt>=0?'#7dffb0':'#ff7788';
@@ -701,6 +805,7 @@ animate(){
   void moved;
   this.updateCamera();
   this.refreshTints();
+  this.moveCars();
   this.renderer.render(this.scene,this.camera);
 }
 };
