@@ -1,0 +1,211 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-paper text-slate-800 antialiased;
+    line-height: 1.8;
+  }
+  h1,
+  h2,
+  h3 {
+    font-feature-settings: 'palt' 1;
+    letter-spacing: 0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid theme('colors.navy.500');
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: theme('colors.iris.line');
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
+  }
+
+  .card {
+    @apply rounded-2xl border border-line bg-white shadow-card transition duration-300 hover:-translate-y-0.5 hover:shadow-card-hover focus-within:ring-2 focus-within:ring-navy-300;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full bg-mist px-2.5 py-0.5 text-xs font-medium text-navy-700 transition hover:bg-navy-100;
+  }
+  .chip-iris {
+    @apply inline-flex items-center rounded-full bg-iris-soft px-2.5 py-0.5 text-xs font-medium text-iris;
+  }
+  .chip-outline {
+    @apply inline-flex items-center rounded-full border border-line px-2.5 py-0.5 text-xs text-slate-500;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-navy-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-navy-700 active:scale-[0.98];
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 py-2.5 text-sm font-semibold text-navy-800 transition hover:border-navy-200 hover:bg-navy-50 active:scale-[0.98];
+  }
+
+  .bg-lab-grid {
+    background-image:
+      linear-gradient(to right, rgba(34, 59, 115, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(34, 59, 115, 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ---------- 記事本文 ---------- */
+  .prose-jp {
+    @apply text-[16.5px] leading-[1.95] text-slate-800;
+    overflow-wrap: anywhere;
+  }
+  .prose-jp > * + * {
+    margin-top: 1.25em;
+  }
+  .prose-jp h2 {
+    @apply mt-14 scroll-mt-24 border-b border-line pb-3 text-[1.55rem] font-bold leading-snug text-navy-900;
+  }
+  .prose-jp h3 {
+    @apply mt-10 scroll-mt-24 border-l-4 border-iris pl-3 text-xl font-bold leading-snug text-navy-900;
+  }
+  .prose-jp h4 {
+    @apply mt-8 font-bold text-navy-800;
+  }
+  .prose-jp ul {
+    @apply list-disc pl-6 marker:text-navy-400;
+  }
+  .prose-jp ol {
+    @apply list-decimal pl-6 marker:font-semibold marker:text-navy-500;
+  }
+  .prose-jp li + li {
+    @apply mt-1.5;
+  }
+  .prose-jp a {
+    @apply text-navy-600 underline decoration-navy-300 underline-offset-2 transition hover:text-navy-800;
+  }
+  .prose-jp a[target='_blank']::after {
+    content: '↗';
+    @apply ml-0.5 text-[0.8em] text-navy-400;
+  }
+  .prose-jp strong {
+    @apply font-bold text-navy-900;
+  }
+  .prose-jp hr {
+    @apply my-10 border-line;
+  }
+  .prose-jp code {
+    @apply rounded bg-mist px-1.5 py-0.5 font-mono text-[0.9em] text-navy-800;
+  }
+  .prose-jp pre {
+    @apply overflow-x-auto rounded-xl bg-navy-900 p-4 text-sm leading-relaxed text-slate-100;
+  }
+  .prose-jp pre code {
+    @apply bg-transparent p-0 text-inherit;
+  }
+  .prose-jp blockquote {
+    @apply rounded-r-xl border-l-4 border-navy-200 bg-white px-5 py-3 text-slate-600;
+  }
+  .prose-jp figure img {
+    @apply w-full rounded-xl border border-line;
+  }
+  .prose-jp figcaption {
+    @apply mt-2 text-center text-sm text-slate-500;
+  }
+
+  /* 比較表（スマートフォンでは横にスクロール。左端の列は固定して、行の見出しを見失わないようにする） */
+  .prose-jp .table-hint {
+    @apply mb-1.5 text-right text-xs text-slate-500 sm:hidden;
+  }
+  .prose-jp .table-hint + .table-wrap {
+    margin-top: 0;
+  }
+  .prose-jp .table-wrap {
+    @apply overflow-x-auto rounded-xl border border-line bg-white;
+    -webkit-overflow-scrolling: touch;
+  }
+  .prose-jp table {
+    @apply w-full min-w-[32rem] border-collapse text-sm leading-relaxed;
+  }
+  .prose-jp th,
+  .prose-jp td {
+    @apply border-b border-line px-3 py-3 text-left align-top sm:px-4;
+  }
+  .prose-jp thead th {
+    @apply bg-mist font-semibold text-navy-800;
+  }
+  .prose-jp thead th:first-child,
+  .prose-jp tbody th[scope='row'] {
+    @apply sticky left-0 z-[1];
+    box-shadow: 1px 0 0 theme('colors.line');
+  }
+  .prose-jp thead th:first-child {
+    @apply z-[2];
+  }
+  .prose-jp tbody th[scope='row'] {
+    @apply min-w-[6.5rem] max-w-[9rem] bg-white font-semibold text-navy-900 sm:max-w-none sm:whitespace-nowrap;
+  }
+  .prose-jp tbody tr:last-child th,
+  .prose-jp tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* 注意・成功・失敗 */
+  .prose-jp .callout {
+    @apply rounded-xl border border-l-4 p-5;
+  }
+  .prose-jp .callout-title {
+    @apply mb-2 text-sm font-bold;
+  }
+  .prose-jp .callout-body > * + * {
+    margin-top: 0.75em;
+  }
+  .prose-jp .callout-note {
+    @apply border-navy-200 border-l-navy-500 bg-mist text-navy-900;
+  }
+  .prose-jp .callout-warning {
+    @apply border-amber-200 border-l-amber-500 bg-amber-50 text-amber-950;
+  }
+  .prose-jp .callout-success {
+    @apply border-emerald-200 border-l-emerald-500 bg-emerald-50 text-emerald-950;
+  }
+  .prose-jp .callout-failure {
+    @apply border-rose-200 border-l-rose-500 bg-rose-50 text-rose-950;
+  }
+
+  /* 手順 */
+  .prose-jp .steps-title {
+    @apply mb-3 font-bold text-navy-900;
+  }
+  .prose-jp .steps ol {
+    @apply list-none pl-0;
+    counter-reset: step;
+  }
+  .prose-jp .steps ol > li {
+    @apply relative rounded-xl border border-line bg-white py-4 pl-14 pr-4;
+    counter-increment: step;
+  }
+  .prose-jp .steps ol > li + li {
+    @apply mt-3;
+  }
+  .prose-jp .steps ol > li::before {
+    content: counter(step);
+    @apply absolute left-4 top-4 grid h-8 w-8 place-items-center rounded-full bg-navy-800 text-sm font-bold text-white;
+  }
+}
