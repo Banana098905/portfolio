@@ -629,7 +629,7 @@ if(!sp){const S=spawnPt(),sx=S[0],sz=S[1],h0=S[2];for(let cx=(sx>>4)-1;cx<=(sx>>
   const ch=Array(18).fill(null);ch[0]={id:15,n:16};ch[1]={id:37,n:6};ch[2]={id:32,n:1};ch[3]={id:35,n:6};chests[(sx+3)+','+(h0+1)+','+(sz-3)]=ch;
   sp={x:sx+.5,y:h0+1.01,z:sz+.5}}
 if(!loaded){p.x=sp.x;p.y=sp.y;p.z=sp.z}else{const S0=spawnPt();p.x=S0[0]+.5;p.y=S0[2]+1.01;p.z=S0[1]+.5;p.vy=0}
-setWant();for(const w of want)if(w[2]<=9)ensure(w[0],w[1]);
+setWant();for(const w of want)if(w[2]<=2)ensure(w[0],w[1]);
 while(hitBox(p.x,p.y,p.z)&&p.y<HT-2)p.y+=1;
 for(const w of want)if(w[2]<=4)build(w[0],w[1]);
 // 持ち物
