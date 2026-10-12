@@ -349,14 +349,14 @@ function XVl(rx,rz){const id=rx+','+rz;if(VIL.has(id))return VIL.get(id);let v=n
 function XV(d,x0,z0){for(let rx=Math.floor((x0-30)/RS);rx<=Math.floor((x0+46)/RS);rx++)for(let rz=Math.floor((z0-30)/RS);rz<=Math.floor((z0+46)/RS);rz++){const v=XVl(rx,rz);if(!v||v.x+26<x0||v.x-26>=x0+CS||v.z+26<z0||v.z-26>=z0+CS)continue;
  const y0=v.y,S=(x,y,z,b)=>{const lx=x-x0,lz=z-z0;if(lx<0||lx>15||lz<0||lz>15||y<1||y>=HT)return;d[(y*CS+lz)*CS+lx]=b;if(b===57)TL.push([x,y,z])};
  for(let x=Math.max(x0,v.x-24);x<=Math.min(x0+15,v.x+24);x++)for(let z=Math.max(z0,v.z-24);z<=Math.min(z0+15,v.z+24);z++){const r=Math.hypot(x-v.x,z-v.z);if(r>24)continue;const hg=r>22?4:r>19?6:10;for(let y=y0;y<y0+hg;y++)S(x,y,z,0);S(x,y0-1,z,r<10?51:((x*7+z*3)%5===0?91:3));S(x,y0-2,z,3);S(x,y0-3,z,3)}
- S(v.x,y0-1,v.z,30);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)S(v.x+a,y0,v.z+b,51);
+ S(v.x,y0-1,v.z,51);for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)if(a||b)S(v.x+a,y0,v.z+b,51);
  [[11,11],[-11,11],[11,-11],[-11,-11]].forEach(q=>{for(let y=0;y<3;y++)S(v.x+q[0],y0+y,v.z+q[1],51);S(v.x+q[0],y0+3,v.z+q[1],57)});
  HUT.forEach((h,i)=>{const cx=v.x+h[0],cz=v.z+h[1],dx0=Math.abs(h[0])>Math.abs(h[1])?-Math.sign(h[0])*3:0,dz0=dx0?0:-Math.sign(h[1])*3;
   for(let a=-3;a<=3;a++)for(let b=-3;b<=3;b++){const e=Math.abs(a)===3||Math.abs(b)===3,cr=Math.abs(a)===3&&Math.abs(b)===3,dr=a===dx0&&b===dz0;S(cx+a,y0-1,cz+b,4);
    for(let y=0;y<4;y++){let id=0;if(e){id=cr?5:((a===0||b===0)&&y===1&&!dr)?14:4;if(dr&&y<2)id=0}S(cx+a,y0+y,cz+b,id)}S(cx+a,y0+4,cz+b,i===0?6:4)}
-  S(cx,y0+3,cz,57);S(cx+2,y0,cz+2,43)})}}
+  if(i<3)S(cx,y0+3,cz,57);S(cx+2,y0,cz+2,43)})}}
 // ===== 遺跡・水晶洞 =====
-const mkS=(d,x0,z0)=>(x,y,z,b)=>{const lx=x-x0,lz=z-z0;if(lx<0||lx>15||lz<0||lz>15||y<1||y>=HT)return;d[(y*CS+lz)*CS+lx]=b;if(b===57)TL.push([x,y,z])};
+const mkS=(d,x0,z0,nl)=>(x,y,z,b)=>{const lx=x-x0,lz=z-z0;if(lx<0||lx>15||lz<0||lz>15||y<1||y>=HT)return;d[(y*CS+lz)*CS+lx]=b;if(b===57&&!nl)TL.push([x,y,z])};
 function XRl(rx,rz){const id='r'+rx+','+rz;if(VIL.has(id))return VIL.get(id);let v=null;if(hs(rx*9+4,51,rz*5+1)<.55){const x=rx*144+20+(hs(rx,52,rz)*104|0),z=rz*144+20+(hs(rx+5,53,rz)*104|0);v={id,x,z,y:Math.max(25,hAt(x,z)-40-(hs(rx,54,rz+3)*60|0))}}VIL.set(id,v);return v}
 function XR(d,x0,z0){for(let rx=Math.floor((x0-10)/144);rx<=Math.floor((x0+26)/144);rx++)for(let rz=Math.floor((z0-10)/144);rz<=Math.floor((z0+26)/144);rz++){const v=XRl(rx,rz);if(!v||v.x+10<x0||v.x-10>=x0+CS||v.z+10<z0||v.z-10>=z0+CS)continue;const S=mkS(d,x0,z0),y0=v.y;
  for(let a=-9;a<=9;a++)for(let b=-9;b<=9;b++){const X=v.x+a,Z=v.z+b,e=Math.abs(a)===9||Math.abs(b)===9;for(let y=0;y<7;y++)S(X,y0+y,Z,0);S(X,y0-1,Z,hs(X,y0,Z)<.3?91:51);S(X,y0-2,Z,3);
@@ -364,8 +364,8 @@ function XR(d,x0,z0){for(let rx=Math.floor((x0-10)/144);rx<=Math.floor((x0+26)/1
  [[-4,-4],[4,-4],[-4,4],[4,4]].forEach(q=>{const h=2+(hs(q[0]+v.x,q[1],v.z)*3|0);for(let y=0;y<h;y++)S(v.x+q[0],y0+y,v.z+q[1],51)});
  [[-8,-8],[8,-8],[-8,8],[8,8]].forEach(q=>S(v.x+q[0],y0+3,v.z+q[1],57));S(v.x,y0,v.z,53);S(v.x,y0+1,v.z,43)}}
 function XGl(rx,rz){const id='g'+rx+','+rz;if(VIL.has(id))return VIL.get(id);let v=null;if(hs(rx*5+1,41,rz*3+2)<.5){const x=rx*128+20+(hs(rx,42,rz)*88|0),z=rz*128+20+(hs(rx+3,43,rz)*88|0);v={id,x,z,y:Math.max(30,hAt(x,z)-25-(hs(rx,44,rz+7)*80|0)),r:9+(hs(rx,45,rz)*5|0)}}VIL.set(id,v);return v}
-function XG(d,x0,z0){for(let rx=Math.floor((x0-16)/128);rx<=Math.floor((x0+32)/128);rx++)for(let rz=Math.floor((z0-16)/128);rz<=Math.floor((z0+32)/128);rz++){const v=XGl(rx,rz);if(!v)continue;const R=v.r;if(v.x+R+1<x0||v.x-R-1>=x0+CS||v.z+R+1<z0||v.z-R-1>=z0+CS)continue;const S=mkS(d,x0,z0);
- for(let x=Math.max(x0,v.x-R-1);x<=Math.min(x0+15,v.x+R+1);x++)for(let z=Math.max(z0,v.z-R-1);z<=Math.min(z0+15,v.z+R+1);z++)for(let y=v.y-R-1;y<=v.y+R+1;y++){const q=Math.hypot(x-v.x,y-v.y,z-v.z);if(q>R+.5)continue;if(q<=R-1)S(x,y,z,y<v.y-R+3?30:0);else{const h=hs(x,y*3+z,z*7+y);S(x,y,z,h<.1?13:h<.15?192:h<.175?57:h<.2?193:14)}}}}
+function XG(d,x0,z0){for(let rx=Math.floor((x0-16)/128);rx<=Math.floor((x0+32)/128);rx++)for(let rz=Math.floor((z0-16)/128);rz<=Math.floor((z0+32)/128);rz++){const v=XGl(rx,rz);if(!v)continue;const R=v.r;if(v.x+R+1<x0||v.x-R-1>=x0+CS||v.z+R+1<z0||v.z-R-1>=z0+CS)continue;const S=mkS(d,x0,z0,1);
+ for(let x=Math.max(x0,v.x-R-1);x<=Math.min(x0+15,v.x+R+1);x++)for(let z=Math.max(z0,v.z-R-1);z<=Math.min(z0+15,v.z+R+1);z++)for(let y=v.y-R-1;y<=v.y+R+1;y++){const q=Math.hypot(x-v.x,y-v.y,z-v.z);if(q>R+.5)continue;if(q<=R-1)S(x,y,z,0);else{const h=hs(x,y*3+z,z*7+y);S(x,y,z,h<.1?13:h<.15?192:h<.18?57:h<.2?193:14)}}}}
 function genChunk(cx,cz){const d=new Uint8Array(csz),hmv=new Int16Array(CS*CS),hh=new Int16Array(CS*CS),x0=cx*CS,z0=cz*CS;let maxH=0;
  for(let lz=0;lz<CS;lz++)for(let lx=0;lx<CS;lx++){const h=hAt(x0+lx,z0+lz);hh[lz*CS+lx]=h;if(h>maxH)maxH=h;const sd=h<WL+2;
   for(let y=0;y<=h;y++){let v;if(y===h)v=sd?7:1;else if(y>h-4)v=sd?7:2;else{v=y<DEP+50?48:3}d[(y*CS+lz)*CS+lx]=v}}
@@ -918,18 +918,21 @@ function use(s){const h=raycast(),hv=h?get(h.x,h.y,h.z):0,nb=!s||!isBlk(s.id);
   setB(h.px,h.py,h.pz,id);reg(h.px,h.py,h.pz,id);s.n--;if(!s.n)sl[sel]=null;renderBar();snd('place');return true}
  return false}
 // 地図
-const EX=new Set();let mo=false,mT=0,tk=0;const mcv=document.createElement('canvas');mcv.width=mcv.height=250;mcv.style.cssText='position:fixed;left:50%;top:50%;translate:-50% -50%;z-index:25;display:none;border:2px solid #ffbf5e;border-radius:10px;pointer-events:none;box-shadow:0 10px 40px #000a';document.body.appendChild(mcv);
-function mapDraw(){const c=mcv.getContext('2d'),S=5,Rc=25,pc=p.x>>2,pz=p.z>>2,BC=[[130,130,140],[70,150,80],[210,190,110],[170,110,230],[220,80,50]];c.fillStyle='#0b1220';c.fillRect(0,0,250,250);
- for(let i=-Rc;i<Rc;i++)for(let j=-Rc;j<Rc;j++){if(!EX.has((pc+i)+','+(pz+j)))continue;const x=(pc+i)*4+2,z=(pz+j)*4+2,b=BC[bmAt(x,z)],v=.65+Math.max(-.3,Math.min(.5,(hAt(x,z)-p.y)/40));c.fillStyle='rgb('+b.map(a=>Math.min(255,a*v|0))+')';c.fillRect((i+Rc)*S,(j+Rc)*S,S,S)}
- const P=(x,z)=>[(x/4-pc+Rc)*S,(z/4-pz+Rc)*S];MC.forEach(m=>{const q=P(m.p[0],m.p[2]),f=m.id===249;c.fillStyle=f?'#f33':'#fff';c.fillRect(q[0]-2,q[1]-2,f?6:3,f?6:3)});
- VD.forEach(i=>{const v=VIL.get(i);if(!v)return;const q=P(v.x,v.z);c.fillStyle='#ff9a2e';c.fillRect(q[0]-4,q[1]-4,8,8)});RD.forEach(i=>{const v=VIL.get(i);if(!v)return;const q=P(v.x,v.z);c.fillStyle='#b070ff';c.fillRect(q[0]-3,q[1]-3,6,6)});GD.forEach(i=>{const v=VIL.get(i);if(!v)return;const q=P(v.x,v.z);c.fillStyle='#40e0ff';c.fillRect(q[0]-3,q[1]-3,6,6)});const q=P(p.x,p.z);c.save();c.translate(q[0],q[1]);c.rotate(-p.yaw);c.fillStyle='#ffd24a';c.beginPath();c.moveTo(0,-6);c.lineTo(4,5);c.lineTo(-4,5);c.fill();c.restore();c.fillStyle='#fff';c.font='11px sans-serif';c.fillText('深'+Math.max(0,Math.floor(SEA-p.y))+'m 🟥旗 🟧村'+VD.size+' 🟪遺跡'+RD.size+' 🟦洞'+GD.size,6,244)}
+const EX=new Set(),EV=new Map();let mo=false,mT=0,tk=0;const mcv=document.createElement('canvas');mcv.width=mcv.height=250;mcv.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:25;display:none;border:2px solid #ffbf5e;border-radius:10px;pointer-events:none;box-shadow:0 10px 40px #000a';document.body.appendChild(mcv);
+function mapDraw(){const c=mcv.getContext('2d'),S=3,Rc=41,pc=p.x>>1,pz=p.z>>1,BC=[[130,130,140],[70,150,80],[210,190,110],[170,110,230],[220,80,50]];c.fillStyle='#05080f';c.fillRect(0,0,250,250);
+ for(let i=-Rc;i<Rc;i++)for(let j=-Rc;j<Rc;j++){const v=EV.get((pc+i)+','+(pz+j));if(v===undefined)continue;let col;if(v===0)col='#1a2234';else if(v===2)col='#2a5fb0';else if(v===3)col='#e0561a';else{const b=BC[bmAt((pc+i)*2,(pz+j)*2)];col='rgb('+b.map(a=>a*.85|0)+')'}c.fillStyle=col;c.fillRect((i+Rc)*S,(j+Rc)*S,S,S)}
+ const P=(x,z)=>[(x/2-pc+Rc)*S,(z/2-pz+Rc)*S],mk=(q,col,r)=>{c.fillStyle=col;c.fillRect(q[0]-r,q[1]-r,r*2,r*2)};
+ MC.forEach(m=>{const f=m.id===249;mk(P(m.p[0],m.p[2]),f?'#f33':'#fff',f?3:1.5)});
+ VD.forEach(i=>{const v=VIL.get(i);if(v)mk(P(v.x,v.z),'#ff9a2e',4)});RD.forEach(i=>{const v=VIL.get(i);if(v)mk(P(v.x,v.z),'#b070ff',3)});GD.forEach(i=>{const v=VIL.get(i);if(v)mk(P(v.x,v.z),'#40e0ff',3)});
+ const q=P(p.x,p.z);c.save();c.translate(q[0],q[1]);c.rotate(-p.yaw);c.fillStyle='#ffd24a';c.strokeStyle='#000';c.lineWidth=1;c.beginPath();c.moveTo(0,-6);c.lineTo(4,5);c.lineTo(-4,5);c.closePath();c.fill();c.stroke();c.restore();
+ c.fillStyle='#000b';c.fillRect(0,234,250,16);c.fillStyle='#fff';c.font='11px sans-serif';c.fillText('深'+Math.max(0,Math.floor(SEA-p.y))+'m 🟥旗 🟧村'+VD.size+' 🟪遺跡'+RD.size+' 🟦洞'+GD.size,6,246)}
 function map(){if(!cnt(320)&&!mo)return msg('地図がない（板4＋石炭1で作れる）');mo=!mo;mcv.style.display=mo?'block':'none';if(mo)mapDraw()}
 // 毎フレーム
 function upd(dt){rc-=dt;tc-=dt;fac(dt);lrm();if(RBQ.length){const q=RBQ.shift();if(meshes[q[0]+','+q[1]])build(q[0],q[1])}for(let i=bm.length-1;i>=0;i--){const b=bm[i];if((b.t-=dt)<=0){sc.remove(b.l);b.l.geometry.dispose();b.l.material.dispose();bm.splice(i,1)}}
  const qx=Math.floor(p.x),qy=Math.floor(p.y-.5),qz=Math.floor(p.z);if(get(qx,qy,qz)===250&&p.vy<=0&&POW.has(qx+','+qy+','+qz)){p.vy=17;p.ground=false;snd('splash')}
  if(FM.size){const t=performance.now()/400;FM.forEach(f=>f.cl.rotation.y=Math.sin(t+f.g.position.x)*.35)}
  tk+=dt;if(tk<.25)return;const d=tk;tk=0;mT+=d;vil(d);xplr();pow(d);
- if(mT>.5){mT=0;const pc=p.x>>2,pz=p.z>>2;if(EX.size<9000)for(let i=-5;i<=5;i++)for(let j=-5;j<=5;j++)EX.add((pc+i)+','+(pz+j));if(mo)mapDraw()}
+ if(mT>.5){mT=0;const cx=p.x>>1,cz=p.z>>1,py=Math.floor(p.y);for(let i=-12;i<=12;i++)for(let j=-12;j<=12;j++){if(i*i+j*j>150)continue;const k=(cx+i)+','+(cz+j),x=(cx+i)*2,z=(cz+j)*2;if(!chunkAt(x>>4,z>>4)||(EV.size>14000&&!EV.has(k)))continue;const a=get(x,py,z),b=get(x,py+1,z),c=get(x,py-1,z);EV.set(k,a===30?2:a===31?3:(a===0&&b===0)||(c===0&&a===0)?1:0)}if(mo)mapDraw()}
  for(const [k,m] of MC){const x=m.p[0],y=m.p[1],z=m.p[2];if(!chunkAt(x>>4,z>>4))continue;
   if(get(x,y,z)!==m.id){MC.delete(k);const f=FM.get(k);if(f){sc.remove(f.g);FM.delete(k)}continue}
   if(!POW.has(k)){m.t=0;continue}m.t+=d;const dd=Math.hypot(p.x-x-.5,p.y-y,p.z-z-.5);
@@ -1013,8 +1016,8 @@ function xhint(nm,fn,sz,set,v){let b=null,bd=1e9;for(let a=-3;a<=3;a++)for(let c
 function xplr(){[[XRl,144,RD,'🏛 古代遺跡',25],[XGl,128,GD,'💎 水晶洞',22]].forEach(a=>{const r0=Math.floor(p.x/a[1]),z0=Math.floor(p.z/a[1]);for(let i=-1;i<=1;i++)for(let j=-1;j<=1;j++){const v=a[0](r0+i,z0+j);if(!v)continue;const dd=Math.hypot(p.x-v.x,p.z-v.z);if(a[2]===RD&&dd<60)fillC(v.x,v.y+1,v.z,3);
   if(dd<a[4]&&Math.abs(p.y-v.y)<14&&!a[2].has(v.id)){a[2].add(v.id);give(58,3);msg(a[3]+'を発見！（'+a[2].size+'か所目）金×3');snd('craft')}}})}
 // 保存・読込
-function save(){if(typeof noSave!=='undefined'&&noSave)return;try{localStorage.setItem('bcx1',JSON.stringify({m:[...MC.values()].map(m=>m.p.concat(m.id)),e:[...EX],b:[...BELT.values()].map(e=>[e.x,e.y,e.z,e.d,['c','s','g'].indexOf(e.t)]),v:[...VD],q:[...QD],fl:[...FL],rd:[...RD],gd:[...GD],el:[...EL.values()].map(e=>[e.x,e.y,e.z,e.t,e.on?1:0,Math.round(e.fuel)])}))}catch(e){}}
-try{const o=JSON.parse(localStorage.getItem('bcx1')||'null');if(o){o.m.forEach(a=>reg(a[0],a[1],a[2],a[3]));o.e.forEach(e=>EX.add(e));(o.b||[]).forEach(a=>{const k=a[0]+','+a[1]+','+a[2];BELT.set(k,{x:a[0],y:a[1],z:a[2],d:a[3],t:'csg'[a[4]]});bMesh(k)});(o.v||[]).forEach(i=>VD.add(i));(o.q||[]).forEach(i=>QD.add(i));(o.fl||[]).forEach(i=>FL.add(i));(o.rd||[]).forEach(i=>RD.add(i));(o.gd||[]).forEach(i=>GD.add(i));(o.el||[]).forEach(a=>EL.set(a[0]+','+a[1]+','+a[2],{x:a[0],y:a[1],z:a[2],t:a[3],id:T2ID[a[3]],on:!!a[4],fuel:a[5]}));EL.forEach((e,k)=>eMesh(k))}}catch(e){}
+function save(){if(typeof noSave!=='undefined'&&noSave)return;try{localStorage.setItem('bcx1',JSON.stringify({m:[...MC.values()].map(m=>m.p.concat(m.id)),e:[],e2:[...EV].map(a=>a[0]+':'+a[1]),b:[...BELT.values()].map(e=>[e.x,e.y,e.z,e.d,['c','s','g'].indexOf(e.t)]),v:[...VD],q:[...QD],fl:[...FL],rd:[...RD],gd:[...GD],el:[...EL.values()].map(e=>[e.x,e.y,e.z,e.t,e.on?1:0,Math.round(e.fuel)])}))}catch(e){}}
+try{const o=JSON.parse(localStorage.getItem('bcx1')||'null');if(o){o.m.forEach(a=>reg(a[0],a[1],a[2],a[3]));(o.e2||[]).forEach(t=>{const a=t.split(':');EV.set(a[0],+a[1])});(o.b||[]).forEach(a=>{const k=a[0]+','+a[1]+','+a[2];BELT.set(k,{x:a[0],y:a[1],z:a[2],d:a[3],t:'csg'[a[4]]});bMesh(k)});(o.v||[]).forEach(i=>VD.add(i));(o.q||[]).forEach(i=>QD.add(i));(o.fl||[]).forEach(i=>FL.add(i));(o.rd||[]).forEach(i=>RD.add(i));(o.gd||[]).forEach(i=>GD.add(i));(o.el||[]).forEach(a=>EL.set(a[0]+','+a[1]+','+a[2],{x:a[0],y:a[1],z:a[2],t:a[3],id:T2ID[a[3]],on:!!a[4],fuel:a[5]}));EL.forEach((e,k)=>eMesh(k))}}catch(e){}
 setInterval(save,15000);addEventListener('pagehide',save);
 addEventListener('keydown',e=>{if(e.code==='KeyN'&&!e.repeat)map()});
 $('tc').insertAdjacentHTML('beforeend','<button class="tb" id="bmp" style="right:24px;bottom:calc(270px + env(safe-area-inset-bottom,0px));width:52px;height:52px;font-size:20px">🗺</button>');hb('bmp',()=>map());
