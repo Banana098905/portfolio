@@ -8,10 +8,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="portfolio.css">
+  <link rel="stylesheet" href="studio-zero-entry.css">
 </head>
 <body>
   <nav aria-label="メイン">
-    <div class="logo">FM</div>
+    <div class="logo" id="sz-entry">FM</div>
     <ul>
       <li><a href="#map">マップ</a></li>
       <li><a href="#library">ライブラリ</a></li>
@@ -124,8 +125,10 @@
 
   <dialog id="dlg" aria-labelledby="dlgTitle"></dialog>
 
+  <div id="sz-noise-overlay" aria-hidden="true"></div>
   <script src="data.js"></script>
   <script src="hero.js"></script>
   <script src="app.js"></script>
+  <script src="studio-zero-entry.js"></script>
 </body>
 </html>

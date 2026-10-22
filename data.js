@@ -18,6 +18,9 @@ window.WORKS = [
   { id:"simcity", sym:"▦", title:"MICRO CITY (都市建設)", area:"city", status:"published", kind:"game", url:"simcity.html",
     desc:"ミニ都市建設シミュレーター。道路・発電所・住宅・商業・工業を配置し、RCI需要と税収を管理しながら荒れ地から大都市へ育てよう。",
     tags:["RCI需要","税収管理"] },
+      { id:"robot_factory", sym:"⚙", title:"ROBOT FACTORY", area:"city", status:"published", kind:"game", url:"robot_factory.html",
+    desc:"ロボット工場を育てる放置・自動生産ゲーム。設備・ロボット・研究ツリーで自動化を進め、工場の見た目も成長していく。",
+    tags:["放置","自動生産","研究ツリー","周回要素","スマホ対応"] },
   { id:"rts", sym:"⚔", title:"王国戦争", area:"city", status:"published", kind:"game", url:"rts.html",
     desc:"30×30マップのリアルタイム戦略ゲーム。施設を建て軍を育て敵城を落とせ。", tags:["RTS","30×30マップ"] },
   { id:"defense_tactics", sym:"♜", title:"防衛戦略", area:"city", status:"published", kind:"game", url:"defense_tactics.html",
@@ -49,6 +52,7 @@ window.WORKS = [
     desc:"YouTube・SNS向けサムネイルのデザイン制作。", tags:["サムネイル"] },
   { id:"webdesign", sym:"</>", title:"Webデザイン", area:"studio", status:"published", kind:"site", url:"webdesign.html",
     desc:"各種WebサイトのデザインをHTML / CSS / Figmaで制作。", tags:["HTML / CSS","Figma"] }
+  
 ];
 /* 更新ログ（確認できた履歴のみ追加すること） */
 window.LOG = [

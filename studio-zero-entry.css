@@ -1,0 +1,221 @@
+/* ==========================================================================
+   STUDIO ZERO - FM Secret Entry System Styles
+   ========================================================================== */
+
+/* 1. FM Logo Styling Additions */
+.logo#sz-entry,
+.logo {
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+  user-select: none;
+  transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+
+.logo#sz-entry:focus-visible,
+.logo:focus-visible {
+  outline: 2px solid var(--brass, #86cdb1);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.logo#sz-entry:hover,
+.logo:hover {
+  color: var(--brass-bright, #b5e8c9);
+  text-shadow: 0 0 8px rgba(134, 205, 177, 0.45);
+}
+
+/* 2. Ambient Glitch Effect */
+.logo.sz-glitch-active {
+  animation: szLogoJitter 0.22s ease-in-out infinite;
+  text-shadow: -2px 0 rgba(255, 75, 75, 0.7), 2px 0 rgba(60, 220, 255, 0.7);
+}
+
+.logo.sz-glitch-active::before,
+.logo.sz-glitch-active::after {
+  content: 'FM';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.logo.sz-glitch-active::before {
+  color: #ff5e6c;
+  left: -2px;
+  clip-path: inset(20% 0 45% 0);
+  animation: szGlitchSlice1 0.22s ease infinite;
+}
+
+.logo.sz-glitch-active::after {
+  color: #5cf0d4;
+  left: 2px;
+  clip-path: inset(50% 0 15% 0);
+  animation: szGlitchSlice2 0.22s ease infinite;
+}
+
+@keyframes szLogoJitter {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 0.5px); }
+  50% { transform: translate(2px, -0.5px); }
+  75% { transform: translate(-1px, 0); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes szGlitchSlice1 {
+  0% { clip-path: inset(20% 0 45% 0); transform: translate(-2px, -0.5px); }
+  50% { clip-path: inset(55% 0 15% 0); transform: translate(2px, 0.5px); }
+  100% { clip-path: inset(10% 0 60% 0); transform: translate(-1px, 0); }
+}
+
+@keyframes szGlitchSlice2 {
+  0% { clip-path: inset(60% 0 15% 0); transform: translate(2px, 0.5px); }
+  50% { clip-path: inset(15% 0 50% 0); transform: translate(-2px, -0.5px); }
+  100% { clip-path: inset(35% 0 35% 0); transform: translate(1px, 0); }
+}
+
+/* 3. Noise Overlay */
+#sz-noise-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  background-color: #0b1514;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.4) 0px,
+      rgba(0, 0, 0, 0.4) 2px,
+      rgba(16, 32, 30, 0.25) 2px,
+      rgba(16, 32, 30, 0.25) 4px
+    ),
+    radial-gradient(
+      circle at center,
+      rgba(134, 205, 177, 0.12) 0%,
+      rgba(11, 21, 20, 0.95) 80%
+    );
+  background-size: 100% 4px, 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+#sz-noise-overlay.sz-noise-active {
+  opacity: 1;
+  pointer-events: auto;
+  animation: szScanlines 0.5s linear infinite;
+}
+
+@keyframes szScanlines {
+  0% { background-position: 0 0, 0 0; }
+  100% { background-position: 0 8px, 0 0; }
+}
+
+/* Expanding ripple from FM logo origin */
+#sz-noise-overlay::before {
+  content: '';
+  position: absolute;
+  top: var(--sz-origin-y, 25px);
+  left: var(--sz-origin-x, 40px);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(181, 232, 201, 0.9) 0%, rgba(134, 205, 177, 0.45) 40%, transparent 70%);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  opacity: 0;
+}
+
+#sz-noise-overlay.sz-noise-active::before {
+  opacity: 1;
+  animation: szOriginExpand 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes szOriginExpand {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0.95;
+  }
+  60% {
+    opacity: 0.65;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(240);
+    opacity: 0.15;
+  }
+}
+
+/* Centered status message */
+#sz-noise-overlay::after {
+  content: 'SIGNAL CONNECTING...';
+  position: relative;
+  z-index: 2;
+  font-family: var(--serif-en, monospace);
+  font-size: 1.15rem;
+  letter-spacing: 0.35em;
+  color: var(--brass-bright, #b5e8c9);
+  text-shadow: 0 0 14px rgba(134, 205, 177, 0.7);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s ease 0.15s, transform 0.3s ease 0.15s;
+}
+
+#sz-noise-overlay.sz-noise-active::after {
+  opacity: 1;
+  transform: translateY(0);
+  animation: szSignalPulse 0.9s ease-in-out infinite alternate;
+}
+
+@keyframes szSignalPulse {
+  0% {
+    opacity: 0.75;
+    text-shadow: 0 0 8px rgba(134, 205, 177, 0.4);
+  }
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 18px rgba(181, 232, 201, 0.95);
+  }
+}
+
+/* 4. Accessibility & Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo#sz-entry,
+  .logo,
+  .logo.sz-glitch-active {
+    animation: none !important;
+    transform: none !important;
+    text-shadow: none !important;
+  }
+
+  .logo.sz-glitch-active::before,
+  .logo.sz-glitch-active::after {
+    display: none !important;
+  }
+
+  #sz-noise-overlay {
+    animation: none !important;
+    transition: opacity 0.2s ease !important;
+  }
+
+  #sz-noise-overlay.sz-noise-active {
+    animation: none !important;
+  }
+
+  #sz-noise-overlay::before {
+    display: none !important;
+    animation: none !important;
+  }
+
+  #sz-noise-overlay::after,
+  #sz-noise-overlay.sz-noise-active::after {
+    animation: none !important;
+    transform: none !important;
+  }
+}

@@ -1,0 +1,2392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1017">
+  <meta name="description" content="ROBOT FACTORY - ロボット工場を育てるブラウザ放置・自動生産ゲーム">
+  <title>ROBOT FACTORY</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+  <style>
+/* ROBOT FACTORY - スタイルシート */
+:root {
+  --bg: #0a1017; --bg2: #0f1823; --panel: #131f2c; --panel2: #192836; --line: #243749;
+  --text: #e6eef6; --dim: #8ba0b4; --accent: #3dd6ff; --accent2: #ffb347; --good: #5ee3a1; --bad: #ff6b6b;
+  --credits: #ffd24a; --metal: #9fb4c7; --parts: #5ee3a1; --energy: #ffe94d; --rp: #b48cff;
+  --radius: 10px; --tabh: 62px;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif; font-size: 15px; line-height: 1.45; }
+body { min-height: 100vh; overscroll-behavior-y: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+b, strong { font-weight: 700; }
+.hidden { display: none !important; }
+
+#app { max-width: 1100px; margin: 0 auto; padding: 0 12px calc(var(--tabh) + 24px); }
+
+/* ---- ヘッダー ---- */
+#topbar { position: sticky; top: 0; z-index: 20; background: linear-gradient(var(--bg), rgba(10,16,23,0.96)); padding: 8px 0 6px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: baseline; gap: 10px; font-weight: 800; letter-spacing: 2px; font-size: 18px; color: var(--accent); }
+.brand b { color: var(--accent2); }
+.brand .stage { margin-left: auto; font-size: 12px; letter-spacing: 0; color: var(--dim); font-weight: 500; }
+#resbar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 6px; }
+.res { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 5px 8px; min-width: 0; }
+.res .rn { font-size: 11px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res .rv { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res .rr { font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.res.bad .rv { color: var(--bad); }
+
+/* ---- タブ ---- */
+#tabs { display: flex; gap: 4px; margin: 10px 0; overflow-x: auto; }
+#tabs button { flex: 1 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px; min-height: 44px; font-weight: 600; color: var(--dim); white-space: nowrap; }
+#tabs button.active { background: var(--accent); color: #04202b; border-color: var(--accent); }
+#tabs button .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent2); margin-left: 6px; vertical-align: middle; }
+
+/* ---- 共通パーツ ---- */
+.view { display: none; }
+.view.active { display: block; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+.card + .card { margin-top: 10px; }
+h2 { font-size: 16px; margin: 0 0 8px; letter-spacing: 1px; }
+h3 { font-size: 14px; margin: 0 0 4px; }
+.sub { color: var(--dim); font-size: 12.5px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.grow { flex: 1; }
+.btn { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px; min-height: 44px; font-weight: 700; transition: transform 0.05s, background 0.15s; user-select: none; touch-action: manipulation; }
+.btn:hover:not(:disabled) { background: #22374a; }
+.btn:active:not(:disabled) { transform: scale(0.97); }
+.btn.primary { background: var(--accent); color: #04202b; border-color: var(--accent); }
+.btn.primary:hover:not(:disabled) { background: #6be3ff; }
+.btn.amber { background: var(--accent2); color: #2b1a04; border-color: var(--accent2); }
+.btn.danger { background: #5a1f27; border-color: #8a2f3a; }
+.btn:disabled { opacity: 0.45; }
+.btn.sm { min-height: 36px; padding: 5px 10px; font-size: 13px; }
+.bar { height: 8px; border-radius: 4px; background: #0b141d; overflow: hidden; border: 1px solid var(--line); }
+.bar > i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--good)); transition: width 0.25s; }
+.chip { display: inline-flex; align-items: center; gap: 3px; background: #0d1721; border: 1px solid var(--line); border-radius: 12px; padding: 1px 8px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip.lack { color: var(--bad); border-color: #6a2a2e; }
+.badge { font-size: 11px; padding: 1px 7px; border-radius: 10px; background: #0d1721; border: 1px solid var(--line); color: var(--dim); white-space: nowrap; }
+.badge.ok { color: var(--good); border-color: #2c6a52; }
+.badge.warn { color: var(--accent2); border-color: #7a5a22; }
+.badge.bad { color: var(--bad); border-color: #6a2a2e; }
+
+/* ---- メイン画面 ---- */
+#factoryWrap { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #000; touch-action: manipulation; }
+#factory { display: block; width: 100%; aspect-ratio: 960 / 360; cursor: pointer; }
+#buffs { position: absolute; left: 8px; top: 8px; display: flex; flex-direction: column; gap: 4px; pointer-events: none; }
+#buffs span { background: rgba(255, 210, 74, 0.92); color: #2b1a04; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+#powerWarn { position: absolute; right: 8px; top: 8px; background: rgba(255, 60, 60, 0.9); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; pointer-events: none; }
+#drone { position: absolute; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; border: 0; background: radial-gradient(circle at 35% 30%, #fff6c4, #ffb347 60%, #c46a00); box-shadow: 0 0 18px 6px rgba(255, 190, 70, 0.7); font-size: 26px; animation: bob 1.4s ease-in-out infinite; z-index: 5; padding: 0; }
+@keyframes bob { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-8px) rotate(4deg); } }
+#actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.bigbtn { min-height: 70px; border-radius: 12px; border: 1px solid var(--line); font-size: 18px; font-weight: 800; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; touch-action: manipulation; user-select: none; }
+.bigbtn small { font-size: 12px; font-weight: 500; opacity: 0.85; }
+#btnMine { background: linear-gradient(#2c4258, #1c2f40); }
+#btnAsm { background: linear-gradient(#5a4515, #3a2c0c); }
+.bigbtn:active { transform: scale(0.98); }
+.bigbtn:disabled { opacity: 0.5; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.grid2 > .card { margin: 0; }
+#quick { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.qbuy { flex: 0 0 auto; min-width: 150px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; text-align: left; min-height: 56px; }
+.qbuy .qn { font-weight: 700; font-size: 13px; }
+.qbuy .qc { font-size: 12px; color: var(--dim); }
+.qbuy.can { border-color: var(--good); box-shadow: inset 0 0 0 1px rgba(94, 227, 161, 0.35); }
+.statline { display: flex; justify-content: space-between; font-size: 13px; padding: 2px 0; }
+.statline span:first-child { color: var(--dim); }
+
+/* ---- リスト系カード ---- */
+.list { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+.item { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.item.locked { opacity: 0.55; }
+.item.can { border-color: #2c6a52; }
+.item .hd { display: flex; align-items: center; gap: 8px; }
+.item .ic { font-size: 26px; width: 40px; height: 40px; display: grid; place-items: center; background: #0d1721; border-radius: 8px; flex: none; }
+.item .nm { font-weight: 800; }
+.item .cnt { margin-left: auto; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.item .ft { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.item .costs { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.item .fx { font-size: 12.5px; color: var(--dim); }
+.toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { background: var(--panel); border: 0; padding: 8px 14px; min-height: 40px; color: var(--dim); font-weight: 700; }
+.seg button.active { background: var(--accent); color: #04202b; }
+.catbar { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 10px; }
+.catbar button { flex: 0 0 auto; background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 7px 14px; min-height: 40px; color: var(--dim); font-weight: 600; }
+.catbar button.active { background: var(--rp); color: #1a0d33; border-color: var(--rp); }
+.tier { grid-column: 1 / -1; font-size: 12px; color: var(--dim); letter-spacing: 1px; border-bottom: 1px dashed var(--line); padding-bottom: 2px; margin-top: 4px; }
+.item.done { border-color: #4a3d7a; background: #1a1730; }
+.ach { display: flex; gap: 10px; align-items: center; padding: 8px 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; opacity: 0.45; }
+.ach.on { opacity: 1; border-color: #7a5a22; background: #231d0f; }
+.ach .ic { font-size: 22px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.stat .sv { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stat .sl { font-size: 12px; color: var(--dim); }
+
+/* ---- 設定 ---- */
+.setrow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.setrow:last-child { border-bottom: 0; }
+.setrow .lb { flex: 1; min-width: 150px; }
+select, input[type="range"], textarea { font: inherit; color: var(--text); background: #0b141d; border: 1px solid var(--line); border-radius: 8px; }
+select { padding: 8px; min-height: 40px; }
+textarea { width: 100%; min-height: 80px; padding: 8px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px; resize: vertical; }
+input[type="range"] { width: 160px; padding: 0; accent-color: var(--accent); }
+
+/* ---- モーダル・トースト ---- */
+#modal { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.65); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+#modal .box { background: var(--panel); border: 1px solid var(--accent); border-radius: 14px; padding: 16px; max-width: 460px; width: 100%; max-height: 86vh; overflow: auto; }
+#modal h2 { color: var(--accent); }
+#modal .btns { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; flex-wrap: wrap; }
+#toasts { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(var(--tabh) + 14px); z-index: 90; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; width: min(92vw, 460px); }
+.toast { background: rgba(19, 31, 44, 0.97); border: 1px solid var(--accent); border-radius: 10px; padding: 8px 14px; font-size: 13.5px; animation: tin 0.25s ease-out; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5); text-align: center; }
+.toast.gold { border-color: var(--accent2); }
+.toast.good { border-color: var(--good); }
+@keyframes tin { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+/* ---- レスポンシブ ---- */
+@media (max-width: 760px) {
+  body { font-size: 14px; }
+  #app { padding: 0 8px calc(var(--tabh) + 20px); }
+  #resbar { grid-template-columns: repeat(3, 1fr); }
+  .res .rv { font-size: 15px; }
+  #tabs { position: fixed; left: 0; right: 0; bottom: 0; margin: 0; z-index: 30; background: rgba(10, 16, 23, 0.97); border-top: 1px solid var(--line); padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); gap: 4px; }
+  #tabs button { padding: 6px 4px; min-height: 48px; font-size: 11.5px; flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 1px; border-radius: 8px; }
+  #tabs button .ti { font-size: 18px; line-height: 1; }
+  #toasts { bottom: calc(var(--tabh) + 20px); }
+  .list { grid-template-columns: 1fr; }
+  .grid2 { grid-template-columns: 1fr; }
+  .bigbtn { min-height: 76px; }
+}
+@media (min-width: 761px) { #tabs button .ti { margin-right: 6px; } }
+@media (prefers-reduced-motion: reduce) { #drone { animation: none; } .toast { animation: none; } }
+
+/* ================= ドット絵テーマ(上書き) ================= */
+:root {
+  --bg: #1a1c2c; --bg2: #1a1c2c; --panel: #262b44; --panel2: #333c57; --line: #566c86;
+  --text: #f4f4f4; --dim: #94b0c2; --accent: #41a6f6; --accent2: #ffcd75; --good: #a7f070; --bad: #ef7d57;
+  --credits: #ffcd75; --metal: #94b0c2; --parts: #a7f070; --energy: #ffcd75; --rp: #b48cff;
+}
+html, body { font-family: "DotGothic16", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", monospace; font-size: 15px; letter-spacing: 0.02em; background: var(--bg); }
+button, input, select, textarea { font-family: inherit; }
+.pix, canvas { image-rendering: pixelated; image-rendering: crisp-edges; image-rendering: -moz-crisp-edges; }
+.pix { display: block; }
+*, *::before, *::after { border-radius: 0 !important; }
+#topbar { background: var(--bg); border-bottom: 2px solid var(--line); }
+.brand { font-size: 20px; letter-spacing: 3px; text-shadow: 2px 2px 0 #000; }
+.brand b { color: var(--accent2); }
+.res, .card, .item, .stat, .ach, .qbuy, .btn, #tabs button, .catbar button, .seg, .toast, #modal .box, .chip, .badge, textarea, select {
+  border-width: 2px; border-color: var(--line);
+}
+.res, .card, .item, .stat, .ach { box-shadow: 0 3px 0 #0c0d16; }
+.res { border-top-width: 3px; }
+.res .rn { display: flex; align-items: center; gap: 4px; }
+.res .rn .ri img { width: 12px; height: 12px; }
+.res .rv { text-shadow: 1px 1px 0 #000; }
+.btn { box-shadow: 0 3px 0 #0c0d16; transition: none; }
+.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: none; }
+.btn.primary { background: var(--accent); color: #0c0d16; border-color: #73eff7; }
+.btn.primary:hover:not(:disabled) { background: #73eff7; }
+.btn.amber { background: var(--accent2); color: #1a1c2c; border-color: #fff3c4; }
+.btn.danger { background: #5d275d; border-color: #b13e53; }
+#tabs button { box-shadow: 0 3px 0 #0c0d16; }
+#tabs button.active { background: var(--accent); color: #0c0d16; border-color: #73eff7; }
+#tabs button .ti { display: inline-block; vertical-align: middle; }
+#tabs button .ti img { width: 20px; height: 20px; }
+.catbar button.active { background: var(--rp); color: #1a1c2c; }
+.seg { box-shadow: 0 3px 0 #0c0d16; }
+.chip { background: #1a1c2c; }
+.badge { background: #1a1c2c; }
+.item .ic { width: 44px; height: 44px; background: #1a1c2c; border: 2px solid var(--line); display: grid; place-items: center; }
+.item .ic img { width: 32px; height: 32px; }
+.ach .ic { width: 32px; height: 32px; display: grid; place-items: center; font-size: 0; }
+.ach .ic img { width: 24px; height: 24px; }
+.item.can { border-color: var(--good); }
+.item.done { background: #2a2145; border-color: #7a5aa8; }
+.bar { height: 12px; background: #0c0d16; border: 2px solid var(--line); }
+.bar > i { background: repeating-linear-gradient(90deg, var(--accent) 0 6px, #2d78b8 6px 8px); transition: none; }
+#factoryWrap { border: 3px solid var(--line); box-shadow: 0 4px 0 #0c0d16; background: #0c0d16; }
+#factory { image-rendering: pixelated; }
+#fxLayer { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fxtext { position: absolute; transform: translate(-50%, -50%); font-size: 16px; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000; white-space: nowrap; animation: fxup 0.9s steps(9) forwards; }
+@keyframes fxup { from { margin-top: 0; opacity: 1; } to { margin-top: -40px; opacity: 0; } }
+#factoryHint { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; font-size: 18px; line-height: 1.7; text-shadow: 2px 2px 0 #000; padding-top: 30px; }
+#factoryHint small { font-size: 12px; color: var(--dim); }
+#buffs span { background: var(--accent2); color: #1a1c2c; border: 2px solid #fff3c4; padding: 0 6px; }
+#powerWarn { background: #b13e53; border: 2px solid #ef7d57; padding: 0 6px; }
+#drone { width: 60px; height: 52px; margin: -26px 0 0 -30px; background: none; box-shadow: none; border: 0; filter: drop-shadow(0 0 0 #ffcd75); animation: bob 0.8s steps(2) infinite; }
+#drone img { width: 60px; height: 50px; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.bigbtn { background: var(--panel2) !important; border: 2px solid var(--line); box-shadow: 0 4px 0 #0c0d16; transition: none; font-size: 19px; }
+#btnMine { border-color: #73eff7; }
+#btnAsm { border-color: var(--accent2); }
+.bigbtn:active { transform: translateY(4px); box-shadow: none; }
+#modal .box { border-color: var(--accent); box-shadow: 0 6px 0 #0c0d16; }
+.toast { box-shadow: 0 3px 0 #0c0d16; animation: none; background: var(--panel); }
+.qbuy { box-shadow: 0 3px 0 #0c0d16; }
+.qbuy.can { box-shadow: 0 3px 0 #0c0d16; }
+input[type="range"] { accent-color: var(--accent); }
+@media (max-width: 760px) {
+  #tabs { background: var(--bg); border-top: 2px solid var(--line); }
+  #tabs button { font-size: 11px; }
+  #tabs button .ti img { width: 20px; height: 20px; }
+  #factoryHint { font-size: 12px; padding-top: 14px; }
+  #factoryHint small { font-size: 10px; }
+}
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div class="brand"><a href="index.html" style="color:var(--dim);text-decoration:none;font-size:12px;letter-spacing:0;margin-right:8px" aria-label="ポートフォリオに戻る">&lt; FM</a>ROBOT <b>FACTORY</b><span class="stage" id="stageName"></span></div>
+      <div id="resbar"></div>
+    </header>
+
+    <nav id="tabs" aria-label="画面切り替え"></nav>
+
+    <!-- メイン画面 -->
+    <section id="view-main" class="view" aria-label="工場">
+      <div id="factoryWrap">
+        <canvas id="factory" aria-label="工場の様子（タップで採掘）"></canvas>
+        <div id="buffs"></div>
+        <div id="powerWarn" class="hidden">電力不足</div>
+        <button id="drone" class="hidden" aria-label="ボーナスドローンを捕まえる"></button>
+        <div id="fxLayer" aria-hidden="true"></div>
+        <div id="factoryHint" class="hidden">「採掘」で金属を集めて<br>「手動組立」でロボットを売ろう<br><small>(この画面をタップしても採掘できます)</small></div>
+      </div>
+      <div id="actions">
+        <button id="btnMine" class="bigbtn">採掘<small id="mineInfo"></small></button>
+        <button id="btnAsm" class="bigbtn">手動組立<small id="asmInfo"></small></button>
+      </div>
+      <div class="grid2">
+        <div class="card" id="goalCard">
+          <h2>現在の目標</h2>
+          <div id="goalText" style="font-weight:700"></div>
+          <div class="bar" style="margin:8px 0 4px"><i id="goalBar"></i></div>
+          <div class="row"><span class="sub" id="goalNum"></span><span class="sub grow" style="text-align:right" id="goalReward"></span></div>
+        </div>
+        <div class="card" id="prodCard">
+          <h2>生産状況</h2>
+          <div class="statline"><span>ロボット生産</span><span id="pUnits"></span></div>
+          <div class="statline"><span>売上</span><span id="pCredits"></span></div>
+          <div class="statline"><span>全体倍率</span><span id="pMult"></span></div>
+          <div class="statline"><span>実績ボーナス</span><span id="pAch"></span></div>
+          <div class="statline"><span>次のイベント</span><span id="pEvt"></span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:10px">
+        <div class="row"><h2 class="grow" style="margin:0">クイック購入</h2><button class="btn sm" data-goto="build">設備画面へ</button></div>
+        <div id="quick" style="margin-top:8px"></div>
+      </div>
+    </section>
+
+    <!-- 設備画面 -->
+    <section id="view-build" class="view" aria-label="設備">
+      <div class="toolbar">
+        <div class="seg" id="bulkSeg"></div>
+        <button class="btn sm hidden" id="autoBtn"></button>
+        <span class="sub" id="powerInfo"></span>
+      </div>
+      <div class="list" id="buildList"></div>
+    </section>
+
+    <!-- ロボット画面 -->
+    <section id="view-robots" class="view" aria-label="ロボット">
+      <div class="card" id="synergyCard" style="margin-bottom:10px"></div>
+      <div class="list" id="robotList"></div>
+    </section>
+
+    <!-- 研究画面 -->
+    <section id="view-research" class="view" aria-label="研究">
+      <div class="card" style="margin-bottom:10px">
+        <div class="row"><h2 class="grow" style="margin:0">研究ポイント: <span id="rsRp"></span></h2><span class="badge" id="rsCount"></span></div>
+        <div class="sub" style="margin-top:4px">研究ポイントは研究ラボ・AI設計センター・RESEARCH BOTで生産できます。前提研究を完了すると次の研究が解放されます。</div>
+      </div>
+      <div class="catbar" id="catBar"></div>
+      <div id="researchBody"></div>
+    </section>
+
+    <!-- 実績画面 -->
+    <section id="view-achv" class="view" aria-label="実績">
+      <div class="stats" id="achStats"></div>
+      <div id="achBody"></div>
+    </section>
+
+    <!-- 再編（周回）画面 -->
+    <section id="view-prestige" class="view" aria-label="工場再編">
+      <div class="card" id="presCard"></div>
+      <h2 style="margin:14px 0 8px">恒久強化（ブループリントで購入）</h2>
+      <div class="list" id="permList"></div>
+    </section>
+
+    <!-- 設定画面 -->
+    <section id="view-settings" class="view" aria-label="設定">
+      <div class="card">
+        <h2>サウンド・表示</h2>
+        <div class="setrow"><span class="lb">効果音</span><button class="btn sm" id="setSound"></button></div>
+        <div class="setrow"><span class="lb">音量</span><input type="range" id="setVol" min="0" max="100" step="5" aria-label="音量"></div>
+        <div class="setrow"><span class="lb">数値表示</span>
+          <select id="setNotation" aria-label="数値表示形式">
+            <option value="short">短縮 (1.23M)</option>
+            <option value="sci">科学表記 (1.23e6)</option>
+            <option value="full">フル表示 (1,230,000)</option>
+          </select></div>
+      </div>
+      <div class="card">
+        <h2>セーブデータ</h2>
+        <div class="sub">進行状況は15秒ごと・画面を離れる時に自動保存されます。最終保存: <span id="lastSave">-</span></div>
+        <div class="row" style="margin:8px 0"><button class="btn" id="btnSave">今すぐセーブ</button><button class="btn" id="btnExport">エクスポート</button></div>
+        <textarea id="exportBox" readonly placeholder="エクスポートすると、ここにセーブコードが表示されます" aria-label="エクスポート用セーブコード"></textarea>
+        <div class="row" style="margin:6px 0 12px"><button class="btn sm" id="btnCopy">コピー</button><button class="btn sm" id="btnDownload">ファイルに保存</button></div>
+        <textarea id="importBox" placeholder="セーブコードをここに貼り付けてインポート" aria-label="インポート用セーブコード"></textarea>
+        <div class="row" style="margin-top:6px"><button class="btn primary" id="btnImport">インポート</button></div>
+      </div>
+      <div class="card">
+        <h2>危険な操作</h2>
+        <div class="sub">進行状況を完全に消去して最初からやり直します（元に戻せません）。</div>
+        <button class="btn danger" id="btnReset" style="margin-top:8px">進行状況をリセット</button>
+      </div>
+      <div class="card">
+        <h2>ℹ バージョン</h2>
+        <div class="sub" id="verInfo"></div>
+        <div class="sub" style="margin-top:6px">ショートカット: <b>M</b>=採掘 / <b>A</b>=手動組立</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toasts" aria-live="polite"></div>
+  <div id="modal" class="hidden" role="dialog" aria-modal="true"></div>
+
+  <script>
+/* ROBOT FACTORY - ゲームデータ定義（設備・ロボット・研究・目標・実績・恒久強化）
+ * ロジックやUIとは独立した「データ」だけを置くファイル。バランス調整はここを編集する。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+
+  RF.VERSION = '1.0.0';
+  RF.SAVE_VERSION = 1;
+  RF.SAVE_KEY = 'robot_factory_save';
+  RF.UNIT_VALUE = 8;            // ロボット1台あたりの基本売却額(クレジット)
+  RF.MANUAL_ASSEMBLE_METAL = 5; // 手動組立1台に必要な金属
+  RF.PRESTIGE_BASE = 3e11;      // 工場再編の基準値(この累計クレジットで1BP)
+  RF.OFFLINE_BASE_HOURS = 4;
+  RF.OFFLINE_MAX_HOURS = 24;
+  RF.OFFLINE_BASE_EFF = 0.5;
+
+  // ---- 資源 ----
+  RF.RES = [
+    { id: 'credits', name: 'クレジット', icon: '¢', color: '#ffd24a' },
+    { id: 'metal', name: '金属', icon: '⛏', color: '#9fb4c7' },
+    { id: 'parts', name: '電子部品', icon: '🔌', color: '#5ee3a1' },
+    { id: 'energy', name: 'エネルギー', icon: '⚡', color: '#ffe94d' },
+    { id: 'rp', name: '研究ポイント', icon: '🔬', color: '#b48cff' },
+  ];
+  RF.RESMAP = {};
+  RF.RES.forEach((r) => (RF.RESMAP[r.id] = r));
+
+  // ---- 設備 ----
+  // in/out は「設備1台・1秒あたり」。energy は貯めない「供給量」。power は消費電力。
+  // kind: 'conveyor'(全設備を加速) / 'manager'(全体ボーナス) / 未指定は通常生産
+  RF.BUILDINGS = [
+    { id: 'bench', name: '手動組立台', icon: '🛠', color: '#c9a36a', tags: ['units'],
+      desc: '金属を使ってロボットを組み立てる初期の作業台。',
+      base: { credits: 15 }, growth: 1.15, in: { metal: 1 }, out: { units: 0.2 }, power: 0, unlock: {} },
+    { id: 'miner', name: '金属加工機', icon: '⚙', color: '#9fb4c7', tags: ['metal'],
+      desc: '鉱石を精錬し、金属部品を生産する。',
+      base: { credits: 60 }, growth: 1.15, in: {}, out: { metal: 2 }, power: 0, unlock: { earned: 40 } },
+    { id: 'lab', name: '研究ラボ', icon: '🧪', color: '#b48cff', tags: ['rp'],
+      desc: '金属を消費して研究ポイントを生み出す小さな研究室。',
+      base: { credits: 350 }, growth: 1.18, in: { metal: 2 }, out: { rp: 0.1 }, power: 0, unlock: { earned: 200 } },
+    { id: 'gen', name: '発電機', icon: '⚡', color: '#ffe94d', tags: ['energy'],
+      desc: '工場にエネルギーを供給する。電力が不足すると高度な設備の稼働率が落ちる。',
+      base: { credits: 500 }, growth: 1.18, in: {}, out: { energy: 8 }, power: 0, unlock: { earned: 900 } },
+    { id: 'parts', name: '電子部品製造機', icon: '🔌', color: '#5ee3a1', tags: ['parts'],
+      desc: '金属から制御装置用の電子部品を作る。電力が必要。',
+      base: { credits: 900, metal: 150 }, growth: 1.17, in: { metal: 4 }, out: { parts: 1 }, power: 4, unlock: { earned: 1500 } },
+    { id: 'asm', name: '組立ロボット', icon: '🦾', color: '#58b8ff', tags: ['units'],
+      desc: '金属と電子部品から基本ロボットを自動製造する。',
+      base: { credits: 8000, parts: 40 }, growth: 1.18, in: { metal: 6, parts: 1.5 }, out: { units: 3 }, power: 8, unlock: { earned: 8000 } },
+    { id: 'conv', name: 'コンベア', icon: '➡', color: '#ff9f4a', tags: [], kind: 'conveyor',
+      desc: '生産ラインを繋ぎ、全設備の生産量を底上げする(1台ごとに加算)。',
+      base: { credits: 30000, metal: 4000 }, growth: 1.25, in: {}, out: {}, power: 2, unlock: { earned: 20000 } },
+    { id: 'line', name: '高性能組立ライン', icon: '🏭', color: '#ff6b8b', tags: ['units'],
+      desc: '大量生産を可能にする巨大ライン。研究「量産設計」で解放。',
+      base: { credits: 3e6, parts: 3e4 }, growth: 1.2, in: { metal: 60, parts: 20 }, out: { units: 75 }, power: 150, unlock: { rs: 'p3' } },
+    { id: 'ai', name: 'AI設計センター', icon: '🧠', color: '#c26bff', tags: ['rp'],
+      desc: '電子部品を消費して大量の研究ポイントを生産する。研究「機械学習」で解放。',
+      base: { credits: 1e7, parts: 2e5 }, growth: 1.2, in: { parts: 10 }, out: { rp: 4 }, power: 100, unlock: { rs: 'i1' } },
+    { id: 'reactor', name: '核融合炉', icon: '☢', color: '#ffd24a', tags: ['energy'],
+      desc: '莫大なエネルギーを供給する。研究「核融合技術」で解放。',
+      base: { credits: 5e7, parts: 1e6 }, growth: 1.22, in: {}, out: { energy: 1200 }, power: 0, unlock: { rs: 'e3' } },
+    { id: 'quantum', name: '量子製造機', icon: '🌀', color: '#4af0ff', tags: ['units'],
+      desc: '量子もつれを利用した究極の組立機。研究「量子基礎理論」で解放。',
+      base: { credits: 5e11, parts: 5e9 }, growth: 1.22, in: { metal: 600, parts: 300 }, out: { units: 4000 }, power: 1500, unlock: { rs: 'q1' } },
+    { id: 'manager', name: '自律型工場管理AI', icon: '🤖', color: '#ff4af0', tags: [], kind: 'manager',
+      desc: '工場全体を統括し、全生産を1台につき×1.06する強力な管理AI。研究「自律管理AI」で解放。',
+      base: { credits: 5e12, parts: 1e11 }, growth: 1.4, in: {}, out: {}, power: 500, unlock: { rs: 'i4' } },
+  ];
+  RF.BMAP = {};
+  RF.BUILDINGS.forEach((b) => (RF.BMAP[b.id] = b));
+  RF.LEVEL_MAX = 10;
+  RF.LEVEL_MULT = 1.3;                      // 設備レベル1つにつき出力×1.3
+  RF.MILESTONES = [25, 50, 100, 200];        // 所有数がこの数に達するごとに出力×2
+  RF.LEVEL_COST = (def, lv) => ({ credits: Math.ceil(def.base.credits * 15 * Math.pow(5, lv)) });
+
+  // ---- ロボット ----
+  RF.ROBOTS = [
+    { id: 'worker', name: 'WORKER BOT', icon: '🤖', color: '#9fd0ff',
+      desc: '基本的な作業ロボット。手動採掘の威力+1、金属を毎秒0.5自動採掘。',
+      base: { credits: 100, metal: 50 }, growth: 1.2, unlock: {} },
+    { id: 'miner', name: 'MINER BOT', icon: '⛏', color: '#9fb4c7',
+      desc: '採掘を補助。金属加工機の生産量が1台ごとに+3%。',
+      base: { credits: 2000, metal: 500 }, growth: 1.22, unlock: { rs: 'r1' } },
+    { id: 'assembler', name: 'ASSEMBLER BOT', icon: '🦾', color: '#58b8ff',
+      desc: '組立速度を向上。ロボット製造設備の生産量が1台ごとに+3%。',
+      base: { credits: 2e4, metal: 5000, parts: 200 }, growth: 1.23, unlock: { rs: 'r2' } },
+    { id: 'engineer', name: 'ENGINEER BOT', icon: '🔧', color: '#ffb84a',
+      desc: '設備の効率を高める。全設備の生産量+1%、消費電力-0.5%(最大-50%)。',
+      base: { credits: 2e5, parts: 5000 }, growth: 1.24, unlock: { rs: 'r3' } },
+    { id: 'research', name: 'RESEARCH BOT', icon: '🔬', color: '#b48cff',
+      desc: '研究を補助。研究ポイントを毎秒0.2生産し、研究設備の生産量が+2%。',
+      base: { credits: 1e6, parts: 2e4 }, growth: 1.25, unlock: { rs: 'r4' } },
+    { id: 'overlord', name: 'AI OVERLORD', icon: '👁', color: '#ff4af0',
+      desc: '終盤の強力な自動化システム。工場全体の生産が1体ごとに+5%。',
+      base: { credits: 1e10, parts: 1e8 }, growth: 1.4, unlock: { rs: 'r6' } },
+  ];
+  RF.ROBOTMAP = {};
+  RF.ROBOTS.forEach((r) => (RF.ROBOTMAP[r.id] = r));
+  RF.SYNERGY_IDS = ['worker', 'miner', 'assembler', 'engineer', 'research'];
+
+  // ---- 研究 ----
+  RF.RCATS = [
+    { id: 'prod', name: '生産技術', icon: '🏭' },
+    { id: 'auto', name: '自動化技術', icon: '⚙' },
+    { id: 'energy', name: 'エネルギー技術', icon: '⚡' },
+    { id: 'robot', name: 'ロボット工学', icon: '🤖' },
+    { id: 'ai', name: 'AI技術', icon: '🧠' },
+    { id: 'quantum', name: '量子製造技術', icon: '🌀' },
+  ];
+  // fx: mult(tg=設備ID/tag:タグ/all) value power supply cost growth conv robot click clickPct offline offEff auto
+  RF.RESEARCH = [
+    { id: 'p0', cat: 'prod', tier: 1, name: '強化グローブ', cost: 10, req: [], desc: '手動採掘の威力×2。', fx: [{ t: 'click', v: 2 }] },
+    { id: 'p1', cat: 'prod', tier: 1, name: '高効率ドリル', cost: 25, req: [], desc: '金属加工機の生産量×2。', fx: [{ t: 'mult', tg: 'miner', v: 2 }] },
+    { id: 'p2', cat: 'prod', tier: 2, name: '精密工作機械', cost: 120, req: ['p1'], desc: 'ロボット製造設備の生産量×1.5、ロボット売却額×1.25。', fx: [{ t: 'mult', tg: 'tag:units', v: 1.5 }, { t: 'value', v: 1.25 }] },
+    { id: 'p3', cat: 'prod', tier: 2, name: '量産設計', cost: 3000, req: ['p2'], desc: '「高性能組立ライン」を解放。ロボット製造設備×1.25。', fx: [{ t: 'mult', tg: 'tag:units', v: 1.25 }] },
+    { id: 'p4', cat: 'prod', tier: 3, name: '素材循環', cost: 50000, req: ['p3'], desc: '金属・電子部品の生産量×2。', fx: [{ t: 'mult', tg: 'tag:metal', v: 2 }, { t: 'mult', tg: 'tag:parts', v: 2 }] },
+    { id: 'p5', cat: 'prod', tier: 3, name: '超精密加工', cost: 1000000, req: ['p4'], desc: '全設備の生産量×1.5。', fx: [{ t: 'mult', tg: 'all', v: 1.5 }] },
+    { id: 'p6', cat: 'prod', tier: 4, name: '完全自動化生産', cost: 20000000, req: ['p5', 'i3'], desc: 'ロボット製造設備の生産量×2、ロボット売却額×1.5。', fx: [{ t: 'mult', tg: 'tag:units', v: 2 }, { t: 'value', v: 1.5 }] },
+
+    { id: 'a1', cat: 'auto', tier: 1, name: '自動発注システム', cost: 60, req: ['p1'], desc: '「自動購入」機能を解放(設備画面でON/OFF)。', fx: [{ t: 'auto' }] },
+    { id: 'a2', cat: 'auto', tier: 2, name: 'コスト最適化', cost: 800, req: ['a1'], desc: '設備の価格上昇率-0.01。', fx: [{ t: 'growth', v: -0.01 }] },
+    { id: 'a3', cat: 'auto', tier: 2, name: '高速ベルト', cost: 10000, req: ['a2'], desc: 'コンベア1台あたりの効果を+2%→+3%に強化。', fx: [{ t: 'conv', v: 0.01 }] },
+    { id: 'a4', cat: 'auto', tier: 3, name: '在庫管理AI', cost: 400000, req: ['a3'], desc: '全設備の購入価格×0.9。', fx: [{ t: 'cost', v: 0.9 }] },
+    { id: 'a5', cat: 'auto', tier: 3, name: 'オフライン管理', cost: 5000000, req: ['a4'], desc: 'オフライン上限+4時間、オフライン効率+20%。', fx: [{ t: 'offline', v: 4 }, { t: 'offEff', v: 0.2 }] },
+    { id: 'a6', cat: 'auto', tier: 4, name: '全自動ライン', cost: 50000000, req: ['a5'], desc: '設備の価格上昇率-0.01、購入価格×0.85。', fx: [{ t: 'growth', v: -0.01 }, { t: 'cost', v: 0.85 }] },
+
+    { id: 'e1', cat: 'energy', tier: 1, name: '省エネ設計', cost: 150, req: ['p1'], desc: '全設備の消費電力×0.85。', fx: [{ t: 'power', v: 0.85 }] },
+    { id: 'e2', cat: 'energy', tier: 2, name: '高効率発電', cost: 4000, req: ['e1'], desc: '発電量×2。', fx: [{ t: 'mult', tg: 'tag:energy', v: 2 }] },
+    { id: 'e3', cat: 'energy', tier: 3, name: '核融合技術', cost: 200000, req: ['e2'], desc: '「核融合炉」を解放。', fx: [] },
+    { id: 'e4', cat: 'energy', tier: 3, name: 'エネルギー増幅', cost: 5000000, req: ['e3'], desc: '発電量×2。', fx: [{ t: 'mult', tg: 'tag:energy', v: 2 }] },
+    { id: 'e5', cat: 'energy', tier: 4, name: '超伝導送電', cost: 20000000, req: ['e4'], desc: '全設備の消費電力×0.7。', fx: [{ t: 'power', v: 0.7 }] },
+
+    { id: 'r1', cat: 'robot', tier: 1, name: 'ロボット工学基礎', cost: 50, req: ['p1'], desc: 'MINER BOTを解放。', fx: [] },
+    { id: 'r2', cat: 'robot', tier: 2, name: '組立AI', cost: 1500, req: ['r1'], desc: 'ASSEMBLER BOTを解放。', fx: [] },
+    { id: 'r3', cat: 'robot', tier: 2, name: 'エンジニア育成', cost: 30000, req: ['r2'], desc: 'ENGINEER BOTを解放。', fx: [] },
+    { id: 'r4', cat: 'robot', tier: 3, name: '自律学習', cost: 600000, req: ['r3'], desc: 'RESEARCH BOTを解放。', fx: [] },
+    { id: 'r5', cat: 'robot', tier: 3, name: 'ロボット強化', cost: 10000000, req: ['r4'], desc: '全ロボットの効果×1.5。', fx: [{ t: 'robot', v: 1.5 }] },
+    { id: 'r6', cat: 'robot', tier: 4, name: 'OVERLORD計画', cost: 100000000, req: ['r5', 'i3'], desc: 'AI OVERLORDを解放。', fx: [] },
+
+    { id: 'i1', cat: 'ai', tier: 2, name: '機械学習', cost: 2500, req: ['p2'], desc: '「AI設計センター」を解放。', fx: [] },
+    { id: 'i2', cat: 'ai', tier: 2, name: '最適化アルゴリズム', cost: 100000, req: ['i1'], desc: '全設備の生産量×1.25。', fx: [{ t: 'mult', tg: 'all', v: 1.25 }] },
+    { id: 'i3', cat: 'ai', tier: 3, name: 'ニューラル制御', cost: 5000000, req: ['i2'], desc: '研究ポイント生産×2。', fx: [{ t: 'mult', tg: 'tag:rp', v: 2 }] },
+    { id: 'i4', cat: 'ai', tier: 4, name: '自律管理AI', cost: 30000000, req: ['i3'], desc: '「自律型工場管理AI」を解放。', fx: [] },
+    { id: 'i5', cat: 'ai', tier: 4, name: '自己改善', cost: 300000000, req: ['i4'], desc: '全設備の生産量×2。', fx: [{ t: 'mult', tg: 'all', v: 2 }] },
+
+    { id: 'q1', cat: 'quantum', tier: 5, name: '量子基礎理論', cost: 20000000, req: ['i3', 'p5'], desc: '「量子製造機」を解放。', fx: [] },
+    { id: 'q2', cat: 'quantum', tier: 5, name: '量子もつれ生産', cost: 200000000, req: ['q1'], desc: 'ロボット製造設備の生産量×3。', fx: [{ t: 'mult', tg: 'tag:units', v: 3 }] },
+    { id: 'q3', cat: 'quantum', tier: 5, name: '量子コンピュータ', cost: 3000000000, req: ['q2'], desc: '研究ポイント生産×3、全設備×1.5。', fx: [{ t: 'mult', tg: 'tag:rp', v: 3 }, { t: 'mult', tg: 'all', v: 1.5 }] },
+    { id: 'q4', cat: 'quantum', tier: 6, name: '時空間工場', cost: 40000000000, req: ['q3'], desc: '全設備の生産量×3、オフライン上限+8時間。', fx: [{ t: 'mult', tg: 'all', v: 3 }, { t: 'offline', v: 8 }] },
+    { id: 'q5', cat: 'quantum', tier: 6, name: '特異点', cost: 500000000000, req: ['q4'], desc: '全設備の生産量×5。工場の完成形。', fx: [{ t: 'mult', tg: 'all', v: 5 }] },
+  ];
+  RF.RMAP = {};
+  RF.RESEARCH.forEach((r) => (RF.RMAP[r.id] = r));
+
+  // ---- 恒久強化（工場再編で得るブループリント(BP)で購入） ----
+  RF.PERMS = [
+    { id: 'eff', name: '生産効率改善', max: 20, desc: '全生産+10%/Lv(加算)。', cost: (lv) => Math.ceil(1 * Math.pow(1.5, lv)) },
+    { id: 'start', name: '初期資金', max: 6, desc: '再編後の初期クレジットが増える(Lv1=2,000 → 以降×10)。', cost: (lv) => Math.ceil(2 * Math.pow(2, lv)) },
+    { id: 'click', name: '熟練技術', max: 6, desc: '手動操作の威力×2/Lv。', cost: (lv) => Math.ceil(2 * Math.pow(2.2, lv)) },
+    { id: 'offline', name: '長期稼働設計', max: 5, desc: 'オフライン上限+4時間/Lv、効率+5%/Lv。', cost: (lv) => Math.ceil(3 * Math.pow(2, lv)) },
+    { id: 'event', name: 'ドローン誘引', max: 5, desc: 'ボーナスドローンの出現間隔-12%/Lv。', cost: (lv) => Math.ceil(2 * Math.pow(2, lv)) },
+    { id: 'keep', name: '技術継承', max: 3, desc: '再編後も研究を保持(Lv1=Tier1, Lv2=Tier2, Lv3=Tier3)。', cost: (lv) => [5, 25, 100][lv] },
+    { id: 'robot', name: 'ロボット継承', max: 5, desc: '再編後もロボットの10%/Lvを保持。', cost: (lv) => Math.ceil(4 * Math.pow(2.3, lv)) },
+    { id: 'auto', name: '自動化遺産', max: 1, desc: '研究なしで最初から「自動購入」が使える。', cost: () => 3 },
+  ];
+  RF.PERMMAP = {};
+  RF.PERMS.forEach((p) => (RF.PERMMAP[p.id] = p));
+
+  // ---- 目標（順番に表示。達成で報酬） ----
+  const own = (s, id) => (s.b[id] ? s.b[id].n : 0);
+  const done = (s) => Object.keys(s.rs).filter((k) => s.rs[k]).length;
+  const goal = (id, text, fn, reward) => ({ id, text, fn, reward: reward || 0 });
+  RF.GOALS = [
+    goal('g1', '「採掘」ボタンで金属を50集めよう', (s) => [s.stats.metalAll, 50], 20),
+    goal('g2', '「手動組立」でロボットを3台作ろう', (s) => [s.stats.manualUnits, 3], 30),
+    goal('g3', '手動組立台を1台購入しよう', (s) => [own(s, 'bench'), 1], 40),
+    goal('g4', '金属加工機を2台購入しよう', (s) => [own(s, 'miner'), 2], 80),
+    goal('g5', '累計クレジットを250稼ごう(研究ラボが解放されます)', (s) => [s.stats.earnedRun, 250], 100),
+    goal('g6', '研究ラボを1台購入しよう', (s) => [own(s, 'lab'), 1], 200),
+    goal('g7', '研究を1つ完了しよう', (s) => [done(s), 1], 300),
+    goal('g8', '手動組立台を5台にしよう', (s) => [own(s, 'bench'), 5], 400),
+    goal('g9', '発電機を購入しよう(電力が必要な設備に備える)', (s) => [own(s, 'gen'), 1], 600),
+    goal('g10', '電子部品製造機を購入しよう', (s) => [own(s, 'parts'), 1], 1000),
+    goal('g11', 'WORKER BOTを開発しよう', (s) => [s.rob.worker || 0, 1], 1500),
+    goal('g12', '組立ロボットを3台購入しよう', (s) => [own(s, 'asm'), 3], 5000),
+    goal('g13', '研究を5つ完了しよう', (s) => [done(s), 5], 8000),
+    goal('g14', '設備のレベルを合計3上げよう', (s) => [Object.keys(s.b).reduce((a, k) => a + s.b[k].lv, 0), 3], 15000),
+    goal('g15', 'コンベアを1台設置しよう', (s) => [own(s, 'conv'), 1], 30000),
+    goal('g16', '累計ロボット生産数を1万台にしよう', (s) => [s.stats.unitsAll, 1e4], 60000),
+    goal('g17', '高性能組立ラインを建設しよう', (s) => [own(s, 'line'), 1], 2e5),
+    goal('g18', 'AI設計センターを建設しよう', (s) => [own(s, 'ai'), 1], 5e5),
+    goal('g19', '5種類のロボットをすべて開発しよう', (s) => [RF.SYNERGY_IDS.filter((i) => (s.rob[i] || 0) > 0).length, 5], 1e6),
+    goal('g20', '研究を15個完了しよう', (s) => [done(s), 15], 3e6),
+    goal('g21', '累計ロボット生産数を100万台にしよう', (s) => [s.stats.unitsAll, 1e6], 1e7),
+    goal('g22', '核融合炉を建設しよう', (s) => [own(s, 'reactor'), 1], 3e7),
+    goal('g23', '量子製造機を建設しよう', (s) => [own(s, 'quantum'), 1], 3e8),
+    goal('g24', '自律型工場管理AIを稼働させよう', (s) => [own(s, 'manager'), 1], 3e9),
+    goal('g25', '工場を再編して恒久強化を獲得しよう(任意)', (s) => [s.pres.count, 1], 0),
+    goal('g26', 'すべての研究を完了しよう(特異点到達)', (s) => [done(s), RF.RESEARCH.length], 0),
+  ];
+
+  // ---- 実績（1つ達成ごとに全生産+1%） ----
+  RF.ACHIEVEMENTS = [];
+  (function () {
+    const A = RF.ACHIEVEMENTS;
+    const add = (id, cat, name, desc, fn) => A.push({ id, cat, name, desc, fn });
+    const sci = (n) => (n >= 1e6 ? '10^' + Math.round(Math.log10(n)) : n.toLocaleString('en-US'));
+    for (let k = 2; k <= 14; k++) {
+      const t = Math.pow(10, k);
+      add('prod' + k, 'prod', 'ロボット生産 ' + sci(t), '累計ロボット生産数が ' + sci(t) + ' 台に到達。', (s) => s.stats.unitsAll >= t);
+    }
+    [1e3, 1e6, 1e9, 1e12, 1e15].forEach((t) =>
+      add('earn' + Math.log10(t), 'prod', '累計売上 ' + sci(t), '累計クレジット獲得が ' + sci(t) + ' に到達。', (s) => s.stats.earnedAll >= t));
+    RF.BUILDINGS.forEach((b) => {
+      [10, 50].forEach((n) => add('b_' + b.id + n, 'build', b.name + ' ×' + n, b.name + 'を' + n + '台所有する。', (s) => own(s, b.id) >= n));
+    });
+    [10, 50, 100, 250, 500].forEach((n) => add('btotal' + n, 'build', '総設備数 ' + n, '設備の合計所有数が ' + n + ' に到達。', (s) => Object.keys(s.b).reduce((a, k) => a + s.b[k].n, 0) >= n));
+    [10, 40].forEach((n) => add('lvl' + n, 'build', '設備レベル合計 ' + n, '設備レベルの合計が ' + n + ' に到達。', (s) => Object.keys(s.b).reduce((a, k) => a + s.b[k].lv, 0) >= n));
+    [1, 5, 10, 20, 30].forEach((n) => add('rs' + n, 'research', '研究 ' + n + '個', '研究を' + n + '個完了する。', (s) => done(s) >= n));
+    add('rsall', 'research', '全研究完了', 'すべての研究を完了する。', (s) => done(s) >= RF.RESEARCH.length);
+    [1, 10, 50, 200, 1000].forEach((n) => add('rob' + n, 'robot', 'ロボット ' + n + '体', 'ロボットを合計' + n + '体開発する。', (s) => Object.keys(s.rob).reduce((a, k) => a + (s.rob[k] || 0), 0) >= n));
+    add('robset', 'robot', '多様なロボット', '5種類のロボットすべてを開発する。', (s) => RF.SYNERGY_IDS.every((i) => (s.rob[i] || 0) > 0));
+    add('overlord', 'robot', '支配者の誕生', 'AI OVERLORDを開発する。', (s) => (s.rob.overlord || 0) > 0);
+    [100, 1000, 10000].forEach((n) => add('click' + n, 'misc', 'クリック ' + n + '回', '手動操作を' + n + '回行う。', (s) => s.stats.clicks >= n));
+    [1, 10, 50].forEach((n) => add('evt' + n, 'misc', 'ドローン捕獲 ' + n, 'ボーナスドローンを' + n + '回捕まえる。', (s) => s.stats.events >= n));
+    [1, 5, 10].forEach((n) => add('pres' + n, 'misc', '工場再編 ' + n + '回', '工場を' + n + '回再編する。', (s) => s.pres.count >= n));
+    add('offline1', 'misc', 'おかえりなさい', 'オフライン報酬を初めて受け取る。', (s) => s.stats.offlineClaims >= 1);
+  })();
+  RF.ACHMAP = {};
+  RF.ACHIEVEMENTS.forEach((a) => (RF.ACHMAP[a.id] = a));
+  RF.ACH_CATS = { prod: '生産', build: '設備', research: '研究', robot: 'ロボット', misc: 'その他' };
+})();
+
+/* ROBOT FACTORY - ゲームロジック（描画・DOMには一切依存しない）
+ * 状態(state)の生成、派生値の計算、購入、生産Tick、オフライン進行、周回、セーブ/ロード。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+  const MAXNUM = 1e300;
+  const PROC_ORDER = ['miner', 'parts', 'lab', 'asm', 'line', 'quantum', 'ai', 'bench'];
+
+  // ================= 数値表示 =================
+  RF.notation = 'short';
+  const SUF = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  function small(n) {
+    if (n >= 100) return n.toFixed(0);
+    if (n >= 10) return n.toFixed(1);
+    return n.toFixed(2);
+  }
+  // fmt: 一般表示(小数あり) / fmtInt: 在庫など切り捨て表示
+  RF.fmt = function (n, mode, int) {
+    mode = mode || RF.notation;
+    if (typeof n !== 'number' || isNaN(n)) return '0';
+    if (!isFinite(n)) return n > 0 ? '∞' : '-∞';
+    if (n < 0) return '-' + RF.fmt(-n, mode, int);
+    if (n < 1000) return int ? String(Math.floor(n + 1e-9)) : small(n);
+    if (mode === 'full' && n < 1e15) return Math.floor(n).toLocaleString('en-US');
+    if (mode === 'sci' || mode === 'full') return n.toExponential(2).replace('e+', 'e');
+    const e = Math.floor(Math.log10(n) / 3);
+    if (e < SUF.length) {
+      const v = n / Math.pow(10, e * 3);
+      return (v >= 100 ? v.toFixed(1) : v.toFixed(2)) + SUF[e];
+    }
+    return n.toExponential(2).replace('e+', 'e');
+  };
+  RF.fmtInt = (n, mode) => RF.fmt(n, mode, true);
+  RF.fmtTime = function (sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    if (h > 0) return h + '時間' + m + '分';
+    if (m > 0) return m + '分' + s + '秒';
+    return s + '秒';
+  };
+
+  // ================= 状態 =================
+  RF.newState = function () {
+    const s = {
+      v: RF.SAVE_VERSION,
+      res: { credits: 0, metal: 0, parts: 0, rp: 0 },
+      b: {}, rob: {}, rs: {}, ach: {}, unl: {}, goal: 0,
+      stats: { units: 0, unitsAll: 0, earnedRun: 0, earnedAll: 0, metalAll: 0, manualUnits: 0, clicks: 0, events: 0, playtime: 0, offlineClaims: 0 },
+      pres: { bp: 0, bpTotal: 0, count: 0, perm: {} },
+      set: { sound: true, vol: 0.5, notation: 'short', autoBuy: false, bulk: 1, tab: 'main' },
+      buffs: [], evt: { next: 75, active: null },
+      last: Date.now(), created: Date.now(),
+    };
+    RF.BUILDINGS.forEach((b) => (s.b[b.id] = { n: 0, lv: 0 }));
+    return s;
+  };
+
+  // ================= 派生値 =================
+  function aggregate(s) {
+    const R = { mult: {}, value: 1, power: 1, cost: 1, growth: 0, conv: 0.02, robot: 1, click: 1, offline: 0, offEff: 0, auto: false };
+    for (const r of RF.RESEARCH) {
+      if (!s.rs[r.id]) continue;
+      for (const f of r.fx) {
+        switch (f.t) {
+          case 'mult': R.mult[f.tg] = (R.mult[f.tg] || 1) * f.v; break;
+          case 'value': R.value *= f.v; break;
+          case 'power': R.power *= f.v; break;
+          case 'cost': R.cost *= f.v; break;
+          case 'growth': R.growth += f.v; break;
+          case 'conv': R.conv += f.v; break;
+          case 'robot': R.robot *= f.v; break;
+          case 'click': R.click *= f.v; break;
+          case 'offline': R.offline += f.v; break;
+          case 'offEff': R.offEff += f.v; break;
+          case 'auto': R.auto = true; break;
+        }
+      }
+    }
+    return R;
+  }
+  const pl = (s, id) => s.pres.perm[id] || 0;
+  const rb = (s, id) => s.rob[id] || 0;
+
+  RF.derive = function (s) {
+    const R = aggregate(s);
+    const D = { R, bmult: {} };
+    let achN = 0;
+    for (const k in s.ach) if (s.ach[k]) achN++;
+    D.achN = achN;
+    const rbm = R.robot;
+    let types = 0, minC = Infinity;
+    for (const id of RF.SYNERGY_IDS) { const c = rb(s, id); if (c > 0) types++; if (c < minC) minC = c; }
+    D.synergy = (1 + 0.03 * types) * (types === 5 ? 1 + Math.min(1, 0.1 * Math.floor(minC / 5)) : 1);
+    let buffProd = 1, buffClick = 1;
+    for (const f of s.buffs) { if (f.k === 'prod') buffProd *= f.v; else if (f.k === 'click') buffClick *= f.v; }
+    D.buffProd = buffProd;
+    D.global = (1 + 0.01 * achN) * (1 + 0.02 * s.pres.bpTotal) * (1 + 0.1 * pl(s, 'eff')) * D.synergy *
+      (R.mult.all || 1) * Math.pow(1.06, s.b.manager.n) * (1 + 0.05 * rb(s, 'overlord') * rbm) * buffProd;
+    D.convBonus = 1 + R.conv * s.b.conv.n;
+    const eng = 1 + 0.01 * rb(s, 'engineer') * rbm;
+    let demand = 0, supply = 0;
+    const engCut = 1 - Math.min(0.5, 0.005 * rb(s, 'engineer') * rbm);
+    for (const b of RF.BUILDINGS) {
+      const st = s.b[b.id];
+      demand += st.n * b.power * R.power * engCut;
+      if (b.kind) { D.bmult[b.id] = 0; continue; }
+      let m = Math.pow(RF.LEVEL_MULT, st.lv);
+      for (const ms of RF.MILESTONES) if (st.n >= ms) m *= 2;
+      m *= R.mult[b.id] || 1;
+      for (const t of b.tags) m *= R.mult['tag:' + t] || 1;
+      if (b.tags.includes('metal')) m *= 1 + 0.03 * rb(s, 'miner') * rbm;
+      if (b.tags.includes('units')) m *= 1 + 0.03 * rb(s, 'assembler') * rbm;
+      if (b.tags.includes('rp')) m *= 1 + 0.02 * rb(s, 'research') * rbm;
+      m *= eng * D.convBonus * D.global;
+      D.bmult[b.id] = m;
+      if (b.out.energy) supply += st.n * b.out.energy * m;
+    }
+    D.demand = demand; D.supply = supply;
+    D.powerSat = demand > 0 ? Math.min(1, supply / demand) : 1;
+    D.passiveMetal = 0.5 * rb(s, 'worker') * rbm * D.global;
+    D.passiveRp = 0.2 * rb(s, 'research') * rbm * D.global * (R.mult['tag:rp'] || 1);
+    D.clickMult = R.click * Math.pow(2, pl(s, 'click')) * buffClick;
+    D.clickPower = (1 + rb(s, 'worker') * rbm) * D.clickMult;
+    D.asmPower = (1 + rb(s, 'worker') * 0.25 * rbm) * D.clickMult;
+    D.offlineHours = Math.min(RF.OFFLINE_MAX_HOURS, RF.OFFLINE_BASE_HOURS + R.offline + 4 * pl(s, 'offline'));
+    D.offlineEff = Math.min(0.95, RF.OFFLINE_BASE_EFF + R.offEff + 0.05 * pl(s, 'offline'));
+    D.unitPrice = RF.UNIT_VALUE * R.value;
+    return D;
+  };
+
+  // 表示用の実測レート（秒あたり）。tickごとに指数移動平均で更新
+  RF.rates = { gross: { credits: 0, metal: 0, parts: 0, rp: 0, units: 0 }, cons: { metal: 0, parts: 0 } };
+  RF.totalGross = { credits: 0, metal: 0, parts: 0, rp: 0, units: 0 };
+
+  // ================= コスト =================
+  RF.buildingCost = function (s, id, extra, D) {
+    const def = RF.BMAP[id];
+    const R = (D || RF.derive(s)).R;
+    const n = s.b[id].n + (extra || 0);
+    const f = Math.pow(Math.max(1.05, def.growth + R.growth), n) * R.cost;
+    const c = {};
+    for (const k in def.base) c[k] = Math.ceil(def.base[k] * f);
+    return c;
+  };
+  RF.robotCost = function (s, id, extra) {
+    const def = RF.ROBOTMAP[id];
+    const f = Math.pow(def.growth, rb(s, id) + (extra || 0));
+    const c = {};
+    for (const k in def.base) c[k] = Math.ceil(def.base[k] * f);
+    return c;
+  };
+  RF.levelCost = function (s, id) { return RF.LEVEL_COST(RF.BMAP[id], s.b[id].lv); };
+  RF.canAfford = function (s, cost) {
+    for (const k in cost) if ((s.res[k] || 0) < cost[k]) return false;
+    return true;
+  };
+  function pay(s, cost) { for (const k in cost) s.res[k] = Math.max(0, s.res[k] - cost[k]); }
+  function addCost(a, b) { for (const k in b) a[k] = (a[k] || 0) + b[k]; return a; }
+  // qty台まとめて買う場合の合計(最大qty、買える分まで)
+  RF.bulkBuilding = function (s, id, qty, D) {
+    D = D || RF.derive(s);
+    const total = {}; let count = 0;
+    const left = Object.assign({}, s.res);
+    const limit = qty === Infinity ? 500 : qty;
+    for (let i = 0; i < limit; i++) {
+      const c = RF.buildingCost(s, id, i, D);
+      let ok = true;
+      for (const k in c) if (left[k] < c[k]) ok = false;
+      if (!ok) break;
+      for (const k in c) left[k] -= c[k];
+      addCost(total, c); count++;
+    }
+    return { count, total };
+  };
+
+  // ================= 解放 =================
+  RF.unlockInfo = function (s, kind, def) {
+    const key = (kind === 'b' ? 'b:' : 'r:') + def.id;
+    if (s.unl[key]) return { ok: true };
+    const u = def.unlock || {};
+    const needE = u.earned !== undefined && s.stats.earnedRun < u.earned;
+    const needR = u.rs && !s.rs[u.rs];
+    if (!needE && !needR) return { ok: true };
+    const parts = [];
+    if (needE) parts.push('今回の累計売上 ' + RF.fmt(u.earned));
+    if (needR) parts.push('研究「' + RF.RMAP[u.rs].name + '」');
+    return { ok: false, text: parts.join(' / ') };
+  };
+  RF.isUnlocked = function (s, kind, def) { return RF.unlockInfo(s, kind, def).ok; };
+
+  // ================= 購入・操作 =================
+  RF.buyBuilding = function (s, id, qty, silent) {
+    const def = RF.BMAP[id];
+    if (!def || !s.b[id]) return { ok: false, reason: '不明な設備' };
+    if (!RF.isUnlocked(s, 'b', def)) return { ok: false, reason: '未解放' };
+    const D = RF.derive(s);
+    qty = qty || 1;
+    let bought = 0;
+    const limit = qty === Infinity ? 500 : qty;
+    for (let i = 0; i < limit; i++) {
+      const c = RF.buildingCost(s, id, 0, D);
+      if (!RF.canAfford(s, c)) break;
+      pay(s, c);
+      s.b[id].n++;
+      bought++;
+    }
+    if (!bought) return { ok: false, reason: '資源不足' };
+    s.unl['b:' + id] = true;
+    if (!silent) RF.notify('buy', { id, bought });
+    return { ok: true, bought };
+  };
+  RF.upgradeBuilding = function (s, id) {
+    const st = s.b[id];
+    if (!st || st.n <= 0) return { ok: false, reason: '未所有' };
+    if (st.lv >= RF.LEVEL_MAX) return { ok: false, reason: '最大レベル' };
+    const c = RF.levelCost(s, id);
+    if (!RF.canAfford(s, c)) return { ok: false, reason: '資源不足' };
+    pay(s, c); st.lv++;
+    RF.notify('level', { id });
+    return { ok: true };
+  };
+  RF.buyRobot = function (s, id) {
+    const def = RF.ROBOTMAP[id];
+    if (!def) return { ok: false, reason: '不明なロボット' };
+    if (!RF.isUnlocked(s, 'r', def)) return { ok: false, reason: '未解放' };
+    const c = RF.robotCost(s, id);
+    if (!RF.canAfford(s, c)) return { ok: false, reason: '資源不足' };
+    pay(s, c);
+    s.rob[id] = rb(s, id) + 1;
+    s.unl['r:' + id] = true;
+    RF.notify('robot', { id });
+    return { ok: true };
+  };
+  RF.researchState = function (s, id) {
+    const r = RF.RMAP[id];
+    if (s.rs[id]) return 'done';
+    if (!r.req.every((q) => s.rs[q])) return 'locked';
+    return s.res.rp >= r.cost ? 'ready' : 'available';
+  };
+  RF.buyResearch = function (s, id) {
+    const r = RF.RMAP[id];
+    if (!r) return { ok: false, reason: '不明な研究' };
+    if (s.rs[id]) return { ok: false, reason: '研究済み' };
+    if (!r.req.every((q) => s.rs[q])) return { ok: false, reason: '前提未達成' };
+    if (s.res.rp < r.cost) return { ok: false, reason: '研究ポイント不足' };
+    s.res.rp -= r.cost;
+    s.rs[id] = true;
+    RF.refreshUnlocks(s);
+    RF.notify('research', { id });
+    return { ok: true };
+  };
+  RF.clickMine = function (s) {
+    const D = RF.derive(s);
+    const amt = D.clickPower;
+    s.res.metal = Math.min(MAXNUM, s.res.metal + amt);
+    s.stats.metalAll += amt; s.stats.clicks++;
+    return amt;
+  };
+  RF.clickAssemble = function (s) {
+    const D = RF.derive(s);
+    const per = RF.MANUAL_ASSEMBLE_METAL;
+    const units = Math.min(D.asmPower, s.res.metal / per);
+    if (units < 0.05) return 0;
+    s.res.metal -= units * per;
+    const gain = units * D.unitPrice;
+    s.res.credits = Math.min(MAXNUM, s.res.credits + gain);
+    s.stats.units += units; s.stats.unitsAll += units; s.stats.manualUnits += units;
+    s.stats.earnedRun += gain; s.stats.earnedAll += gain; s.stats.clicks++;
+    return gain;
+  };
+  RF.autoAvailable = function (s) { return aggregate(s).auto || pl(s, 'auto') > 0; };
+  function autoBuy(s) {
+    if (!s.set.autoBuy || !RF.autoAvailable(s)) return;
+    const D = RF.derive(s);
+    for (const b of RF.BUILDINGS) {
+      if (!RF.isUnlocked(s, 'b', b)) continue;
+      if (b.power > 0 && D.powerSat < 0.999) continue;
+      for (let i = 0; i < 5; i++) {
+        const c = RF.buildingCost(s, b.id, 0, D);
+        if (c.credits > s.res.credits * 0.03) break;
+        if (!RF.buyBuilding(s, b.id, 1, true).ok) break;
+      }
+    }
+  }
+
+  // 新しい設備・ロボットの解放を記録（一度解放したものは周回後も維持）
+  RF.refreshUnlocks = function (s) {
+    for (const b of RF.BUILDINGS) if (!s.unl['b:' + b.id] && RF.isUnlocked(s, 'b', b)) { s.unl['b:' + b.id] = true; RF.notify('unlock', { kind: 'b', id: b.id }); }
+    for (const r of RF.ROBOTS) if (!s.unl['r:' + r.id] && RF.isUnlocked(s, 'r', r)) { s.unl['r:' + r.id] = true; RF.notify('unlock', { kind: 'r', id: r.id }); }
+  };
+
+  // ================= 製造段階（工場の見た目） =================
+  RF.STAGES = [
+    { name: '小さな作業場', desc: '作業台と少数の機械' },
+    { name: '自動化工場', desc: 'コンベアと組立ロボットが稼働' },
+    { name: '大型工場', desc: '多数のロボットが働く巨大ライン' },
+    { name: '未来型AI工場', desc: 'AIと量子技術が支配する製造施設' },
+  ];
+  RF.stage = function (s) {
+    const n = (id) => s.b[id].n;
+    if (n('ai') >= 1 && s.rs.i3) return 4;
+    if (n('line') >= 1) return 3;
+    if (n('asm') >= 1 || n('conv') >= 1) return 2;
+    return 1;
+  };
+
+  // ================= Tick =================
+  RF.tick = function (s, dt, D) {
+    D = D || RF.derive(s);
+    const G = { credits: 0, metal: 0, parts: 0, rp: 0, units: 0 };
+    const C = { metal: 0, parts: 0 };
+    const res = s.res;
+    for (const id of PROC_ORDER) {
+      const st = s.b[id];
+      if (st.n <= 0) continue;
+      const b = RF.BMAP[id];
+      let bs = st.n * dt * (b.power > 0 ? D.powerSat : 1); // 設備稼働秒
+      for (const r in b.in) bs = Math.min(bs, res[r] / b.in[r]);
+      if (!(bs > 0)) continue;
+      for (const r in b.in) { const u = b.in[r] * bs; res[r] -= u; C[r] += u; }
+      const m = D.bmult[id];
+      for (const o in b.out) {
+        const amt = b.out[o] * m * bs;
+        if (o === 'units') G.units += amt;
+        else G[o] += amt;
+      }
+    }
+    G.metal += D.passiveMetal * dt;
+    G.rp += D.passiveRp * dt;
+    G.credits += G.units * D.unitPrice;
+    res.metal = Math.min(MAXNUM, Math.max(0, res.metal + G.metal));
+    res.parts = Math.min(MAXNUM, Math.max(0, res.parts + G.parts));
+    res.rp = Math.min(MAXNUM, res.rp + G.rp);
+    res.credits = Math.min(MAXNUM, res.credits + G.credits);
+    s.stats.units += G.units; s.stats.unitsAll += G.units;
+    s.stats.earnedRun += G.credits; s.stats.earnedAll += G.credits;
+    s.stats.metalAll += G.metal;
+    s.stats.playtime += dt;
+    for (const k in G) RF.totalGross[k] += G[k];
+    const a = 1 - Math.exp(-dt / 1.5);
+    for (const k in G) RF.rates.gross[k] += (G[k] / dt - RF.rates.gross[k]) * a;
+    for (const k in C) RF.rates.cons[k] += (C[k] / dt - RF.rates.cons[k]) * a;
+    // バフ
+    if (s.buffs.length) {
+      for (const f of s.buffs) f.t -= dt;
+      s.buffs = s.buffs.filter((f) => f.t > 0);
+    }
+    return D;
+  };
+
+  // 時間を進める(ステップ分割)。offline=trueならランダムイベントを発生させない
+  let autoT = 0;
+  RF.advance = function (s, dt, offline) {
+    if (!(dt > 0)) return;
+    const step = offline ? Math.max(1, dt / 2000) : 0.25;
+    let left = dt;
+    let guard = 0;
+    while (left > 1e-6 && guard++ < 5000) {
+      const d = Math.min(step, left);
+      left -= d;
+      const D = RF.derive(s);
+      RF.tick(s, d, D);
+      autoT += d;
+      if (autoT >= 2) { autoT = 0; autoBuy(s); }
+      if (!offline) stepEvent(s, d);
+    }
+  };
+
+  // ================= ランダムイベント(ボーナスドローン) =================
+  const KINDS = [
+    { k: 'cash', w: 35 }, { k: 'boost', w: 25 }, { k: 'frenzy', w: 15 }, { k: 'research', w: 15 }, { k: 'supply', w: 10 },
+  ];
+  function nextInterval(s) {
+    return (70 + Math.random() * 110) * Math.pow(0.88, pl(s, 'event'));
+  }
+  function stepEvent(s, dt) {
+    const e = s.evt;
+    if (e.active) {
+      e.active.t -= dt;
+      if (e.active.t <= 0) { e.active = null; e.next = nextInterval(s); }
+    } else {
+      e.next -= dt;
+      if (e.next <= 0) RF.spawnDrone(s);
+    }
+  }
+  RF.spawnDrone = function (s) {
+    let r = Math.random() * 100, kind = 'cash';
+    for (const k of KINDS) { if ((r -= k.w) <= 0) { kind = k.k; break; } }
+    s.evt.active = { x: 8 + Math.random() * 84, y: 12 + Math.random() * 60, t: 14, kind };
+    RF.notify('drone', {});
+  };
+  RF.claimDrone = function (s) {
+    const e = s.evt.active;
+    if (!e) return null;
+    const g = RF.rates.gross;
+    let msg = '';
+    switch (e.kind) {
+      case 'cash': { const v = Math.max(200, g.credits * 150); s.res.credits += v; s.stats.earnedRun += v; s.stats.earnedAll += v; msg = 'ボーナス資金 +' + RF.fmtInt(v) + ' クレジット'; break; }
+      case 'boost': s.buffs.push({ k: 'prod', v: 7, t: 30, name: '生産ブースト ×7' }); msg = '生産ブースト! 30秒間 全生産×7'; break;
+      case 'frenzy': s.buffs.push({ k: 'click', v: 30, t: 20, name: '手動フィーバー ×30' }); msg = '手動フィーバー! 20秒間 手動操作×30'; break;
+      case 'research': { const v = Math.max(25, g.rp * 120); s.res.rp += v; msg = '研究データ +' + RF.fmtInt(v) + ' RP'; break; }
+      default: { const m = Math.max(150, g.metal * 150), p = g.parts * 100; s.res.metal += m; s.res.parts += p; msg = '補給物資 金属+' + RF.fmtInt(m) + (p > 1 ? ' 電子部品+' + RF.fmtInt(p) : ''); }
+    }
+    s.evt.active = null; s.evt.next = nextInterval(s);
+    s.stats.events++;
+    RF.notify('droneClaim', { kind: e.kind, msg });
+    return msg;
+  };
+
+  // ================= 目標・実績 =================
+  const listeners = [];
+  RF.on = function (fn) { listeners.push(fn); };
+  RF.notify = function (type, data) { for (const fn of listeners) { try { fn(type, data); } catch (e) { /* UI側の例外でロジックを止めない */ } } };
+
+  RF.goalProgress = function (s) {
+    const g = RF.GOALS[s.goal];
+    if (!g) return null;
+    const [cur, target] = g.fn(s);
+    return { goal: g, cur: Math.min(cur, target), target, ratio: target > 0 ? Math.min(1, cur / target) : 1 };
+  };
+  RF.check = function (s) {
+    RF.refreshUnlocks(s);
+    for (const a of RF.ACHIEVEMENTS) {
+      if (!s.ach[a.id] && a.fn(s)) { s.ach[a.id] = true; RF.notify('ach', { ach: a }); }
+    }
+    let guard = 0;
+    while (s.goal < RF.GOALS.length && guard++ < 50) {
+      const g = RF.GOALS[s.goal];
+      const [cur, target] = g.fn(s);
+      if (cur < target) break;
+      const reward = g.reward > 0 ? Math.max(g.reward, RF.rates.gross.credits * 90) : 0;
+      s.res.credits += reward;
+      s.goal++;
+      RF.notify('goal', { goal: g, reward });
+    }
+  };
+
+  // ================= 工場再編(周回) =================
+  RF.prestigeGain = function (s) {
+    return Math.floor(Math.sqrt(Math.max(0, s.stats.earnedRun) / RF.PRESTIGE_BASE));
+  };
+  RF.canPrestige = function (s) { return RF.prestigeGain(s) >= 1; };
+  RF.prestige = function (s) {
+    const gain = RF.prestigeGain(s);
+    if (gain < 1) return { ok: false };
+    s.pres.bp += gain; s.pres.bpTotal += gain; s.pres.count++;
+    const keepTier = pl(s, 'keep');
+    const keepRob = pl(s, 'robot') * 0.1;
+    const rsKeep = {};
+    for (const r of RF.RESEARCH) if (s.rs[r.id] && r.tier <= keepTier) rsKeep[r.id] = true;
+    const robKeep = {};
+    for (const k in s.rob) { const n = Math.floor(s.rob[k] * keepRob); if (n > 0) robKeep[k] = n; }
+    s.res = { credits: pl(s, 'start') > 0 ? 2000 * Math.pow(10, pl(s, 'start') - 1) : 0, metal: 0, parts: 0, rp: 0 };
+    RF.BUILDINGS.forEach((b) => (s.b[b.id] = { n: 0, lv: 0 }));
+    s.rob = robKeep; s.rs = rsKeep;
+    s.buffs = []; s.evt = { next: 60, active: null };
+    s.stats.units = 0; s.stats.earnedRun = 0;
+    RF.refreshUnlocks(s);
+    RF.notify('prestige', { gain });
+    RF.check(s);
+    return { ok: true, gain };
+  };
+  RF.permLevel = (s, id) => pl(s, id);
+  RF.buyPerm = function (s, id) {
+    const p = RF.PERMMAP[id];
+    if (!p) return { ok: false };
+    const lv = pl(s, id);
+    if (lv >= p.max) return { ok: false, reason: '最大レベル' };
+    const c = p.cost(lv);
+    if (s.pres.bp < c) return { ok: false, reason: 'BP不足' };
+    s.pres.bp -= c; s.pres.perm[id] = lv + 1;
+    RF.notify('perm', { id });
+    return { ok: true };
+  };
+
+  // ================= オフライン進行 =================
+  RF.applyOffline = function (s, now) {
+    now = now || Date.now();
+    let elapsed = (now - s.last) / 1000;
+    if (!(elapsed > 0)) { s.last = now; return null; }
+    if (elapsed < 60) return null; // 1分未満はオフライン扱いにしない
+    const D = RF.derive(s);
+    const cap = D.offlineHours * 3600;
+    const used = Math.min(elapsed, cap);
+    const before = Object.assign({}, RF.totalGross);
+    const stBefore = s.stats.unitsAll;
+    RF.advance(s, used * D.offlineEff, true);
+    s.buffs = [];
+    const gained = {};
+    for (const k in before) gained[k] = RF.totalGross[k] - before[k];
+    s.stats.offlineClaims++;
+    return { elapsed, used, capped: elapsed > cap, eff: D.offlineEff, capHours: D.offlineHours, gained, units: s.stats.unitsAll - stBefore };
+  };
+
+  // ================= セーブ / ロード =================
+  function hash(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; }
+    return h.toString(16);
+  }
+  function b64enc(str) {
+    if (typeof Buffer !== 'undefined') return Buffer.from(str, 'utf8').toString('base64');
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function b64dec(str) {
+    if (typeof Buffer !== 'undefined') return Buffer.from(str, 'base64').toString('utf8');
+    return decodeURIComponent(escape(atob(str)));
+  }
+  RF.serialize = function (s) {
+    const data = JSON.stringify(s, (k, v) => (k[0] === '_' ? undefined : v));
+    return JSON.stringify({ ver: RF.SAVE_VERSION, sum: hash(data), data });
+  };
+  RF.exportSave = function (s) { s.last = Date.now(); return b64enc(RF.serialize(s)); };
+
+  const num = (x, def, max) => (typeof x === 'number' && isFinite(x) && x >= 0 ? Math.min(x, max === undefined ? MAXNUM : max) : def);
+  // 将来のバージョン更新用: 旧データを最新形式へ変換する
+  function migrate(d) {
+    let v = typeof d.v === 'number' ? d.v : 1;
+    // 例) if (v < 2) { d.newField = ...; v = 2; }
+    d.v = v;
+    return d;
+  }
+  // 破損・手動改変データを安全な形へ整える
+  function sanitize(d) {
+    if (!d || typeof d !== 'object') throw new Error('invalid');
+    d = migrate(d);
+    const s = RF.newState();
+    const o = (x) => (x && typeof x === 'object' ? x : {});
+    for (const k in s.res) s.res[k] = num(o(d.res)[k], 0);
+    for (const b of RF.BUILDINGS) {
+      const x = o(o(d.b)[b.id]);
+      s.b[b.id] = { n: Math.floor(num(x.n, 0, 1e6)), lv: Math.min(RF.LEVEL_MAX, Math.floor(num(x.lv, 0))) };
+    }
+    for (const r of RF.ROBOTS) { const n = Math.floor(num(o(d.rob)[r.id], 0, 1e9)); if (n > 0) s.rob[r.id] = n; }
+    for (const r of RF.RESEARCH) if (o(d.rs)[r.id] === true) s.rs[r.id] = true;
+    for (const a of RF.ACHIEVEMENTS) if (o(d.ach)[a.id] === true) s.ach[a.id] = true;
+    for (const k in o(d.unl)) if (/^[br]:[a-z0-9]+$/.test(k) && d.unl[k] === true) s.unl[k] = true;
+    s.goal = Math.min(RF.GOALS.length, Math.floor(num(d.goal, 0)));
+    for (const k in s.stats) s.stats[k] = num(o(d.stats)[k], 0);
+    const p = o(d.pres);
+    s.pres.bp = Math.floor(num(p.bp, 0)); s.pres.bpTotal = Math.floor(num(p.bpTotal, 0)); s.pres.count = Math.floor(num(p.count, 0));
+    for (const pp of RF.PERMS) { const lv = Math.floor(num(o(p.perm)[pp.id], 0)); if (lv > 0) s.pres.perm[pp.id] = Math.min(pp.max, lv); }
+    const st = o(d.set);
+    s.set.sound = st.sound !== false;
+    s.set.vol = Math.min(1, num(st.vol, 0.5));
+    s.set.notation = ['short', 'sci', 'full'].includes(st.notation) ? st.notation : 'short';
+    s.set.autoBuy = st.autoBuy === true;
+    s.set.bulk = [1, 10, 'max'].includes(st.bulk) ? st.bulk : 1;
+    s.set.tab = typeof st.tab === 'string' ? st.tab : 'main';
+    if (Array.isArray(d.buffs)) {
+      s.buffs = d.buffs.filter((f) => f && (f.k === 'prod' || f.k === 'click') && num(f.v, 0) > 0 && num(f.t, 0) > 0).slice(0, 10)
+        .map((f) => ({ k: f.k, v: Math.min(100, f.v), t: Math.min(120, f.t), name: String(f.name || '').slice(0, 30) }));
+    }
+    s.evt.next = Math.min(300, num(o(d.evt).next, 75));
+    s.last = num(d.last, Date.now(), 4e12);
+    s.created = num(d.created, Date.now(), 4e12);
+    return s;
+  }
+  RF.parseSave = function (text) {
+    const outer = JSON.parse(text);
+    if (!outer || typeof outer.data !== 'string' || typeof outer.sum !== 'string') throw new Error('形式が正しくありません');
+    if (hash(outer.data) !== outer.sum) throw new Error('チェックサム不一致(データ破損)');
+    return sanitize(JSON.parse(outer.data));
+  };
+  RF.importSave = function (code) {
+    try {
+      const s = RF.parseSave(b64dec(String(code).trim()));
+      return { ok: true, state: s };
+    } catch (e) { return { ok: false, error: e.message || String(e) }; }
+  };
+  const BAK = RF.SAVE_KEY + '_bak';
+  let bakT = 0;
+  RF.save = function (s) {
+    try {
+      s.last = Date.now();
+      const str = RF.serialize(s);
+      const old = localStorage.getItem(RF.SAVE_KEY);
+      if (old && Date.now() - bakT > 300000) { localStorage.setItem(BAK, old); bakT = Date.now(); }
+      localStorage.setItem(RF.SAVE_KEY, str);
+      return true;
+    } catch (e) { return false; }
+  };
+  RF.load = function () {
+    let raw = null;
+    try { raw = localStorage.getItem(RF.SAVE_KEY); } catch (e) { return { state: RF.newState(), status: 'new' }; }
+    if (!raw) return { state: RF.newState(), status: 'new' };
+    try { return { state: RF.parseSave(raw), status: 'ok' }; } catch (e1) {
+      try { localStorage.setItem(RF.SAVE_KEY + '_corrupt', raw); } catch (e) { /* 容量不足は無視 */ }
+      try {
+        const bak = localStorage.getItem(BAK);
+        if (bak) return { state: RF.parseSave(bak), status: 'recovered', error: e1.message };
+      } catch (e2) { /* バックアップも壊れている */ }
+      return { state: RF.newState(), status: 'corrupt', error: e1.message };
+    }
+  };
+  RF.wipe = function () {
+    try { localStorage.removeItem(RF.SAVE_KEY); localStorage.removeItem(BAK); } catch (e) { /* 無視 */ }
+  };
+})();
+
+/* ROBOT FACTORY - 効果音（Web Audio APIで生成。音声ファイル不要） */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+  let ctx = null, lastClick = 0, gesture = false;
+
+  function ensure() {
+    if (!gesture) return null; // ユーザー操作の前は音声を初期化しない(ブラウザの自動再生制限)
+    if (!ctx) {
+      try { const C = window.AudioContext || window.webkitAudioContext; if (C) ctx = new C(); } catch (e) { ctx = null; }
+    }
+    if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) { /* 無視 */ } }
+    return ctx;
+  }
+  function tone(freq, dur, type, vol, delay, slideTo) {
+    const c = ctx; if (!c) return;
+    const t0 = c.currentTime + (delay || 0);
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, t0);
+    if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0002, vol), t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(t0); o.stop(t0 + dur + 0.02);
+  }
+  const SOUNDS = {
+    click: (v) => tone(520, 0.06, 'square', v * 0.5, 0, 380),
+    asm: (v) => { tone(330, 0.07, 'square', v * 0.5); tone(660, 0.09, 'triangle', v * 0.6, 0.05); },
+    buy: (v) => { tone(440, 0.08, 'square', v * 0.6); tone(660, 0.12, 'square', v * 0.6, 0.07); },
+    robot: (v) => { tone(300, 0.1, 'sawtooth', v * 0.5); tone(450, 0.1, 'sawtooth', v * 0.5, 0.08); tone(600, 0.16, 'triangle', v * 0.6, 0.16); },
+    level: (v) => { tone(500, 0.08, 'triangle', v * 0.6); tone(750, 0.14, 'triangle', v * 0.6, 0.07); },
+    research: (v) => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', v * 0.6, i * 0.08)),
+    ach: (v) => [659, 784, 988, 1319].forEach((f, i) => tone(f, 0.2, 'square', v * 0.45, i * 0.09)),
+    drone: (v) => { tone(880, 0.1, 'sine', v * 0.7); tone(1175, 0.16, 'sine', v * 0.7, 0.1); },
+    bonus: (v) => [784, 988, 1175, 1568].forEach((f, i) => tone(f, 0.14, 'triangle', v * 0.7, i * 0.06)),
+    error: (v) => tone(180, 0.15, 'sawtooth', v * 0.5, 0, 120),
+    prestige: (v) => [262, 330, 392, 523, 659, 784].forEach((f, i) => tone(f, 0.3, 'triangle', v * 0.6, i * 0.1)),
+  };
+  RF.audio = {
+    // 最初のタップ/キー入力で音声を有効化する
+    init() { gesture = true; ensure(); },
+    play(kind) {
+      const s = RF.S;
+      if (!s || !s.set.sound || !SOUNDS[kind]) return;
+      if (kind === 'click') { const n = Date.now(); if (n - lastClick < 45) return; lastClick = n; }
+      if (!ensure()) return;
+      try { SOUNDS[kind](Math.max(0, Math.min(1, s.set.vol)) * 0.3); } catch (e) { /* 音が鳴らなくても進行には影響しない */ }
+    },
+  };
+})();
+
+/* ROBOT FACTORY - ドット絵スプライト（コードで定義。画像ファイル不要）
+ * 1文字=1ピクセル。パレットは固定16色。'.' は透明。行は右/上を自動で透明パディングする。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+
+  // Sweetie-16 風パレット
+  const PAL = {
+    '0': '#1a1c2c', '1': '#5d275d', '2': '#b13e53', '3': '#ef7d57', '4': '#ffcd75', '5': '#a7f070', '6': '#38b764', '7': '#257179',
+    '8': '#29366f', '9': '#3b5dc9', 'a': '#41a6f6', 'b': '#73eff7', 'c': '#f4f4f4', 'd': '#94b0c2', 'e': '#566c86', 'f': '#333c57',
+  };
+  RF.PAL = PAL;
+
+  const D = {};  // id -> [frameA, frameB, ...] (各frameは文字列の配列)
+  const SIZE = {}; // id -> [w, h]
+
+  function pad(rows, w, h) {
+    const out = rows.map((r) => (r + '.'.repeat(w)).slice(0, w));
+    while (out.length < h) out.unshift('.'.repeat(w));
+    return out.slice(out.length - h);
+  }
+  function def(id, w, h, frames) { D[id] = frames.map((f) => pad(f, w, h)); SIZE[id] = [w, h]; }
+  function variant(rows, repl) { const c = rows.slice(); for (const k in repl) c[k] = repl[k]; return c; }
+
+  // ================= 設備 16x16 =================
+  const bench = ['', '', '', '.......00', '......0dd0', '.......e', '.......e...44', '.......e..4334', '.......e..3333', '.00000000000000', '.04444444444440', '.04333333333340', '.00000000000000', '.0e..........e0', '.0e..........e0', '.0e..........e0'];
+  def('bench', 16, 16, [bench, variant(bench, { 3: '', 4: '', 5: '.......00', 6: '......0dd0...44', 7: '.......e..4334' })]);
+
+  const miner = ['.....ee', '.....ee', '.....ff', '..eeeeeeeeeeee', '..edddddddddde', '..edffffffffde', '..edfff33fffde', '..edff3443ffde', '..edf344443fde', '..edff3443ffde', '..edfff33fffde', '..edffffffffde', '..edddddddddde', '..eeeeeeeeeeee', '..e2e......e2e', '..eee......eee'];
+  def('miner', 16, 16, [miner, variant(miner, { 6: '..edf3ffff3fde', 7: '..edff3443ffde', 8: '..edff3443ffde', 9: '..edff3443ffde', 10: '..edf3ffff3fde' })]);
+
+  const lab = ['', '', '......cc', '......cc', '.....c..c', '....c....c', '....c.55.c', '...c.5555.c', '...c555555c', '...cccccccc', '.fffffffffffff', '.f11111111111f', '.f1bb1111aa11f', '.f11111111111f', '.ffffffffffffff', '.f............f'];
+  def('lab', 16, 16, [lab, variant(lab, { 6: '....c..5.c', 7: '...c.5..5.c', 12: '.f1bb11111a11f' })]);
+
+  const gen = ['', '', '', '..eeeeeeeeeeee', '..e4444444444e', '..e4444440044e', '..e4444400444e', '..e4444000004e', '..e4444444004e', '..e4444400444e', '..e4444004444e', '..e4444044444e', '..e4444444444e', '..eeeeeeeeeeee', '..e2e......e2e', '..eee......eee'];
+  def('gen', 16, 16, [gen, variant(gen, { 5: '..e4444400444e', 6: '..e4444000444e', 7: '..e4444400004e', 8: '..e4444440044e', 9: '..e4444004444e', 10: '..e4444000444e', 11: '..e4444400444e' })]);
+
+  const parts = ['', '', '', '..eeeeeeeeeeee', '..e7777777777e', '..e7dd0000dd7e', '..e7d000000d7e', '..e7d0ff00fd7e', '..e7d000000d7e', '..e7dd0000dd7e', '..e7777777777e', '..e7577277577e', '..eeeeeeeeeeee', '.....e....e', '.....e....e', '....eee..eee'];
+  def('parts', 16, 16, [parts, variant(parts, { 11: '..e7755277757e' })]);
+
+  const asm = ['', '', '', '', '', '......bbbbbbb', '......b.....b', '......b.....b', '......b....44', '......b....44', '......b', '......b', '...9999999999', '...9aaaaaaaa9', '...9999999999', '...eeeeeeeeee'];
+  def('asm', 16, 16, [asm, variant(asm, { 5: '', 6: '', 7: '......bbbbbbb', 8: '......b.....b', 9: '......b....44', 10: '......b....44' })]);
+
+  const conv = ['', '', '', '', '', '', '', '', '', '', '...3333333333', '..300000000003', '..30f4f4f4f403', '..300000000003', '...3333333333', '..e..e....e..e'];
+  def('conv', 16, 16, [conv, variant(conv, { 12: '..30 4f4f4f4f03'.replace(' ', 'f') })]);
+
+  const line = ['', '', '.44444444444444', '..e2222222222e', '..e2ffffffff2e', '..e2f4ffffff2e', '..e2ffffffff2e', '..e2222222222e', '..e2cc2cc2cc2e', '..e2222222222e', '..e2f2f2f2f22e', '..e2222222222e', '..eeeeeeeeeeee', '..e...e..e...e', '..e..........e', '..eeeeeeeeeeee'];
+  def('line', 16, 16, [line, variant(line, { 5: '..e2ffff4fff2e', 8: '..e2c2cc2cc22e' })]);
+
+  const ai = ['', '', '.....bbbbbb', '....bcccccb', '...bccaaaccb', '...bcaaaaacb', '...bcaaaaacb', '....bcaaacb', '.....bbbbb', '..ffffffffffff', '..f1111111111f', '..f1b1b1b1b11f', '..f1111111111f', '..ffffffffffff', '..f..........f', '..fff......fff'];
+  def('ai', 16, 16, [ai, variant(ai, { 4: '...bccbbbccb', 5: '...bcbbbbbcb', 6: '...bcbbbbbcb', 7: '....bcbbbcb', 11: '..f1a1a1a1a11f' })]);
+
+  const reactor = ['', '', '', '.....4444', '...44444444', '..4433333344', '..4332222334', '..4322cc2234', '..4322cc2234', '..4332222334', '..4433333344', '...44444444', '..ffffffffff', '..f4f4f4f4ff', '..ffffffffff', '..e........e'];
+  def('reactor', 16, 16, [reactor, variant(reactor, { 5: '..4433443344', 6: '..4334224334', 7: '..4322cc2234', 8: '..4322cc2234', 9: '..4334224334', 10: '..4433443344' })]);
+
+  const quantum = ['', '', '....b......b', '...b.bbbbb.b', '..b.b.....b.b', '..b.b.ccc.b.b', '..b.b.cbc.b.b', '..b.b.ccc.b.b', '..b.b.....b.b', '...b.bbbbb.b', '....b......b', '..77777777777', '..7bbbbbbbb77', '..77777777777', '..7.........7', '..777.....777'];
+  def('quantum', 16, 16, [quantum, variant(quantum, { 3: '...b.bbbbb.b', 4: '..b.b.....b.b', 5: '..b.b.bcb.b.b', 6: '..b.b.ccc.b.b', 7: '..b.b.bcb.b.b', 9: '...b.bbbbb.b', 12: '..7b7b7b7b777' })]);
+
+  const manager = ['..eeeeeeeeeeee', '..e1111111111e', '..e1ccccc111e', '..e1c0c0c111e', '..e1ccccc111e', '..e1111111111e', '..e12121212 1e'.replace(' ', '1'), '..e1111111111e', '..e12121212 1e'.replace(' ', '1'), '..e1111111111e', '..e11aa1aa111e', '..e1111111111e', '..e1ccccccc11e', '..e1111111111e', '..eeeeeeeeeeee', '..e..........e'];
+  def('manager', 16, 16, [manager, variant(manager, { 6: '..e11212121 2e'.replace(' ', '1'), 8: '..e11212121 2e'.replace(' ', '1'), 3: '..e1c0c0c111e' })]);
+
+  // ================= ロボット 12x14 =================
+  const TOP = { worker: '.....00.....', miner: '....4444....', assembler: '.....0b0....', engineer: '...444444...', research: '....0aa0....', overlord: '.0.0....0.0.' };
+  const COL = { worker: ['a', 'b'], miner: ['d', '3'], assembler: ['9', 'a'], engineer: ['3', '4'], research: ['1', 'b'], overlord: ['2', '4'] };
+  function robotRows(id, leg) {
+    const [X, Y] = COL[id];
+    const eye = id === 'overlord' ? '2' : id === 'research' ? 'b' : '0';
+    const r = [
+      TOP[id],
+      '...0cccc0...',
+      '...0c' + eye + eye + 'c0...',
+      '...0cccc0...',
+      '....0000....',
+      '..0XXXXXX0..',
+      '.0XXYYYYXX0.',
+      '.0XXXXXXXX0.',
+      '..0XXXXXX0..',
+      leg ? '...ee..ee...' : '....ee.ee...',
+      leg ? '...e....e...' : '....e..e....',
+    ];
+    return r.map((s) => s.replace(/X/g, X).replace(/Y/g, Y));
+  }
+  for (const id in COL) def('r:' + id, 12, 14, [robotRows(id, true), robotRows(id, false)]);
+
+  // 工場の歩行ロボット用(同じ絵を共有)・建物のスプライトキーは 'b:'
+  for (const id of ['bench', 'miner', 'lab', 'gen', 'parts', 'asm', 'conv', 'line', 'ai', 'reactor', 'quantum', 'manager']) { D['b:' + id] = D[id]; SIZE['b:' + id] = SIZE[id]; }
+
+  // ================= 資源・UI 8x8 =================
+  def('res:credits', 8, 8, [['..4444..', '.443344.', '44344344', '43444434', '43444434', '44344344', '.443344.', '..4444..']]);
+  def('res:metal', 8, 8, [['', '', '..dddddd', '.dcccccd', 'deeeeeed', 'dddddddd', '.fffffff', '']]);
+  def('res:parts', 8, 8, [['.d.d.d.d', '.d.d.d.d', 'dd0000dd', '.d0ff0d.', 'dd0ff0dd', '.d0000d.', 'dd.d.d.d', '.d.d.d.d'].map((s) => s.replace(/d/g, '6'))]);
+  def('res:energy', 8, 8, [['....44..', '...444..', '..444...', '.444444.', '...444..', '..44....', '..4.....', '.4......']]);
+  def('res:rp', 8, 8, [['...cc...', '...cc...', '..c..c..', '.c.55.c.', '.c5555c.', '.cccccc.', '........', '........']]);
+  def('ui:lock', 8, 8, [['..dddd..', '.d....d.', '.d....d.', 'eeeeeeee', 'eddddde', 'edd00dde', 'eddddde', 'eeeeeeee']]);
+  def('ui:trophy', 8, 8, [['4444444', '4.444.4', '4.444.4', '.44444.', '..444..', '...4...', '..444..', '.44444.'].map((s) => s.padEnd(8, '.'))]);
+  def('ui:recycle', 8, 8, [['..5555..', '.5....5.', '5..55.5.', '5.5555.5', '5.5555.5', '5.55..5.', '.5....5.', '..5555..']]);
+  def('ui:gear', 8, 8, [['..d..d..', '.dddddd.', 'dd.00.dd', '.d0..0d.', '.d0..0d.', 'dd.00.dd', '.dddddd.', '..d..d..']]);
+  def('ui:drone', 12, 10, [
+    ['....bbbb....', '...bccccb...', '...bcbbbb...', '...bbbbbb...', '.4444444444.', '443333333344', '.4444444444.', '...4....4...'],
+    ['....bbbb....', '...bccccb...', '...bcbbbb...', '...bbbbbb...', '.4444444444.', '434343434344', '.4444444444.', '..4......4..'],
+  ]);
+
+  // ================= 描画ヘルパー =================
+  const cache = {};
+  function make(id, frame) {
+    const frames = D[id];
+    if (!frames) return null;
+    const f = frames[frame % frames.length];
+    const key = id + '#' + (frame % frames.length);
+    if (cache[key]) return cache[key];
+    const [w, h] = SIZE[id];
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const x = c.getContext('2d');
+    for (let j = 0; j < h; j++) for (let i = 0; i < w; i++) {
+      const ch = f[j][i];
+      if (ch !== '.' && PAL[ch]) { x.fillStyle = PAL[ch]; x.fillRect(i, j, 1, 1); }
+    }
+    cache[key] = c;
+    return c;
+  }
+  RF.sprites = {
+    has: (id) => !!D[id],
+    size: (id) => SIZE[id],
+    frames: (id) => (D[id] ? D[id].length : 0),
+    canvas: make,
+    rows: (id, frame) => D[id][frame % D[id].length],
+    url(id, frame) { const c = make(id, frame || 0); return c ? c.toDataURL('image/png') : ''; },
+    ids: () => Object.keys(D),
+  };
+})();
+
+/* ROBOT FACTORY - 工場ビジュアル描画（ドット絵）
+ * 320x120 の低解像度キャンバスにスプライトを描き、CSSで整数倍に拡大表示する(image-rendering: pixelated)。
+ * 状態を読み取って絵を描くだけで、ゲームの状態は変更しない。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+  const W = 320, H = 120, BASE = 94; // 論理サイズ / ベルト上面(機械の接地線)
+  const ORDER = ['bench', 'miner', 'lab', 'gen', 'parts', 'asm', 'conv', 'line', 'ai', 'reactor', 'quantum', 'manager'];
+  const MAXC = { bench: 2, miner: 2, lab: 2, gen: 2, parts: 2, asm: 2, conv: 2, line: 2, ai: 2, reactor: 1, quantum: 2, manager: 1 };
+  // 段階ごとの配色 [壁, 壁の影, 窓枠, 窓ガラス, 床, 床の線]
+  const THEME = [
+    ['#333c57', '#292d45', '#566c86', '#41567a', '#1a1c2c', '#262b44'],
+    ['#29366f', '#222c5c', '#3b5dc9', '#41a6f6', '#1a1c2c', '#29366f'],
+    ['#5d275d', '#4a1f4a', '#b13e53', '#ef7d57', '#1a1c2c', '#33153a'],
+    ['#1a1c2c', '#12131f', '#73eff7', '#5d275d', '#0c0d16', '#29366f'],
+  ];
+  let cv, ctx, t = 0, lastDraw = 0, boxAcc = 0;
+  const parts = [];  // 火花・煙(1ピクセル粒子)
+  const boxes = [];  // ベルト上の製品
+  const bots = [];   // 歩行ロボット
+  const fxLayer = () => document.getElementById('fxLayer');
+
+  const px = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x), Math.round(y), w, h); };
+  const spr = (id, x, y, frame, flip) => {
+    const c = RF.sprites.canvas(id, frame || 0);
+    if (!c) return;
+    if (flip) { ctx.save(); ctx.translate(Math.round(x) + c.width, Math.round(y)); ctx.scale(-1, 1); ctx.drawImage(c, 0, 0); ctx.restore(); }
+    else ctx.drawImage(c, Math.round(x), Math.round(y));
+  };
+
+  function drawBackground(stage) {
+    const th = THEME[stage - 1];
+    px(0, 0, W, BASE + 8, th[0]);
+    for (let y = 0; y < BASE + 8; y += 8) px(0, y, W, 1, th[1]); // 壁の板目
+    // 窓
+    const n = stage === 1 ? 3 : stage === 2 ? 5 : 7;
+    for (let i = 0; i < n; i++) {
+      const wx = Math.round((W / (n + 1)) * (i + 1)) - 12;
+      px(wx - 1, 13, 26, 28, th[2]);
+      px(wx, 14, 24, 26, th[3]);
+      px(wx + 11, 14, 2, 26, th[2]); px(wx, 26, 24, 2, th[2]);
+      px(wx + 2, 16, 3, 3, 'rgba(255,255,255,0.25)');
+    }
+    // 天井
+    if (stage === 1) {
+      px(W / 2, 0, 1, 6, '#566c86'); px(W / 2 - 3, 6, 7, 3, '#ffcd75'); px(W / 2 - 1, 9, 3, 1, '#f4f4f4');
+    } else {
+      px(0, 2, W, 3, th[2]); px(0, 5, W, 1, th[1]);
+      for (let i = 0; i < 8; i++) px(14 + i * 40, 6, 14, 2, stage === 4 ? '#b13e53' : '#f4f4f4');
+    }
+    if (stage >= 3) { // クレーン
+      const cx = 30 + Math.floor((Math.sin(t * 0.3) * 0.5 + 0.5) * 250);
+      px(8, 44, W - 16, 2, '#ef7d57');
+      px(cx - 4, 42, 9, 5, '#ffcd75');
+      const dy = 48 + Math.floor((Math.sin(t) * 0.5 + 0.5) * 8);
+      px(cx, 47, 1, dy - 47, '#94b0c2'); px(cx - 2, dy, 5, 3, '#ffcd75');
+    }
+    if (stage === 4) { // ネオングリッド床とホログラム
+      for (let i = 0; i < 16; i++) px(i * 20 + ((Math.floor(t * 10)) % 20), BASE + 8, 1, H - BASE - 8, 'rgba(115,239,247,0.25)');
+      for (let j = 0; j < 3; j++) px(0, BASE + 12 + j * j * 3 + j * 2, W, 1, 'rgba(115,239,247,0.25)');
+      const r = 14 + Math.floor(Math.sin(t * 2) * 2);
+      for (let a = 0; a < 6.28; a += 0.18) px(W / 2 + Math.cos(a) * r, 44 + Math.sin(a) * r * 0.5, 1, 1, 'rgba(115,239,247,0.7)');
+    }
+    // 床
+    px(0, BASE + 8, W, H - BASE - 8, th[4]);
+    px(0, BASE + 8, W, 1, th[2]);
+    for (let x = 0; x < W; x += 16) px(x, BASE + 9, 1, H - BASE - 9, th[5]);
+    px(0, BASE + 24, W, 1, th[5]);
+  }
+
+  function drawBelt(stage, act) {
+    if (stage < 2) { px(0, BASE, W, 8, '#5d275d'); px(0, BASE, W, 2, '#b13e53'); px(0, BASE + 6, W, 2, '#1a1c2c'); return; }
+    px(0, BASE, W, 8, '#333c57');
+    px(0, BASE, W, 1, '#566c86');
+    const off = Math.floor(t * 18 * (0.3 + act)) % 8;
+    for (let x = -8 + off; x < W; x += 8) { px(x, BASE + 2, 4, 1, '#566c86'); px(x + 2, BASE + 4, 4, 1, '#566c86'); }
+    px(0, BASE + 6, W, 2, '#1a1c2c');
+  }
+
+  function drawMachines(s, D) {
+    const list = [];
+    for (const id of ORDER) {
+      const n = s.b[id].n;
+      if (n <= 0) continue;
+      const c = Math.min(MAXC[id], 1 + Math.floor(Math.log(n) / Math.log(3)));
+      for (let i = 0; i < c; i++) list.push(id);
+    }
+    if (!list.length) return;
+    const slot = Math.min(22, Math.floor((W - 8) / list.length));
+    let x = Math.round((W - slot * list.length) / 2) + Math.round((slot - 16) / 2);
+    for (const id of list) {
+      const def = RF.BMAP[id];
+      const act = def.power > 0 ? 0.2 + 0.8 * D.powerSat : 1;
+      const fr = Math.floor(t * 3 * act + x * 0.13) % 2;
+      const bob = (id !== 'bench' && id !== 'asm' && fr === 1 && act > 0.4) ? 1 : 0;
+      spr('b:' + id, x, BASE - 16 + bob - (bob ? 0 : 0), fr);
+      // 煙・火花
+      if (id === 'miner' && act > 0.2 && Math.random() < 0.04) parts.push({ x: x + 6, y: BASE - 16, vx: 4, vy: -8, life: 1.2, c: '#94b0c2' });
+      if (id === 'gen' && Math.random() < 0.05) parts.push({ x: x + 8, y: BASE - 12, vx: (Math.random() - 0.5) * 20, vy: -14, life: 0.5, c: '#ffcd75' });
+      if (id === 'reactor' && Math.random() < 0.06) parts.push({ x: x + 8, y: BASE - 12, vx: (Math.random() - 0.5) * 16, vy: -18, life: 0.6, c: '#ef7d57' });
+      if (id === 'ai' && Math.random() < 0.05) parts.push({ x: x + 8, y: BASE - 12, vx: (Math.random() - 0.5) * 24, vy: -12, life: 0.6, c: '#73eff7' });
+      x += slot;
+    }
+  }
+
+  function drawBoxes(dt, rate) {
+    boxAcc += dt * Math.min(3, Math.log10(1 + rate) * 0.9);
+    while (boxAcc >= 1) {
+      boxAcc -= 1;
+      if (boxes.length < 30) boxes.push({ x: -6, c: ['#ffcd75', '#41a6f6', '#a7f070', '#ef7d57'][Math.floor(Math.random() * 4)] });
+    }
+    for (let i = boxes.length - 1; i >= 0; i--) {
+      const b = boxes[i];
+      b.x += 24 * dt;
+      if (b.x > W + 6) { boxes.splice(i, 1); continue; }
+      px(b.x, BASE - 4, 5, 4, b.c); px(b.x, BASE - 4, 5, 1, 'rgba(255,255,255,0.5)');
+    }
+  }
+
+  function syncBots(s) {
+    const want = [];
+    for (const r of RF.ROBOTS) {
+      const n = s.rob[r.id] || 0;
+      const c = Math.min(r.id === 'overlord' ? 2 : 4, Math.ceil(Math.log2(n + 1) * 0.9));
+      for (let i = 0; i < c; i++) want.push(r.id);
+    }
+    if (want.length > 20) want.length = 20;
+    while (bots.length > want.length) bots.pop();
+    for (let i = 0; i < want.length; i++) {
+      if (!bots[i]) bots[i] = { x: Math.random() * W, dir: Math.random() < 0.5 ? 1 : -1, sp: 6 + Math.random() * 8, ph: Math.random(), lane: Math.floor(Math.random() * 2) };
+      bots[i].type = want[i];
+    }
+  }
+
+  function drawParticles(dt) {
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
+      if (p.life <= 0) { parts.splice(i, 1); continue; }
+      px(p.x, p.y, 1, 1, p.c);
+    }
+  }
+
+  RF.render = {
+    init(canvas) {
+      cv = canvas; cv.width = W; cv.height = H; ctx = cv.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+    },
+    resize() { /* 低解像度固定のためCSSで拡大。何もしない */ },
+    // クリック位置(論理座標)に浮遊テキスト(DOM、ドット文字)＋火花
+    fx(text, x, y, color) {
+      const layer = fxLayer();
+      if (layer && layer.children.length < 14) {
+        const s = document.createElement('span');
+        s.className = 'fxtext'; s.textContent = text; s.style.color = color || '#ffcd75';
+        s.style.left = (x / W * 100) + '%'; s.style.top = (y / H * 100) + '%';
+        layer.append(s);
+        setTimeout(() => { if (s.parentNode) s.parentNode.removeChild(s); }, 900);
+      }
+      for (let i = 0; i < 6; i++) parts.push({ x, y, vx: (Math.random() - 0.5) * 50, vy: -Math.random() * 30, life: 0.4, c: color || '#ffcd75' });
+    },
+    toLogical(clientX, clientY) {
+      const r = cv.getBoundingClientRect();
+      return { x: ((clientX - r.left) / r.width) * W, y: ((clientY - r.top) / r.height) * H };
+    },
+    draw(s, D, now) {
+      if (!ctx) return;
+      if (now - lastDraw < 33) return; // 約30fps
+      const dt = Math.min(0.1, (now - lastDraw) / 1000 || 0.033);
+      lastDraw = now; t += dt;
+      const stage = RF.stage(s);
+      ctx.imageSmoothingEnabled = false;
+      drawBackground(stage);
+      drawBelt(stage, D.powerSat);
+      drawBoxes(dt, RF.rates.gross.units);
+      drawMachines(s, D);
+      syncBots(s);
+      for (const b of bots) {
+        b.x += b.dir * b.sp * dt;
+        if (b.x < 6) { b.x = 6; b.dir = 1; } else if (b.x > W - 18) { b.x = W - 18; b.dir = -1; }
+        spr('r:' + b.type, b.x, BASE + 10 + b.lane * 2, Math.floor(t * 6 + b.ph * 4) % 2, b.dir < 0);
+      }
+      drawParticles(dt);
+      if (D.powerSat < 0.999 && Math.floor(t * 3) % 2 === 0) { // 電力不足: 画面端を赤く点滅
+        px(0, 0, W, 2, '#b13e53'); px(0, H - 2, W, 2, '#b13e53'); px(0, 0, 2, H, '#b13e53'); px(W - 2, 0, 2, H, '#b13e53');
+      }
+    },
+  };
+})();
+
+/* ROBOT FACTORY - UI（DOMの構築・更新・操作）
+ * ゲーム状態は RF.S から読み、変更は必ず game.js の関数経由で行う。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+  const $ = (q, r) => (r || document).querySelector(q);
+  function el(tag, cls, text) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  const F = (n) => RF.fmt(n);
+  const FI = (n) => RF.fmtInt(n);
+  const S = () => RF.S;
+  const LABEL = { units: 'ロボット', metal: '金属', parts: '電子部品', rp: '研究P', energy: 'エネルギー', credits: 'クレジット' };
+  const TABS = [
+    { id: 'main', name: '工場', icon: 'b:line' }, { id: 'build', name: '設備', icon: 'b:bench' }, { id: 'robots', name: 'ロボット', icon: 'r:worker' },
+    { id: 'research', name: '研究', icon: 'b:lab' }, { id: 'achv', name: '実績', icon: 'ui:trophy' }, { id: 'prestige', name: '再編', icon: 'ui:recycle' },
+    { id: 'settings', name: '設定', icon: 'ui:gear' },
+  ];
+  const SHORT = { credits: '¢', metal: '金属', parts: '部品', energy: 'EN', rp: 'RP', bp: 'BP' };
+  const urlCache = {};
+  const spUrl = (id) => urlCache[id] || (urlCache[id] = RF.sprites.url(id));
+  // 要素の中身をドット絵アイコン(img)にする
+  function setIcon(e, id) {
+    let i = e.firstChild;
+    if (!i || i.tagName !== 'IMG') { e.textContent = ''; i = document.createElement('img'); i.className = 'pix'; i.alt = ''; e.append(i); }
+    if (i.dataset.k !== id) { i.dataset.k = id; i.src = spUrl(id); }
+  }
+  const refs = { res: {}, b: {}, r: {}, rs: {}, perm: {}, ach: {}, tabs: {} };
+  let curTab = 'main';
+  let lastD = null;
+  let busy = false;
+  let lastWarn = 0;
+
+  // 連打・二重発火による不正な購入を防ぐ(同一操作を60ms間隔に制限)
+  function guard(fn) {
+    if (busy) return;
+    busy = true;
+    try { fn(); } finally { setTimeout(() => { busy = false; }, 60); }
+  }
+  function toast(text, cls) {
+    const box = $('#toasts');
+    while (box.children.length >= 4) box.removeChild(box.firstChild);
+    const t = el('div', 'toast' + (cls ? ' ' + cls : ''), text);
+    box.append(t);
+    setTimeout(() => { if (t.parentNode) t.parentNode.removeChild(t); }, 3400);
+  }
+  function warn(text) {
+    const n = Date.now();
+    if (n - lastWarn < 1200) return;
+    lastWarn = n; toast(text);
+  }
+  function closeModal() { const m = $('#modal'); m.classList.add('hidden'); m.innerHTML = ''; }
+  function modal(title, body, buttons) {
+    const m = $('#modal');
+    m.innerHTML = '';
+    const box = el('div', 'box');
+    box.append(el('h2', '', title));
+    (Array.isArray(body) ? body : [body]).forEach((n) => box.append(typeof n === 'string' ? el('p', 'sub', n) : n));
+    const bb = el('div', 'btns');
+    (buttons || [{ text: '閉じる', cls: 'primary' }]).forEach((b) => {
+      const x = el('button', 'btn ' + (b.cls || ''), b.text);
+      x.addEventListener('click', () => { closeModal(); if (b.fn) b.fn(); });
+      bb.append(x);
+    });
+    box.append(bb);
+    m.append(box);
+    m.classList.remove('hidden');
+    const first = bb.lastChild; if (first) first.focus();
+  }
+
+  // コスト表示チップ
+  function makeChips(parent, keys) {
+    const map = {};
+    keys.forEach((k) => { const c = el('span', 'chip'); parent.append(c); map[k] = c; });
+    return map;
+  }
+  function setChips(map, cost, s) {
+    for (const k in map) {
+      const c = cost[k] || 0;
+      const def = RF.RESMAP[k];
+      map[k].textContent = (SHORT[k] || k) + ' ' + FI(c);
+      map[k].classList.toggle('lack', (k === 'bp' ? s.pres.bp : s.res[k] || 0) < c);
+    }
+  }
+
+  // ================= ヘッダー・タブ =================
+  function buildHeader() {
+    const bar = $('#resbar');
+    for (const id of ['credits', 'metal', 'parts', 'energy', 'rp']) {
+      const def = RF.RESMAP[id];
+      const d = el('div', 'res');
+      d.style.borderTop = '2px solid ' + def.color;
+      const rn = el('div', 'rn'); const ri = el('span', 'ri'); setIcon(ri, 'res:' + id); rn.append(ri, document.createTextNode(def.name));
+      d.append(rn, el('div', 'rv'), el('div', 'rr'));
+      bar.append(d);
+      refs.res[id] = { root: d, v: d.children[1], r: d.children[2] };
+    }
+  }
+  function buildTabs() {
+    const nav = $('#tabs');
+    for (const t of TABS) {
+      const b = el('button');
+      b.dataset.tab = t.id;
+      const ti = el('span', 'ti'); setIcon(ti, t.icon);
+      b.append(ti, el('span', 'tn', t.name));
+      b.addEventListener('click', () => showTab(t.id));
+      nav.append(b);
+      refs.tabs[t.id] = b;
+    }
+  }
+  function showTab(id) {
+    curTab = id;
+    S().set.tab = id;
+    for (const t of TABS) {
+      $('#view-' + t.id).classList.toggle('active', t.id === id);
+      refs.tabs[t.id].classList.toggle('active', t.id === id);
+    }
+    window.scrollTo(0, 0);
+    RF.ui.refresh();
+    if (id === 'main' && RF.render) RF.render.resize();
+  }
+
+  // ================= メイン画面 =================
+  function holdButton(btn, fn) {
+    let t1 = null, t2 = null;
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; };
+    btn.addEventListener('pointerdown', (e) => {
+      if (e.button !== undefined && e.button > 0) return;
+      e.preventDefault();
+      fn();
+      stop();
+      t1 = setTimeout(() => { t2 = setInterval(fn, 130); }, 380);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
+    btn.addEventListener('click', (e) => { if (e.detail === 0) fn(); }); // キーボード操作
+  }
+  function doMine(x, y) {
+    const s = S();
+    const amt = RF.clickMine(s);
+    const p = x == null ? { x: 300 + Math.random() * 360, y: 150 } : { x, y };
+    RF.render.fx('+' + F(amt), p.x, p.y, '#b9d0e4');
+    RF.audio.play('click');
+  }
+  function doAsm() {
+    const s = S();
+    const gain = RF.clickAssemble(s);
+    if (gain > 0) {
+      RF.render.fx('+¢' + F(gain), 300 + Math.random() * 360, 130, '#ffd24a');
+      RF.audio.play('asm');
+    } else { warn('金属が足りません(手動組立は金属5が必要)'); RF.audio.play('error'); }
+  }
+  function buildMain() {
+    const cv = $('#factory');
+    RF.render.init(cv);
+    cv.addEventListener('pointerdown', (e) => {
+      if (e.button !== undefined && e.button > 0) return;
+      const p = RF.render.toLogical(e.clientX, e.clientY);
+      doMine(p.x, p.y);
+    });
+    holdButton($('#btnMine'), () => doMine());
+    holdButton($('#btnAsm'), () => doAsm());
+    const dr = $('#drone'); const di = document.createElement('img'); di.className = 'pix'; di.alt = ''; di.src = spUrl('ui:drone'); dr.append(di);
+    $('#drone').addEventListener('click', () => guard(() => { RF.claimDrone(S()); RF.ui.refresh(); }));
+    document.querySelectorAll('[data-goto]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.goto)));
+    window.addEventListener('keydown', (e) => {
+      if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+      if (!$('#modal').classList.contains('hidden') || e.ctrlKey || e.metaKey || e.repeat) return;
+      if (e.key === 'm' || e.key === 'M') { doMine(); }
+      else if (e.key === 'a' || e.key === 'A') { doAsm(); }
+    });
+  }
+  function buildQuick(s) {
+    const ids = RF.BUILDINGS.filter((b) => RF.isUnlocked(s, 'b', b)).map((b) => b.id);
+    const key = ids.join(',');
+    if (refs.quickKey === key) return;
+    refs.quickKey = key;
+    const q = $('#quick'); q.innerHTML = ''; refs.q = {};
+    for (const id of ids) {
+      const def = RF.BMAP[id];
+      const b = el('button', 'qbuy');
+      const n = el('div', 'qn'), c = el('div', 'qc');
+      b.append(n, c);
+      b.addEventListener('click', () => guard(() => {
+        const r = RF.buyBuilding(S(), id, 1);
+        if (!r.ok) { RF.audio.play('error'); warn(def.name + ': ' + r.reason); }
+        RF.check(S()); RF.ui.refresh();
+      }));
+      q.append(b);
+      refs.q[id] = { b, n, c };
+    }
+    if (!ids.length) q.append(el('div', 'sub', 'まだ購入できる設備がありません。クレジットを稼ぎましょう。'));
+  }
+  function updMain(s, D) {
+    $('#mineInfo').textContent = '+' + F(D.clickPower) + ' 金属 (長押しで連続)';
+    const units = Math.min(D.asmPower, s.res.metal / RF.MANUAL_ASSEMBLE_METAL);
+    $('#asmInfo').textContent = '金属' + RF.MANUAL_ASSEMBLE_METAL + ' ¢' + F(D.unitPrice) + ' ×' + F(D.asmPower) + '台';
+    $('#btnAsm').classList.toggle('can', units >= 0.05);
+    const gp = RF.goalProgress(s);
+    if (gp) {
+      $('#goalText').textContent = gp.goal.text;
+      $('#goalBar').style.width = (gp.ratio * 100).toFixed(1) + '%';
+      $('#goalNum').textContent = FI(gp.cur) + ' / ' + FI(gp.target);
+      $('#goalReward').textContent = gp.goal.reward > 0 ? '報酬: クレジット' : '';
+    } else {
+      $('#goalText').textContent = 'すべての目標を達成しました！ 工場再編でさらに先を目指そう。';
+      $('#goalBar').style.width = '100%'; $('#goalNum').textContent = ''; $('#goalReward').textContent = '';
+    }
+    const g = RF.rates.gross;
+    $('#pUnits').textContent = F(g.units) + ' 台/秒';
+    $('#pCredits').textContent = '¢' + F(g.credits) + '/秒';
+    $('#pMult').textContent = '×' + F(D.global);
+    $('#pAch').textContent = '+' + D.achN + '% (' + D.achN + '/' + RF.ACHIEVEMENTS.length + ')';
+    $('#pEvt').textContent = s.evt.active ? 'ドローン出現中!' : '約' + (Math.ceil(s.evt.next / 10) * 10) + '秒後';
+    // ドローン
+    const dr = $('#drone'), a = s.evt.active;
+    dr.classList.toggle('hidden', !a);
+    if (a) { dr.style.left = a.x + '%'; dr.style.top = a.y + '%'; }
+    $('#powerWarn').classList.toggle('hidden', D.powerSat >= 0.999);
+    $('#factoryHint').classList.toggle('hidden', RF.BUILDINGS.some((b) => s.b[b.id].n > 0));
+    $('#powerWarn').textContent = '電力不足 稼働率' + Math.round(D.powerSat * 100) + '%';
+    const bf = $('#buffs');
+    const names = s.buffs.map((f) => f.name + ' ' + Math.ceil(f.t) + 's');
+    if (bf.dataset.k !== names.join('|')) {
+      bf.dataset.k = names.join('|'); bf.innerHTML = '';
+      names.forEach((n) => bf.append(el('span', '', n)));
+    }
+    buildQuick(s);
+    for (const id in refs.q) {
+      const r = refs.q[id], def = RF.BMAP[id];
+      const c = RF.buildingCost(s, id, 0, D);
+      const can = RF.canAfford(s, c);
+      r.n.textContent = def.name + ' ×' + s.b[id].n;
+      r.c.textContent = Object.keys(c).map((k) => SHORT[k] + FI(c[k])).join(' ');
+      r.b.classList.toggle('can', can);
+    }
+  }
+
+  // ================= 設備画面 =================
+  function buildBuild() {
+    const seg = $('#bulkSeg');
+    [[1, '×1'], [10, '×10'], ['max', 'MAX']].forEach(([v, t]) => {
+      const b = el('button', '', t);
+      b.addEventListener('click', () => { S().set.bulk = v; RF.ui.refresh(); });
+      b.dataset.v = String(v);
+      seg.append(b);
+    });
+    $('#autoBtn').addEventListener('click', () => { S().set.autoBuy = !S().set.autoBuy; RF.ui.refresh(); });
+    const list = $('#buildList');
+    for (const def of RF.BUILDINGS) {
+      const card = el('div', 'item');
+      const hd = el('div', 'hd');
+      const ic = el('div', 'ic');
+      const tt = el('div'); const nm = el('div', 'nm', def.name); const lv = el('span', 'badge', 'Lv0');
+      tt.append(nm); const meta = el('div', 'sub'); tt.append(meta);
+      const cnt = el('div', 'cnt', '0');
+      hd.append(ic, tt, cnt);
+      const desc = el('div', 'sub', def.desc);
+      const fxo = el('div', 'fx'), fxt = el('div', 'fx');
+      const lock = el('div', 'sub');
+      const ft = el('div', 'ft');
+      const costs = el('div', 'costs');
+      const chips = makeChips(costs, Object.keys(def.base));
+      const buy = el('button', 'btn primary', '購入');
+      buy.addEventListener('click', () => guard(() => {
+        const s = S(); const q = s.set.bulk === 'max' ? Infinity : s.set.bulk;
+        const r = RF.buyBuilding(s, def.id, q);
+        if (!r.ok) { RF.audio.play('error'); warn(def.name + ': ' + r.reason); }
+        RF.check(s); RF.ui.refresh();
+      }));
+      ft.append(costs, buy);
+      const ft2 = el('div', 'ft');
+      const lcosts = el('div', 'costs');
+      const lchips = makeChips(lcosts, ['credits']);
+      const lvBtn = el('button', 'btn sm', 'レベルアップ');
+      lvBtn.addEventListener('click', () => guard(() => {
+        const r = RF.upgradeBuilding(S(), def.id);
+        if (!r.ok) { RF.audio.play('error'); warn(r.reason); }
+        RF.check(S()); RF.ui.refresh();
+      }));
+      ft2.append(lv, lcosts, lvBtn);
+      card.append(hd, desc, fxo, fxt, lock, ft, ft2);
+      list.append(card);
+      refs.b[def.id] = { card, nm, ic, lv, meta, cnt, desc, fxo, fxt, lock, ft, ft2, chips, buy, lchips, lvBtn };
+    }
+  }
+  function outText(def, n, m, withN, act) {
+    const p = [];
+    for (const o in def.out) p.push(LABEL[o] + ' +' + F(def.out[o] * m * (withN ? n * act : 1)) + '/s');
+    return p.join('、');
+  }
+  function updBuild(s, D) {
+    document.querySelectorAll('#bulkSeg button').forEach((b) => b.classList.toggle('active', b.dataset.v === String(s.set.bulk)));
+    const ab = $('#autoBtn');
+    const avail = RF.autoAvailable(s);
+    ab.classList.toggle('hidden', !avail);
+    ab.textContent = '自動購入: ' + (s.set.autoBuy ? 'ON' : 'OFF');
+    ab.classList.toggle('primary', s.set.autoBuy);
+    $('#powerInfo').textContent = '電力 供給 ' + F(D.supply) + ' / 需要 ' + F(D.demand) + (D.powerSat < 0.999 ? '  (稼働率 ' + Math.round(D.powerSat * 100) + '%)' : '');
+    const qty = s.set.bulk === 'max' ? Infinity : s.set.bulk;
+    for (const def of RF.BUILDINGS) {
+      const r = refs.b[def.id], st = s.b[def.id];
+      const unl = RF.isUnlocked(s, 'b', def);
+      r.card.classList.toggle('locked', !unl);
+      [r.desc, r.fxo, r.fxt, r.ft, r.ft2].forEach((e) => e.classList.toggle('hidden', !unl));
+      r.lock.classList.toggle('hidden', unl);
+      setIcon(r.ic, unl ? 'b:' + def.id : 'ui:lock');
+      r.nm.textContent = unl ? def.name : '？？？';
+      r.cnt.textContent = unl ? st.n : '';
+      if (!unl) { r.lock.textContent = '解放条件: ' + RF.unlockInfo(s, 'b', def).text; r.meta.textContent = ''; continue; }
+      const next = RF.MILESTONES.find((m) => st.n < m);
+      r.meta.textContent = next ? '次の出力×2ボーナス: ' + next + '台' : 'ボーナス全達成';
+      const act = def.power > 0 ? D.powerSat : 1;
+      const m = D.bmult[def.id];
+      if (def.kind === 'conveyor') {
+        r.fxo.textContent = '全設備の生産 +' + (D.R.conv * 100).toFixed(0) + '%/台 (現在 ×' + F(D.convBonus) + ')';
+        r.fxt.textContent = '消費電力 ' + F(def.power * D.R.power) + '/台';
+      } else if (def.kind === 'manager') {
+        r.fxo.textContent = '全生産 ×1.06/台 (現在 ×' + F(Math.pow(1.06, st.n)) + ')';
+        r.fxt.textContent = '消費電力 ' + F(def.power * D.R.power) + '/台';
+      } else {
+        r.fxo.textContent = '1台: ' + outText(def, 1, m, false, 1) +
+          (Object.keys(def.in).length ? ' | 消費: ' + Object.keys(def.in).map((k) => LABEL[k] + ' -' + F(def.in[k]) + '/s').join('、') : '') +
+          (def.power > 0 ? ' | 電力 ' + F(def.power * D.R.power) : '');
+        r.fxt.textContent = st.n > 0 ? '合計: ' + outText(def, st.n, m, true, act) : '';
+      }
+      const bulk = RF.bulkBuilding(s, def.id, qty, D);
+      const cost = bulk.count > 0 ? bulk.total : RF.buildingCost(s, def.id, 0, D);
+      setChips(r.chips, cost, s);
+      r.buy.disabled = bulk.count === 0;
+      r.buy.textContent = bulk.count > 1 ? '購入 ×' + bulk.count : '購入';
+      r.card.classList.toggle('can', bulk.count > 0);
+      r.lv.textContent = 'Lv' + st.lv + (st.lv >= RF.LEVEL_MAX ? ' MAX' : '');
+      r.ft2.classList.toggle('hidden', st.n <= 0);
+      if (st.lv >= RF.LEVEL_MAX) { r.lvBtn.disabled = true; r.lvBtn.textContent = '最大レベル'; r.lchips.credits.classList.add('hidden'); }
+      else {
+        const lc = RF.levelCost(s, def.id);
+        setChips(r.lchips, lc, s);
+        r.lchips.credits.classList.remove('hidden');
+        r.lvBtn.disabled = !RF.canAfford(s, lc);
+        r.lvBtn.textContent = '強化 (出力×' + RF.LEVEL_MULT + ')';
+      }
+    }
+  }
+
+  // ================= ロボット画面 =================
+  function robotEffect(id, s, D) {
+    const n = s.rob[id] || 0, k = D.R.robot;
+    switch (id) {
+      case 'worker': return '手動威力 +' + F(n * k) + '、金属 +' + F(D.passiveMetal) + '/s';
+      case 'miner': return '金属加工機 ×' + F(1 + 0.03 * n * k);
+      case 'assembler': return 'ロボット製造設備 ×' + F(1 + 0.03 * n * k);
+      case 'engineer': return '全設備 ×' + F(1 + 0.01 * n * k) + '、消費電力 -' + (Math.min(50, 0.5 * n * k)).toFixed(1) + '%';
+      case 'research': return '研究P +' + F(D.passiveRp) + '/s、研究設備 ×' + F(1 + 0.02 * n * k);
+      default: return '全生産 ×' + F(1 + 0.05 * n * k);
+    }
+  }
+  function buildRobots() {
+    const list = $('#robotList');
+    for (const def of RF.ROBOTS) {
+      const card = el('div', 'item');
+      const hd = el('div', 'hd');
+      const ic = el('div', 'ic');
+      const tt = el('div'); const nm = el('div', 'nm', def.name);
+      tt.append(nm);
+      const cnt = el('div', 'cnt', '0');
+      hd.append(ic, tt, cnt);
+      const desc = el('div', 'sub', def.desc);
+      const eff = el('div', 'fx');
+      const lock = el('div', 'sub');
+      const ft = el('div', 'ft');
+      const costs = el('div', 'costs');
+      const chips = makeChips(costs, Object.keys(def.base));
+      const buy = el('button', 'btn primary', '開発');
+      buy.addEventListener('click', () => guard(() => {
+        const r = RF.buyRobot(S(), def.id);
+        if (!r.ok) { RF.audio.play('error'); warn(def.name + ': ' + r.reason); }
+        RF.check(S()); RF.ui.refresh();
+      }));
+      ft.append(costs, buy);
+      card.append(hd, desc, eff, lock, ft);
+      list.append(card);
+      refs.r[def.id] = { card, nm, ic, cnt, desc, eff, lock, ft, chips, buy };
+    }
+  }
+  function updRobots(s, D) {
+    const types = RF.SYNERGY_IDS.filter((id) => (s.rob[id] || 0) > 0).length;
+    const sc = $('#synergyCard');
+    sc.innerHTML = '';
+    sc.append(el('h2', '', 'ロボットシナジー'));
+    sc.append(el('div', '', '開発した種類 ' + types + '/5 全生産 ×' + F(D.synergy)));
+    sc.append(el('div', 'sub', '種類ごとに全生産+3%。5種類そろえると、最も少ない数が5体増えるごとにさらに+10%(最大+100%)。'));
+    for (const def of RF.ROBOTS) {
+      const r = refs.r[def.id];
+      const unl = RF.isUnlocked(s, 'r', def);
+      r.card.classList.toggle('locked', !unl);
+      [r.desc, r.eff, r.ft].forEach((e) => e.classList.toggle('hidden', !unl));
+      r.lock.classList.toggle('hidden', unl);
+      setIcon(r.ic, unl ? 'r:' + def.id : 'ui:lock');
+      r.nm.textContent = unl ? def.name : '？？？';
+      r.cnt.textContent = unl ? (s.rob[def.id] || 0) : '';
+      if (!unl) { r.lock.textContent = '解放条件: ' + RF.unlockInfo(s, 'r', def).text; continue; }
+      r.eff.textContent = '現在の効果: ' + robotEffect(def.id, s, D);
+      const c = RF.robotCost(s, def.id);
+      setChips(r.chips, c, s);
+      const can = RF.canAfford(s, c);
+      r.buy.disabled = !can;
+      r.card.classList.toggle('can', can);
+    }
+  }
+
+  // ================= 研究画面 =================
+  function buildResearch() {
+    const bar = $('#catBar'), body = $('#researchBody');
+    refs.cat = 'all'; refs.catBtns = {};
+    const mk = (id, text) => {
+      const b = el('button', id === 'all' ? 'active' : '', text);
+      b.addEventListener('click', () => { refs.cat = id; RF.ui.refresh(); });
+      bar.append(b); refs.catBtns[id] = b;
+    };
+    mk('all', 'すべて');
+    RF.RCATS.forEach((c) => mk(c.id, c.name));
+    for (const cat of RF.RCATS) {
+      const block = el('div'); block.style.marginBottom = '16px';
+      block.append(el('h2', '', cat.name));
+      const list = el('div', 'list');
+      let lastTier = 0;
+      RF.RESEARCH.filter((r) => r.cat === cat.id).sort((a, b) => a.tier - b.tier).forEach((r) => {
+        if (r.tier !== lastTier) { list.append(el('div', 'tier', 'TIER ' + r.tier)); lastTier = r.tier; }
+        const card = el('div', 'item');
+        const hd = el('div', 'hd');
+        const tt = el('div', 'grow'); tt.append(el('div', 'nm', r.name));
+        const badge = el('span', 'badge');
+        hd.append(tt, badge);
+        const desc = el('div', 'sub', r.desc);
+        const req = el('div', 'fx');
+        const ft = el('div', 'ft');
+        const costs = el('div', 'costs');
+        const chip = el('span', 'chip'); costs.append(chip);
+        const btn = el('button', 'btn primary', '研究');
+        btn.addEventListener('click', () => guard(() => {
+          const x = RF.buyResearch(S(), r.id);
+          if (!x.ok) { RF.audio.play('error'); warn(x.reason); }
+          RF.check(S()); RF.ui.refresh();
+        }));
+        ft.append(costs, btn);
+        card.append(hd, desc, req, ft);
+        list.append(card);
+        refs.rs[r.id] = { card, badge, req, chip, btn, ft };
+      });
+      block.append(list);
+      body.append(block);
+      refs.rs['_' + cat.id] = block;
+    }
+  }
+  function updResearch(s) {
+    $('#rsRp').textContent = FI(s.res.rp);
+    const done = Object.keys(s.rs).length;
+    $('#rsCount').textContent = '研究済み ' + done + '/' + RF.RESEARCH.length;
+    for (const c of RF.RCATS) {
+      const t = RF.RESEARCH.filter((r) => r.cat === c.id), d = t.filter((r) => s.rs[r.id]).length;
+      refs.catBtns[c.id].textContent = c.name + ' ' + d + '/' + t.length;
+      refs.rs['_' + c.id].classList.toggle('hidden', refs.cat !== 'all' && refs.cat !== c.id);
+    }
+    for (const id in refs.catBtns) refs.catBtns[id].classList.toggle('active', refs.cat === id);
+    for (const r of RF.RESEARCH) {
+      const x = refs.rs[r.id], st = RF.researchState(s, r.id);
+      x.card.classList.toggle('done', st === 'done');
+      x.card.classList.toggle('locked', st === 'locked');
+      x.card.classList.toggle('can', st === 'ready');
+      x.badge.className = 'badge ' + (st === 'done' ? 'ok' : st === 'ready' ? 'ok' : st === 'available' ? 'warn' : 'bad');
+      x.badge.textContent = { done: '研究済み', ready: '研究可能', available: 'RP不足', locked: '前提未達' }[st];
+      x.req.textContent = r.req.length ? '前提: ' + r.req.map((q) => (s.rs[q] ? '[済]' : '[未]') + RF.RMAP[q].name).join(' / ') : '前提: なし';
+      x.chip.textContent = '' + FI(r.cost);
+      x.chip.classList.toggle('lack', s.res.rp < r.cost && st !== 'done');
+      x.btn.classList.toggle('hidden', st === 'done');
+      x.btn.disabled = st !== 'ready';
+    }
+  }
+
+  // ================= 実績画面 =================
+  function buildAchv() {
+    const body = $('#achBody');
+    for (const cid in RF.ACH_CATS) {
+      body.append(el('h2', '', RF.ACH_CATS[cid]));
+      const list = el('div', 'list'); list.style.marginBottom = '14px';
+      RF.ACHIEVEMENTS.filter((a) => a.cat === cid).forEach((a) => {
+        const c = el('div', 'ach');
+        const ic = el('div', 'ic'); setIcon(ic, 'ui:lock');
+        const t = el('div'); t.append(el('div', 'nm', a.name), el('div', 'sub', a.desc));
+        c.append(ic, t); list.append(c);
+        refs.ach[a.id] = { c, ic };
+      });
+      body.append(list);
+    }
+  }
+  function updAchv(s, D) {
+    const tb = Object.keys(s.b).reduce((a, k) => a + s.b[k].n, 0);
+    const tr = Object.keys(s.rob).reduce((a, k) => a + (s.rob[k] || 0), 0);
+    const stats = [
+      ['累計ロボット生産数', FI(s.stats.unitsAll)], ['累計売上(クレジット)', FI(s.stats.earnedAll)], ['設備所有数', FI(tb)],
+      ['研究完了数', Object.keys(s.rs).length + '/' + RF.RESEARCH.length], ['ロボット開発数', FI(tr)],
+      ['実績', D.achN + '/' + RF.ACHIEVEMENTS.length + ' (+' + D.achN + '%)'], ['工場再編回数', String(s.pres.count)],
+      ['ドローン捕獲数', FI(s.stats.events)], ['手動操作回数', FI(s.stats.clicks)], ['プレイ時間', RF.fmtTime(s.stats.playtime)],
+    ];
+    const box = $('#achStats');
+    if (box.children.length !== stats.length) { box.innerHTML = ''; stats.forEach(() => { const d = el('div', 'stat'); d.append(el('div', 'sv'), el('div', 'sl')); box.append(d); }); }
+    stats.forEach((x, i) => { box.children[i].children[0].textContent = x[1]; box.children[i].children[1].textContent = x[0]; });
+    for (const a of RF.ACHIEVEMENTS) {
+      const on = !!s.ach[a.id], r = refs.ach[a.id];
+      r.c.classList.toggle('on', on); setIcon(r.ic, on ? 'ui:trophy' : 'ui:lock');
+    }
+  }
+
+  // ================= 再編画面 =================
+  function buildPrestige() {
+    const list = $('#permList');
+    for (const p of RF.PERMS) {
+      const card = el('div', 'item');
+      const hd = el('div', 'hd');
+      const tt = el('div', 'grow'); tt.append(el('div', 'nm', p.name));
+      const lv = el('span', 'badge'); hd.append(tt, lv);
+      const desc = el('div', 'sub', p.desc);
+      const ft = el('div', 'ft');
+      const costs = el('div', 'costs'); const chips = makeChips(costs, ['bp']);
+      const btn = el('button', 'btn amber', '購入');
+      btn.addEventListener('click', () => guard(() => {
+        const r = RF.buyPerm(S(), p.id);
+        if (!r.ok) { RF.audio.play('error'); warn(r.reason || '購入できません'); } else RF.audio.play('buy');
+        RF.ui.refresh();
+      }));
+      ft.append(costs, btn);
+      card.append(hd, desc, ft); list.append(card);
+      refs.perm[p.id] = { card, lv, chips, btn };
+    }
+    refs.pres = {};
+  }
+  function doPrestige() {
+    const s = S();
+    const gain = RF.prestigeGain(s);
+    if (gain < 1) return;
+    modal('工場を再編しますか？', [
+      '獲得できるブループリント: +' + gain + ' BP',
+      'リセットされるもの: 資源・設備・ロボット・研究(「技術継承」で一部保持)',
+      '維持されるもの: 実績・恒久強化・BP・解放済み設備/ロボット・統計・設定',
+      '再編後は恒久強化により、より速く成長できます。',
+    ], [{ text: 'キャンセル' }, { text: '再編する', cls: 'amber', fn: () => { RF.prestige(S()); RF.save(S()); RF.ui.refresh(); showTab('main'); } }]);
+  }
+  function updPrestige(s) {
+    const gain = RF.prestigeGain(s);
+    const c = $('#presCard');
+    if (!refs.pres.built) {
+      c.innerHTML = '';
+      c.append(el('h2', '', '工場再編'));
+      c.append(el('div', 'sub', '工場を再編成して、恒久的な研究資源「ブループリント(BP)」を獲得します。BPは恒久強化の購入に使え、累計BP1つにつき全生産+2%の効果もあります。再編は任意です。'));
+      const info = el('div'); info.style.margin = '10px 0';
+      const bar = el('div', 'bar'); bar.style.margin = '8px 0 4px'; const bi = el('i'); bar.append(bi);
+      const prog = el('div', 'sub');
+      const btn = el('button', 'btn amber', '工場を再編する');
+      btn.addEventListener('click', () => guard(doPrestige));
+      c.append(info, bar, prog, btn);
+      refs.pres = { built: true, info, bi, prog, btn };
+    }
+    const r = refs.pres;
+    r.info.textContent = '所持BP: ' + s.pres.bp + '　累計獲得: ' + s.pres.bpTotal + '　(全生産 +' + (s.pres.bpTotal * 2) + '%)　再編回数: ' + s.pres.count;
+    r.bi.style.width = Math.min(100, (s.stats.earnedRun / RF.PRESTIGE_BASE) * 100) + '%';
+    r.prog.textContent = '今回の累計売上: ' + F(s.stats.earnedRun) + ' / 再編可能ライン ' + F(RF.PRESTIGE_BASE) + '　獲得BP: +' + gain;
+    r.btn.disabled = gain < 1;
+    r.btn.textContent = gain < 1 ? '再編にはまだ売上が足りません' : '工場を再編する (+' + gain + ' BP)';
+    for (const p of RF.PERMS) {
+      const x = refs.perm[p.id], lv = s.pres.perm[p.id] || 0;
+      x.lv.textContent = 'Lv' + lv + '/' + p.max;
+      if (lv >= p.max) { x.btn.disabled = true; x.btn.textContent = '最大'; x.chips.bp.classList.add('hidden'); }
+      else {
+        const cost = p.cost(lv);
+        x.chips.bp.classList.remove('hidden');
+        setChips(x.chips, { bp: cost }, s);
+        x.btn.disabled = s.pres.bp < cost; x.btn.textContent = '購入';
+      }
+      x.card.classList.toggle('can', lv < p.max && s.pres.bp >= p.cost(lv));
+    }
+  }
+
+  // ================= 設定画面 =================
+  function copyText(text, done) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => done(true), () => done(false));
+    } else done(false);
+  }
+  function buildSettings() {
+    $('#setSound').addEventListener('click', () => { const s = S(); s.set.sound = !s.set.sound; RF.audio.play('buy'); syncSettings(); });
+    $('#setVol').addEventListener('input', (e) => { S().set.vol = e.target.value / 100; });
+    $('#setVol').addEventListener('change', () => RF.audio.play('buy'));
+    $('#setNotation').addEventListener('change', (e) => { S().set.notation = e.target.value; RF.notation = e.target.value; RF.ui.refresh(); });
+    $('#btnSave').addEventListener('click', () => { const ok = RF.save(S()); toast(ok ? 'セーブしました' : 'セーブに失敗しました(ブラウザの保存領域を確認してください)', ok ? 'good' : ''); syncSettings(); });
+    $('#btnExport').addEventListener('click', () => {
+      const code = RF.exportSave(S());
+      $('#exportBox').value = code;
+      $('#exportBox').select();
+      toast('セーブコードを出力しました。コピーして保管してください', 'good');
+    });
+    $('#btnCopy').addEventListener('click', () => {
+      const box = $('#exportBox');
+      if (!box.value) box.value = RF.exportSave(S());
+      box.select();
+      copyText(box.value, (ok) => {
+        if (!ok) { try { ok = document.execCommand('copy'); } catch (e) { ok = false; } }
+        toast(ok ? 'コピーしました' : 'コピーできませんでした。選択したテキストを手動でコピーしてください');
+      });
+    });
+    $('#btnDownload').addEventListener('click', () => {
+      const code = RF.exportSave(S());
+      const blob = new Blob([code], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'robot_factory_save.txt';
+      document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    });
+    $('#btnImport').addEventListener('click', () => {
+      const code = $('#importBox').value.trim();
+      if (!code) { toast('セーブコードを貼り付けてください'); return; }
+      const res = RF.importSave(code);
+      if (!res.ok) { modal('インポートに失敗しました', ['セーブコードが壊れているか、形式が正しくありません。現在のデータは変更されていません。', '詳細: ' + res.error]); return; }
+      modal('セーブデータを読み込みますか？', '現在の進行状況は上書きされます。', [{ text: 'キャンセル' }, {
+        text: '読み込む', cls: 'primary', fn: () => {
+          RF.S = res.state; RF.notation = RF.S.set.notation; RF.S.last = Date.now();
+          RF.save(RF.S); $('#importBox').value = ''; RF.ui.syncSettings(); RF.ui.rebuild(); toast('インポートしました', 'good');
+        },
+      }]);
+    });
+    $('#btnReset').addEventListener('click', () => {
+      modal('本当にリセットしますか？', ['すべての進行状況(実績・恒久強化を含む)が消えます。この操作は元に戻せません。必要なら先にエクスポートしてください。'], [
+        { text: 'キャンセル', cls: 'primary' },
+        { text: 'すべて消去する', cls: 'danger', fn: () => { RF.wipe(); RF.S = RF.newState(); RF.notation = 'short'; RF.save(RF.S); RF.ui.syncSettings(); RF.ui.rebuild(); showTab('main'); toast('リセットしました'); } },
+      ]);
+    });
+    $('#verInfo').textContent = 'ROBOT FACTORY v' + RF.VERSION + ' (セーブデータ形式 v' + RF.SAVE_VERSION + ')';
+  }
+  function syncSettings() {
+    const s = S();
+    $('#setSound').textContent = s.set.sound ? 'ON' : 'OFF';
+    $('#setSound').classList.toggle('primary', s.set.sound);
+    $('#setVol').value = Math.round(s.set.vol * 100);
+    $('#setNotation').value = s.set.notation;
+    const d = new Date(s.last);
+    $('#lastSave').textContent = isNaN(d) ? '-' : d.toLocaleTimeString();
+  }
+
+  // ================= イベント通知 =================
+  function onEvent(type, d) {
+    switch (type) {
+      case 'buy': RF.audio.play('buy'); break;
+      case 'robot': RF.audio.play('robot'); break;
+      case 'level': RF.audio.play('level'); break;
+      case 'research': RF.audio.play('research'); toast('研究完了: ' + RF.RMAP[d.id].name, 'good'); break;
+      case 'unlock': toast('解放: ' + (d.kind === 'b' ? RF.BMAP[d.id].name : RF.ROBOTMAP[d.id].name), 'good'); break;
+      case 'ach': RF.audio.play('ach'); toast('実績解除: ' + d.ach.name + ' (全生産+1%)', 'gold'); break;
+      case 'goal': toast('目標達成!' + (d.reward > 0 ? ' 報酬 ¢' + F(d.reward) : ''), 'good'); break;
+      case 'drone': RF.audio.play('drone'); toast('ボーナスドローンが出現! タップして捕まえよう'); break;
+      case 'droneClaim': RF.audio.play('bonus'); toast('' + d.msg, 'good'); break;
+      case 'prestige': RF.audio.play('prestige'); toast('工場を再編しました (+' + d.gain + ' BP)', 'good'); break;
+    }
+  }
+
+  RF.ui = {
+    init() {
+      const fav = document.querySelector('link[rel=icon]'); if (fav) fav.href = spUrl('r:worker');
+      buildHeader(); buildTabs(); buildMain(); buildBuild(); buildRobots(); buildResearch(); buildAchv(); buildPrestige(); buildSettings();
+      RF.on(onEvent);
+      syncSettings();
+      const t = S().set.tab;
+      showTab(TABS.some((x) => x.id === t) ? t : 'main');
+    },
+    // 状態が丸ごと入れ替わった時(インポート/リセット)のUI再同期
+    rebuild() { refs.quickKey = null; refs.pres = {}; syncSettings(); RF.ui.refresh(); },
+    syncSettings,
+    refresh() { RF.ui.update(S(), RF.derive(S())); },
+    toast, modal,
+    showOffline(rep) {
+      const g = rep.gained;
+      const body = [
+        '離れていた時間: ' + RF.fmtTime(rep.elapsed) + (rep.capped ? '(上限 ' + rep.capHours + '時間まで反映)' : ''),
+        '稼働効率 ' + Math.round(rep.eff * 100) + '% で計算しました。',
+        el('div', 'stats'),
+      ];
+      const st = body[2];
+      [['ロボット製造', FI(rep.units) + '台'], ['クレジット', '¢' + FI(g.credits)], ['金属', FI(g.metal)], ['電子部品', FI(g.parts)], ['研究P', FI(g.rp)]].forEach((x) => {
+        const d = el('div', 'stat'); d.append(el('div', 'sv', x[1]), el('div', 'sl', x[0])); st.append(d);
+      });
+      modal('おかえりなさい！', body, [{ text: 'OK', cls: 'primary' }]);
+    },
+    update(s, D) {
+      lastD = D;
+      const R = refs.res, g = RF.rates.gross, c = RF.rates.cons;
+      const sg = (x) => (x >= 0 ? '+' : '-') + F(Math.abs(x)) + '/s';
+      R.credits.v.textContent = FI(s.res.credits); R.credits.r.textContent = sg(g.credits);
+      R.metal.v.textContent = FI(s.res.metal); R.metal.r.textContent = sg(g.metal - c.metal);
+      R.parts.v.textContent = FI(s.res.parts); R.parts.r.textContent = sg(g.parts - c.parts);
+      R.energy.v.textContent = F(D.supply) + ' / ' + F(D.demand);
+      R.energy.r.textContent = D.demand > 0 ? '稼働率 ' + Math.round(D.powerSat * 100) + '%' : '供給/需要';
+      R.energy.root.classList.toggle('bad', D.powerSat < 0.999);
+      R.rp.v.textContent = FI(s.res.rp); R.rp.r.textContent = sg(g.rp);
+      $('#stageName').textContent = 'STAGE ' + RF.stage(s) + ' ' + RF.STAGES[RF.stage(s) - 1].name;
+      document.title = 'ROBOT FACTORY - ¢' + FI(s.res.credits);
+      const dotR = RF.RESEARCH.some((r) => RF.researchState(s, r.id) === 'ready');
+      const setDot = (id, on) => {
+        const b = refs.tabs[id], d = b.querySelector('.dot');
+        if (on && !d) b.querySelector('.tn').append(el('span', 'dot'));
+        else if (!on && d) d.remove();
+      };
+      setDot('research', dotR);
+      setDot('prestige', RF.canPrestige(s));
+      switch (curTab) {
+        case 'main': updMain(s, D); break;
+        case 'build': updBuild(s, D); break;
+        case 'robots': updRobots(s, D); break;
+        case 'research': updResearch(s); break;
+        case 'achv': updAchv(s, D); break;
+        case 'prestige': updPrestige(s); break;
+        case 'settings': break;
+      }
+    },
+    get lastD() { return lastD; },
+  };
+  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+})();
+
+/* ROBOT FACTORY - 起動・メインループ
+ * 更新(固定間隔のゲームTick)と描画(requestAnimationFrame)を分離している。 */
+(function () {
+  'use strict';
+  const RF = (globalThis.RF = globalThis.RF || {});
+  const TICK_MS = 100;       // ゲーム更新間隔
+  const UI_MS = 250;         // DOM更新間隔
+  const SAVE_MS = 15000;     // 自動セーブ間隔
+  const CHECK_MS = 1000;     // 実績・目標判定間隔
+
+  function boot() {
+    const res = RF.load();
+    RF.S = res.state;
+    RF.notation = RF.S.set.notation;
+    RF.refreshUnlocks(RF.S); // 初期解放は通知なしで反映(UI登録前)
+    RF.ui.init();
+    ['pointerdown', 'keydown'].forEach((ev) => document.addEventListener(ev, RF.audio.init, { once: true }));
+
+    if (res.status === 'corrupt') {
+      RF.ui.modal('セーブデータを読み込めませんでした', ['保存データが壊れていたため、新しいゲームを開始します。(破損データは別キーに退避しました)', '詳細: ' + res.error]);
+    } else if (res.status === 'recovered') {
+      RF.ui.toast('セーブが破損していたためバックアップから復元しました');
+    }
+
+    // オフライン進行
+    if (res.status !== 'new') {
+      const rep = RF.applyOffline(RF.S, Date.now());
+      RF.S.last = Date.now();
+      if (rep) { RF.check(RF.S); RF.ui.showOffline(rep); }
+    }
+    RF.check(RF.S);
+    RF.save(RF.S);
+    RF.ui.refresh();
+
+    let last = performance.now(), acc = 0, uiAcc = 0, saveAcc = 0, chkAcc = 0;
+    let wall = Date.now();
+
+    function step() {
+      const now = performance.now();
+      let dt = (now - last) / 1000;
+      last = now;
+      const nowWall = Date.now();
+      const wallDt = (nowWall - wall) / 1000;
+      wall = nowWall;
+      // タブが非表示/スリープ等で大きく時間が飛んだ場合は、時計の差分をオフライン扱いで処理
+      if (wallDt > 5 || dt > 5) {
+        const gap = Math.max(wallDt, dt);
+        RF.S.last = nowWall - gap * 1000;
+        const rep = RF.applyOffline(RF.S, nowWall);
+        RF.S.last = nowWall;
+        if (rep) { RF.check(RF.S); RF.ui.showOffline(rep); }
+        dt = 0; acc = 0;
+      }
+      acc += dt * 1000; uiAcc += dt * 1000; saveAcc += dt * 1000; chkAcc += dt * 1000;
+      if (acc >= TICK_MS) {
+        RF.advance(RF.S, Math.min(acc, 1000) / 1000, false);
+        acc = 0;
+      }
+      if (chkAcc >= CHECK_MS) { chkAcc = 0; RF.check(RF.S); }
+      if (uiAcc >= UI_MS) { uiAcc = 0; RF.ui.refresh(); }
+      if (saveAcc >= SAVE_MS) { saveAcc = 0; RF.save(RF.S); RF.ui.syncSettings(); }
+      RF.render.draw(RF.S, RF.derive(RF.S), now);
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+
+    // タブを閉じる/隠す時に保存
+    const flush = () => { RF.save(RF.S); };
+    window.addEventListener('beforeunload', flush);
+    window.addEventListener('pagehide', flush);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+
+    window.RF = RF; // デバッグ用(コンソールから RF.S などを確認可能)
+  }
+
+  function start() {
+    try { boot(); } catch (e) {
+      console.error(e);
+      const d = document.createElement('div');
+      d.style.cssText = 'padding:20px;color:#ff8080;font-family:sans-serif';
+      d.textContent = '起動に失敗しました: ' + (e && e.message ? e.message : e) + '  (ページを再読み込みしてください)';
+      document.body.prepend(d);
+    }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+
+  </script>
+</body>
+</html>

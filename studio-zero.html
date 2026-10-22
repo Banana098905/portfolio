@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STUDIO ZERO</title>
+  <meta name="description" content="STUDIO ZERO — Creator's workspace">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="studio-zero.css">
+</head>
+<body>
+  <!-- Layout: sidebar + main -->
+  <div class="sz-app" id="szApp">
+    
+    <!-- Mobile header -->
+    <header class="sz-mobile-header" id="szMobileHeader">
+      <button class="sz-mobile-menu-btn" id="szMenuBtn" aria-label="メニューを開く" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="sz-mobile-title">STUDIO ZERO</div>
+      <a href="index.html" class="sz-back-mobile" aria-label="ポートフォリオに戻る">← BACK</a>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sz-sidebar" id="szSidebar">
+      <div class="sz-sidebar-header">
+        <div class="sz-brand">
+          <span class="sz-brand-label">CREATOR TERMINAL</span>
+          <h1 class="sz-brand-name">STUDIO ZERO</h1>
+        </div>
+        <a href="index.html" class="sz-back-link" title="ポートフォリオに戻る">← Portfolio</a>
+      </div>
+
+      <nav class="sz-nav" aria-label="STUDIO ZERO ナビゲーション">
+        <button class="sz-nav-item active" data-view="deck" id="navDeck">
+          <span class="sz-nav-icon">◈</span>
+          <span class="sz-nav-label">MAIN DECK</span>
+        </button>
+        <button class="sz-nav-item" data-view="ideas" id="navIdeas">
+          <span class="sz-nav-icon">◇</span>
+          <span class="sz-nav-label">IDEA VAULT</span>
+        </button>
+        <button class="sz-nav-item" data-view="projects" id="navProjects">
+          <span class="sz-nav-icon">▧</span>
+          <span class="sz-nav-label">PROJECTS</span>
+        </button>
+        <button class="sz-nav-item" data-view="search" id="navSearch">
+          <span class="sz-nav-icon">⊘</span>
+          <span class="sz-nav-label">SEARCH</span>
+        </button>
+        <button class="sz-nav-item" data-view="backup" id="navBackup">
+          <span class="sz-nav-icon">⇄</span>
+          <span class="sz-nav-label">DATA BACKUP</span>
+        </button>
+      </nav>
+
+      <div class="sz-sidebar-footer">
+        <div class="sz-signal">
+          <span class="sz-signal-dot"></span>
+          <span class="sz-signal-text">SIGNAL CONNECTED</span>
+        </div>
+        <div class="sz-local-note">LOCAL WORKSPACE · このブラウザに保存</div>
+      </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="sz-main" id="szMain">
+      <!-- Content will be rendered by JS -->
+    </main>
+  </div>
+
+  <!-- Modal container -->
+  <dialog class="sz-modal" id="szModal"></dialog>
+
+  <!-- Confirmation dialog -->
+  <dialog class="sz-confirm" id="szConfirm"></dialog>
+
+  <script src="studio-zero-app.js"></script>
+</body>
+</html>
