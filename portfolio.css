@@ -1,0 +1,84 @@
+/* 新機能用スタイル（style.css の後に読み込み） */
+:root{--sea:#0b1514;--moss:#2f8a5f}
+html{scroll-behavior:smooth}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:2px solid var(--brass-bright);outline-offset:3px}
+.hero{background:radial-gradient(ellipse 900px 500px at 50% 0%,rgba(134,205,177,.16),transparent 60%),linear-gradient(180deg,#14292a 0%,#0b1514 75%)}
+.hero-content{pointer-events:none}
+.hero-lead{margin:24px 0 32px!important;font-family:var(--serif-jp);color:var(--parchment)!important;letter-spacing:.12em!important}
+.hero-cta{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;pointer-events:auto}
+.btn{display:inline-block;font:inherit;font-size:.88rem;letter-spacing:.1em;color:var(--brass);background:transparent;border:1px solid var(--line);padding:12px 28px;border-radius:3px;text-decoration:none;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
+.btn:hover{border-color:var(--brass);background:rgba(134,205,177,.1)}
+.btn-primary{background:var(--brass);color:var(--ink);border-color:var(--brass)}
+.btn-primary:hover{background:var(--brass-bright)}
+.btn-sm{padding:7px 16px;font-size:.8rem}
+.wrap{max-width:1100px;margin:0 auto;padding:110px 40px 40px}
+.wrap h2{margin-bottom:24px}
+.sec-note{text-align:center;color:var(--dim);font-size:.88rem;margin-bottom:32px}
+/* map */
+.area-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:24px}
+.area-tabs .btn[aria-pressed="true"]{background:var(--brass);color:var(--ink)}
+.map-layout{display:grid;grid-template-columns:1.6fr 1fr;gap:24px;align-items:start}
+.map-svg{width:100%;height:auto;background:radial-gradient(ellipse at 50% 40%,#16322f,#0c1a19);border:1px solid var(--line)}
+.region{cursor:pointer;transition:opacity .2s}
+.region .blob{fill-opacity:.28;stroke-width:1.5;stroke-opacity:.6;transition:fill-opacity .2s}
+.region:hover .blob,.region.on .blob{fill-opacity:.5}
+.map-svg.has-sel .region:not(.on){opacity:.45}
+.region text{fill:var(--parchment);font-family:var(--serif-en);font-size:15px;letter-spacing:.2em;pointer-events:none}
+.pin{cursor:pointer}
+.pin circle{fill:var(--parchment);stroke:var(--ink);stroke-width:2;transition:r .15s}
+.pin:hover circle,.pin.on circle{r:9;fill:var(--brass-bright)}
+.pin:focus-visible{outline:none}.pin:focus-visible circle{stroke:var(--brass-bright);stroke-width:3;r:9}
+.map-panel{background:var(--wood-card);border:1px solid var(--line);padding:24px;min-height:220px}
+.map-panel h3{font-family:var(--serif-jp);font-size:1.05rem;border-left:2px solid var(--brass);padding-left:12px;margin-bottom:6px}
+.map-panel .sub{font-size:.8rem;color:var(--dim-2);margin-bottom:16px;padding-left:14px}
+.map-panel p{font-size:.86rem;color:var(--dim);line-height:1.8}
+.map-panel ul{list-style:none;display:flex;flex-direction:column;gap:6px;margin:12px 0}
+.map-panel li button{width:100%;text-align:left;font:inherit;font-size:.88rem;color:var(--parchment);background:rgba(134,205,177,.05);border:1px solid var(--line);padding:8px 12px;cursor:pointer}
+.map-panel li button:hover,.map-panel li button[aria-current="true"]{border-color:var(--brass);background:rgba(134,205,177,.14)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+/* library */
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.filters input[type=search],.filters select{font:inherit;font-size:.88rem;color:var(--parchment);background:var(--wood-card);border:1px solid var(--line);padding:9px 12px;border-radius:3px}
+.filters input[type=search]{flex:1 1 220px}
+.chk{font-size:.85rem;color:var(--dim);display:flex;gap:6px;align-items:center;cursor:pointer}
+.lib-meta{display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:.85rem;color:var(--dim);margin-bottom:24px}
+.lib-meta #discover{color:var(--brass)}
+.lib-meta .btn{margin-left:auto}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:24px}
+.work{background:linear-gradient(155deg,var(--wood-card),var(--wood));border:1px solid var(--line);display:flex;flex-direction:column;transition:border-color .2s}
+.work:hover{border-color:rgba(134,205,177,.5)}
+.work .thumb{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.work-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.work h3{font-family:var(--serif-jp);font-size:1.05rem}
+.work .meta{display:flex;gap:8px;flex-wrap:wrap;font-size:.72rem}
+.badge{border:1px solid var(--line);padding:1px 9px;border-radius:3px;color:var(--brass)}
+.badge.wip{color:#e6b36a;border-color:rgba(230,179,106,.4)}
+.work p{font-size:.84rem;color:var(--dim);line-height:1.8;flex:1}
+.work .actions{margin-top:6px}
+.fav[aria-pressed="true"]{color:#f08fa0;border-color:#f08fa0}
+.empty{text-align:center;color:var(--dim);padding:48px 0}
+/* modal */
+dialog{margin:auto;width:min(680px,calc(100% - 32px));max-height:calc(100% - 32px);overflow:auto;background:var(--wood);color:var(--parchment);border:1px solid var(--brass);padding:0}
+dialog::backdrop{background:rgba(4,10,9,.78)}
+dialog[open]{animation:fadeIn .25s ease}
+dialog .thumb{width:100%;display:block;aspect-ratio:16/9;object-fit:cover}
+.dlg-body{padding:28px}
+.dlg-body h3{font-family:var(--serif-jp);font-size:1.4rem;margin-bottom:10px}
+.dlg-body dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:.88rem;margin:16px 0}
+.dlg-body dt{color:var(--dim-2)}
+.dlg-body .note{font-size:.72rem;color:var(--dim-2)}
+.dlg-close{position:absolute;top:10px;right:10px}
+/* misc */
+.about .links{margin-top:28px}.about .links a,.log a{color:var(--brass)}
+.contact-btn{display:inline-block}
+.log{list-style:none;border-left:1px solid var(--line);margin-left:8px}
+.log li{padding:0 0 24px 24px;font-size:.88rem;color:var(--dim);line-height:1.8}
+.log time{color:var(--brass);margin-right:12px}
+a.quest-banner{color:inherit;text-decoration:none}
+@media (max-width:768px){
+  .wrap{padding:80px 24px 24px}
+  .map-layout{grid-template-columns:1fr}
+  .map-svg{display:none} /* スマホではエリア一覧＋パネルで操作 */
+  .lib-meta .btn{margin-left:0}
+}

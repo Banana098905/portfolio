@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>へんてこバトル | トップダウン対戦</title>
+<style>
+  :root{--paper:#fff8e9;--orange:#ff7a3d}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#253b61 0,#101827 62%);color:var(--paper);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;display:grid;place-items:center;padding:20px}
+  .shell{width:min(1100px,100%)}
+  header{display:flex;align-items:center;justify-content:space-between;margin:0 4px 15px}
+  .logo{font-weight:900;font-size:clamp(22px,4vw,34px);letter-spacing:.05em;transform:rotate(-2deg)}
+  .logo span{color:var(--orange)}
+  .tag{font-size:12px;font-weight:800;letter-spacing:.08em;color:#b7c6dd;background:#1b2a44;border:1px solid #345277;padding:7px 10px;border-radius:999px}
+  .game{position:relative;overflow:hidden;border:4px solid #dbe7f7;border-radius:18px;box-shadow:0 25px 60px #02081480}
+  .hud{position:absolute;z-index:2;inset:18px 18px auto;display:flex;justify-content:space-between;gap:14px;pointer-events:none}
+  .fighter{width:min(38%,380px);text-shadow:0 2px 0 #17243b}
+  .fighter.right{text-align:right}
+  .name{font-weight:900;font-size:15px}
+  .bar{height:15px;margin-top:6px;background:#263a57;border:3px solid #fff;border-radius:99px;overflow:hidden;box-shadow:0 2px 0 #17243b}
+  .fill{height:100%;width:100%;background:linear-gradient(90deg,#ffcc5b,#ff6b4b);transition:width .18s}
+  .right .fill{margin-left:auto;background:linear-gradient(90deg,#54d5ef,#5978ff)}
+  .status{position:absolute;z-index:2;left:50%;top:18px;transform:translateX(-50%);text-align:center;font-weight:900;text-shadow:0 2px 0 #17243b;pointer-events:none}
+  .timer{font-size:32px;line-height:.9}
+  .hint{font-size:11px;color:#e6f7ff;margin-top:6px;background:#1b2a4499;padding:4px 8px;border-radius:99px}
+  canvas{display:block;width:100%;height:auto;aspect-ratio:16/9}
+  .message{position:absolute;z-index:4;inset:0;display:grid;place-items:center;background:#0d1729b8;text-align:center;padding:20px}
+  .message.hidden{display:none}
+  .messageBox{background:#fff8e9;color:#17243b;border:4px solid #17243b;box-shadow:8px 8px 0 #ff7a3d;border-radius:14px;padding:22px 28px;max-width:680px}
+  .message h2{margin:0 0 6px;font-size:clamp(20px,3.5vw,30px)}
+  .message p{margin:0 0 14px;line-height:1.6;font-weight:700}
+  .message p.small{font-size:13px;margin:0 0 14px}
+  .message button.main{border:0;border-radius:9px;background:var(--orange);color:white;font:900 17px inherit;padding:12px 28px;cursor:pointer;box-shadow:0 4px 0 #a63b25}
+  .message .pick{width:100%;margin:0 0 6px;padding:10px;border:2px solid #345277;border-radius:8px;background:#233a58;color:#fff8e9;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 3px 0 #101827}
+  .message .pick.active{border-color:#ffd85a;background:#33507a;color:#ffd85a}
+  .pickRow{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 16px}
+  .pickCol{background:#17243b;border-radius:10px;padding:10px 12px}
+  .pickTitle{color:#ffd85a;font-weight:900;margin:0 0 8px;letter-spacing:.14em}
+  .message .sub{border:0;border-radius:8px;background:#55b9f3;color:#fff;font-weight:900;padding:10px 18px;cursor:pointer;box-shadow:0 3px 0 #2a7ba6;font-size:14px}
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 4px 0}
+  .controlBox{background:#17243b;border:1px solid #345277;border-radius:12px;padding:12px 15px;font-size:12px;line-height:1.9;color:#cddaf0}
+  .controlBox strong{color:#fff}
+  .keys{display:inline-block;border:1px solid #60799b;background:#263a57;border-radius:4px;padding:0 5px;color:#fff;font-weight:800;line-height:20px;margin:0 1px}
+  @media(max-width:600px){body{padding:10px}.hud{inset:10px}.name{font-size:11px}.bar{height:11px;border-width:2px}.status{top:10px}.timer{font-size:24px}.hint{font-size:9px;margin-top:3px;padding:2px 5px}.controls{grid-template-columns:1fr;font-size:11px}.messageBox{padding:14px}.tag{display:none}.pickRow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header><div class="logo">へんてこ<span>バトル</span></div><div class="tag">VERSION 0.3 / TOP-DOWN VS</div></header>
+  <section class="game" aria-label="へんてこバトル トップダウン対戦">
+    <div class="hud"><div class="fighter"><div class="name" id="p1Name">P1 📦 配達員</div><div class="bar"><div class="fill" id="p1Hp"></div></div></div><div class="fighter right"><div class="name" id="p2Name">P2 🎣 釣り人</div><div class="bar"><div class="fill" id="p2Hp"></div></div></div></div>
+    <div class="status"><div class="timer" id="timer">60</div><div class="hint" id="packageHint">P1荷物：小型｜P2荷物：小型</div></div>
+    <canvas id="canvas" width="960" height="540"></canvas>
+    <div class="message" id="message"><div class="messageBox"><h2>ジョブを選ぼう！</h2><p>先取2ラウンドで勝利！</p><p class="small">P1は1/2キー、P2は8/9キーでも選べる。</p>
+      <div class="pickRow">
+        <div class="pickCol"><div class="pickTitle">P1</div><button class="pick active" data-slot="0" data-job="delivery">📦 配達員</button><button class="pick" data-slot="0" data-job="fisher">🎣 釣り人</button></div>
+        <div class="pickCol"><div class="pickTitle">P2</div><button class="pick" data-slot="1" data-job="delivery">📦 配達員</button><button class="pick active" data-slot="1" data-job="fisher">🎣 釣り人</button></div>
+      </div>
+      <button class="main" id="start">バトル開始 (Space)</button></div></div>
+  </section>
+  <div class="controls"><div class="controlBox"><strong>P1</strong><br><span class="keys">W</span><span class="keys">A</span><span class="keys">S</span><span class="keys">D</span> 移動　<span class="keys">J</span> 攻撃　<span class="keys">K</span> 投げ　<span class="keys">L</span> 荷物替え　<span class="keys">Shift</span>(左) ダッシュ</div><div class="controlBox"><strong>P2</strong><br><span class="keys">↑</span><span class="keys">↓</span><span class="keys">←</span><span class="keys">→</span> 移動　<span class="keys">,</span> 攻撃　<span class="keys">.</span> 投げ　<span class="keys">/</span> 荷物替え　<span class="keys">Shift</span>(右) ダッシュ</div></div>
+</main>
+<script>
+(()=>{
+const c=document.querySelector('#canvas'),x=c.getContext('2d'),W=960,H=540,PI=Math.PI;
+const hpEl=[document.querySelector('#p1Hp'),document.querySelector('#p2Hp')],nameEl=[document.querySelector('#p1Name'),document.querySelector('#p2Name')],timerEl=document.querySelector('#timer'),hint=document.querySelector('#packageHint'),msg=document.querySelector('#message');
+const keys={},selected=[0,0],wins=[0,0];
+const packages=[
+  {name:'小型',sub:'高速',color:'#ffd85a',speed:9,dmg:8,kb:7},
+  {name:'大型',sub:'強力',color:'#ff8a52',speed:6,dmg:17,kb:13},
+  {name:'バネ入り',sub:'大きく吹き飛ばす',color:'#b98cff',speed:7,dmg:11,kb:18},
+  {name:'謎の',sub:'効果ランダム',color:'#8ce0c0',speed:7.5,dmg:14,kb:10}
+];
+const B={x0:80,y0:80,x1:880,y1:460};
+const OBS=[{x:280,y:270,r:22},{x:680,y:270,r:22},{x:480,y:180,r:18},{x:480,y:360,r:18}];
+const MAPS=[
+  {up:['KeyW'],down:['KeyS'],left:['KeyA'],right:['KeyD'],melee:['KeyJ'],th:['KeyK'],dash:['ShiftLeft']},
+  {up:['ArrowUp'],down:['ArrowDown'],left:['ArrowLeft'],right:['ArrowRight'],melee:['Comma','Numpad1'],th:['Period','Numpad2'],dash:['ShiftRight','Numpad0']}
+];
+const jobLabel={delivery:'📦 配達員',fisher:'🎣 釣り人'};
+let jobs=['delivery','fisher'],players=[],projectiles=[],particles=[],running=false,time=60,last=0,phase='menu',flash=0,rot=0;
+const menuHTML=msg.innerHTML;
+
+function down(list){return list.some(k=>keys[k])}
+
+function makePlayer(slot){
+  const job=jobs[slot];
+  return{slot,job,x:slot===0?320:640,y:270,vx:0,vy:0,fx:slot===0?1:-1,fy:0,hp:100,swing:0,dash:0,dashCd:0,meleeCd:0,throwCd:0,inv:40,color:job==='fisher'?'#2fa8b5':'#ff7a3d'};
+}
+
+function updateHud(){
+  players.forEach((p,i)=>{
+    hpEl[i].style.width=p.hp+'%';
+    nameEl[i].textContent='P'+(i+1)+' '+jobLabel[p.job];
+  });
+  hint.textContent='P1荷物：'+packages[selected[0]].name+'｜P2荷物：'+packages[selected[1]].name;
+}
+
+function resetRound(){
+  players=[makePlayer(0),makePlayer(1)];
+  projectiles=[];particles=[];time=60;timerEl.textContent='60';flash=0;
+  phase='play';updateHud();msg.classList.add('hidden');
+  running=true;last=performance.now();requestAnimationFrame(loop);
+}
+
+function startMatch(){wins[0]=0;wins[1]=0;resetRound()}
+
+function selectJob(slot,job){
+  jobs[slot]=job;
+  document.querySelectorAll('.pick[data-slot="'+slot+'"]').forEach(e=>e.classList.toggle('active',e.dataset.job===job));
+}
+
+function bindMenu(){
+  msg.querySelectorAll('.pick').forEach(b=>b.onclick=()=>{selectJob(+b.dataset.slot,b.dataset.job);b.blur()});
+  const s=document.querySelector('#start');if(s)s.onclick=e=>{startMatch();e.target.blur();};
+}
+
+function showTitle(){
+  running=false;phase='menu';wins[0]=0;wins[1]=0;
+  msg.innerHTML=menuHTML;msg.classList.remove('hidden');bindMenu();
+}
+
+function finish(){
+  running=false;
+  const a=players[0],b=players[1];
+  let w=-1;
+  if(a.hp>b.hp)w=0;else if(b.hp>a.hp)w=1;
+  if(w>=0)wins[w]++;
+  const over=wins[0]>=2||wins[1]>=2;
+  phase=over?'over':'inter';
+  msg.innerHTML='<div class="messageBox"><h2>'+(over?(wins[0]>=2?'P1 優勝！':'P2 優勝！'):(w===0?'ラウンド P1！':w===1?'ラウンド P2！':'ドロー！'))+'</h2><p>HP '+Math.ceil(Math.max(0,a.hp))+' : '+Math.ceil(Math.max(0,b.hp))+'　スコア '+wins[0]+' - '+wins[1]+'</p>'+(over?'<button class="main" id="totitle">タイトルへ</button>':'<p>先取2ラウンドで勝利！</p><button class="main" id="next">次のラウンド (Space)</button><p style="margin:12px 0 0"><button class="sub" id="totitle2">ジョブを変える</button></p>')+'</div>';
+  msg.classList.remove('hidden');
+  const n=document.querySelector('#next');if(n)n.onclick=e=>{resetRound();e.target.blur();};
+  const t=document.querySelector('#totitle'),t2=document.querySelector('#totitle2');
+  if(t)t.onclick=e=>{showTitle();e.target.blur();};if(t2)t2.onclick=e=>{showTitle();e.target.blur();};
+}
+
+function throwPkg(p){
+  const q=packages[selected[p.slot]];
+  let dmg=q.dmg,kb=q.kb,sp=q.speed,col=q.color;
+  const size=selected[p.slot]===1?30:21;
+  if(selected[p.slot]===3){
+    dmg=7+Math.random()*18;
+    kb=5+Math.random()*16;
+    col=['#8ce0c0','#ff7dbd','#ffe08a'][Math.floor(Math.random()*3)];
+  }
+  projectiles.push({x:p.x+p.fx*24,y:p.y+p.fy*24,vx:p.fx*sp,vy:p.fy*sp,w:size,h:size,dmg,kb,col,life:150,owner:p,hook:p.job==='fisher',rot:Math.random()*PI});
+  p.throwCd=p.job==='fisher'?32:26;
+}
+
+function hurt(v,dmg,k,dx,dy){
+  if(v.inv>0)return;
+  v.hp=Math.max(0,v.hp-dmg);
+  v.vx+=dx*k;v.vy+=dy*k;v.inv=20;flash=6;
+  for(let i=0;i<8;i++)particles.push({x:v.x,y:v.y,vx:(Math.random()-.5)*6,vy:-Math.random()*4-1,life:22,color:'#ffe9a9'});
+}
+
+function input(){
+  for(let i=0;i<2;i++){
+    const p=players[i],m=MAPS[i];
+    if(down(m.melee)){
+      m.melee.forEach(k=>keys[k]=false);
+      if(p.meleeCd===0){p.meleeCd=30;p.swing=20;}
+    }
+    if(down(m.th)){
+      m.th.forEach(k=>keys[k]=false);
+      if(p.throwCd===0)throwPkg(p);
+    }
+    if(down(m.dash)){
+      m.dash.forEach(k=>keys[k]=false);
+      if(p.dashCd===0){p.dash=12;p.dashCd=65;p.vx+=p.fx*10;p.vy+=p.fy*10;}
+    }
+    const lx=(down(m.right)?1:0)-(down(m.left)?1:0);
+    const ly=(down(m.down)?1:0)-(down(m.up)?1:0);
+    if(lx||ly){
+      const l=Math.hypot(lx,ly),nx=lx/l,ny=ly/l;
+      p.fx=nx;p.fy=ny;
+      const a=p.dash?1.05:.62;
+      p.vx+=nx*a;p.vy+=ny*a;
+    }
+    const s=Math.hypot(p.vx,p.vy),cap=p.dash?11:6.2;
+    if(s>cap){p.vx*=cap/s;p.vy*=cap/s;}
+  }
+}
+
+function act(p,opp){
+  p.meleeCd=Math.max(0,p.meleeCd-1);
+  p.throwCd=Math.max(0,p.throwCd-1);
+  p.dashCd=Math.max(0,p.dashCd-1);
+  p.swing=Math.max(0,p.swing-1);
+  p.dash=Math.max(0,p.dash-1);
+  p.inv=Math.max(0,p.inv-1);
+  p.vx*=.88;p.vy*=.88;
+  p.x+=p.vx;p.y+=p.vy;
+  if(p.x<B.x0){p.x=B.x0;p.vx*=-.4;}
+  if(p.x>B.x1){p.x=B.x1;p.vx*=-.4;}
+  if(p.y<B.y0){p.y=B.y0;p.vy*=-.4;}
+  if(p.y>B.y1){p.y=B.y1;p.vy*=-.4;}
+  for(const o of OBS){
+    const dx=p.x-o.x,dy=p.y-o.y,d=Math.hypot(dx,dy)||1,need=o.r+16;
+    if(d<need){p.x=o.x+dx/d*need;p.y=o.y+dy/d*need;}
+  }
+  const dx=opp.x-p.x,dy=opp.y-p.y,d=Math.hypot(dx,dy)||1;
+  if(d<34){
+    const push=(34-d)/2;
+    p.x-=dx/d*push;p.y-=dy/d*push;
+    opp.x+=dx/d*push;opp.y+=dy/d*push;
+  }
+}
+
+function meleeHit(p,opp){
+  const dx=opp.x-p.x,dy=opp.y-p.y,d=Math.hypot(dx,dy);
+  if(d<70&&(p.fx*dx+p.fy*dy)/d>0.3)hurt(opp,10,11,dx/d,dy/d);
+}
+
+function combat(){
+  const a=players[0],b=players[1];
+  if(a.swing===10)meleeHit(a,b);
+  if(b.swing===10)meleeHit(b,a);
+  projectiles.forEach(q=>{
+    q.x+=q.vx;q.y+=q.vy;q.life--;
+    for(const o of OBS){
+      if(Math.hypot(q.x-o.x,q.y-o.y)<o.r+q.w/2){q.life=0;break;}
+    }
+    if(q.life>0&&(q.x<B.x0+q.w/2||q.x>B.x1-q.w/2||q.y<B.y0+q.w/2||q.y>B.y1-q.w/2))q.life=0;
+    if(q.life>0)for(const t of players){
+      if(t===q.owner||t.inv>0)continue;
+      if(Math.hypot(t.x-q.x,t.y-q.y)<22+q.w/2){
+        const d=Math.hypot(q.vx,q.vy)||1;
+        hurt(t,q.dmg,q.kb,q.vx/d,q.vy/d);
+        if(q.hook){
+          const ox=q.owner.x-t.x,oy=q.owner.y-t.y,od=Math.hypot(ox,oy)||1;
+          t.x+=ox/od*(od-90);t.y+=oy/od*(od-90);
+        }
+        q.life=0;break;
+      }
+    }
+  });
+  projectiles=projectiles.filter(q=>q.life>0);
+  if(!a.hp||!b.hp){finish();return true;}
+  return false;
+}
+
+function drawGym(){
+  x.fillStyle='#b0794a';x.fillRect(0,0,W,H);
+  x.strokeStyle='rgba(90,55,25,.35)';x.lineWidth=2;
+  x.beginPath();
+  for(let y=18;y<H;y+=44){x.moveTo(0,y);x.lineTo(W,y);}
+  for(let r=0;r<13;r++){
+    const ry=r*44,off=(r%2)*55;
+    for(let rx=off;rx<W;rx+=110){x.moveTo(rx,ry);x.lineTo(rx,ry+44);}
+  }
+  x.stroke();
+  x.fillStyle='#4a2f1b';
+  x.fillRect(0,0,W,B.y0);x.fillRect(0,B.y1,W,H-B.y1);
+  x.fillRect(0,0,B.x0,H);x.fillRect(B.x1,0,W-B.x0,H);
+  x.strokeStyle='#2c1b0d';x.lineWidth=4;
+  x.strokeRect(B.x0-13,B.y0-13,(B.x1-B.x0)+26,(B.y1-B.y0)+26);
+  x.fillStyle='#6b4326';
+  [[B.x0-13,B.y0-13],[B.x1+13,B.y0-13],[B.x0-13,B.y1+13],[B.x1+13,B.y1+13]].forEach(p=>{
+    x.beginPath();x.arc(p[0],p[1],9,0,PI*2);x.fill();
+  });
+  x.strokeStyle='#f3ead2';x.lineWidth=4;
+  x.strokeRect(B.x0,B.y0,B.x1-B.x0,B.y1-B.y0);
+  x.beginPath();x.moveTo(480,B.y0);x.lineTo(480,B.y1);x.stroke();
+  x.beginPath();x.arc(480,270,60,0,PI*2);x.stroke();
+  x.fillStyle='#f3ead2';x.beginPath();x.arc(480,270,5,0,PI*2);x.fill();
+}
+
+function drawObs(){
+  for(const o of OBS){
+    x.fillStyle='#dfa54e';x.fillRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2);
+    x.strokeStyle='#a8722a';x.lineWidth=3;x.strokeRect(o.x-o.r,o.y-o.r,o.r*2,o.r*2);
+    x.beginPath();
+    x.moveTo(o.x-o.r,o.y-o.r);x.lineTo(o.x+o.r,o.y+o.r);
+    x.moveTo(o.x+o.r,o.y-o.r);x.lineTo(o.x-o.r,o.y+o.r);
+    x.stroke();
+  }
+}
+
+function drawF(f){
+  x.fillStyle='rgba(35,18,5,.3)';
+  x.beginPath();x.ellipse(f.x+2,f.y+7,19,14,0,0,PI*2);x.fill();
+  x.save();
+  x.translate(f.x,f.y);x.rotate(Math.atan2(f.fy,f.fx));
+  if(f.inv>0&&f.inv%4<2)x.globalAlpha=.55;
+  if(f.swing>0){
+    x.strokeStyle='rgba(255,255,255,'+(.75*f.swing/20)+')';x.lineWidth=9;
+    x.beginPath();x.arc(0,0,38,-1,1);x.stroke();
+  }
+  x.fillStyle=f.color;
+  x.beginPath();x.arc(0,0,15,0,PI*2);x.fill();
+  x.strokeStyle='#17243b';x.lineWidth=3;x.stroke();
+  x.fillStyle='#fff1d2';
+  x.beginPath();x.moveTo(22,0);x.lineTo(9,-7);x.lineTo(9,7);x.closePath();x.fill();
+  x.fillStyle='#fff8e9';
+  x.beginPath();x.arc(-4,0,6.5,0,PI*2);x.fill();
+  x.strokeStyle='#17243b';x.lineWidth=2;x.stroke();
+  x.restore();
+  x.font='900 13px sans-serif';x.textAlign='center';x.lineJoin='round';x.lineWidth=4;
+  x.strokeStyle='rgba(25,15,5,.8)';x.strokeText('P'+(f.slot+1),f.x,f.y-24);
+  x.fillStyle='#fff';x.fillText('P'+(f.slot+1),f.x,f.y-24);
+}
+
+function draw(){
+  drawGym();drawObs();
+  projectiles.forEach(q=>{
+    if(q.hook&&q.owner){
+      x.strokeStyle='#3d2a20';x.lineWidth=2;
+      x.beginPath();x.moveTo(q.owner.x,q.owner.y);x.lineTo(q.x,q.y);x.stroke();
+    }
+    x.save();
+    x.translate(q.x,q.y);q.rot+=.12;x.rotate(q.rot);
+    x.fillStyle=q.col;x.fillRect(-q.w/2,-q.h/2,q.w,q.h);
+    x.strokeStyle='#7d4f35';x.lineWidth=2;x.strokeRect(-q.w/2,-q.h/2,q.w,q.h);
+    x.fillStyle='#fff6d7';x.fillRect(-q.w*.25,-3,q.w*.5,6);
+    x.restore();
+  });
+  drawF(players[0]);drawF(players[1]);
+  particles.forEach(z=>{
+    x.fillStyle=z.color;x.globalAlpha=z.life/22;
+    x.fillRect(z.x-3,z.y-3,6,6);x.globalAlpha=1;
+  });
+  if(flash>0){
+    x.fillStyle='rgba(255,240,200,'+(flash/20)+')';
+    x.fillRect(0,0,W,H);flash--;
+  }
+}
+
+function loop(now){
+  if(!running)return;
+  last=now;
+  if(Math.floor(now/1000)!==Math.floor((now-16.7)/1000)){
+    time--;
+    timerEl.textContent=Math.max(0,time);
+    if(time<=0){finish();return;}
+  }
+  input();
+  act(players[0],players[1]);act(players[1],players[0]);
+  if(combat())return;
+  particles.forEach(z=>{z.x+=z.vx;z.y+=z.vy;z.life--;});
+  particles=particles.filter(z=>z.life>0);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+addEventListener('keydown',ev=>{
+  if(['KeyW','KeyA','KeyS','KeyD','KeyJ','KeyK','KeyL','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Comma','Period','Slash','ShiftLeft','ShiftRight','Space','Numpad0','Numpad1','Numpad2','Numpad3'].includes(ev.code))ev.preventDefault();
+  keys[ev.code]=true;
+  if(ev.repeat)return;
+  if(phase==='menu'){
+    const m={Digit1:[0,'delivery'],Digit2:[0,'fisher'],Digit8:[1,'delivery'],Digit9:[1,'fisher']}[ev.code];
+    if(m)selectJob(m[0],m[1]);
+    if(ev.code==='Space')startMatch();
+  }else if(phase==='inter'){
+    if(ev.code==='Space')resetRound();
+  }else if(phase==='over'){
+    if(ev.code==='Space')showTitle();
+  }else if(phase==='play'){
+    if(ev.code==='KeyL'&&jobs[0]==='delivery'){selected[0]=(selected[0]+1)%4;updateHud();}
+    if((ev.code==='Slash'||ev.code==='Numpad3')&&jobs[1]==='delivery'){selected[1]=(selected[1]+1)%4;updateHud();}
+  }
+});
+addEventListener('keyup',ev=>keys[ev.code]=false);
+
+bindMenu();
+})();
+</script>
+</body>
+</html>

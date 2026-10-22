@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>2Dホテル経営プロトタイプ</title>
+<style>
+  html,body{margin:0;height:100%;background:#0a0e18;display:flex;
+            align-items:center;justify-content:center}
+  canvas{max-width:100%;max-height:100vh;display:block}
+</style>
+</head>
+<body>
+<canvas id="c" width="800" height="600"></canvas>
+<script>
+(() => {
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ---------- 定数 ----------
+const FLOORS = 3;
+const ROOMS_PER_FLOOR = 4;
+const ROOM_W = 150, ROOM_H = 100;
+const FLOOR_GAP = 120;
+const GROUND_Y = 560;        // ロビーの床＝道路レベル
+const ELEV_X = 80, ELEV_W = 70;
+const ROOMS_X = 140;
+
+const floorY = f => GROUND_Y - (f + 1) * FLOOR_GAP;
+
+// ---------- 部屋データ ----------
+const rooms = [];
+for (let f = 0; f < FLOORS; f++) {
+  for (let i = 0; i < ROOMS_PER_FLOOR; i++) {
+    rooms.push({
+      floor: f, idx: i,
+      x: ROOMS_X + i * ROOM_W,
+      y: floorY(f),
+      state: 'vacant',   // vacant | reserved | occupied | dirty
+      cleanTimer: 0,
+    });
+  }
+}
+
+let money = 0;
+const guests = [];
+let spawnTimer = 60;
+
+// ---------- ユーティリティ ----------
+function moveTo(o, tx, ty, speed) {
+  const dx = tx - o.x, dy = ty - o.y;
+  const d = Math.hypot(dx, dy);
+  if (d <= speed) { o.x = tx; o.y = ty; return true; }
+  o.x += dx / d * speed;
+  o.y += dy / d * speed;
+  return false;
+}
+
+// ---------- ゲスト ----------
+class Guest {
+  constructor(room) {
+    this.room = room;
+    this.x = -30;
+    this.y = GROUND_Y;
+    this.state = 'walkIn';
+    this.timer = 0;
+    this.stayTime = 360 + Math.random() * 420;
+    this.color = `hsl(${(Math.random()*360)|0}, 65%, 65%)`;
+    this.dead = false;
+  }
+  update() {
+    const sp = 1.8;
+    switch (this.state) {
+      case 'walkIn':
+        if (moveTo(this, ELEV_X, GROUND_Y, sp)) this.state = 'rideUp';
+        break;
+      case 'rideUp':
+        if (moveTo(this, ELEV_X, floorY(this.room.floor), sp*1.6))
+          this.state = 'walkToRoom';
+        break;
+      case 'walkToRoom':
+        if (moveTo(this, this.room.x + ROOM_W/2, floorY(this.room.floor), sp)) {
+          this.room.state = 'occupied';
+          this.state = 'stay';
+        }
+        break;
+      case 'stay':
+        if (++this.timer > this.stayTime) {
+          this.room.state = 'dirty';
+          this.room.cleanTimer = 0;
+          this.state = 'walkToLift';
+        }
+        break;
+      case 'walkToLift':
+        if (moveTo(this, ELEV_X, floorY(this.room.floor), sp))
+          this.state = 'rideDown';
+        break;
+      case 'rideDown':
+        if (moveTo(this, ELEV_X, GROUND_Y, sp*1.6)) {
+          money += 120;
+          this.state = 'walkOut';
+        }
+        break;
+      case 'walkOut':
+        if (moveTo(this, W + 60, GROUND_Y, sp)) this.dead = true;
+        break;
+    }
+  }
+}
+
+// ---------- 更新 ----------
+function trySpawn() {
+  const vacant = rooms.filter(r => r.state === 'vacant');
+  if (!vacant.length) return;
+  const room = vacant[(Math.random() * vacant.length) | 0];
+  room.state = 'reserved';
+  guests.push(new Guest(room));
+}
+
+function update() {
+  // 清掃（本来はスタッフNPCにやらせる部分）
+  for (const r of rooms) {
+    if (r.state === 'dirty' && ++r.cleanTimer > 180) {
+      r.state = 'vacant';
+      r.cleanTimer = 0;
+    }
+  }
+  // 客のスポーン
+  if (--spawnTimer <= 0) {
+    trySpawn();
+    spawnTimer = 90 + Math.random() * 120;
+  }
+  // ゲスト
+  for (const g of guests) g.update();
+  for (let i = guests.length - 1; i >= 0; i--)
+    if (guests[i].dead) guests.splice(i, 1);
+}
+
+// ---------- 描画 ----------
+function drawBackground() {
+  const g = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  g.addColorStop(0, '#0b1220');
+  g.addColorStop(1, '#1b2436');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+function drawShell() {
+  const left  = ELEV_X - ELEV_W/2 - 12;
+  const right = ROOMS_X + ROOMS_PER_FLOOR * ROOM_W + 12;
+  const top   = floorY(FLOORS - 1) - ROOM_H - 12;
+
+  ctx.fillStyle = '#232a42';
+  ctx.fillRect(left, top, right - left, GROUND_Y - top);
+
+  // エレベーターシャフト
+  ctx.fillStyle = '#131829';
+  ctx.fillRect(ELEV_X - ELEV_W/2, top, ELEV_W, GROUND_Y - top);
+
+  ctx.strokeStyle = '#39406a';
+  ctx.lineWidth = 3;
+  for (let f = 0; f < FLOORS; f++) {
+    const y = floorY(f);
+    ctx.beginPath();
+    ctx.moveTo(ELEV_X - ELEV_W/2, y);
+    ctx.lineTo(ELEV_X + ELEV_W/2, y);
+    ctx.stroke();
+  }
+}
+
+function drawLobby() {
+  const left  = ROOMS_X - 20;
+  const right = ROOMS_X + ROOMS_PER_FLOOR * ROOM_W + 12;
+  const top   = floorY(0);
+
+  ctx.fillStyle = '#2b3050';
+  ctx.fillRect(left, top, right - left, GROUND_Y - top);
+  ctx.fillStyle = '#4a5170';
+  ctx.fillRect(left, GROUND_Y - 6, right - left, 6);
+
+  // 受付カウンター
+  ctx.fillStyle = '#6b5a8a';
+  ctx.fillRect(ROOMS_X + 60, GROUND_Y - 38, 120, 38);
+  ctx.fillStyle = '#8b78ad';
+  ctx.fillRect(ROOMS_X + 60, GROUND_Y - 38, 120, 6);
+
+  // 入口
+  ctx.fillStyle = '#0d1220';
+  ctx.fillRect(20, GROUND_Y - 90, 50, 90);
+}
+
+function drawRoom(r) {
+  const x = r.x, y = r.y, top = y - ROOM_H;
+
+  ctx.fillStyle = r.state === 'occupied' ? '#343b58'
+                : r.state === 'dirty'    ? '#463040'
+                : '#252a41';
+  ctx.fillRect(x, top, ROOM_W, ROOM_H);
+
+  // 窓（在室中は明かりが点く）
+  ctx.fillStyle = r.state === 'occupied' ? '#ffd98a' : '#161b2c';
+  ctx.fillRect(x + ROOM_W - 50, top + 20, 34, 30);
+  ctx.strokeStyle = '#0e1220';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(x + ROOM_W - 50, top + 20, 34, 30);
+
+  // ベッド
+  ctx.fillStyle = '#7d87b0';
+  ctx.fillRect(x + 16, y - 24, 58, 18);
+  ctx.fillStyle = '#cdd6f5';
+  ctx.fillRect(x + 16, y - 34, 18, 10);
+
+  // 床
+  ctx.fillStyle = '#4a5170';
+  ctx.fillRect(x, y - 6, ROOM_W, 6);
+
+  // 仕切り
+  ctx.strokeStyle = '#0e1220';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, top, ROOM_W, ROOM_H);
+}
+
+function drawGuest(g) {
+  ctx.fillStyle = g.color;
+  ctx.fillRect(g.x - 6, g.y - 22, 12, 16);
+  ctx.beginPath();
+  ctx.arc(g.x, g.y - 28, 6, 0, Math.PI * 2);
+  ctx.fillStyle = '#f0d2b4';
+  ctx.fill();
+}
+
+function drawUI() {
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(12, 12, 180, 36);
+  ctx.fillStyle = '#ffd98a';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(`¥ ${money}`, 26, 31);
+
+  const occ = rooms.filter(r => r.state !== 'vacant' && r.state !== 'dirty').length;
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(12, 56, 180, 36);
+  ctx.fillStyle = '#c9d2f0';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText(`稼働 ${occ} / ${rooms.length} 室`, 26, 75);
+}
+
+function draw() {
+  drawBackground();
+  drawShell();
+  drawLobby();
+  for (const r of rooms) drawRoom(r);
+  for (const g of guests) if (g.state !== 'stay') drawGuest(g);
+  drawUI();
+}
+
+// ---------- ループ ----------
+(function loop() {
+  update();
+  draw();
+  requestAnimationFrame(loop);
+})();
+
+})();
+</script>
+</body>
+</html>
