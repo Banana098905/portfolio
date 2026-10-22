@@ -1,4 +1,9 @@
 /* 新機能用スタイル（style.css の後に読み込み） */
+:root{--ink:#0b1514;--wood:#10201e;--wood-card:#14292a;--brass:#86cdb1;--brass-bright:#b5e8c9;--parchment:#eef3ea;--dim:#8fa59b;--dim-2:#6a857c;--line:rgba(134,205,177,.2)}
+nav{background:rgba(11,21,20,.9)}
+.hero{position:relative;overflow:hidden;min-height:100vh}
+.hero-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:1}
+.hero-content{position:relative;z-index:2;max-width:100%;padding:0 24px}
 :root{--sea:#0b1514;--moss:#2f8a5f}
 html{scroll-behavior:smooth}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
