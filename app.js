@@ -8,10 +8,10 @@ var ST={published:'公開中',wip:'開発中'};
 function load(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch(e){return[]}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 var favs=load('fm_favs'),seen=load('fm_seen');
-/* ---- 仮ビジュアル（実際のゲーム画面ではありません） ---- */
+/* ---- サムネイル（記号で表示。画像は使わない） ---- */
 function thumb(w){
-  var c=A[w.area].color,h=0;for(var i=0;i<w.id.length;i++)h=(h*31+w.id.charCodeAt(i))%360;
-  var cx=60+h%200,svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c+'"/><stop offset="1" stop-color="#0b1514"/></linearGradient></defs><rect width="320" height="180" fill="url(#g)"/><circle cx="'+cx+'" cy="'+(40+h%50)+'" r="'+(30+h%30)+'" fill="#fff" fill-opacity=".12"/><path d="M0 150 Q80 '+(110+h%30)+' 160 140 T320 '+(120+h%30)+' V180 H0Z" fill="#06100f" fill-opacity=".55"/><text x="20" y="112" font-size="64" fill="#fff" fill-opacity=".85" font-family="serif">'+esc(w.title.charAt(0))+'</text></svg>';
+  var c=A[w.area].color,sym=w.sym||w.title.charAt(0),fs=sym.length>1?72:104;
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+c+'" stop-opacity=".55"/><stop offset="1" stop-color="#0b1514"/></linearGradient></defs><rect width="480" height="200" fill="url(#g)"/><circle cx="240" cy="100" r="74" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="1.5"/><circle cx="240" cy="100" r="58" fill="#fff" fill-opacity=".06"/><text x="240" y="100" font-size="'+fs+'" fill="#eef3ea" fill-opacity=".92" text-anchor="middle" dominant-baseline="central" font-family="\'Segoe UI Symbol\',\'Noto Sans Symbols 2\',\'Noto Sans JP\',sans-serif">'+esc(sym)+'</text></svg>';
   return 'data:image/svg+xml,'+encodeURIComponent(svg);
 }
 /* ---- マップ ---- */
@@ -60,7 +60,7 @@ var f={q:$('#q'),area:$('#fArea'),st:$('#fStatus'),sort:$('#fSort'),fav:$('#fFav
 f.area.innerHTML='<option value="">すべてのエリア</option>'+Object.keys(A).map(function(k){return '<option value="'+k+'">'+A[k].name+'（'+A[k].label+'）</option>'}).join('');
 function card(w){
   var isF=favs.indexOf(w.id)>-1;
-  return '<article class="work"><img class="thumb" loading="lazy" width="320" height="180" alt="" src="'+thumb(w)+'"><div class="work-body"><h3>'+esc(w.title)+'</h3><div class="meta"><span class="badge">'+esc(A[w.area].name)+'</span><span class="badge'+(w.status==='wip'?' wip':'')+'">'+ST[w.status]+'</span>'+(seen.indexOf(w.id)>-1?'<span class="badge">発見済み</span>':'')+'</div><p>'+esc(w.desc)+'</p><div class="actions"><a class="btn btn-sm btn-primary" href="'+esc(w.url)+'">'+(w.kind==='game'?'プレイ':'見る')+'<span class="sr-only">: '+esc(w.title)+'</span></a><button type="button" class="btn btn-sm" data-d="'+w.id+'">詳細<span class="sr-only">: '+esc(w.title)+'</span></button><button type="button" class="btn btn-sm fav" data-f="'+w.id+'" aria-pressed="'+isF+'" aria-label="'+esc(w.title)+'をお気に入り">'+(isF?'♥':'♡')+'</button></div></div></article>';
+  return '<article class="work"><img class="thumb" loading="lazy" width="480" height="200" alt="" src="'+thumb(w)+'"><div class="work-body"><h3>'+esc(w.title)+'</h3><div class="meta"><span class="badge">'+esc(A[w.area].name)+'</span><span class="badge'+(w.status==='wip'?' wip':'')+'">'+ST[w.status]+'</span>'+(seen.indexOf(w.id)>-1?'<span class="badge">発見済み</span>':'')+'</div><p>'+esc(w.desc)+'</p><div class="actions"><a class="btn btn-sm btn-primary" href="'+esc(w.url)+'">'+(w.kind==='game'?'プレイ':'見る')+'<span class="sr-only">: '+esc(w.title)+'</span></a><button type="button" class="btn btn-sm" data-d="'+w.id+'">詳細<span class="sr-only">: '+esc(w.title)+'</span></button><button type="button" class="btn btn-sm fav" data-f="'+w.id+'" aria-pressed="'+isF+'" aria-label="'+esc(w.title)+'をお気に入り">'+(isF?'♥':'♡')+'</button></div></div></article>';
 }
 function render(){
   var q=f.q.value.trim().toLowerCase(),r=W.filter(function(w){
@@ -85,7 +85,7 @@ var dlg=$('#dlg'),opener=null;
 function openDlg(id,from){
   var w=W.filter(function(x){return x.id===id})[0];if(!w)return;opener=from;
   if(seen.indexOf(id)<0){seen.push(id);save('fm_seen',seen);render()}
-  var h='<button type="button" class="btn btn-sm dlg-close" id="dlgX">閉じる</button><img class="thumb" alt="" src="'+thumb(w)+'"><div class="dlg-body"><h3 id="dlgTitle">'+esc(w.title)+'</h3><p>'+esc(w.desc)+'</p><dl><dt>エリア</dt><dd>'+esc(A[w.area].name)+'（'+esc(A[w.area].label)+'）</dd><dt>公開状況</dt><dd>'+ST[w.status]+'</dd>'+(w.tags&&w.tags.length?'<dt>特徴</dt><dd>'+w.tags.map(esc).join(' / ')+'</dd>':'')+'</dl><div class="actions"><a class="btn btn-primary" href="'+esc(w.url)+'">'+(w.kind==='game'?'プレイする':'見る')+'</a></div><p class="note" style="margin-top:16px">画像は雰囲気を表す仮のビジュアルで、実際の画面ではありません。</p></div>';
+  var h='<button type="button" class="btn btn-sm dlg-close" id="dlgX">閉じる</button><img class="thumb" alt="" src="'+thumb(w)+'"><div class="dlg-body"><h3 id="dlgTitle">'+esc(w.title)+'</h3><p>'+esc(w.desc)+'</p><dl><dt>エリア</dt><dd>'+esc(A[w.area].name)+'（'+esc(A[w.area].label)+'）</dd><dt>公開状況</dt><dd>'+ST[w.status]+'</dd>'+(w.tags&&w.tags.length?'<dt>特徴</dt><dd>'+w.tags.map(esc).join(' / ')+'</dd>':'')+'</dl><div class="actions"><a class="btn btn-primary" href="'+esc(w.url)+'">'+(w.kind==='game'?'プレイする':'見る')+'</a></div><p class="note" style="margin-top:16px">サムネイルは作品イメージを表す記号です。</p></div>';
   dlg.innerHTML=h;dlg.showModal();$('#dlgX').addEventListener('click',function(){dlg.close()});
 }
 dlg.addEventListener('click',function(e){if(e.target===dlg)dlg.close()});
